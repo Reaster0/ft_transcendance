@@ -17,7 +17,6 @@ export class UsersController {
 
 	@Get()
 	findAllUsers() {
-		console.log('in get');
 		// TODO add pagination query ?
 		return this.usersService.findAllUsers();
 	}
