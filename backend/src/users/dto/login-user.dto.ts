@@ -1,7 +1,6 @@
 import	{ 	IsString,
 	IsEmail,
-	IsNotEmpty,
-	IsDefined
+	IsNotEmpty
 } from 'class-validator';
 
 export class LoginUserDto {

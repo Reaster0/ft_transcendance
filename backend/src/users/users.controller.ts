@@ -10,6 +10,8 @@ import	{ 	Body,
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LogoutUserDto } from './dto/logout-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -26,9 +28,19 @@ export class UsersController {
 		return this.usersService.findSpecificUser('' + id); // TODO check other way to do that
 	}
 
-	@Post()
+	@Post('register')
 	createUser(@Body() createUserDto: CreateUserDto) {
 		return this.usersService.createUser(createUserDto);
+	}
+
+	@Post('login')
+	loginUser(@Body() loginUserDto: LoginUserDto) {
+		return this.usersService.loginUser(loginUserDto);
+	}
+
+	@Post('logout')
+	logoutUser(@Body() logoutUserDto: LogoutUserDto) {
+		return this.usersService.logoutUser(logoutUserDto);
 	}
 
 	@Patch(':id')

@@ -2,7 +2,8 @@ import { IsAlpha, IsEmail } from 'class-validator';
 import	{	Entity,
 		 	PrimaryGeneratedColumn,
 			Column,
-			BeforeInsert
+			BeforeInsert,
+			BeforeUpdate
 		} from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 
@@ -27,12 +28,15 @@ export class User {
 	// Another option : create relation with @ManyToMany
 	friends: string;
 	
-	@Column({ default: 'offline' })
+	@Column({ type: 'text', default: 'offline' })
 	status: string;
 
+	@Column({ default: 0 })
+	eloscore: number;
 
 	// From a repo github with chat system tinchat from tanvirtin:
 	@BeforeInsert()
+	@BeforeUpdate()
 	async hashPassword() {
 		this.password = await bcrypt.hash(this.password, 10);
 	}
