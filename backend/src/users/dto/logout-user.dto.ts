@@ -1,10 +1,10 @@
 import	{
-			IsEmail,
+			IsString,
 			IsNotEmpty
 		} from 'class-validator';
 
 export class LogoutUserDto {
-	@IsEmail()
+	@IsString()
 	@IsNotEmpty()
-	readonly email: string;
+	readonly nickname: string;
 }

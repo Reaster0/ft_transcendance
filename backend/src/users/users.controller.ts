@@ -5,7 +5,8 @@ import	{ 	Body,
 			Patch,
 			Delete,
 			Get,
-			Query
+			Query,
+			HttpCode
 		} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
