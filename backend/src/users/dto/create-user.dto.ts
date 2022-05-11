@@ -1,7 +1,8 @@
 import	{ 	IsString,
 			IsEmail,
 			IsNotEmpty,
-			IsAlpha
+			IsAlpha,
+			IsOptional
 		} from 'class-validator';
 
 export class CreateUserDto {
@@ -12,11 +13,12 @@ export class CreateUserDto {
 
 	@IsEmail()
 	@IsNotEmpty()
+	@IsOptional()
 	readonly email: string;
+
+	//TODO take either email or nickname
 
 	@IsNotEmpty()
 	readonly password: string;
 
-
-	// TODO: implement others parameters from user.entity.ts
 }

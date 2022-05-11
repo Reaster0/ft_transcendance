@@ -1,4 +1,4 @@
-import { IsAlpha, IsEmail } from 'class-validator';
+import { IsAlpha, IsEmail, IsOptional } from 'class-validator';
 import	{	Entity,
 		 	PrimaryGeneratedColumn,
 			Column,
@@ -17,14 +17,17 @@ export class User {
 	@IsAlpha()
 	nickname: string;
 
-	@Column({ type: 'text', unique: true })
+	@Column({ type: 'text', unique: true, default: "" })
 	@IsEmail()
+	@IsOptional()
 	email: string;
+	//TODO make email optionnal if registration via user42
 
 	@Column({ type: 'text' })
 	password: string;
 
 	@Column({ array: true, default: {} })
+	// Does it work ?
 	// Another option : create relation with @ManyToMany
 	friends: string;
 	

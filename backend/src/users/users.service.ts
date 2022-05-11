@@ -4,8 +4,9 @@ import 	{ 	Injectable,
 			HttpStatus
 		} from '@nestjs/common';
 import 	{	Connection,
-			Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+			Repository
+		} from 'typeorm';
+import	{ InjectRepository } from '@nestjs/typeorm';
 import 	{ User } from './entities/user.entity';
 import 	{ CreateUserDto } from './dto/create-user.dto';
 import 	{ UpdateUserDto } from './dto/update-user.dto';
@@ -34,28 +35,32 @@ export class UsersService {
 
 	async createUser(createUserDto: CreateUserDto) {
 		const { nickname, email } = createUserDto;
-		let user = await this.userRepository.findOne({ where: { nickname }});
+		let user = await this.userRepository.findOne({ nickname: nickname });
 		if (user) {
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
 		}
-		user = await this.userRepository.findOne({ where: { email }});
+		user = await this.userRepository.findOne({ email: email });
 		if (user) {
 			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
 		}
+		// Another way is to make a try/catch block to check if error?code is
+		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
+		// comes from email or nickname by doing successives checks.
 		user = this.userRepository.create(createUserDto);
 		return this.userRepository.save(user);
 	}
 
 	async updateUser(id: string, updateUserDto: UpdateUserDto) {
 		const { nickname, email } = updateUserDto;
-		let user = await this.userRepository.findOne({ where: { nickname }});
+		let user = await this.userRepository.findOne({ nickname: nickname });
 		if (user) {
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
 		}
-		user = await this.userRepository.findOne({ where: { email }});
+		user = await this.userRepository.findOne({ email: email });
 		if (user) {
 			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
-		}		
+		}
+		// Same remarks as createUser concerning previous user checks.	
 		user = await this.userRepository.preload({
 			id: +id,
 			...updateUserDto,
@@ -68,12 +73,15 @@ export class UsersService {
 
 	async removeUser(id: string) {
 		const user = await this.findSpecificUser(id);
+		if (!user) {
+			throw new HttpException('User to delete not found', HttpStatus.NOT_FOUND);	
+		}
 		return this.userRepository.remove(user);
 	}
 
 	async loginUser(loginUserDto: LoginUserDto) {
 		const { email, password } = loginUserDto;
-		const user = await this.userRepository.findOne({ where: { email }});
+		const user = await this.userRepository.findOne({ email: email });
 		if (!user) {
 			throw new HttpException('Email doesn\'t match a registered user', HttpStatus.BAD_REQUEST);
 		}
@@ -85,16 +93,16 @@ export class UsersService {
 	}
 
 	async logoutUser(logoutUserDto: LogoutUserDto) {
-
-		const { email } = logoutUserDto;
-		const user = await this.userRepository.findOne({ where: { email }});
+		const { nickname } = logoutUserDto;
+		const user = await this.userRepository.findOne({ nickname: nickname });
 		if (!user) {
 			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
 		}
 		user.changeStatus('offline');
 		return this.userRepository.save(user);
 	}
-	// TODO how to check if user leave app ?
+	// TODO how to check if user leave app ? => When user not in chat or playing
+	// TODO (checks throught websockets and modify status accordingly)
 
 	// TODO : function to modify elo, maybe use an elo-calculator
 }
