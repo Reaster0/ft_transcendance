@@ -1,5 +1,7 @@
 import 	{ 	Injectable,
-			NotFoundException
+			NotFoundException,
+			HttpException,
+			HttpStatus
 		} from '@nestjs/common';
 import 	{	Connection,
 			Repository } from 'typeorm';
@@ -7,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import 	{ User } from './entities/user.entity';
 import 	{ CreateUserDto } from './dto/create-user.dto';
 import 	{ UpdateUserDto } from './dto/update-user.dto';
-
+import 	{ LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -29,15 +31,31 @@ export class UsersService {
 	}
 
 	async createUser(createUserDto: CreateUserDto) {
-		const user = this.userRepository.create({
-			...createUserDto,
-		});
+		const { nickname, email } = createUserDto;
+		let user = await this.userRepository.findOne({ where: { nickname }});
+		if (user) {
+			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
+		}
+		user = await this.userRepository.findOne({ where: { email }});
+		if (user) {
+			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
+		}
+		user = this.userRepository.create(createUserDto);
 		return this.userRepository.save(user);
 	}
 
 	async updateUser(id: string, updateUserDto: UpdateUserDto) {
-		const user = await this.userRepository.preload({
-			id: id,
+		const { nickname, email } = updateUserDto;
+		let user = await this.userRepository.findOne({ where: { nickname }});
+		if (user) {
+			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
+		}
+		user = await this.userRepository.findOne({ where: { email }});
+		if (user) {
+			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
+		}		
+		user = await this.userRepository.preload({
+			id: +id,
 			...updateUserDto,
 		});
 		if (!user) {
@@ -50,4 +68,24 @@ export class UsersService {
 		const user = await this.findSpecificUser(id);
 		return this.userRepository.remove(user);
 	}
+
+	async loginUser(loginUserDto: LoginUserDto) {
+		const { email, password } = loginUserDto;
+		const user = await this.userRepository.findOne({ where: email });
+		if (!user || !await user.comparePassword(password)) {
+			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);
+		}
+		user.changeStatus('online');
+		return user;
+	}
+
+	async logoutUser(userToLogoutNick: string) {
+		const user = await this.userRepository.findOne({ where: userToLogoutNick });
+		if (!user) {
+			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
+		}
+		user.changeStatus('offline');
+	}
+	// TODO how to check if user leave app ?
+
 }
