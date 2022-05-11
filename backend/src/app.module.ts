@@ -4,11 +4,19 @@ import { AppService } from './app.service';
 import { TypeOrmModule} from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import * as Joi from '@hapi/joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '../.env',
+      validationSchema: Joi.object({
+        DATABASE_HOST: Joi.required(),
+        DATABASE_PORT: Joi.number().default(5432),
+        DATABASE_USER: Joi.required(),
+        DATABASE_PASSWORD: Joi.required(),
+        DATABASE_NAME: Joi.required()
+      }),
     }),
     UsersModule,
     TypeOrmModule.forRoot({
