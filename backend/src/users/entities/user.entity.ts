@@ -6,6 +6,7 @@ import	{	Entity,
 			BeforeUpdate
 		} from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { Exclude } from 'class-transformer';
 
 
 @Entity('users') // sql table will be name 'users'
@@ -24,6 +25,7 @@ export class User {
 	//TODO make email optionnal if registration via user42
 
 	@Column({ type: 'text' })
+	@Exclude()
 	password: string;
 
 	@Column({ array: true, default: {} })
