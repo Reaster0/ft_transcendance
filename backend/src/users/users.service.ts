@@ -1,17 +1,10 @@
-import 	{ 	Injectable,
-			NotFoundException,
-			HttpException,
-			HttpStatus
-		} from '@nestjs/common';
-import 	{	Connection,
-			Repository
-		} from 'typeorm';
-import	{ InjectRepository } from '@nestjs/typeorm';
-import 	{ User } from './entities/user.entity';
-import 	{ CreateUserDto } from './dto/create-user.dto';
-import 	{ UpdateUserDto } from './dto/update-user.dto';
-import 	{ LoginUserDto } from './dto/login-user.dto';
-import 	{ LogoutUserDto } from './dto/logout-user.dto';
+import { Injectable, NotFoundException, HttpException, HttpStatus }
+	from '@nestjs/common';
+import { Connection, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
+	from './dto/user.dto';
 
 
 @Injectable()
@@ -47,6 +40,7 @@ export class UsersService {
 		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
 		// comes from email or nickname by doing successives checks.
 		user = this.userRepository.create(createUserDto);
+		console.log(user.id);
 		return this.userRepository.save(user);
 	}
 
@@ -80,10 +74,10 @@ export class UsersService {
 	}
 
 	async loginUser(loginUserDto: LoginUserDto) {
-		const { email, password } = loginUserDto;
-		const user = await this.userRepository.findOne({ email: email });
+		const { nickname, password } = loginUserDto;
+		const user = await this.userRepository.findOne({ nickname: nickname });
 		if (!user) {
-			throw new HttpException('Email doesn\'t match a registered user', HttpStatus.BAD_REQUEST);
+			throw new HttpException('Nickname doesn\'t match a registered user', HttpStatus.BAD_REQUEST);
 		}
 		if (!await user.comparePassword(password)) {
 			throw new HttpException('Password doesn\'t match the one registered for this user', HttpStatus.BAD_REQUEST);

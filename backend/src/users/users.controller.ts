@@ -1,3 +1,4 @@
+import 	{ 	UsersService } from './users.service';
 import	{ 	Body,
 			Controller,
 			Param,
@@ -8,19 +9,18 @@ import	{ 	Body,
 			Query,
 			HttpCode,
 			ClassSerializerInterceptor,
-			UseInterceptors
-		} from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { LogoutUserDto } from './dto/logout-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+			UseInterceptors } from '@nestjs/common';
+import 	{	CreateUserDto,
+			UpdateUserDto,
+			LoginUserDto,
+			LogoutUserDto } from './dto/user.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
 
+	// TODO protect routes
 	@Get()
 	findAllUsers() {
 		// TODO add pagination query ?
