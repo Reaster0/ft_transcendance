@@ -5,6 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
 	from './dto/user.dto';
+import { JwtService } from '@nestjs/jwt';
+
+// TODO set cookie and jwt token strategy 
+// https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
 
 
 @Injectable()
@@ -12,6 +16,7 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
+		private readonly jwtService: JwtService,
 	) {}
 
 	findAllUsers() {
@@ -82,7 +87,7 @@ export class UsersService {
 		if (!await user.comparePassword(password)) {
 			throw new HttpException('Password doesn\'t match the one registered for this user', HttpStatus.BAD_REQUEST);
 		}
-		user.changeStatus('online');
+		user.status = 'online';
 		return this.userRepository.save(user);
 	}
 
@@ -92,11 +97,35 @@ export class UsersService {
 		if (!user) {
 			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
 		}
-		user.changeStatus('offline');
+		user.status = 'offline';
 		return this.userRepository.save(user);
 	}
+
+	modifyElo(user: User, opponentElo: number, userWon: boolean) {
+		const eloRating = require('elo-rating');
+		const result = eloRating.calculate(user.eloScore, opponentElo, userWon);
+		user.eloScore = result.playerRating;
+		this.userRepository.save(user);
+	}
+
+	addFriend(user: User, friendId: number) {
+		const found = user.friends.find(element => friendId);
+		if (found) {
+			throw new  HttpException('User is already a friend', HttpStatus.BAD_REQUEST);			
+		}
+		user.friends.push(friendId);
+		this.userRepository.save(user);
+	}
+
+	removeFriend(user: User, friendId: number) {
+		const found = user.friends.indexOf(friendId);
+		if (found == -1) {
+			throw new  HttpException('User is not a friend', HttpStatus.BAD_REQUEST);			
+		}	
+		user.friends.splice(found, 1);
+		this.userRepository.save(user);
+	}
+
 	// TODO how to check if user leave app ? => When user not in chat or playing
 	// TODO (checks throught websockets and modify status accordingly)
-
-	// TODO : function to modify elo, maybe use an elo-calculator
 }
