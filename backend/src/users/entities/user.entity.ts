@@ -18,20 +18,18 @@ export class User {
 	@IsAlpha()
 	nickname: string;
 
-	@Column({ type: 'text', unique: true, default: "" })
+	@Column({ type: 'text', unique: true, nullable: true })
 	@IsEmail()
 	@IsOptional()
 	email: string;
-	//TODO make email optionnal if registration via user42
 
 	@Column({ type: 'text' })
 	@Exclude()
 	password: string;
 
-	@Column({ array: true, default: {} })
-	// Does it work ?
-	// Another option : create relation with @ManyToMany
-	friends: string;
+	@Column({ array: true, default: [] })
+	// Array of uuid of friends
+	friends: number;
 	
 	@Column({ type: 'text', default: 'offline' })
 	status: string;
@@ -57,7 +55,5 @@ export class User {
 	// authentication token ?
 	// avatar ?
 	// score ?
-	// friends ?
-	// status ?
 	// match history as an array ?
 }

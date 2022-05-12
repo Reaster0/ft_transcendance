@@ -5,6 +5,7 @@ import { TypeOrmModule} from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import * as Joi from '@hapi/joi';
+import { string } from '@hapi/joi';
 
 @Module({
   imports: [
@@ -28,7 +29,9 @@ import * as Joi from '@hapi/joi';
         DATABASE_PORT: Joi.number().default(5432),
         DATABASE_USER: Joi.string().required(),
         DATABASE_PASSWORD: Joi.string().required(),
-        DATABASE_NAME: Joi.string().required()
+        DATABASE_NAME: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
   ],
