@@ -1,4 +1,4 @@
-import { IsAlpha, IsEmail, IsOptional } from 'class-validator';
+import { IsAlpha, IsEmail, IsNumber, IsOptional } from 'class-validator';
 import	{	Entity,
 		 	PrimaryGeneratedColumn,
 			Column,
@@ -12,6 +12,7 @@ import { Exclude } from 'class-transformer';
 @Entity('users') // sql table will be name 'users'
 export class User {
 	@PrimaryGeneratedColumn()
+	@IsNumber()
 	id: number;
 
 	@Column({ unique: true })
@@ -27,15 +28,20 @@ export class User {
 	@Exclude()
 	password: string;
 
-	@Column({ array: true, default: [] })
-	// Array of uuid of friends
-	friends: number;
+	@Column({ type: 'int', array: true, default: {} })
+	@IsNumber({}, { each: true })
+	// Array of id of friends
+	friends: number[];
 	
 	@Column({ type: 'text', default: 'offline' })
 	status: string;
 
 	@Column({ default: 0 })
-	eloscore: number;
+	eloScore: number;
+
+	// For game history and stats:
+	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
+	//matchHistory: Game; 
 
 	// From a repo github with chat system tinchat from tanvirtin:
 	@BeforeInsert()
@@ -48,12 +54,6 @@ export class User {
 		return await bcrypt.compare(attempt, this.password);
 	}
 
-	async changeStatus(status: string) {
-		this.status = status;
-	}
-
 	// authentication token ?
 	// avatar ?
-	// score ?
-	// match history as an array ?
 }
