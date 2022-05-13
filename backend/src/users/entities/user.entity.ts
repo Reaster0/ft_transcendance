@@ -8,7 +8,7 @@ import	{	Entity,
 import * as bcrypt from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { Status } from '../../utils/enums/status.enum';
+import { Status } from '../../common/enums/status.enum';
 
 
 @Entity('users') // sql table will be name 'users'

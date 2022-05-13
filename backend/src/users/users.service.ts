@@ -6,7 +6,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
 	from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Status } from '../utils/enums/status.enum';
+import { Status } from '../common/enums/status.enum';
 
 // TODO set cookie and jwt token strategy 
 // https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
@@ -46,7 +46,6 @@ export class UsersService {
 		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
 		// comes from email or nickname by doing successives checks.
 		user = this.userRepository.create(createUserDto);
-		console.log(user.id);
 		return this.userRepository.save(user);
 	}
 

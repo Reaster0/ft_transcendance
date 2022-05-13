@@ -2,10 +2,12 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { UserGuard } from './common/guards/user.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+  //app.useGlobalGuards(new UserGuard());
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
