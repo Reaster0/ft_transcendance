@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
 	from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Status } from '../utils/enums/status.enum';
 
 // TODO set cookie and jwt token strategy 
 // https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
@@ -88,10 +89,10 @@ export class UsersService {
 		if (!await user.comparePassword(password)) {
 			throw new HttpException('Password doesn\'t match the one registered for this user', HttpStatus.BAD_REQUEST);
 		}
-		if (user.status == 'online') {
+		if (user.status == Status.ONLINE || user.status == Status.PLAYING) {
 			throw new HttpException('User is already login', HttpStatus.BAD_REQUEST);
 		}
-		user.status = 'online';
+		user.status = Status.ONLINE;
 		return this.userRepository.save(user);
 	}
 
@@ -101,7 +102,7 @@ export class UsersService {
 		if (!user) {
 			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
 		}
-		user.status = 'offline';
+		user.status = Status.OFFLINE;
 		return this.userRepository.save(user);
 	}
 

@@ -8,6 +8,7 @@ import	{	Entity,
 import * as bcrypt from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Status } from '../../utils/enums/status.enum';
 
 
 @Entity('users') // sql table will be name 'users'
@@ -46,10 +47,10 @@ export class User {
 	// Array of id of friends
 	friends: number[];
 	
-	@Column({ type: 'text', default: 'offline' })
-	@ApiProperty({ type: String, description: 'User status, either offline\
+	@Column({ type: 'text', default: Status.OFFLINE })
+	@ApiProperty({ enum: Status, type: String, description: 'User status, either offline\
 		/online/playing.'})
-	status: string;
+	status: Status;
 
 	@Column({ default: 0 })
 	@ApiProperty({ type: Number, description: 'Elo score, based on Elo \
