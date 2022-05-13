@@ -75,6 +75,7 @@ export class UsersService {
 		if (!user) {
 			throw new HttpException('User to delete not found', HttpStatus.NOT_FOUND);	
 		}
+		// TODO : delete user id from others user friends array
 		return this.userRepository.remove(user);
 	}
 
@@ -86,6 +87,9 @@ export class UsersService {
 		}
 		if (!await user.comparePassword(password)) {
 			throw new HttpException('Password doesn\'t match the one registered for this user', HttpStatus.BAD_REQUEST);
+		}
+		if (user.status == 'online') {
+			throw new HttpException('User is already login', HttpStatus.BAD_REQUEST);
 		}
 		user.status = 'online';
 		return this.userRepository.save(user);
