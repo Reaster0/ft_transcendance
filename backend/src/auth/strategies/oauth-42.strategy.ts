@@ -33,7 +33,7 @@ export class OauthStrategy42 extends PassportStrategy(
             clientID: process.env.CLIENT_ID,
             clientSecret: process.env.CLIENT_SECRET,
             callbackURL: process.env.CALLBACK_URL,
-            scope: ['public']
+            //scope: ['public']
         },
     )
     }

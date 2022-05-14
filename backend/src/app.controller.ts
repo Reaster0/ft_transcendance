@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { OauthGard42Guard } from './auth/guards/oauth-gard42.guard';
 
 @Controller()
 export class AppController {
@@ -11,7 +11,12 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OauthGard42Guard)
+  @Get('login')
+  login(): string {
+    return 'noooo';
+  }
+
   @Get('chat')
   getChat(): string {
     return 'Hello Chatters... Say Hello !';

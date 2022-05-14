@@ -11,17 +11,22 @@ import { JwtStrategy } from 'src/users/jwt.strategy';
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([User]),
-		PassportModule.register({defaultStrategy: 'jwt'}),
+		PassportModule.register({ defaultStrategy: 'jwt' }),
 		ConfigModule,
-		JwtModule.register({ //or registerAsync
-			secret: process.env.JWT_SECRET,
-			signOptions: {
-				expiresIn: process.env.JWT_EXPIRATION,
+		JwtModule.registerAsync({
+			useFactory: async () => {
+				return {
+					secret: process.env.JWT_SECRET,
+					signOptions: {
+						expiresIn: '3600s',
+					},
+				};
 			},
-			}),
-		],
+			inject: [ConfigService],
+		})
+	],
 	controllers: [UsersController],
 	providers: [UsersService, JwtStrategy],
 	exports: [UsersService, JwtStrategy, PassportModule, JwtModule], //check again
 })
-export class UsersModule {}
+export class UsersModule { }

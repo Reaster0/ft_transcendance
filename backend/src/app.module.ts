@@ -8,6 +8,9 @@ import * as Joi from '@hapi/joi'; //remove
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { JwtStrategy } from './users/jwt.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule, PassportStrategy } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -31,6 +34,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy, JwtModule, PassportModule], //test JwtStrat
 })
 export class AppModule {}
