@@ -9,11 +9,16 @@ import	{ 	Body,
 			Query,
 			HttpCode,
 			ClassSerializerInterceptor,
-			UseInterceptors } from '@nestjs/common';
+			UseInterceptors, 
+			UseGuards,
+			Req} from '@nestjs/common';
 import 	{	CreateUserDto,
 			UpdateUserDto,
 			LoginUserDto,
 			LogoutUserDto } from './dto/user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthUser } from './guards/userAuth.guard';
+import { Request } from 'express';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -27,6 +32,15 @@ export class UsersController {
 		return this.usersService.findAllUsers();
 	}
 
+	@UseGuards(AuthGuard('jwt'))
+	@Get('logged')
+	logged(@Req() req: Request): boolean {
+		const token = req.cookies['jwt'];
+		if (!token)
+			return false;
+		return true;
+	}
+			
 	@Get(':id')
 	findSpecificUser(@Param('id') id: number) {
 		return this.usersService.findSpecificUser('' + id); // TODO check other way to do that
@@ -42,6 +56,8 @@ export class UsersController {
 		return this.usersService.loginUser(loginUserDto);
 	}
 
+	
+	//@UseGuards(AuthGuard('jwt'), UserAuth)
 	@Post('logout')
 	logoutUser(@Body() logoutUserDto: LogoutUserDto) {
 		return this.usersService.logoutUser(logoutUserDto);
@@ -56,4 +72,5 @@ export class UsersController {
 	removeUser(@Param('id') id: string) {
 		return this.usersService.removeUser(id);
 	}
+
 }
