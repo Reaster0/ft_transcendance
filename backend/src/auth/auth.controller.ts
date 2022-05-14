@@ -51,6 +51,6 @@ export class AuthController {
        const payload: JwtPayload = {nickname: req.user['username'], authStatus: false};
        const jwtToken: string = await this.jwtService.sign(payload);
        res.cookie('jwt', jwtToken, {httpOnly: true}); //set cookie 
-       res.redirect(process.env.FRONTEND); //back to frontend
+       res.redirect('/chat'); //back to frontend
     }
 }
