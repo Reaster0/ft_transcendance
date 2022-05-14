@@ -1,4 +1,4 @@
-simport { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
+import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
 	from '@nestjs/common';
 import { Connection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
