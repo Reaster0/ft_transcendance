@@ -4,13 +4,9 @@ import { AppService } from './app.service';
 import { TypeOrmModule} from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
-import * as Joi from '@hapi/joi'; //remove 
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
-import { JwtStrategy } from './users/jwt.strategy';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule, PassportStrategy } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -34,6 +30,6 @@ import { PassportModule, PassportStrategy } from '@nestjs/passport';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy, JwtModule, PassportModule], //test JwtStrat
+  providers: [AppService], //test JwtStrat
 })
 export class AppModule {}

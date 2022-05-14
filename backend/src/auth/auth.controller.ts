@@ -1,8 +1,6 @@
 import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthService } from './auth.service';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
-import { Profile } from 'passport-42';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';

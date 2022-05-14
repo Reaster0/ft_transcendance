@@ -13,8 +13,7 @@ export class AppController {
 
   @UseGuards(OauthGard42Guard)
   @Get('login')
-  login(): string {
-    return 'noooo';
+  login(): void {
   }
 
   @Get('chat')
