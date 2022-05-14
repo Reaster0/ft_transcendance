@@ -144,10 +144,12 @@ export class UsersService {
 	}
 
 	async findUserByName(nickname: string): Promise<User>{
+		console.log(nickname);
 		const user = await this.userRepository.findOne({ nickname });
 		if (!user) {
-			throw new UnauthorizedException();
+			throw new UnauthorizedException('User not founddddddd');
 		}
+		console.error('ev okay');
 		return user;
 	}
 

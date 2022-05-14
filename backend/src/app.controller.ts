@@ -11,6 +11,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  //bad ! just for exemple
   @UseGuards(OauthGard42Guard)
   @Get('login')
   login(): void {
