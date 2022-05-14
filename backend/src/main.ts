@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { UserGuard } from './common/guards/user.guard';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +25,8 @@ async function bootstrap() {
       .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
+// somewhere in your initialization file
+app.use(cookieParser());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(
     app.get(Reflector))
   );

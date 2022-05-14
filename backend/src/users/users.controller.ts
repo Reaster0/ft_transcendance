@@ -6,6 +6,9 @@ import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
 	ApiAcceptedResponse, ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthUser } from './guards/userAuth.guard';
+import { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -33,6 +36,15 @@ export class UsersController {
 	@ApiNotFoundResponse({ 
 		description: 'User with given id not found.'
 	})
+	@UseGuards(AuthGuard('jwt'))
+	@Get('logged')
+	logged(@Req() req: Request): boolean {
+		const token = req.cookies['jwt'];
+		if (!token)
+			return false;
+		return true;
+	}
+			
 	@Get(':id')
 	findSpecificUser(@Param('id') id: number) {
 		return this.usersService.findSpecificUser('' + id); // TODO check other way to do that
@@ -68,6 +80,8 @@ export class UsersController {
 	@ApiBadRequestResponse({
 		description: 'Couldn\'t logout user, incorrect nickname'
 	})
+	
+	//@UseGuards(AuthGuard('jwt'), UserAuth)
 	@Post('logout')
 	logoutUser(@Body() logoutUserDto: LogoutUserDto) {
 		return this.usersService.logoutUser(logoutUserDto);
@@ -99,4 +113,5 @@ export class UsersController {
 	removeUser(@Param('id') id: string) {
 		return this.usersService.removeUser(id);
 	}
+
 }
