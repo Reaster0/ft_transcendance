@@ -45,6 +45,13 @@ export class UsersController {
 		return true;
 	}
 			
+	@ApiOkResponse({
+		description: 'Return content of one users.', 
+		type: User
+	})
+	@ApiNotFoundResponse({ 
+		description: 'User with given id not found.'
+	})
 	@Get(':id')
 	findSpecificUser(@Param('id') id: number) {
 		return this.usersService.findSpecificUser('' + id); // TODO check other way to do that
@@ -73,6 +80,8 @@ export class UsersController {
 		return this.usersService.loginUser(loginUserDto);
 	}
 
+	
+	//@UseGuards(AuthGuard('jwt'), UserAuth)
 	@ApiCreatedResponse({ 
 		description: 'The user has been successfully logout.',
 		type : User,
@@ -80,8 +89,6 @@ export class UsersController {
 	@ApiBadRequestResponse({
 		description: 'Couldn\'t logout user, incorrect nickname'
 	})
-	
-	//@UseGuards(AuthGuard('jwt'), UserAuth)
 	@Post('logout')
 	logoutUser(@Body() logoutUserDto: LogoutUserDto) {
 		return this.usersService.logoutUser(logoutUserDto);

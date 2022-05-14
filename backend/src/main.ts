@@ -18,6 +18,8 @@ async function bootstrap() {
       }
     }),
   );
+  // somewhere in your initialization file
+  app.use(cookieParser());
   const options = new DocumentBuilder()
       .setTitle('ft_transcendence')
       .setDescription('42 project')
@@ -25,8 +27,6 @@ async function bootstrap() {
       .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
-// somewhere in your initialization file
-app.use(cookieParser());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(
     app.get(Reflector))
   );
