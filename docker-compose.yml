@@ -8,5 +8,5 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    volumes:
-    #  - ./data/postgres:/data/postgres
+    #volumes:
+    #  - /data/postgres:/data/postgres
