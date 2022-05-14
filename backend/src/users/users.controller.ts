@@ -1,6 +1,6 @@
 import { UsersService } from './users.service';
 import { Body, Controller, Param, Post, Patch, Delete, Get, 
-	ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
+	ClassSerializerInterceptor, UseInterceptors, UseGuards, Req } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto 
 	} from './dto/user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
