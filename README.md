@@ -1,10 +1,10 @@
-# ft_transcendance
+# ft_transcendence
 la transcendaaance
 
 This project is about creating a website for the mighty Pong contest
 
 
-# usefull commands
+# useful commands
 
 to install dependencies of backend/frontend
 ```npm install dependencies```
