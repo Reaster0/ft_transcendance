@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, forwardRef, Injectable } from "@nestjs/common";
 import { Observable } from "rxjs";
-import jwt_decode  from "jwt-decode";
+//import jwt_decode  from "jwt-decode";
 
 // add there restrinction
 function validateRequest(request) {

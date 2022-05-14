@@ -6,6 +6,9 @@ import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
 	ApiAcceptedResponse, ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthUser } from './guards/userAuth.guard';
+import { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -26,6 +29,13 @@ export class UsersController {
 		return this.usersService.findAllUsers();
 	}
 
+	@ApiOkResponse({
+		description: 'Return content of one users.', 
+		type: User
+	})
+	@ApiNotFoundResponse({ 
+		description: 'User with given id not found.'
+	})
 	@UseGuards(AuthGuard('jwt'))
 	@Get('logged')
 	logged(@Req() req: Request): boolean {
