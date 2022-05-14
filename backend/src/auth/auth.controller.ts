@@ -1,22 +1,27 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
 import { Profile } from 'passport-42';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
+@ApiTags('Authentification Process Controller')
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(private readonly jwtService: JwtService) {}
 
+    @ApiOperation( {summary: 'OAuth login via 42 api'} )
     @UseGuards(OauthGard42Guard)
     @Get('login')
-    login(): void { 
-        console.log("got to 42");
-        return ;}
+    login(): void {}
 
+    @ApiOperation( {summary: 'callback/Redirection after 42 Authentification'} )
     @UseGuards(OauthGard42Guard)
     @Get('callback')
-    async authRedirect42(@Req() req: any, @Res() res: Response): Promise<Response> {
+    async authRedirect42(@Req() req: Request, @Res({passthrough: true}) res: Response): Promise<void> {
+        /*
         const {
             user,
             authInfo,
@@ -41,5 +46,11 @@ export class AuthController {
         const jwt = this.authService.login(user);
         res.set('authorization', `Bearer ${jwt}`);
         return res.status(201).json({authInfo, user});
+        */
+//       const username = req.user['username'];
+       const payload: JwtPayload = {nickname: req.user['username'], authStatus: false};
+       const jwtToken: string = await this.jwtService.sign(payload);
+       res.cookie('jwt', jwtToken, {httpOnly: true}); //set cookie 
+       res.redirect(process.env.FRONTEND); //back to frontend
     }
 }
