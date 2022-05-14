@@ -1,15 +1,28 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+	<v-app>
+	<Header/>
+	<router-view/>
+	</v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from "./components/HeaderOfPage.vue";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
+	name: 'App',
+	components: {
+		Header
+	},
+	methods: {
+	redirect(){
+		this.$router.push({ name: 'Home'});
+	},
+	back(){
+		this.$router.go(-1);
+	},
+	forward(){
+		this.$router.go(1);
+	},
   }
 }
 </script>
@@ -17,10 +30,8 @@ export default {
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  height: 100vh;
 }
 </style>
