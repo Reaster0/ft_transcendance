@@ -26,7 +26,7 @@ export class UsersController {
 		description: 'List of all users.'
 	})
 	@Get()
-	findAllUsers() {
+	findAllUsers() : Promise<User[]> {
 		// TODO add pagination query ?
 		return this.usersService.findAllUsers();
 	}
@@ -57,7 +57,7 @@ export class UsersController {
 		description: 'User with given id not found.'
 	})
 	@Get(':id')
-	findSpecificUser(@Param('id') id: number) {
+	findSpecificUser(@Param('id') id: number) : Promise<User> {
 		return this.usersService.findSpecificUser('' + id); // TODO check other way to do that
 	}
 
@@ -68,7 +68,7 @@ export class UsersController {
 	})
 	@ApiBadRequestResponse()
 	@Post('register')
-	createUser(@Body() createUserDto: CreateUserDto) {
+	createUser(@Body() createUserDto: CreateUserDto) : Promise <User> {
 		return this.usersService.createUser(createUserDto);
 	}
 
@@ -82,7 +82,7 @@ export class UsersController {
 		already logged in user.'
 	})
 	@Post('login')
-	loginUser(@Body() loginUserDto: LoginUserDto) {
+	loginUser(@Body() loginUserDto: LoginUserDto) : Promise<User> {
 		return this.usersService.loginUser(loginUserDto);
 	}
 
@@ -97,7 +97,7 @@ export class UsersController {
 		description: 'Couldn\'t logout user, incorrect nickname'
 	})
 	@Post('logout')
-	logoutUser(@Body() logoutUserDto: LogoutUserDto) {
+	logoutUser(@Body() logoutUserDto: LogoutUserDto) : Promise<User> {
 		return this.usersService.logoutUser(logoutUserDto);
 	}
 
@@ -113,7 +113,7 @@ export class UsersController {
 		description: 'Id of user to update is incorrect.'
 	})
 	@Patch(':id')
-	updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+	updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) : Promise<User> {
 		return this.usersService.updateUser(id, updateUserDto);
 	}
 
@@ -126,7 +126,7 @@ export class UsersController {
 		description: 'Id of user to remove is incorrect.'
 	})
 	@Delete(':id')
-	removeUser(@Param('id') id: string) {
+	removeUser(@Param('id') id: string) : Promise<User> {
 		return this.usersService.removeUser(id);
 	}
 
