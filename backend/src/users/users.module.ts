@@ -14,11 +14,12 @@ import { JwtStrategy } from 'src/users/strategy/jwt.strategy';
 		PassportModule.register({ defaultStrategy: 'jwt' }),
 		ConfigModule,
 		JwtModule.registerAsync({
+			imports: [ConfigModule],
 			useFactory: async () => {
 				return {
 					secret: process.env.JWT_SECRET,
 					signOptions: {
-						expiresIn: '3600s',
+						expiresIn: process.env.JWT_EXPIRATION_TIME,
 					},
 				};
 			},

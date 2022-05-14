@@ -17,4 +17,8 @@ export class AppController {
   login(): void {
   }
 
+  @Get('chat')
+  getChat(): string {
+    return 'Hello Chatters... Say Hello !';
+  }
 }
