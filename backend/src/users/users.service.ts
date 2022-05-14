@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus }
+import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
 	from '@nestjs/common';
 import { Connection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -132,4 +132,23 @@ export class UsersService {
 
 	// TODO how to check if user leave app ? => When user not in chat or playing
 	// TODO (checks throught websockets and modify status accordingly)
+
+	async validateUser(userData: CreateUserDto): Promise<User> {
+
+		const { nickname } = userData;
+		let user = await this.userRepository.findOne({nickname: nickname});
+		if (user)
+			return user;
+		const newUser: User = await this.createUser(userData);
+		return newUser;
+	}
+
+	async findUserByName(nickname: string): Promise<User>{
+		const user = await this.userRepository.findOne({ nickname });
+		if (!user) {
+			throw new UnauthorizedException();
+		}
+		return user;
+	}
+
 }
