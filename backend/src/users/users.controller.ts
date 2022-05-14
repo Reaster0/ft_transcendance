@@ -4,7 +4,8 @@ import { Body, Controller, Param, Post, Patch, Delete, Get,
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto 
 	} from './dto/user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
-	ApiAcceptedResponse, ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
+	ApiAcceptedResponse, ApiNotFoundResponse, ApiOkResponse, 
+	ApiOperation } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUser } from './guards/userAuth.guard';
@@ -20,6 +21,7 @@ export class UsersController {
 	// TODO protect routes
 	// TODO make sur that id is in correct range if possible
 
+	@ApiOperation({summary: 'Get list of all users'})
 	@ApiOkResponse({ 
 		description: 'List of all users.'
 	})
@@ -29,6 +31,7 @@ export class UsersController {
 		return this.usersService.findAllUsers();
 	}
 
+	@ApiOperation({summary: 'I don\'t know'})
 	@ApiOkResponse({
 		description: 'Return content of one users.', 
 		type: User
@@ -44,7 +47,8 @@ export class UsersController {
 			return false;
 		return true;
 	}
-			
+
+	@ApiOperation({summary: 'Get info of one user'})
 	@ApiOkResponse({
 		description: 'Return content of one users.', 
 		type: User
@@ -57,6 +61,7 @@ export class UsersController {
 		return this.usersService.findSpecificUser('' + id); // TODO check other way to do that
 	}
 
+	@ApiOperation({summary: 'Register an user'})
 	@ApiCreatedResponse({ 
 		description: 'The user has been successfully registered.',
 		type : User
@@ -67,6 +72,7 @@ export class UsersController {
 		return this.usersService.createUser(createUserDto);
 	}
 
+	@ApiOperation({summary: 'Login an user'})
 	@ApiCreatedResponse({ 
 		description: 'The user has been successfully login.',
 		type : User
@@ -82,6 +88,7 @@ export class UsersController {
 
 	
 	//@UseGuards(AuthGuard('jwt'), UserAuth)
+	@ApiOperation({summary: 'Logout an user'})
 	@ApiCreatedResponse({ 
 		description: 'The user has been successfully logout.',
 		type : User,
@@ -94,6 +101,7 @@ export class UsersController {
 		return this.usersService.logoutUser(logoutUserDto);
 	}
 
+	@ApiOperation({summary: 'Modify infos of an user'})
 	@ApiOkResponse({
 		description: 'User successfully modified.',
 		type: User
@@ -109,6 +117,7 @@ export class UsersController {
 		return this.usersService.updateUser(id, updateUserDto);
 	}
 
+	@ApiOperation({summary: 'Delete an user'})
 	@ApiOkResponse({
 		description: 'User successfully deleted.',
 		type: User
