@@ -23,7 +23,7 @@ import { AuthModule } from './auth/auth.module';
         DATABASE_PASSWORD: Joi.string().required(),
         DATABASE_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRATION_TIME: Joi.string().required(),
+        JWT_EXPIRATION_TIME: Joi.number().required(),
         CLIENT_ID: Joi.string().required(),
         CLIENT_SECRET: Joi.string().required(),
         CALLBACK_URL: Joi.string().required(),

@@ -7,6 +7,7 @@ import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
 	from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Status } from '../common/enums/status.enum';
+import { boolean } from 'joi';
 
 // TODO set cookie and jwt token strategy 
 // https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
@@ -133,22 +134,31 @@ export class UsersService {
 
 	async validateUser(userData: CreateUserDto): Promise<User> {
 
-		const { nickname } = userData;
-		let user = await this.userRepository.findOne({nickname: nickname});
+		const { username } = userData;
+		let user = await this.userRepository.findOne({username: username});
 		if (user)
 			return user;
 		const newUser: User = await this.createUser(userData);
 		return newUser;
 	}
 
-	async findUserByName(nickname: string): Promise<User>{
-		console.log(nickname);
+	async findUserByName(nickname: string): Promise<User> {
 		const user = await this.userRepository.findOne({ nickname });
 		if (!user) {
-			throw new UnauthorizedException('User not founddddddd');
+			throw new UnauthorizedException('User not found. Try again');
 		}
-		console.error('ev okay');
 		return user;
 	}
 
+	async setTwoFASecret(secret: string, uid: number): Promise<UpdateResult> {
+		return this.userRepository.update(uid, { twoFASecret: secret });
+	}
+
+	async modify2FA(uid: number) {
+		const user = await this.userRepository.findOne(uid);
+		const enable: boolean = !(user.is2FAEnabled);
+		return this.userRepository.update(uid, {
+			is2FAEnabled: enable
+		});
+	}
 }

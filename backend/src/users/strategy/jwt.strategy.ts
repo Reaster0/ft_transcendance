@@ -18,17 +18,13 @@ export class JwtStrategy extends PassportStrategy(
         (request: Request) => {
           let accessToken = request?.cookies['jwt'];
 
-          console.log(accessToken);
-
           return accessToken;
         }
       ]),
     });
   }
   async validate(payload: JwtPayload): Promise<User> {
-    const {nickname} = payload; 
-//    console.log('nick name:')
- //   console.log(payload);
-    return this.userService.findUserByName(nickname);
+    const {username} = payload; 
+    return this.userService.findUserByName(username);
   }
 }

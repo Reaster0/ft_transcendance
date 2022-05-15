@@ -9,6 +9,7 @@ import * as bcrypt from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
+import { string } from '@hapi/joi';
 
 
 @Entity('users') // sql table will be name 'users'
@@ -25,6 +26,12 @@ export class User {
 	@IsAlpha()
 	nickname: string;
 
+	@ApiProperty({ type: String, description: 'User private name. Cannot be modified \
+		and must only contains alphabetical characters.'})
+	@IsAlpha()
+	@Column({unique: true})
+	username: string;
+
 	@Column({ type: 'text', unique: true, nullable: true })
 	@ApiProperty({ type: String, description: 'User email. Is optional and \
 		must be under email format.'})
@@ -39,6 +46,15 @@ export class User {
 	@Exclude()
 	password: string;
 	// TODO : set password proprierties (length, ...)
+
+	@ApiProperty({ type: string, description: 'User personal 2FA Secret. \
+		(optional field)'})
+	@Column({ nullable: true })
+  	public twoFASecret?: string;
+	
+	@ApiProperty({ type: string, description: 'User as activate 2FA)'})
+	@Column({ default: false })
+  	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
 	@ApiProperty({ type: [Number], description: 'User friends, identified by \

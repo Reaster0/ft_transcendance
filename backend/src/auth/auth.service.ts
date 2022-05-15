@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Profile } from 'passport-42';
+import { Response } from 'express';
+import { authenticator } from 'otplib';
 import { CreateUserDto, LoginUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { toFileStream } from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -18,15 +19,14 @@ export class AuthService {
         return this.userService.findSpecificUser(nickname);
     }
 
-    /*
-    login(user: Profile) {
-        console.log("coucou in user service");
-        const payload = {
-            name: user.username,
-            sub: user.id,
-        };
-        return this.jwtService.sign(payload);
+    async generateTwoFASecret(user: User)/*: Promise<twoFaI> */ {
+        const secret: string = authenticator.generateSecret();
+        const authUrl: string = authenticator.keyuri(user.email, process.env.APPNAME, secret );
+        await this.userService.setTwoFASecret(authUrl, user.id);
+        return {secret, authUrl};
     }
-    */
 
+    public async pipeQrCodeStream(stream: Response, url: string) {
+        return toFileStream(stream, url);
+      }
 }
