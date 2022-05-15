@@ -10,7 +10,7 @@ const routes = [
 		component: HomePage,
 	},
 	{
-		path: '/SignUp',
+		path: '/signup',
 		name: "SignUpForm",
 		component: SignUpForm
 	},
@@ -18,7 +18,7 @@ const routes = [
 		path: '/:catchAll(.*)',
 		name: "404",
 		component: NotFound,
-	},
+	}
 ]
 	const router = createRouter({
 	history: createWebHistory(process.env.BASE_URL),

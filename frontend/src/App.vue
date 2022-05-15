@@ -1,17 +1,17 @@
 <template>
 	<v-app>
-	<Header/>
-	<router-view/>
+		<NavDrawer/>
+		<router-view/>
 	</v-app>
 </template>
 
 <script>
-import Header from "./components/HeaderOfPage.vue";
+import NavDrawer from "./components/NavDrawer.vue"
 
 export default {
 	name: 'App',
 	components: {
-		Header
+		NavDrawer
 	},
 	methods: {
 	redirect(){
@@ -28,10 +28,10 @@ export default {
 </script>
 
 <style>
-#app {
+/* #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   text-align: center;
   color: #2c3e50;
   height: 100vh;
-}
+} */
 </style>
