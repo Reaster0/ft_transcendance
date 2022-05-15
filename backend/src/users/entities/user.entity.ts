@@ -45,6 +45,10 @@ export class User {
 		(optional field)'})
 	@Column({ nullable: true })
   	public twoFASecret?: string;
+	
+	@ApiProperty({ type: string, description: 'User as activate 2FA)'})
+	@Column({ default: false })
+  	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
 	@ApiProperty({ type: [Number], description: 'User friends, identified by \

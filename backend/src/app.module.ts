@@ -23,7 +23,7 @@ import { AuthModule } from './auth/auth.module';
         DATABASE_PASSWORD: Joi.string().required(),
         DATABASE_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRATION_TIME: Joi.string().required(),
+        JWT_EXPIRATION_TIME: Joi.number().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
