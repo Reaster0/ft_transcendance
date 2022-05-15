@@ -26,13 +26,12 @@
 </template>
 
 <script>
-import {ref} from 'vue'
 
 export default {
-	setup(){
-		const drawer = ref(false);
-
-		return {drawer}
+	data() {
+		return {
+			drawer: false,
+		}
 	},
 }
 </script>
