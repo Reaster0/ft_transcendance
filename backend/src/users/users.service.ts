@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus }
+import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
 	from '@nestjs/common';
 import { Connection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
 	from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Status } from '../common/enums/status.enum';
 
 // TODO set cookie and jwt token strategy 
 // https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
@@ -45,7 +46,6 @@ export class UsersService {
 		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
 		// comes from email or nickname by doing successives checks.
 		user = this.userRepository.create(createUserDto);
-		console.log(user.id);
 		return this.userRepository.save(user);
 	}
 
@@ -75,6 +75,7 @@ export class UsersService {
 		if (!user) {
 			throw new HttpException('User to delete not found', HttpStatus.NOT_FOUND);	
 		}
+		// TODO : delete user id from others user friends array
 		return this.userRepository.remove(user);
 	}
 
@@ -87,7 +88,10 @@ export class UsersService {
 		if (!await user.comparePassword(password)) {
 			throw new HttpException('Password doesn\'t match the one registered for this user', HttpStatus.BAD_REQUEST);
 		}
-		user.status = 'online';
+		if (user.status == Status.ONLINE || user.status == Status.PLAYING) {
+			throw new HttpException('User is already login', HttpStatus.BAD_REQUEST);
+		}
+		user.status = Status.ONLINE;
 		return this.userRepository.save(user);
 	}
 
@@ -97,7 +101,7 @@ export class UsersService {
 		if (!user) {
 			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
 		}
-		user.status = 'offline';
+		user.status = Status.OFFLINE;
 		return this.userRepository.save(user);
 	}
 
@@ -128,4 +132,25 @@ export class UsersService {
 
 	// TODO how to check if user leave app ? => When user not in chat or playing
 	// TODO (checks throught websockets and modify status accordingly)
+
+	async validateUser(userData: CreateUserDto): Promise<User> {
+
+		const { nickname } = userData;
+		let user = await this.userRepository.findOne({nickname: nickname});
+		if (user)
+			return user;
+		const newUser: User = await this.createUser(userData);
+		return newUser;
+	}
+
+	async findUserByName(nickname: string): Promise<User>{
+		console.log(nickname);
+		const user = await this.userRepository.findOne({ nickname });
+		if (!user) {
+			throw new UnauthorizedException('User not founddddddd');
+		}
+		console.error('ev okay');
+		return user;
+	}
+
 }

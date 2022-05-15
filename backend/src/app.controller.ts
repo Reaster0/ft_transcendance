@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
+import { OauthGard42Guard } from './auth/guards/oauth-gard42.guard';
 
 @Controller()
 export class AppController {
@@ -8,5 +9,16 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  //bad ! just for exemple
+  @UseGuards(OauthGard42Guard)
+  @Get('login')
+  login(): void {
+  }
+
+  @Get('chat')
+  getChat(): string {
+    return 'Hello Chatters... Say Hello !';
   }
 }
