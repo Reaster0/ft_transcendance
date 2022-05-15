@@ -45,6 +45,7 @@ export class OauthStrategy42 extends PassportStrategy(
             username: profile['username'],
             email: profile['emails'][0]['value'],
             password: 'verybadpasswd',
+            avatar: null,
         }
         return this.authService.validateUser(user);
     }
