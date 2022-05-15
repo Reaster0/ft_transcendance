@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import NotFound from '../views/NotFound.vue'
-import SignUpForm from '../components/SignUpForm.vue'
+import SignUp from "../views/SignUp.vue";
 
 const routes = [
 	{
@@ -11,8 +11,8 @@ const routes = [
 	},
 	{
 		path: '/signup',
-		name: "SignUpForm",
-		component: SignUpForm
+		name: "SignUp",
+		component: SignUp
 	},
 	{
 		path: '/:catchAll(.*)',
