@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
 	from '@nestjs/common';
-import { Connection, Repository } from 'typeorm';
+import { Connection, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
@@ -143,14 +143,16 @@ export class UsersService {
 		return newUser;
 	}
 
-	async findUserByName(nickname: string): Promise<User>{
-		console.log(nickname);
+	async findUserByName(nickname: string): Promise<User> {
 		const user = await this.userRepository.findOne({ nickname });
 		if (!user) {
-			throw new UnauthorizedException('User not founddddddd');
+			throw new UnauthorizedException('User not found. Try again');
 		}
-		console.error('ev okay');
 		return user;
+	}
+
+	async setTwoFASecret(secret: string, uid: number): Promise<UpdateResult> {
+		return this.userRepository.update(uid, { twoFASecret: secret });
 	}
 
 }

@@ -9,6 +9,7 @@ import * as bcrypt from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
+import { string } from '@hapi/joi';
 
 
 @Entity('users') // sql table will be name 'users'
@@ -39,6 +40,11 @@ export class User {
 	@Exclude()
 	password: string;
 	// TODO : set password proprierties (length, ...)
+
+	@ApiProperty({ type: string, description: 'User personal 2FA Secret. \
+		(optional field)'})
+	@Column({ nullable: true })
+  	public twoFASecret?: string;
 
 	@Column({ type: 'int', array: true, default: {} })
 	@ApiProperty({ type: [Number], description: 'User friends, identified by \
