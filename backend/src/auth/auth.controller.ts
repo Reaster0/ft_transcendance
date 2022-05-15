@@ -26,12 +26,13 @@ export class AuthController {
     @Get('callback')
     async authRedirect42(@Req() req: Request, @Res({passthrough: true}) res: Response): Promise<void> {
        
-       const payload: JwtPayload = {nickname: req.user['nickname'], twoFA: false};
+       const payload: JwtPayload = {username: req.user['username'], twoFA: false};
        const jwtToken: string = await this.jwtService.sign(payload);
        res.cookie('jwt', jwtToken, {httpOnly: true}); //set cookie 
        res.redirect(process.env.FRONTEND); //back to frontend
     }
 
+    @ApiOperation({summary: 'Code authentication - Secret'})
     @UseGuards(AuthGuard('jwt'))
     @Post('2FAGenQRC')
     async generate(@Req() req: RequestUser, @Res() res: Response) {

@@ -1,4 +1,4 @@
 export interface JwtPayload {
-    nickname: string;
+    username: string;
     twoFA: boolean;
 }

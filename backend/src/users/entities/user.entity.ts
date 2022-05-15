@@ -26,6 +26,12 @@ export class User {
 	@IsAlpha()
 	nickname: string;
 
+	@ApiProperty({ type: String, description: 'User private name. Cannot be modified \
+		and must only contains alphabetical characters.'})
+	@IsAlpha()
+	@Column({unique: true})
+	username: string;
+
 	@Column({ type: 'text', unique: true, nullable: true })
 	@ApiProperty({ type: String, description: 'User email. Is optional and \
 		must be under email format.'})

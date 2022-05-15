@@ -136,8 +136,8 @@ export class UsersService {
 
 	async validateUser(userData: CreateUserDto): Promise<User> {
 
-		const { nickname } = userData;
-		let user = await this.userRepository.findOne({nickname: nickname});
+		const { username } = userData;
+		let user = await this.userRepository.findOne({username: username});
 		if (user)
 			return user;
 		const newUser: User = await this.createUser(userData);
