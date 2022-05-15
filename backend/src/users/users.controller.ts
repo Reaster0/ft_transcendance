@@ -77,9 +77,9 @@ export class UsersController {
 	}
 
 	@Post('avatar')
-	@ApiOperation({summary: 'Set an avatar'})
+	@ApiOperation({summary: 'Upload an avatar'})
 	@UseInterceptors(FileInterceptor('file'))
-	setAvatar(@Body('username') username: string, @UploadedFile() file: Express.Multer.File) {
+	uploadAvatar(@Body('username') username: string, @UploadedFile() file: Express.Multer.File) {
 		return this.usersService.addAvatar(username, file.buffer);
 	}
 
