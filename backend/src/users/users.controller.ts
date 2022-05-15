@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUser } from './guards/userAuth.guard';
 import { Request } from 'express';
+import { boolean } from 'joi';
 
 @ApiTags('users')
 @Controller('users')
@@ -30,11 +31,11 @@ export class UsersController {
 	}
 
 	@ApiOkResponse({
-		description: 'Return content of one users.', 
-		type: User
+		description: 'Return true or false according if the user is logged or not.', 
+		type: Boolean
 	})
 	@ApiNotFoundResponse({ 
-		description: 'User with given id not found.'
+		description: 'not found, try again'
 	})
 	@UseGuards(AuthGuard('jwt'))
 	@Get('logged')

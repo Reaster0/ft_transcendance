@@ -34,7 +34,7 @@ export class UsersService {
 	}
 
 	async createUser(createUserDto: CreateUserDto) {
-		const { nickname, email } = createUserDto;
+		const { nickname, email, username } = createUserDto;
 		let user = await this.userRepository.findOne({ nickname: nickname });
 		if (user) {
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
@@ -42,6 +42,10 @@ export class UsersService {
 		user = await this.userRepository.findOne({ email: email });
 		if (user) {
 			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
+		}
+		user = await this.userRepository.findOne({ username: username });
+		if (user) {
+			throw new HttpException('username already in use', HttpStatus.BAD_REQUEST);
 		}
 		// Another way is to make a try/catch block to check if error?code is
 		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
@@ -144,8 +148,8 @@ export class UsersService {
 		return newUser;
 	}
 
-	async findUserByName(nickname: string): Promise<User> {
-		const user = await this.userRepository.findOne({ nickname });
+	async findUserByName(username: string): Promise<User> {
+		const user = await this.userRepository.findOne({ username });
 		if (!user) {
 			throw new UnauthorizedException('User not found. Try again');
 		}

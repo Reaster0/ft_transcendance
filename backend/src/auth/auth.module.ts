@@ -6,20 +6,6 @@ import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
-    /*
-    PassportModule,
-    JwtModule.registerAsync({
-      useFactory: async () => {
-        return {
-          secret: process.env.JWT_SECRET,
-          signOptions: {
-            expiresIn: '3600s',
-          },
-        };
-      },
-      inject: [ConfigService],
-    })
-    */
    forwardRef(() => UsersModule)
   ],
   providers: [AuthService, /*JwtStrategy,*/ OauthStrategy42],
