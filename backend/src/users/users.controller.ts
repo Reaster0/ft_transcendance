@@ -10,6 +10,7 @@ import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUser } from './guards/userAuth.guard';
 import { Request } from 'express';
+import { UpdateResult } from 'typeorm';
 
 @ApiTags('users')
 @Controller('users')
@@ -82,7 +83,7 @@ export class UsersController {
 		already logged in user.'
 	})
 	@Post('login')
-	loginUser(@Body() loginUserDto: LoginUserDto) : Promise<User> {
+	loginUser(@Body() loginUserDto: LoginUserDto) : Promise<UpdateResult> {
 		return this.usersService.loginUser(loginUserDto);
 	}
 
@@ -97,7 +98,7 @@ export class UsersController {
 		description: 'Couldn\'t logout user, incorrect nickname'
 	})
 	@Post('logout')
-	logoutUser(@Body() logoutUserDto: LogoutUserDto) : Promise<User> {
+	logoutUser(@Body() logoutUserDto: LogoutUserDto) : Promise<UpdateResult> {
 		return this.usersService.logoutUser(logoutUserDto);
 	}
 

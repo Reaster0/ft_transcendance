@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
 	from '@nestjs/common';
-import { Connection, Repository } from 'typeorm';
+import { Connection, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
@@ -20,7 +20,7 @@ export class UsersService {
 		private readonly jwtService: JwtService,
 	) {}
 
-	findAllUsers() {
+	findAllUsers() : Promise<User[]> {
 		return this.userRepository.find();
 	}
 
@@ -91,8 +91,7 @@ export class UsersService {
 		if (user.status == Status.ONLINE || user.status == Status.PLAYING) {
 			throw new HttpException('User is already login', HttpStatus.BAD_REQUEST);
 		}
-		user.status = Status.ONLINE;
-		return this.userRepository.save(user);
+		return this.userRepository.update(user.id, { status: Status.ONLINE });
 	}
 
 	async logoutUser(logoutUserDto: LogoutUserDto) {
@@ -101,8 +100,7 @@ export class UsersService {
 		if (!user) {
 			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
 		}
-		user.status = Status.OFFLINE;
-		return this.userRepository.save(user);
+		return this.userRepository.update(user.id, { status: Status.OFFLINE });
 	}
 
 	modifyElo(user: User, opponentElo: number, userWon: boolean) {
