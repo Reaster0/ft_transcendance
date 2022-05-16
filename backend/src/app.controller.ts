@@ -10,15 +10,4 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-
-  //bad ! just for exemple
-  @UseGuards(OauthGard42Guard)
-  @Get('login')
-  login(): void {
-  }
-
-  @Get('chat')
-  getChat(): string {
-    return 'Hello Chatters... Say Hello !';
-  }
 }

@@ -10,6 +10,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UpdateResult } from 'typeorm';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { boolean } from 'joi';
+import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
 
 @ApiTags('users')
 @Controller('users')
@@ -38,6 +40,13 @@ export class UsersController {
 		if (!token)
 			return false;
 		return true;
+	}
+
+	@Get('2fa')
+	@UseGuards(AuthGuard('jwt'), AuthUser)
+	change2FAState(@Req() req: RequestUser) {
+		const user: User = req.user;
+		return this.usersService.modify2FA(user.id);
 	}
 
 	@Get(':id')

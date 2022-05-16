@@ -41,7 +41,6 @@ import { AuthModule } from './auth/auth.module';
         autoLoadEntities: true, //Load automatically entities without specifying the array
         synchronize: true // Synch DB with entities each time we load the app TODO disable when production
       }),
-//    inject: [ConfigService],
     }),
     UsersModule,
     AuthModule,
