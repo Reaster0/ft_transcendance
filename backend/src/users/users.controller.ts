@@ -33,10 +33,10 @@ export class UsersController {
 	}
 
 	@Get('logged')
-	@ApiOperation({summary: 'I don\'t know'})
+	@ApiOperation({summary: 'Check if user is logged through token.'})
 	@ApiOkResponse({ description: 'Return true or false according if the user is logged or not.', type: Boolean })
 	@ApiNotFoundResponse({ description: 'Not found.' })
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'), AuthUser)
 	logged(@Req() req: Request): boolean {
 		const token = req.cookies['jwt'];
 		if (!token)
