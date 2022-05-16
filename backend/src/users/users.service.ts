@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
 	from '@nestjs/common';
-import { Connection, Repository } from 'typeorm';
+import { Connection, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
 	from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Status } from '../common/enums/status.enum';
+import { boolean } from 'joi';
 
 // TODO set cookie and jwt token strategy 
 // https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
@@ -33,7 +34,7 @@ export class UsersService {
 	}
 
 	async createUser(createUserDto: CreateUserDto) {
-		const { nickname, email } = createUserDto;
+		const { nickname, email, username } = createUserDto;
 		let user = await this.userRepository.findOne({ nickname: nickname });
 		if (user) {
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
@@ -41,6 +42,10 @@ export class UsersService {
 		user = await this.userRepository.findOne({ email: email });
 		if (user) {
 			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
+		}
+		user = await this.userRepository.findOne({ username: username });
+		if (user) {
+			throw new HttpException('username already in use', HttpStatus.BAD_REQUEST);
 		}
 		// Another way is to make a try/catch block to check if error?code is
 		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
@@ -135,22 +140,31 @@ export class UsersService {
 
 	async validateUser(userData: CreateUserDto): Promise<User> {
 
-		const { nickname } = userData;
-		let user = await this.userRepository.findOne({nickname: nickname});
+		const { username } = userData;
+		let user = await this.userRepository.findOne({username: username});
 		if (user)
 			return user;
 		const newUser: User = await this.createUser(userData);
 		return newUser;
 	}
 
-	async findUserByName(nickname: string): Promise<User>{
-		console.log(nickname);
-		const user = await this.userRepository.findOne({ nickname });
+	async findUserByName(username: string): Promise<User> {
+		const user = await this.userRepository.findOne({ username });
 		if (!user) {
-			throw new UnauthorizedException('User not founddddddd');
+			throw new UnauthorizedException('User not found. Try again');
 		}
-		console.error('ev okay');
 		return user;
 	}
 
+	async setTwoFASecret(secret: string, uid: number): Promise<UpdateResult> {
+		return this.userRepository.update(uid, { twoFASecret: secret });
+	}
+
+	async modify2FA(uid: number): Promise<UpdateResult> {
+		const user = await this.userRepository.findOne(uid);
+		const enable: boolean = !(user.is2FAEnabled);
+		return this.userRepository.update(uid, {
+			is2FAEnabled: enable
+		});
+	}
 }

@@ -17,18 +17,24 @@ export class JwtStrategy extends PassportStrategy(
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           let accessToken = request?.cookies['jwt'];
-
-          console.log(accessToken);
-
           return accessToken;
         }
       ]),
     });
   }
+  /*
   async validate(payload: JwtPayload): Promise<User> {
-    const {nickname} = payload; 
-//    console.log('nick name:')
- //   console.log(payload);
-    return this.userService.findUserByName(nickname);
+    const {username} = payload;
+    const user: User = await this.usersRepository.findOne({ username });
+
+    if (!user) {
+        throw new UnauthorizedException();
+    }
+    return user;
+}
+  */
+  async validate(payload: JwtPayload): Promise<User> {
+//    const {username} = payload; 
+    return this.userService.findUserByName(payload.username);
   }
 }

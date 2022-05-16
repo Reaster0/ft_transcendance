@@ -24,6 +24,10 @@ export class CreateUserDto {
 		user identifications.' })
 	@IsNotEmpty()
 	readonly password: string;
+
+	@ApiProperty({ type: String, description: 'Private username for identifications.' })
+	@IsNotEmpty()
+	readonly username: string;
 }
 
 // DTO for user modification //

@@ -11,9 +11,8 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'), //Need to ask nadege about this
-    }),
+   // ServeStaticModule.forRoot({
+    //  rootPath: join(__dirname, '..', 'client'), //Need to ask nadege about this})
     ConfigModule.forRoot({
       envFilePath: '../.env',
       validationSchema: Joi.object({
@@ -23,7 +22,7 @@ import { AuthModule } from './auth/auth.module';
         DATABASE_PASSWORD: Joi.string().required(),
         DATABASE_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRATION_TIME: Joi.string().required(),
+        JWT_EXPIRATION_TIME: Joi.number().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
