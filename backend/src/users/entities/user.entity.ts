@@ -21,15 +21,15 @@ export class User {
 	@IsNumber()
 	id: number;
 
-	@Column({ unique: true })
-	@ApiProperty({ type: String, description: 'User nickname. Can be modified and must only contains alphabetical characters.'})
-	@IsAlpha()
-	nickname: string;
-
 	@ApiProperty({ type: String, description: 'User private name. Cannot be modified and must only contains alphabetical characters.'})
 	@IsAlpha()
 	@Column({unique: true})
 	username: string;
+
+	@Column({ unique: true })
+	@ApiProperty({ type: String, description: 'User nickname. Can be modified and must only contains alphabetical characters.'})
+	@IsAlpha()
+	nickname: string;
 
 	@Column({ type: 'text', unique: true, nullable: true })
 	@ApiProperty({ type: String, description: 'User email. Must be under email format.'})

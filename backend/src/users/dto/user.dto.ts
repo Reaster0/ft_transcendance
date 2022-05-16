@@ -7,16 +7,15 @@ import	{ 	IsString, IsEmail, IsNotEmpty, IsAlpha, IsOptional
 
 // DTO for user registration //
 export class CreateUserDto {
-	@ApiProperty({ type: String, description: 'The nickname identifying the user. Must only contains alphabetical characters.' })
-	@IsString()
-	@IsOptional()
-	@IsAlpha()
-	readonly nickname: string;
-
 	@ApiProperty({ type: String, description: 'Private username for identifications. Will be stocked in background, but used as nickname in a first time.' })
 	@IsNotEmpty()
 	@IsString()
 	readonly username: string;
+	
+	@ApiProperty({ type: String, description: 'The nickname identifying the user. Must only contains alphabetical characters.' })
+	@IsString()
+	@IsOptional()
+	readonly nickname: string;
 
 	@ApiPropertyOptional({ type: String, description: 'The user email address. Under email format.' })
 	@IsEmail()

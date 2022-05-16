@@ -84,23 +84,12 @@ export class UsersService {
 		return this.userRepository.remove(user);
 	}
 
-	async loginUser(username: string) {
+	async changeStatus(username: string, newStatus: Status) {
 		const user = await this.userRepository.findOne({ username: username });
 		if (!user) {
-			throw new HttpException('Username doesn\'t match a registered user', HttpStatus.BAD_REQUEST);
+			throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);			
 		}
-		if (user.status == Status.ONLINE || user.status == Status.PLAYING) {
-			throw new HttpException('User is already login', HttpStatus.BAD_REQUEST);
-		}
-		return this.userRepository.update(user.id, { status: Status.ONLINE });
-	}
-
-	async logoutUser(username: string) {
-		const user = await this.userRepository.findOne({ username: username });
-		if (!user) {
-			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
-		}
-		return this.userRepository.update(user.id, { status: Status.OFFLINE });
+		return this.userRepository.update(user.id, { status: newStatus });
 	}
 
 	modifyElo(user: User, opponentElo: number, userWon: boolean) {

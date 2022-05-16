@@ -10,8 +10,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UpdateResult } from 'typeorm';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { boolean } from 'joi';
+import { AuthUser } from './guards/userAuth.guard'
 import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
+import { Status } from '../common/enums/status.enum';
+
 
 @ApiTags('users')
 @Controller('users')
@@ -77,18 +79,18 @@ export class UsersController {
 	@Post('login')
 	@ApiOperation({summary: 'Login an user'})
 	@ApiCreatedResponse({ description: 'The user has been successfully login.', type : User })
-	@ApiBadRequestResponse({ description: 'Couldn\'t login user (nickname/password incorrect) or already logged in user.' })
-	loginUser(@Body('username') username: string) : Promise<UpdateResult> {
-		return this.usersService.loginUser(username);
+	@ApiBadRequestResponse({ description: 'Couldn\'t login user, user not found.' })
+	loginUser(@Body('username') username: string)  {
+		return this.usersService.changeStatus(username, Status.ONLINE);
 	}
 
 	@Post('logout')
 	//@UseGuards(AuthGuard('jwt'), UserAuth)
 	@ApiOperation({summary: 'Logout an user'})
 	@ApiCreatedResponse({ description: 'The user has been successfully logout.', type : User })
-	@ApiBadRequestResponse({ description: 'Couldn\'t logout user, incorrect nickname' })
+	@ApiBadRequestResponse({ description: 'Couldn\'t logout user, user not found.' })
 	logoutUser(@Body('username') username: string) : Promise<UpdateResult> {
-		return this.usersService.logoutUser(username);
+		return this.usersService.changeStatus(username, Status.OFFLINE);
 	}
 
 	@Post('avatar')
