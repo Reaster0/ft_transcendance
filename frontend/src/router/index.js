@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import NotFound from '../views/NotFound.vue'
-import SignUp from "../views/SignUp.vue";
+import LoginPage from "../views/LoginPage.vue";
 
 const routes = [
 	{
@@ -10,9 +10,9 @@ const routes = [
 		component: HomePage,
 	},
 	{
-		path: '/signup',
-		name: "SignUp",
-		component: SignUp
+		path: '/login',
+		name: "login",
+		component: LoginPage
 	},
 	{
 		path: '/:catchAll(.*)',

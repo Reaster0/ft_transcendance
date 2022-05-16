@@ -12,7 +12,7 @@
 
 		</v-toolbar-title>
 			<v-spacer></v-spacer>
-			<router-link to="/signup">
+			<router-link to="/login">
 				<v-btn flat color="grey" align-end="true">
 					Login
 					<v-icon>mdi-login</v-icon>
