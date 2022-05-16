@@ -10,6 +10,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthUser } from './guards/userAuth.guard';
 import { Request } from 'express';
 import { boolean } from 'joi';
+import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
 
 @ApiTags('users')
 @Controller('users')
@@ -37,7 +38,7 @@ export class UsersController {
 	@ApiNotFoundResponse({ 
 		description: 'not found, try again'
 	})
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'), AuthUser)
 	@Get('logged')
 	logged(@Req() req: Request): boolean {
 		const token = req.cookies['jwt'];
@@ -45,7 +46,13 @@ export class UsersController {
 			return false;
 		return true;
 	}
-			
+	@UseGuards(AuthGuard('jwt'), AuthUser)
+	@Get('2fa')
+	change2FAState(@Req() req: RequestUser) {
+		const user: User = req.user;
+		return this.usersService.modify2FA(user.id);
+	}
+
 	@ApiOkResponse({
 		description: 'Return content of one users.', 
 		type: User

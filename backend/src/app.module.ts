@@ -11,9 +11,8 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'), //Need to ask nadege about this
-    }),
+   // ServeStaticModule.forRoot({
+    //  rootPath: join(__dirname, '..', 'client'), //Need to ask nadege about this})
     ConfigModule.forRoot({
       envFilePath: '../.env',
       validationSchema: Joi.object({

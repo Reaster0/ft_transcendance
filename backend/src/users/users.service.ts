@@ -160,7 +160,7 @@ export class UsersService {
 		return this.userRepository.update(uid, { twoFASecret: secret });
 	}
 
-	async modify2FA(uid: number) {
+	async modify2FA(uid: number): Promise<UpdateResult> {
 		const user = await this.userRepository.findOne(uid);
 		const enable: boolean = !(user.is2FAEnabled);
 		return this.userRepository.update(uid, {
