@@ -1,18 +1,15 @@
 import { UsersService } from './users.service';
 import { Body, Controller, Param, Post, Patch, Delete, Get, 
-	ClassSerializerInterceptor, UseInterceptors, UseGuards, Req,
-	UploadedFile } from '@nestjs/common';
+		ClassSerializerInterceptor, UseInterceptors, UseGuards, Req,
+		UploadedFile } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
-	ApiAcceptedResponse, ApiNotFoundResponse, ApiOkResponse, 
-	ApiOperation } from '@nestjs/swagger';
+		ApiNotFoundResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthUser } from './guards/userAuth.guard';
 import { Request } from 'express';
 import { UpdateResult } from 'typeorm';
 import { FileInterceptor } from '@nestjs/platform-express';
-
 
 @ApiTags('users')
 @Controller('users')
@@ -33,8 +30,8 @@ export class UsersController {
 
 	@Get('logged')
 	@ApiOperation({summary: 'I don\'t know'})
-	@ApiOkResponse({ description: 'Return content of one users.', type: User })
-	@ApiNotFoundResponse({ description: 'User with given id not found.' })
+	@ApiOkResponse({ description: 'Return true or false according if the user is logged or not.', type: Boolean })
+	@ApiNotFoundResponse({ description: 'Not found.' })
 	@UseGuards(AuthGuard('jwt'))
 	logged(@Req() req: Request): boolean {
 		const token = req.cookies['jwt'];
@@ -51,11 +48,20 @@ export class UsersController {
 		return this.usersService.findUserById('' + id); // TODO check other way to do that
 	}
 
-	@Post('register')
-	@ApiOperation({summary: 'Register an user'})
-	@ApiCreatedResponse({ description: 'The user has been successfully registered.', type : User })
+	// TODO just to test
+	@Post('decrypt')
+	@ApiOperation({summary: 'Get info of one user'})
+	@ApiOkResponse({ description: 'Return content of one users.',  type: User })
+	@ApiNotFoundResponse({ description: 'User with given id not found.' })
+	decrypt(@Body('username') username: string) : Promise<string> {
+		return this.usersService.getSecret(username);
+	}
+
+	@Post('get_or_register')
+	@ApiOperation({summary: 'Retrieve existing user or register new user'})
+	@ApiCreatedResponse({ description: 'The user has been successfully retrieved or registered.', type : User })
 	@ApiBadRequestResponse()
-	createUser(@Body() createUserDto: CreateUserDto) : Promise <User> {
+	retrieveOrCreateUser(@Body() createUserDto: CreateUserDto) : Promise <User> {
 		return this.usersService.retrieveOrCreateUser(createUserDto);
 	}
 
@@ -81,6 +87,13 @@ export class UsersController {
 	@UseInterceptors(FileInterceptor('file'))
 	uploadAvatar(@Body('username') username: string, @UploadedFile() file: Express.Multer.File) {
 		return this.usersService.addAvatar(username, file.buffer);
+	}
+
+	@Post('secret')
+	@ApiOperation({summary: 'Set 2FA secret'})
+	@ApiBadRequestResponse({ description: 'Couldn\'t set secret: User not found.' })
+	set2FASecret(@Body('id') id: number, @Body('secret') secret: string) {
+		return this.usersService.setTwoFASecret(secret, id);
 	}
 
 	@Patch(':id')	

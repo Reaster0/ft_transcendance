@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException, StreamableFile }
 	from '@nestjs/common';
-import { Connection, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Status } from '../common/enums/status.enum';
-import { boolean } from 'joi';
 import { Readable } from 'stream';
 
 @Injectable()
@@ -46,12 +45,12 @@ export class UsersService {
 	}	
 
 	async retrieveOrCreateUser(createUserDto: CreateUserDto) {
-		const { username, nickname } = createUserDto;
+		const { username } = createUserDto;
 		let user = await this.userRepository.findOne({ username: username });
 		if (user) {
 			return user;
 		}
-		user = await this.userRepository.findOne({ nickname: nickname });
+		user = await this.userRepository.findOne({ nickname: username });
 		if (user) {
 			// TODO special gestion of this case !
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
@@ -156,15 +155,22 @@ export class UsersService {
 		return newUser;
 	}
 
-	async setTwoFASecret(secret: string, uid: number): Promise<UpdateResult> {
-		return this.userRepository.update(uid, { twoFASecret: secret });
+	async setTwoFASecret(secret: string, uid: number): Promise<User> {
+		const user = await this.userRepository.findOne({ id : uid });
+		user.twoFASecret = secret;
+		return this.userRepository.save(user);
 	}
 
 	async modify2FA(uid: number) {
-		const user = await this.userRepository.findOne(uid);
+		const user = await this.userRepository.findOne({ id : uid });
 		const enable: boolean = !(user.is2FAEnabled);
 		return this.userRepository.update(uid, {
 			is2FAEnabled: enable
 		});
+	}
+
+	async getSecret(username: string) {
+		const user = await this.userRepository.findOne({ username: username });
+		return user.decryptSecret();
 	}
 }

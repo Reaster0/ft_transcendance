@@ -5,11 +5,13 @@ import	{	Entity,
 			BeforeInsert,
 			BeforeUpdate
 		} from 'typeorm';
-import * as bcrypt from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
 import { string } from '@hapi/joi';
+import * as crypto from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+import { concat } from 'rxjs';
 
 
 @Entity('users') // sql table will be name 'users'
@@ -65,17 +67,33 @@ export class User {
 	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
 	//matchHistory: Game; 
 
-	// From a repo github with chat system tinchat from tanvirtin:
+
+	// Source : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()
 	@BeforeUpdate()
-	async hashSecret() {
-		this.twoFASecret = await bcrypt.hash(this.twoFASecret, 10);
+	async encryptSecret() {
+		if (!this.twoFASecret) {
+			return ;
+		}
+		const key = process.env.ENCRYPTION_KEY || '';
+		const iv = Buffer.from(crypto.randomBytes(parseInt(process.env.ENCRYPTION_IV_LENGTH))).toString('hex').slice(0, parseInt(process.env.ENCRYPTION_IV_LENGTH));
+		const cipher = crypto.createCipheriv(process.env.ENCRYPTION_ALGORITHM, Buffer.from(key), iv);
+		const encrypted = Buffer.concat([cipher.update(this.twoFASecret), cipher.final()]);
+		this.twoFASecret = iv + ':' + encrypted.toString('hex');
+		return this.twoFASecret;
 	}
 
-	async compareSecret(attempt: string) {
-		return await bcrypt.compare(attempt, this.twoFASecret);
+	decryptSecret () {
+		if (!this.twoFASecret) {
+			return null;
+		}
+		let parts = this.twoFASecret.includes(':') ? this.twoFASecret.split(':') : [];
+		const iv = Buffer.from(parts.shift() || '', 'binary');
+		const encrypted = Buffer.from(parts.join(':'), 'hex');
+		const decipher = crypto.createDecipheriv(process.env.ENCRYPTION_ALGORITHM, Buffer.from(process.env.ENCRYPTION_KEY), iv);
+		const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+		return decrypted.toString();
 	}
-
 	// authentication token ?
 	// avatar ?
 }

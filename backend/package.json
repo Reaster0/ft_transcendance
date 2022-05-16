@@ -40,6 +40,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
+    "crypto": "^1.0.1",
     "dependencies": "^0.0.1",
     "elo-rating": "^1.0.1",
     "entities": "^4.3.0",

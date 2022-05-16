@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Redirect, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Redirect, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RequestUser } from './interfaces/requestUser.interface';
+import { twoFACodeDto } from './dto/twoFACode.dto';
 
 @ApiTags('Authentification Process Controller')
 @Controller('auth')
@@ -18,7 +19,7 @@ export class AuthController {
 
     @ApiOperation( {summary: 'OAuth login via 42 api'} )
     @UseGuards(OauthGard42Guard)
-    @Get('login')
+    @Get('login-42')
     login(): void {}
 
     @ApiOperation( {summary: 'callback/Redirection after 42 Authentification'} )
@@ -38,5 +39,18 @@ export class AuthController {
     async generate(@Req() req: RequestUser, @Res() res: Response) {
         const { authUrl } = await this.authService.generateTwoFASecret(req.user);
         return this.authService.pipeQrCodeStream(res, authUrl);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('login-2fa')
+    async validade2FA(@Req() req: RequestUser, @Body() { twoFACode }: twoFACodeDto, @Res({passthrough: true}) res: Response): Promise<boolean> {
+        const isCodeValid = this.authService.is2FAValide(twoFACode, req.user);
+        if (!isCodeValid) {
+            throw new UnauthorizedException('Wrong authentification code');
+        }
+        const payload: JwtPayload = {username: req.user['username'], twoFA: true};
+        const jwtToken: string = await this.jwtService.sign(payload);
+       res.cookie('jwt', jwtToken, {httpOnly: true}); //set cookie 
+       return true;
     }
 }
