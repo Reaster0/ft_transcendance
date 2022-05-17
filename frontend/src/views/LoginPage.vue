@@ -1,21 +1,16 @@
 <template>
-  <div>
+  <div v-if="!isLog">
 	<v-container>
-		<v-row>
-			<v-btn loading rounded elevation="5" outlined width="160" height="100" href="/api/login">
+		<v-row justify="center">
+			<v-btn loading rounded elevation="5" outlined width="500" height="500" href="/api/auth/login-42">
 				<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
 				AUTH
 			</v-btn>
 		</v-row>
-		<v-layout row>
-			<!-- <v-flex></v-flex> -->
-		</v-layout>
-		<div v-if="isLog">
-		<v-btn>test</v-btn>
-		</div>
 	</v-container>
-	<p>{{ isLog }}</p>
-
+	</div>
+	<div v-else>
+		<h1 align="center">YOU SHOULDNT BE HERE</h1>
 	</div>
 </template>
 
@@ -27,7 +22,7 @@ import { isLogged } from '../components/FetchFunctions.js'
 export default {
 	setup()
 	{
-		const isLog = ref(false)
+		const isLog = ref(null)
 
 		onMounted(async() => {
 			isLog.value = await isLogged()
