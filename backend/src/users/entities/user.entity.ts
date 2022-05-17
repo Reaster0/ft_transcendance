@@ -37,16 +37,16 @@ export class User {
 	email: string;
 
 	@Column({ type: 'bytea', nullable: true })
-	@ApiProperty({ type: Uint8Array, description: 'User\'s avatar'})
+	@ApiProperty({ type: Array, description: 'User\'s avatar'})
 	avatar: Uint8Array;
 	// TODO set as non nullable
 
-	@ApiProperty({ type: string, description: 'User personal 2FA Secret (optional field)'})
 	@Column({ nullable: true })
+	@ApiProperty({ type: String, description: 'User personal 2FA Secret (optional field)'})
   	public twoFASecret?: string;
 	
-	@ApiProperty({ type: string, description: 'User as activate 2FA)'})
 	@Column({ default: false })
+	@ApiProperty({ type: String, description: 'User as activate 2FA)'})
   	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
@@ -67,8 +67,7 @@ export class User {
 	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
 	//matchHistory: Game; 
 
-
-	// Source : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
+	// Source of encryption : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()
 	@BeforeUpdate()
 	async encryptSecret() {
@@ -94,6 +93,4 @@ export class User {
 		const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
 		return decrypted.toString();
 	}
-	// authentication token ?
-	// avatar ?
 }

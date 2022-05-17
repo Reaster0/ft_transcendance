@@ -21,8 +21,8 @@ export class AuthService {
 
     async generateTwoFASecret(user: User)/*: Promise<twoFaI> */ {
         const secret: string = authenticator.generateSecret();
-        const authUrl: string = authenticator.keyuri(user.email, process.env.APPNAME, secret );
-        await this.userService.setTwoFASecret(secret, user.id);
+        const authUrl: string = authenticator.keyuri(user.email, process.env.APPNAME, secret);
+        await this.userService.setTwoFASecret(user, secret);
         return {secret, authUrl};
     }
 
