@@ -93,7 +93,7 @@ export class UsersController {
 	}
 
 	@Get(':id')
-//	@UseGuards(AuthGuard('jwt'), AuthUser)
+	@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
 	@ApiOperation({ summary: 'Get info of one user according to its id.' })
 	@ApiOkResponse({ description: 'Return content of one users depending on it\'s id.',  type: User })
@@ -129,7 +129,6 @@ export class UsersController {
 	@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
 	@ApiOperation({summary: 'Set 2FA secret'})
-	@ApiBadRequestResponse({ description: 'Couldn\'t set secret: User not found.' })
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
 	set2FASecret(@Req() req: RequestUser, @Body('secret') secret: string) {
