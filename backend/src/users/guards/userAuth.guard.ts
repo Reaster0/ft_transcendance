@@ -10,7 +10,7 @@ function validateRequest(request: RequestUser) {
 
     const user: User= request.user; 
     let decode = jwt_decode(request.cookies.jwt);
-    if (decode['auth'] === false && user.is2FAEnabled=== true) {
+    if (decode['auth'] === false && user.is2FAEnabled === true) {
         throw new ForbiddenException('need 2FA');
     }
     return true;
