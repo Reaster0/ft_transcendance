@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 import { authenticator } from 'otplib';
-import { CreateUserDto, LoginUserDto } from 'src/users/dto/user.dto';
+import { CreateUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { toFileStream } from 'qrcode';
@@ -12,11 +12,11 @@ export class AuthService {
     constructor(private userService: UsersService) {}
 
     async validateUser(user: CreateUserDto): Promise<User> {
-        return this.userService.validateUser(user);
+        return this.userService.retrieveOrCreateUser(user);
     }
 
     async getUser(nickname: string): Promise<User> {
-        return this.userService.findSpecificUser(nickname);
+        return this.userService.findUserBynickname(nickname);
     }
 
     async generateTwoFASecret(user: User)/*: Promise<twoFaI> */ {
@@ -33,7 +33,7 @@ export class AuthService {
       is2FAValide(twoFACode: string, user: User): boolean {
         return authenticator.verify({
           token: twoFACode,
-          secret: user.twoFASecret
+          secret: user.decryptSecret(),
         })
       }
 }

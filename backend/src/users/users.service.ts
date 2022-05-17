@@ -1,17 +1,12 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
+import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException, StreamableFile }
 	from '@nestjs/common';
-import { Connection, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
-	from './dto/user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Status } from '../common/enums/status.enum';
-import { boolean } from 'joi';
-
-// TODO set cookie and jwt token strategy 
-// https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
-
+import { Readable } from 'stream';
 
 @Injectable()
 export class UsersService {
@@ -21,11 +16,11 @@ export class UsersService {
 		private readonly jwtService: JwtService,
 	) {}
 
-	findAllUsers() {
+	findAllUsers() : Promise<User[]> {
 		return this.userRepository.find();
 	}
 
-	async findSpecificUser(id: string) {
+	async findUserById(id: string) : Promise<User> {
 		const user = await this.userRepository.findOne(id);
 		if (!user) {
 			throw new NotFoundException(`User #${id} not found`);
@@ -33,38 +28,43 @@ export class UsersService {
 		return user;
 	}
 
-	async createUser(createUserDto: CreateUserDto) {
-		const { nickname, email, username } = createUserDto;
-		let user = await this.userRepository.findOne({ nickname: nickname });
+	async findUserByUsername(username: string) : Promise<User> {
+		const user = await this.userRepository.findOne({ username });
+		if (!user) {
+			throw new UnauthorizedException(`User ${username} (username) not found. Try again`);
+		}
+		return user;
+	}
+
+	async findUserBynickname(nickname: string) : Promise<User> {
+		const user = await this.userRepository.findOne({ nickname });
+		if (!user) {
+			throw new UnauthorizedException(`User ${nickname} (nickname) not found. Try again`);
+		}
+		return user;
+	}	
+
+	async retrieveOrCreateUser(createUserDto: CreateUserDto) {
+		const { username } = createUserDto;
+		let user = await this.userRepository.findOne({ username: username });
 		if (user) {
+			return user;
+		}
+		user = await this.userRepository.findOne({ nickname: username });
+		if (user) {
+			// TODO special gestion of this case !
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
 		}
-		user = await this.userRepository.findOne({ email: email });
-		if (user) {
-			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
-		}
-		user = await this.userRepository.findOne({ username: username });
-		if (user) {
-			throw new HttpException('username already in use', HttpStatus.BAD_REQUEST);
-		}
-		// Another way is to make a try/catch block to check if error?code is
-		// a PostgresErrorCode.uniqueViolation. But here, we can check if error
-		// comes from email or nickname by doing successives checks.
 		user = this.userRepository.create(createUserDto);
 		return this.userRepository.save(user);
 	}
 
 	async updateUser(id: string, updateUserDto: UpdateUserDto) {
-		const { nickname, email } = updateUserDto;
+		const { nickname } = updateUserDto;
 		let user = await this.userRepository.findOne({ nickname: nickname });
 		if (user) {
 			throw new HttpException('Nickname already in use', HttpStatus.BAD_REQUEST);
 		}
-		user = await this.userRepository.findOne({ email: email });
-		if (user) {
-			throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
-		}
-		// Same remarks as createUser concerning previous user checks.	
 		user = await this.userRepository.preload({
 			id: +id,
 			...updateUserDto,
@@ -76,7 +76,7 @@ export class UsersService {
 	}
 
 	async removeUser(id: string) {
-		const user = await this.findSpecificUser(id);
+		const user = await this.findUserById(id);
 		if (!user) {
 			throw new HttpException('User to delete not found', HttpStatus.NOT_FOUND);	
 		}
@@ -84,30 +84,12 @@ export class UsersService {
 		return this.userRepository.remove(user);
 	}
 
-	async loginUser(loginUserDto: LoginUserDto) {
-		const { nickname, password } = loginUserDto;
-		const user = await this.userRepository.findOne({ nickname: nickname });
+	async changeStatus(username: string, newStatus: Status) {
+		const user = await this.userRepository.findOne({ username: username });
 		if (!user) {
-			throw new HttpException('Nickname doesn\'t match a registered user', HttpStatus.BAD_REQUEST);
+			throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);			
 		}
-		if (!await user.comparePassword(password)) {
-			throw new HttpException('Password doesn\'t match the one registered for this user', HttpStatus.BAD_REQUEST);
-		}
-		if (user.status == Status.ONLINE || user.status == Status.PLAYING) {
-			throw new HttpException('User is already login', HttpStatus.BAD_REQUEST);
-		}
-		user.status = Status.ONLINE;
-		return this.userRepository.save(user);
-	}
-
-	async logoutUser(logoutUserDto: LogoutUserDto) {
-		const { nickname } = logoutUserDto;
-		const user = await this.userRepository.findOne({ nickname: nickname });
-		if (!user) {
-			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
-		}
-		user.status = Status.OFFLINE;
-		return this.userRepository.save(user);
+		return this.userRepository.update(user.id, { status: newStatus });
 	}
 
 	modifyElo(user: User, opponentElo: number, userWon: boolean) {
@@ -135,8 +117,22 @@ export class UsersService {
 		this.userRepository.save(user);
 	}
 
-	// TODO how to check if user leave app ? => When user not in chat or playing
-	// TODO (checks throught websockets and modify status accordingly)
+	async addAvatar(username: string, dataBuffer: Buffer) {
+		const user = await this.userRepository.findOne({ username: username });
+		if (!user) {
+			throw new  HttpException('User not found', HttpStatus.BAD_REQUEST);			
+		}
+		this.userRepository.update(user.id, {avatar: dataBuffer});
+	}
+
+	async getAvatar(username: string) {
+		const user = await this.userRepository.findOne({ username: username });
+		if (!user) {
+			throw new  HttpException('User not found', HttpStatus.BAD_REQUEST);			
+		}
+		const stream = Readable.from(user.avatar);
+		return new StreamableFile(stream);
+	}
 
 	async validateUser(userData: CreateUserDto): Promise<User> {
 
@@ -144,27 +140,26 @@ export class UsersService {
 		let user = await this.userRepository.findOne({username: username});
 		if (user)
 			return user;
-		const newUser: User = await this.createUser(userData);
+		const newUser: User = await this.retrieveOrCreateUser(userData);
 		return newUser;
 	}
 
-	async findUserByName(username: string): Promise<User> {
-		const user = await this.userRepository.findOne({ username });
-		if (!user) {
-			throw new UnauthorizedException('User not found. Try again');
-		}
-		return user;
+	async setTwoFASecret(secret: string, uid: number): Promise<User> {
+		const user = await this.userRepository.findOne({ id : uid });
+		user.twoFASecret = secret;
+		return this.userRepository.save(user);
 	}
 
-	async setTwoFASecret(secret: string, uid: number): Promise<UpdateResult> {
-		return this.userRepository.update(uid, { twoFASecret: secret });
-	}
-
-	async modify2FA(uid: number): Promise<UpdateResult> {
-		const user = await this.userRepository.findOne(uid);
+	async modify2FA(uid: number) {
+		const user = await this.userRepository.findOne({ id : uid });
 		const enable: boolean = !(user.is2FAEnabled);
 		return this.userRepository.update(uid, {
 			is2FAEnabled: enable
 		});
+	}
+
+	async getSecret(username: string) {
+		const user = await this.userRepository.findOne({ username: username });
+		return user.decryptSecret();
 	}
 }
