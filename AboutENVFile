@@ -1,0 +1,24 @@
+For the database, you need to set :
+
+DATABASE_USER: Name of DB user
+DATABASE_PASSWORD: A password for DB user
+DATABASE_NAME: Name of your DB
+DATABASE_PORT: DB port (5432 for example)
+DATABASE_HOST: Your DB host (localhost by default)
+
+
+For 42 passport and authentification system :
+
+CLIENT_ID: Given by 42 through their API generation
+CLIENT_SECRE: Same
+CALLBACK_URL: The url for authentication callback
+JWT_SECRET: A secret sentence for generating tokens
+JWT_EXPIRATION_TIME: Tokens expiration time in seconds
+
+
+For 2FA secret encryption :
+
+ENCRYPTION_KEY: A sentence of size 32 char (256 bit) used for encryption
+ENCRYPTION_IV_LENGTH: Length for encryption intialization vector (16 by default) 
+ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
+ 

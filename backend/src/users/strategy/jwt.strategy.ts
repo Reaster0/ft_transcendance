@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
@@ -22,19 +22,15 @@ export class JwtStrategy extends PassportStrategy(
       ]),
     });
   }
-  /*
+
   async validate(payload: JwtPayload): Promise<User> {
-    const {username} = payload;
-    const user: User = await this.usersRepository.findOne({ username });
+    const { username } = payload;
+    const user = await this.userService.findUserByUsername(username);
 
     if (!user) {
         throw new UnauthorizedException();
     }
     return user;
-}
-  */
-  async validate(payload: JwtPayload): Promise<User> {
-    const {username} = payload; 
-    return this.userService.findUserByUsername(username);
   }
+
 }

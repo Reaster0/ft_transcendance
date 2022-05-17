@@ -1,6 +1,6 @@
-import { PartialType, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
-import	{ 	IsString, IsEmail, IsNotEmpty, IsAlpha, IsOptional
+import	{ 	IsString, IsEmail, IsNotEmpty, IsOptional, IsAlphanumeric, MinLength, MaxLength
 	} from 'class-validator';
 
 // TODO set rules for password (length, etc...)
@@ -8,23 +8,31 @@ import	{ 	IsString, IsEmail, IsNotEmpty, IsAlpha, IsOptional
 // DTO for user registration //
 export class CreateUserDto {
 	@ApiProperty({ type: String, description: 'Private username for identifications. Will be stocked in background, but used as nickname in a first time.' })
+	@IsString()
 	@IsNotEmpty()
-	@IsString()
 	readonly username: string;
-	
-	@ApiProperty({ type: String, description: 'The nickname identifying the user. Must only contains alphabetical characters.' })
-	@IsString()
-	@IsOptional()
-	readonly nickname: string;
 
-	@ApiPropertyOptional({ type: String, description: 'The user email address. Under email format.' })
+	@ApiProperty({ type: String, description: 'The user email address. Under email format.' })
 	@IsEmail()
+	@IsNotEmpty()
 	readonly email: string;
 
-	@ApiProperty({ type: Uint8Array, description: 'User\'s avatar'})
+	@ApiProperty({ type: Array, description: 'User\'s avatar'})
 	readonly avatar?: Uint8Array;
 	//TODO set as non optional
 }
 
 // DTO for user modification //
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UpdateUserDto {
+	@ApiProperty({ type: String, description: 'nickname' })
+	@IsAlphanumeric()
+	@MinLength(4)
+	@MaxLength(15)
+	@IsOptional()
+	readonly nickname?: string;
+
+	@ApiProperty({ type: String, description: 'email' })
+	@IsEmail()
+	@IsOptional()
+	readonly email?: string
+}
