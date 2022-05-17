@@ -16,6 +16,7 @@
     "vue-cookies": "^1.8.1",
     "vue-router": "^4.0.15",
     "vuetify": "^3.0.0-beta.0",
+    "vuex": "^4.0.2",
     "webfontloader": "^1.0.0"
   },
   "devDependencies": {

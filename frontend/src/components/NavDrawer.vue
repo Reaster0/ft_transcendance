@@ -33,9 +33,11 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+//import { ref } from 'vue'
 import { onMounted } from '@vue/runtime-core'
-import { isLogged } from "../components/FetchFunctions.js"
+//import { isLogged } from "../components/FetchFunctions.js"
+import { useStore } from 'vuex'
+import { computed} from 'vue'
 
 export default {
 	data() {
@@ -44,10 +46,16 @@ export default {
 		}
 	},
 	setup() {
-		const isLog = ref(null)
+		const store = useStore;
+		const isLog = computed(() => {
+			console.log(store)
+			return true;
+		})
+		//const isLog = ref(null)
+
 
 		onMounted(async() => {
-			isLog.value = await isLogged()
+			//isLog.value = await isLogged()
 		})
 
 		return {isLog}
