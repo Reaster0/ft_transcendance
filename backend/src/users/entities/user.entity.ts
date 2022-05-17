@@ -78,6 +78,7 @@ export class User {
 	//matchHistory: Game; 
 
 	// From a repo github with chat system tinchat from tanvirtin:
+	/* not used for now and it scared me :D
 	@BeforeInsert()
 	@BeforeUpdate()
 	async hashPassword() {
@@ -87,6 +88,7 @@ export class User {
 	async comparePassword(attempt: string) {
 		return await bcrypt.compare(attempt, this.password);
 	}
+	*/
 
 	// authentication token ?
 	// avatar ?

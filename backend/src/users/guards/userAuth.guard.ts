@@ -5,7 +5,7 @@ import { RequestUser } from "src/auth/interfaces/requestUser.interface";
 import { User } from "../entities/user.entity";
 
 
-// add there restrinction
+// add more restrinction there if needed
 function validateRequest(request: RequestUser) {
 
     const user: User= request.user; 

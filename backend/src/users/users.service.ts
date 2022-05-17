@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException }
+import { Injectable, NotFoundException, HttpException, HttpStatus, UnauthorizedException, InternalServerErrorException }
 	from '@nestjs/common';
 import { Connection, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDto, UpdateUserDto, LoginUserDto, LogoutUserDto }
+import { CreateUserDto, UpdateUserDto }
 	from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Status } from '../common/enums/status.enum';
@@ -54,6 +54,7 @@ export class UsersService {
 		return this.userRepository.save(user);
 	}
 
+	/*
 	async updateUser(id: string, updateUserDto: UpdateUserDto) {
 		const { nickname, email } = updateUserDto;
 		let user = await this.userRepository.findOne({ nickname: nickname });
@@ -74,6 +75,21 @@ export class UsersService {
 		}
 		return this.userRepository.save(user);
 	}
+	*/
+	async updateUser(user: User, updateUser: UpdateUserDto) {
+		const { nickname, email } = updateUser;
+		if (nickname)
+			user.nickname = nickname;
+		if (email)
+			user.email = email;
+		try {
+			await this.userRepository.save(user);
+		} catch (error) {
+			if (error == '23505')
+				throw new InternalServerErrorException('Username or email already taken');
+			throw new InternalServerErrorException();
+		}
+	}
 
 	async removeUser(id: string) {
 		const user = await this.findSpecificUser(id);
@@ -84,6 +100,7 @@ export class UsersService {
 		return this.userRepository.remove(user);
 	}
 
+	/* not used
 	async loginUser(loginUserDto: LoginUserDto) {
 		const { nickname, password } = loginUserDto;
 		const user = await this.userRepository.findOne({ nickname: nickname });
@@ -99,15 +116,12 @@ export class UsersService {
 		user.status = Status.ONLINE;
 		return this.userRepository.save(user);
 	}
+	*/
 
-	async logoutUser(logoutUserDto: LogoutUserDto) {
-		const { nickname } = logoutUserDto;
-		const user = await this.userRepository.findOne({ nickname: nickname });
-		if (!user) {
-			throw new HttpException('Email or password doesn\'t match a registered user', HttpStatus.BAD_REQUEST);			
-		}
-		user.status = Status.OFFLINE;
-		return this.userRepository.save(user);
+	async logoutUser(user: User): Promise<UpdateResult>{
+		return this.userRepository.update(user.id, {
+			status: Status.OFFLINE,
+		});
 	}
 
 	modifyElo(user: User, opponentElo: number, userWon: boolean) {
@@ -142,9 +156,12 @@ export class UsersService {
 
 		const { username } = userData;
 		let user = await this.userRepository.findOne({username: username});
-		if (user)
+		if (user) {
+			await this.userRepository.update(user.id, {status: Status.ONLINE})
 			return user;
+		}
 		const newUser: User = await this.createUser(userData);
+		await this.userRepository.update(newUser.id, {status: Status.ONLINE})
 		return newUser;
 	}
 
@@ -166,5 +183,37 @@ export class UsersService {
 		return this.userRepository.update(uid, {
 			is2FAEnabled: enable
 		});
+	}
+
+	async currentUser(user: User): Promise<Partial<User>>{
+		let userFound: User = undefined;
+		userFound = await this.userRepository.findOne(user.id);
+		if (!user)
+			throw new NotFoundException('User not found');
+		let { username, ...res } = user;
+		return res;
+	}
+
+	async userInfo(user_name: string): Promise<Partial<User>> {
+		let user: User = undefined;
+		user = await this.userRepository.findOne({username: user_name});
+		if (!user)
+			throw new NotFoundException('No user found');
+		let { username, ...res } = user;
+		return res;
+	}
+
+	async getPartialUserInfo(id: string): Promise<Partial<User>> {
+		let user: User = undefined;
+
+		user = await this.userRepository.findOne(id); //mmmmh
+		if (!user)
+			return user;
+		return {
+			id: user.id,
+			username: user.username,
+			eloScore: user.eloScore,
+			//profile_picture:
+		}
 	}
 }
