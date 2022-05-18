@@ -1,38 +1,55 @@
 <template>
 	<v-container>
-		<h1>Auth</h1>
-		<h1>{{user}}</h1>
-				<!-- <v-card>User ID: {{user.id}}</v-card>
-				<v-card>nickname: {{user.nickname}}</v-card>
-				<v-card>username: {{user.username}}</v-card>
-				<v-card>email: {{user.email}}</v-card>
-				<v-card>Elo: {{user.eloScore}}</v-card>
-				<v-card>Connected: {{user.status}}</v-card>
-				<v-card>has 2fa: {{user.is2FAEnabled}} and 2fa secret: {{user.twoFASecret}}</v-card> -->
+	<div v-if="!codeAccepted">
+		<v-row v-if="!imgQR">
+			<v-col align="center">
+				<h1 class="text">Get your</h1>
+				<v-btn plain rounded elevation="1" @click="async () => {imgQR = await getInitialQR()}">Very own QR Code</v-btn>
+			</v-col>
+		</v-row>
+		<div v-if="imgQR">
+			<v-row justify="center">
+				<v-col cols="6">
+					<v-text-field @keydown.enter="submitCode" v-model="TwoFACode" label="2FA Code" color="white"></v-text-field>
+					<v-img :src="imgQR" max-height="600"></v-img>
+				</v-col>
+			</v-row>
+		</div>
+	</div>
+	<h1 class="text" v-else>Code Accepted!</h1>
 	</v-container>
 </template>
 
 <script>
-import { onMounted } from "vue"
+import { useStore } from "vuex"
+import { computed } from "@vue/runtime-core"
+import { ref } from "vue"
+import { getInitialQR, submit2FaCode } from "../components/FetchFunctions"
 
 export default {
-	props: {
-		user:{
-			type: Object,
-			required: true,
-		},
-	},
 	setup(){
-		
-		onMounted(() =>{
-			console.log("lol")
+
+		const imgQR = ref(null)
+		const TwoFACode = ref(null)
+		const codeAccepted = ref(false)
+
+		const user = computed(() => {
+			return useStore().getters.whoAmI;
 		})
 
-		return {onMounted}
+		async function submitCode() {
+			codeAccepted.value = await submit2FaCode(TwoFACode.value)
+		}
+
+		return {user, imgQR, getInitialQR, TwoFACode, codeAccepted, submit2FaCode, submitCode}
 	},
 }
 </script>
 
-<style>
-
+<style scoped>
+.text{
+	font-size: 3em;
+	font-weight: bold;
+	color: white;
+}
 </style>

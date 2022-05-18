@@ -16,7 +16,7 @@ const store = createStore({
 		connected: false,
 	},
 	getters: {
-		whoIAm:(state) => {
+		whoAmI:(state) => {
 			return state.user;
 		},
 		isConnected:(state) => {

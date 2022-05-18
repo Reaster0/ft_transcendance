@@ -1,15 +1,16 @@
 <template>
 <v-container>
 	<v-container v-if="user" >
-		<v-row justify="center">
-			<v-col cols="5">
-				<v-card>User ID: {{user.id}}</v-card>
-				<v-card>nickname: {{user.nickname}}</v-card>
-				<v-card>username: {{user.username}}</v-card>
-				<v-card>email: {{user.email}}</v-card>
-				<v-card>Elo: {{user.eloScore}}</v-card>
-				<v-card>Connected: {{user.status}}</v-card>
-				<v-card>has 2fa: {{user.is2FAEnabled}} and 2fa secret: {{user.twoFASecret}}</v-card>
+		<v-row>
+			<v-col align="center">
+				<h3>User ID: {{user.id}}</h3>
+				<h3>nickname: {{user.nickname}}</h3>
+				<h3>username: {{user.username}}</h3>
+				<h3>email: {{user.email}}</h3>
+				<h3>Elo: {{user.eloScore}}</h3>
+				<h3>Connected: {{user.status}}</h3>
+				<h3>has 2fa: {{user.is2FAEnabled}}</h3>
+				<h3>and 2fa secret: {{user.twoFASecret}}</h3>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -20,26 +21,37 @@
 			</v-btn>
 		</v-row>
 		<v-row justify="center">
-			<h1 justify="center">2fa Connect</h1>
+			<h1>Enable 2FA</h1>
+		</v-row>
+		<v-row justify="center">
+			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="2FA Code for testing purpose" color="white"></v-text-field>
+			<h1 v-if="codeAccepted">Code Accepted!</h1>
 		</v-row>
 	</v-container>
 </v-container>
 </template>
 
 <script>
-import { ref } from 'vue'
-import { onMounted } from '@vue/runtime-core'
+import { useStore } from "vuex"
+import { computed } from "@vue/runtime-core"
+import { ref } from "vue"
+import { submit2FaCode } from "../components/FetchFunctions"
 
 export default {
 	setup(){
-		const user = ref(null)
 
-		onMounted(async() =>{
-			user.value = await fetch("api/users/1").then(res => res.json())
-			.catch(err => console.log(err))
+		const inputCode = ref(null)
+		const codeAccepted = ref(false)
+
+		const user = computed(() => {
+			return useStore().getters.whoAmI;
 		})
 
-		return {user,}
+		async function submitCode() {
+			codeAccepted.value = await submit2FaCode(inputCode.value)
+		}
+
+		return {user, ref, submit2FaCode, submitCode, inputCode, codeAccepted}
 	}
 }
 </script>
