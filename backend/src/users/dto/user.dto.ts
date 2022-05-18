@@ -16,10 +16,6 @@ export class CreateUserDto {
 	@IsEmail()
 	@IsNotEmpty()
 	readonly email: string;
-
-	@ApiProperty({ type: Array, description: 'User\'s avatar'})
-	readonly avatar?: Uint8Array;
-	//TODO set as non optional
 }
 
 // DTO for user modification //

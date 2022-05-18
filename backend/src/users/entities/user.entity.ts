@@ -1,18 +1,11 @@
-import { IsAlpha, IsEmail, IsNumber, IsOptional } from 'class-validator';
-import	{	Entity,
-		 	PrimaryGeneratedColumn,
-			Column,
-			BeforeInsert,
-			BeforeUpdate
-		} from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { IsEmail, IsNumber, IsAlphanumeric } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne,
+		JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
-import { string } from '@hapi/joi';
 import * as crypto from 'crypto';
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
-import { concat } from 'rxjs';
-
+import { Avatar } from './avatar.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -21,45 +14,48 @@ export class User {
 	@IsNumber()
 	id: number;
 
+	@Column({ type: 'text', unique: true})
 	@ApiProperty({ type: String, description: 'User private name. Cannot be modified and must only contains alphabetical characters.'})
-	@IsAlpha()
-	@Column({unique: true})
 	username: string;
 
-	@Column({ unique: true })
+	@Column({ type: 'text', unique: true})
 	@ApiProperty({ type: String, description: 'User nickname. Can be modified and must only contains alphabetical characters.'})
-	@IsAlpha()
+	@IsAlphanumeric()
 	nickname: string;
 
-	@Column({ type: 'text', unique: true, nullable: true })
+	@Column({ type: 'text', unique: true })
 	@ApiProperty({ type: String, description: 'User email. Must be under email format.'})
 	@IsEmail()
 	email: string;
 
-	@Column({ type: 'bytea', nullable: true })
-	@ApiProperty({ type: Array, description: 'User\'s avatar'})
-	avatar: Uint8Array;
-	// TODO set as non nullable
+	@JoinColumn({ name : 'avatarId' })
+	@ApiProperty({ description: 'If of avatar inside Avatar table, to retrieve user\'s avatar.'})
+	@OneToOne(() => Avatar, { nullable: true })
+	@Exclude()
+	avatar?: Avatar; 
 
-	@Column({ nullable: true })
+	@Column({ type: 'int', default: 0 })
+	@ApiProperty({ type:Number, description: 'Avatar id (inside avatar table) of user\'s avatar.' })
+	avatarId?: number;
+
+	@Column({ type: 'text', nullable: true })
 	@ApiProperty({ type: String, description: 'User personal 2FA Secret (optional field)'})
   	public twoFASecret?: string;
 	
-	@Column({ default: false })
+	@Column({ type: 'boolean', default: false })
 	@ApiProperty({ type: String, description: 'User as activate 2FA)'})
   	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
 	@ApiProperty({ type: [Number], description: 'User friends, identified by unique ids inside an array.'})
 	@IsNumber({}, { each: true })
-	// Array of id of friends
 	friends: number[];
 	
 	@Column({ type: 'text', default: Status.OFFLINE })
 	@ApiProperty({ enum: Status, type: String, description: 'User status, either offline/online/playing.'})
 	status: Status;
 
-	@Column({ default: 0 })
+	@Column({ type: 'int', default: 0 })
 	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
 	eloScore: number;
 

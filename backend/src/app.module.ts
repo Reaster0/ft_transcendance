@@ -4,9 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule} from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import * as Joi from '@hapi/joi';
-import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -27,6 +25,7 @@ import { AuthModule } from './auth/auth.module';
         ENCRYPTION_KEY: Joi.string().required(),
         ENCRYPTION_IV_LENGTH: Joi.number().required(),
         ENCRYPTION_ALGORITHM: Joi.string().required(),
+        DEFAULT_AVATAR: Joi.string().required(),
       isGlobal: true,
       }),
     }),
