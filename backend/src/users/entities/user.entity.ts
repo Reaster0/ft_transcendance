@@ -5,73 +5,92 @@ import	{	Entity,
 			BeforeInsert,
 			BeforeUpdate
 		} from 'typeorm';
-import * as bcrypt from 'bcryptjs';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
+import { string } from '@hapi/joi';
+import * as crypto from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+import { concat } from 'rxjs';
 
 
 @Entity('users') // sql table will be name 'users'
 export class User {
 	@PrimaryGeneratedColumn()
-	@ApiProperty({ type: Number, description: 'An unique id number attributed \
-		to user inside database upon creation.'})
+	@ApiProperty({ type: Number, description: 'An unique id number attributed to user inside database upon creation.'})
 	@IsNumber()
 	id: number;
 
+	@ApiProperty({ type: String, description: 'User private name. Cannot be modified and must only contains alphabetical characters.'})
+	@IsAlpha()
+	@Column({unique: true})
+	username: string;
+
 	@Column({ unique: true })
-	@ApiProperty({ type: String, description: 'User nickname. Can be modified \
-		and must only contains alphabetical characters.'})
+	@ApiProperty({ type: String, description: 'User nickname. Can be modified and must only contains alphabetical characters.'})
 	@IsAlpha()
 	nickname: string;
 
 	@Column({ type: 'text', unique: true, nullable: true })
-	@ApiProperty({ type: String, description: 'User email. Is optional and \
-		must be under email format.'})
+	@ApiProperty({ type: String, description: 'User email. Must be under email format.'})
 	@IsEmail()
-	@IsOptional()
-	email?: string;
-	// TODO : when email is null, return a message like 'No mail registered'
+	email: string;
 
-	@Column({ type: 'text' })
-	@ApiProperty({ type: String, description: 'User password, needed for \
-		app authentification.'})
-	@Exclude()
-	password: string;
-	// TODO : set password proprierties (length, ...)
+	@Column({ type: 'bytea', nullable: true })
+	@ApiProperty({ type: Array, description: 'User\'s avatar'})
+	avatar: Uint8Array;
+	// TODO set as non nullable
+
+	@Column({ nullable: true })
+	@ApiProperty({ type: String, description: 'User personal 2FA Secret (optional field)'})
+  	public twoFASecret?: string;
+	
+	@Column({ default: false })
+	@ApiProperty({ type: String, description: 'User as activate 2FA)'})
+  	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
-	@ApiProperty({ type: [Number], description: 'User friends, identified by \
-		unique ids inside an array.'})
+	@ApiProperty({ type: [Number], description: 'User friends, identified by unique ids inside an array.'})
 	@IsNumber({}, { each: true })
 	// Array of id of friends
 	friends: number[];
 	
 	@Column({ type: 'text', default: Status.OFFLINE })
-	@ApiProperty({ enum: Status, type: String, description: 'User status, either offline\
-		/online/playing.'})
+	@ApiProperty({ enum: Status, type: String, description: 'User status, either offline/online/playing.'})
 	status: Status;
 
 	@Column({ default: 0 })
-	@ApiProperty({ type: Number, description: 'Elo score, based on Elo \
-		chess system and modified after each match.'})
+	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
 	eloScore: number;
 
 	// For game history and stats:
 	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
 	//matchHistory: Game; 
 
-	// From a repo github with chat system tinchat from tanvirtin:
+	// Source of encryption : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()
 	@BeforeUpdate()
-	async hashPassword() {
-		this.password = await bcrypt.hash(this.password, 10);
+	async encryptSecret() {
+		if (!this.twoFASecret) {
+			return ;
+		}
+		const key = process.env.ENCRYPTION_KEY || '';
+		const iv = Buffer.from(crypto.randomBytes(parseInt(process.env.ENCRYPTION_IV_LENGTH))).toString('hex').slice(0, parseInt(process.env.ENCRYPTION_IV_LENGTH));
+		const cipher = crypto.createCipheriv(process.env.ENCRYPTION_ALGORITHM, Buffer.from(key), iv);
+		const encrypted = Buffer.concat([cipher.update(this.twoFASecret), cipher.final()]);
+		this.twoFASecret = iv + ':' + encrypted.toString('hex');
+		return this.twoFASecret;
 	}
 
-	async comparePassword(attempt: string) {
-		return await bcrypt.compare(attempt, this.password);
+	decryptSecret () {
+		if (!this.twoFASecret) {
+			return null;
+		}
+		let parts = this.twoFASecret.includes(':') ? this.twoFASecret.split(':') : [];
+		const iv = Buffer.from(parts.shift() || '', 'binary');
+		const encrypted = Buffer.from(parts.join(':'), 'hex');
+		const decipher = crypto.createDecipheriv(process.env.ENCRYPTION_ALGORITHM, Buffer.from(process.env.ENCRYPTION_KEY), iv);
+		const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+		return decrypted.toString();
 	}
-
-	// authentication token ?
-	// avatar ?
 }

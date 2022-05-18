@@ -2,13 +2,10 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { UserGuard } from './common/guards/user.guard';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
-  //app.useGlobalGuards(new UserGuard());
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
@@ -18,7 +15,6 @@ async function bootstrap() {
       }
     }),
   );
-  // somewhere in your initialization file
   app.use(cookieParser());
   const options = new DocumentBuilder()
       .setTitle('ft_transcendence')

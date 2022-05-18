@@ -42,8 +42,10 @@ export class OauthStrategy42 extends PassportStrategy(
         const user = {
             //username: profile['name'][1]['givenName'],
             nickname: profile['username'],
+            username: profile['username'],
             email: profile['emails'][0]['value'],
             password: 'verybadpasswd',
+            avatar: null,
         }
         return this.authService.validateUser(user);
     }
