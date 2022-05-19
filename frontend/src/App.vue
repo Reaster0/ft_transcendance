@@ -16,7 +16,7 @@ import { isLogged, getUserInfo } from "./components/FetchFunctions.js"
 export default {
 	name: 'App',
 	components: {
-		NavDrawer
+		NavDrawer,
 	},
 	methods: {
 	redirect(){
