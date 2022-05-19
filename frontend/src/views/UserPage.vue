@@ -1,16 +1,16 @@
 <template>
 <v-container>
+	<particles-bg type="thick" color="00214A" :bg="true" />
 	<v-container v-if="user" >
 		<v-row>
-			<v-col align="center">
+			<v-col align="center" class="text">
 				<h3>User ID: {{user.id}}</h3>
 				<h3>nickname: {{user.nickname}}</h3>
 				<h3>username: {{user.username}}</h3>
 				<h3>email: {{user.email}}</h3>
 				<h3>Elo: {{user.eloScore}}</h3>
 				<h3>Connected: {{user.status}}</h3>
-				<h3>has 2fa: {{user.is2FAEnabled}}</h3>
-				<h3>and 2fa secret: {{user.twoFASecret}}</h3>
+				<h3>is2FAEnabled: {{user.is2FAEnabled}}</h3>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -21,10 +21,10 @@
 			</v-btn>
 		</v-row>
 		<v-row justify="center">
-			<h1>Enable 2FA</h1>
+			<h1 class="text2">Enable 2FA</h1>
 		</v-row>
 		<v-row justify="center">
-			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="2FA Code for testing purpose" color="white"></v-text-field>
+			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="2FA Code for testing purpose" color="white" counter="6" maxlength="6"></v-text-field>
 			<h1 v-if="codeAccepted">Code Accepted!</h1>
 		</v-row>
 	</v-container>
@@ -36,8 +36,13 @@ import { useStore } from "vuex"
 import { computed } from "@vue/runtime-core"
 import { ref } from "vue"
 import { submit2FaCode } from "../components/FetchFunctions"
+import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
+
 
 export default {
+	components: {
+		ParticlesBg
+	},
 	setup(){
 
 		const inputCode = ref(null)
@@ -56,6 +61,15 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.text{
+	font-size: 2em;
+	/* font-weight: bold; */
+	color: #EA25B5;
+}
+.text2{
+	font-size: 3em;
+	font-weight: bold;
+	color: #04BBEC;
+}
 </style>

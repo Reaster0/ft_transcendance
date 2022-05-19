@@ -29,6 +29,7 @@ export default {
 		this.$router.go(1);
 	},
   },
+
   setup(){
 		const store = useStore()
 
