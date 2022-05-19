@@ -1,8 +1,8 @@
-import { UsersService } from './users.service';
+import { UsersService } from './services/users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, 
 		UseInterceptors, UseGuards, Req, Query, Patch, Res, UploadedFile,
-		Delete, StreamableFile, ParseIntPipe } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+		Delete, ParseIntPipe, HttpException, HttpStatus } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
 		ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
@@ -12,9 +12,21 @@ import { Request, Response } from 'express';
 import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
 import { Status } from '../common/enums/status.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { avatarOptions } from './avatars.config';
-import { AvatarsService } from './avatars.service';
-import { Readable } from 'stream';
+import { AvatarsService } from './services/avatars.service';
+import { extname } from 'path';
+
+export const avatarOptions = {
+	limits: { 
+		fileSize: 1024 * 1024 
+	},
+    fileFilter: (req: any, file: any, cb: any) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+            cb(null, true);
+        } else {
+            cb(new HttpException(`Unsupported file type ${extname(file.originalname)}`, HttpStatus.BAD_REQUEST), false);
+        }
+    },
+};
 
 @ApiTags('users')
 @Controller('users')

@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus, 
-	UnauthorizedException, StreamableFile, InternalServerErrorException, Res 
-	} from '@nestjs/common';
+		StreamableFile, InternalServerErrorException, Res } from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { User } from '../entities/user.entity';
+import { CreateUserDto, UpdateUserDto } from '../user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Status } from '../common/enums/status.enum';
+import { Status } from '../../common/enums/status.enum';
 import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';

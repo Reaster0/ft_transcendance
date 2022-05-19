@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner } from 'typeorm';
-import { Avatar } from './entities/avatar.entity';
+import { Avatar } from '../entities/avatar.entity';
  
 @Injectable()
 export class AvatarsService {
