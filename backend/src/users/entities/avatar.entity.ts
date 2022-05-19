@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class Avatar {
   @PrimaryGeneratedColumn()
   @ApiProperty({ type: Number, description: 'Id to identify avatar.'})
-  public id: number;
+  id: number;
  
   @Column({ type: 'text', nullable: true })
   @ApiProperty({ type: String, description: 'User\'s avatar filename.'})

@@ -50,12 +50,20 @@ export class UsersService {
 	}	
 
 	async retrieveOrCreateUser(createUserDto: CreateUserDto) {
-		const { username } = createUserDto;
+		const { username, email } = createUserDto;
 		let nickname = username;
-		let user = await this.userRepository.findOne({ username: username });
+		let user = await this.userRepository.findOne({ username: username, email: email });
 		if (user) {
 			return user;
 		}
+		user = await this.userRepository.findOne({ username: username });
+		if (user) {
+			throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
+		}
+		user = await this.userRepository.findOne({ email: email });	
+		if (user) {
+			throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
+		}	
 		const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		while ((user = await this.userRepository.findOne({ nickname: nickname })) && nickname.length < 4) {
 			let randomChar = letters[Math.floor(Math.random() * letters.length)];

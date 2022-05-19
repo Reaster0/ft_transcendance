@@ -11,7 +11,6 @@ import { Exclude } from 'class-transformer';
 export class User {
 	@PrimaryGeneratedColumn()
 	@ApiProperty({ type: Number, description: 'An unique id number attributed to user inside database upon creation.'})
-	@IsNumber()
 	id: number;
 
 	@Column({ type: 'text', unique: true})
@@ -34,7 +33,7 @@ export class User {
 	@Exclude()
 	avatar?: Avatar; 
 
-	@Column({ type: 'int', default: 0 })
+	@Column({ type: 'int' , nullable: true })
 	@ApiProperty({ type:Number, description: 'Avatar id (inside avatar table) of user\'s avatar.' })
 	avatarId?: number;
 
