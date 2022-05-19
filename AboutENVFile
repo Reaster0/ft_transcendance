@@ -22,3 +22,5 @@ ENCRYPTION_KEY: A sentence of size 32 char (256 bit) used for encryption
 ENCRYPTION_IV_LENGTH: Length for encryption intialization vector (16 by default) 
 ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
  
+For avatar :
+DEFAULT_AVATAR: Avatar set by default

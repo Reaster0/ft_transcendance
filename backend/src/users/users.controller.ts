@@ -1,8 +1,8 @@
-import { UsersService } from './users.service';
+import { UsersService } from './services/users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, 
 		UseInterceptors, UseGuards, Req, Query, Patch, Res, UploadedFile,
-		Delete } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+		Delete, ParseIntPipe, HttpException, HttpStatus } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
 		ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
@@ -12,13 +12,28 @@ import { Request, Response } from 'express';
 import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
 import { Status } from '../common/enums/status.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AvatarsService } from './services/avatars.service';
+import { extname } from 'path';
 
+export const avatarOptions = {
+	limits: { 
+		fileSize: 1024 * 1024 
+	},
+    fileFilter: (req: any, file: any, cb: any) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+            cb(null, true);
+        } else {
+            cb(new HttpException(`Unsupported file type ${extname(file.originalname)}`, HttpStatus.BAD_REQUEST), false);
+        }
+    },
+};
 
 @ApiTags('users')
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(private readonly usersService: UsersService,
+		private readonly avatarsService: AvatarsService) {}
 
 	@Get()
 	@UseGuards(AuthGuard('jwt'), AuthUser)
@@ -93,7 +108,7 @@ export class UsersController {
 	}
 
 	@Get(':id')
-	@UseGuards(AuthGuard('jwt'), AuthUser)
+	//@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
 	@ApiOperation({ summary: 'Get info of one user according to its id.' })
 	@ApiOkResponse({ description: 'Return content of one users depending on it\'s id.',  type: User })
@@ -102,6 +117,18 @@ export class UsersController {
 	/** End of swagger **/
 	findSpecificUser(@Param('id') id: number) : Promise<User> {
 		return this.usersService.findUserById('' + id);
+	}
+
+	@Get('getAvatar/:id')
+	@UseGuards(AuthGuard('jwt'), AuthUser)
+	/** Swagger **/
+	@ApiOperation({ summary: 'Getting avatar by it\'s avatar id.' })
+	@ApiOkResponse({ description: 'Return avatar'})
+	@ApiNotFoundResponse({ description: 'User with given username not found.' })
+	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
+	/** End of swagger **/
+	async getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true}) res) {
+		return await this.usersService.getAvatarByAvatarId(id, res);
 	}
 
 	@Post('getOrRegister')
@@ -114,15 +141,15 @@ export class UsersController {
 		return this.usersService.retrieveOrCreateUser(createUserDto);
 	}
 
-	@Post('avatar')
-	@UseInterceptors(FileInterceptor('file'))
+	@Post('uploadAvatar')
+	@UseInterceptors(FileInterceptor('avatar', avatarOptions))
 	@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
-	@ApiOperation({summary: 'Upload an avatar'})
+	@ApiOperation({summary: 'Upload an avatar and store it in database.'})
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
 	uploadAvatar(@Req() req: RequestUser, @UploadedFile() file: Express.Multer.File) {
-		return this.usersService.addAvatar(req.user, file.buffer);
+		return this.usersService.addAvatar(req.user, file.originalname, file.buffer);
 	}
 
 	@Post('secret')
@@ -142,7 +169,7 @@ export class UsersController {
 	@ApiOkResponse({description: 'User account'})
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
-	updateUser(@Body() updateUser: UpdateUserDto, @Req() req: RequestUser, @Res({passthrough: true}) res: Response): Promise<void> {
+	async updateUser(@Body() updateUser: UpdateUserDto, @Req() req: RequestUser, @Res({passthrough: true}) res: Response): Promise<void> {
 		return this.usersService.updateUser(req.user, updateUser);
 	}
 
@@ -151,9 +178,8 @@ export class UsersController {
 	/** Swagger **/
 	@ApiOperation({summary: 'Login an user when joining chat websocket'})
 	@ApiCreatedResponse({ description: 'The user has been successfully login.', type : User })
-	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
-	loginUser(@Req() req: RequestUser)  {
+	async loginUser(@Req() req: RequestUser)  {
 		return this.usersService.changeStatus(req.user, Status.ONLINE);
 	}
 	
@@ -162,22 +188,20 @@ export class UsersController {
 	/** Swagger **/
 	@ApiOperation({summary: 'Logout an user'})
 	@ApiCreatedResponse({ description: 'The user has been successfully logout.' })
-	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
 	async logoutUser(@Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
 		this.usersService.changeStatus(req.user, Status.OFFLINE);
-		res.clearCookie('jwt'); //test
-		res.redirect(process.env.FRONTEND);
+		res.clearCookie('jwt');
 	}
 
 	@Delete('deleteAccount')
 	/** Swagger **/
 	@ApiOperation({summary: 'Delete an user'})
 	@ApiOkResponse({ description: 'User successfully deleted.', type: User })
-	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
-	removeUser(@Req() req: RequestUser) : Promise<User> {
-		return this.usersService.removeUser(req.user);
+	async removeUser(@Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
+		this.usersService.removeUser(req.user);
+		res.clearCookie('jwt');
 	}
 
 }
