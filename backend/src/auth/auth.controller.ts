@@ -8,6 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RequestUser } from './interfaces/requestUser.interface';
 import { twoFACodeDto } from './dto/twoFACode.dto';
+import { secureHeapUsed } from 'crypto';
 
 @ApiTags('Authentification Process Controller')
 @Controller('auth')
@@ -25,15 +26,15 @@ export class AuthController {
     @ApiOperation( {summary: 'callback/Redirection after 42 Authentification'} )
     @UseGuards(OauthGard42Guard)
     @Get('callback')
-    async authRedirect42(@Req() req: Request, @Res({passthrough: true}) res: Response): Promise<void> {
-       
-       const payload: JwtPayload = {username: req.user['username'], twoFA: false};
-       const jwtToken: string = await this.jwtService.sign(payload);
-       res.cookie('jwt', jwtToken, {httpOnly: true, secure: true}); //set cookie 
-       res.redirect(process.env.FRONTEND); //back to frontend
+    async authRedirect42(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
+
+        const payload: JwtPayload = { username: req.user['username'], twoFA: false };
+        const jwtToken: string = await this.jwtService.sign(payload);
+        res.cookie('jwt', jwtToken, { httpOnly: true, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie 
+        res.redirect(process.env.FRONTEND); //back to frontend
     }
 
-    @ApiOperation({summary: 'Code authentication - Secret'})
+    @ApiOperation({ summary: 'Code authentication - Secret' })
     @UseGuards(AuthGuard('jwt'))
     @Post('2FAGenQRC')
     async generate(@Req() req: RequestUser, @Res() res: Response) {
@@ -50,7 +51,7 @@ export class AuthController {
         }
         const payload: JwtPayload = { username: req.user['username'], twoFA: true };
         const jwtToken: string = await this.jwtService.sign(payload);
-        res.cookie('jwt', jwtToken, { httpOnly: true, secure: true }); //set cookie 
+        res.cookie('jwt', jwtToken, { httpOnly: true, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie 
         this.authService.enableTwoFA(req.user);
         return true;
     }

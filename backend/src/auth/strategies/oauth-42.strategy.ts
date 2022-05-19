@@ -10,24 +10,6 @@ export class OauthStrategy42 extends PassportStrategy(
     '42',
 ) {
     constructor(private readonly authService: AuthService) {
-        /*
-        super(
-            {
-                clientID: process.env.CLIENT_ID,
-                clientSecret: process.env.CLIENT_SECRET,
-                callbackURL: process.env.CALLBACK_URL,
-            },
-            (
-                accessToken: string,
-                refreshToken: string,
-                expire_int: number,
-                profile: Profile,
-                done: VerifiedCallback,
-            ): void => {
-                return done(null, profile, { accessToken, refreshToken, expire_int });
-            },
-        );
-    */
     super(
         {
             clientID: process.env.CLIENT_ID,
