@@ -3,8 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import	{ 	IsString, IsEmail, IsNotEmpty, IsOptional, IsAlphanumeric, MinLength, MaxLength
 	} from 'class-validator';
 
-// TODO set rules for password (length, etc...)
-
 // DTO for user registration //
 export class CreateUserDto {
 	@ApiProperty({ type: String, description: 'Private username for identifications. Will be stocked in background, but used as nickname in a first time.' })

@@ -1,7 +1,7 @@
 import { UsersService } from './users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, 
 		UseInterceptors, UseGuards, Req, Query, Patch, Res, UploadedFile,
-		Delete } from '@nestjs/common';
+		Delete, StreamableFile, ParseIntPipe } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags,
 		ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
@@ -13,12 +13,15 @@ import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
 import { Status } from '../common/enums/status.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { avatarOptions } from './avatars.config';
+import { AvatarsService } from './avatars.service';
+import { Readable } from 'stream';
 
 @ApiTags('users')
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(private readonly usersService: UsersService,
+		private readonly avatarsService: AvatarsService) {}
 
 	@Get()
 	@UseGuards(AuthGuard('jwt'), AuthUser)
@@ -104,16 +107,16 @@ export class UsersController {
 		return this.usersService.findUserById('' + id);
 	}
 
-	@Post('getAvatar')
-	//@UseGuards(AuthGuard('jwt'), AuthUser)
+	@Get('getAvatar/:id')
+	@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
-	@ApiOperation({ summary: 'Getting avatar of user which username is sent as request.' })
+	@ApiOperation({ summary: 'Getting avatar by it\'s avatar id.' })
 	@ApiOkResponse({ description: 'Return avatar'})
 	@ApiNotFoundResponse({ description: 'User with given username not found.' })
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
-	getAvatar(@Body('username') username: string, @Res({ passthrough: true}) res) {
-		return this.usersService.getAvatar(username, res);
+	async getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true}) res) {
+		return await this.usersService.getAvatarByAvatarId(id, res);
 	}
 
 	@Post('getOrRegister')
@@ -128,7 +131,7 @@ export class UsersController {
 
 	@Post('uploadAvatar')
 	@UseInterceptors(FileInterceptor('avatar', avatarOptions))
-	//@UseGuards(AuthGuard('jwt'), AuthUser)
+	@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
 	@ApiOperation({summary: 'Upload an avatar and store it in database.'})
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})

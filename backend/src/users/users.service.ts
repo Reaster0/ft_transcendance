@@ -146,23 +146,25 @@ export class UsersService {
 		}
 	}
 
-	async getAvatar(username: string, @Res({ passthrough: true }) res) {
-		const user = await this.userRepository.findOne({ username : username });
-		if (!user) {
-			throw new NotFoundException(`User ${username} (username) not found.`);
-		}
-		let stream = undefined;
-		if (user.avatarId != 0) {
-			console.log(user.avatar.avatarBuffer);
-			let avatar = user.avatar;
-			let stream = Readable.from(avatar.avatarBuffer);
-			res.set({'Content-Disposition': `inline; filename="${avatar.avatarFilename}"`,'Content-Type': 'image'});
-		} else {
+	async getAvatarByAvatarId(avatarId: number, @Res({ passthrough: true }) res) {
+		let avatar = await this.avatarsService.getAvatarById(avatarId);
+		if (!avatar) {
+			let filename = process.env.DEFAULT_AVATAR;
 			let stream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR));
-			res.set({'Content-Disposition': `inline; filename="default_avatar"`,'Content-Type': 'image'});
+			res.set({
+				'Content-Disposition': `inline; filename="${filename}"`,
+				'Content-Type': 'image'
+			  });
+			return new StreamableFile(stream);
 		}
+		const stream = Readable.from(avatar.avatarBuffer);
+		const filename = avatar.avatarFilename;
+		res.set({
+			'Content-Disposition': `inline; filename="${filename}"`,
+			'Content-Type': 'image'
+			});
 		return new StreamableFile(stream);
-	}	
+	}
 
 	async setTwoFASecret(user: User, secret: string): Promise<User> {
 		user.twoFASecret = secret;

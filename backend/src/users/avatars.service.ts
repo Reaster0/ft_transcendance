@@ -11,7 +11,6 @@ export class AvatarsService {
   ) {}
  
   async uploadAvatar(avatarFilename: string, avatarBuffer: Buffer, queryRunner: QueryRunner) {
-    console.log(avatarFilename);
 	const newAvatar = await this.AvatarsRepository.create({
       avatarFilename : avatarFilename,
       avatarBuffer: avatarBuffer
@@ -23,7 +22,7 @@ export class AvatarsService {
   async getAvatarById(avatarId: number) {
     const avatar = await this.AvatarsRepository.findOne(avatarId);
     if (!avatar) {
-      throw new NotFoundException();
+      return null;
     }
     return avatar;
   }
