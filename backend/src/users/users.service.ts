@@ -138,6 +138,10 @@ export class UsersService {
 		return this.userRepository.update(user.id, { is2FAEnabled: enable });
 	}
 
+	async enableTwoFA(id: number) {
+		await this.userRepository.update(id, {is2FAEnabled: true});
+	}
+
 	async getSecret(user: User) {
 		return user.decryptSecret();
 	}
@@ -146,7 +150,7 @@ export class UsersService {
 		let userFound = await this.userRepository.findOne(user.id);
 		if (!user)
 			throw new NotFoundException('User not found');
-		let { username, ...res } = user;
+		let { username, twoFASecret, ...res } = user;
 		return res;
 	}
 
@@ -155,7 +159,7 @@ export class UsersService {
 		user = await this.userRepository.findOne({ username: userName });
 		if (!user)
 			throw new NotFoundException('No user found');
-		let { username, ...res } = user;
+		let { username, twoFASecret, ...res } = user;
 		return res;
 	}
 

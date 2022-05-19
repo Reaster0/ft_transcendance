@@ -29,7 +29,7 @@ export class AuthController {
        
        const payload: JwtPayload = {username: req.user['username'], twoFA: false};
        const jwtToken: string = await this.jwtService.sign(payload);
-       res.cookie('jwt', jwtToken, {httpOnly: true}); //set cookie 
+       res.cookie('jwt', jwtToken, {httpOnly: true, secure: true}); //set cookie 
        res.redirect(process.env.FRONTEND); //back to frontend
     }
 
@@ -43,14 +43,15 @@ export class AuthController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post('login-2fa')
-    async validade2FA(@Req() req: RequestUser, @Body() { twoFACode }: twoFACodeDto, @Res({passthrough: true}) res: Response): Promise<boolean> {
+    async validade2FA(@Req() req: RequestUser, @Body() { twoFACode }: twoFACodeDto, @Res({ passthrough: true }) res: Response): Promise<boolean> {
         const isCodeValid = this.authService.is2FAValide(twoFACode, req.user);
         if (!isCodeValid) {
             throw new UnauthorizedException('Wrong authentification code');
         }
-        const payload: JwtPayload = {username: req.user['username'], twoFA: true};
+        const payload: JwtPayload = { username: req.user['username'], twoFA: true };
         const jwtToken: string = await this.jwtService.sign(payload);
-       res.cookie('jwt', jwtToken, {httpOnly: true}); //set cookie 
-       return true;
+        res.cookie('jwt', jwtToken, { httpOnly: true, secure: true }); //set cookie 
+        this.authService.enableTwoFA(req.user);
+        return true;
     }
 }
