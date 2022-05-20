@@ -14,6 +14,7 @@ import { Status } from '../common/enums/status.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AvatarsService } from './services/avatars.service';
 import { extname } from 'path';
+import jwt_decode from 'jwt-decode';
 
 export const avatarOptions = {
 	limits: { 
@@ -47,17 +48,23 @@ export class UsersController {
 	}
 
 	@Get('logged')
-	@UseGuards(AuthGuard('jwt'), AuthUser)
+	@UseGuards(AuthGuard('jwt')) // modification for evan
 	/** Swagger **/
 	@ApiOperation({summary: 'Check if user is logged through token.'})
-	@ApiOkResponse({ description: 'Return true or false according if the user is logged or not.', type: Boolean })
+	@ApiOkResponse({ description: 'Return true if the User is properly logged else: \
+	 reutrn 401 if the token is absent and 418 if it dosent make tea.', type: Boolean })
 	@ApiNotFoundResponse({ description: 'Not found.' })
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
-	logged(@Req() req: Request): boolean {
-		const token = req.cookies['jwt'];
-		if (!token)
-			return false;
+	logged(@Req() req: RequestUser): boolean {
+		const user: User = req.user;
+		if (user.is2FAEnabled == true) {
+			const token = req.cookies['jwt'];
+			const decode = jwt_decode(token);
+			console.log(decode);
+			if (decode['twoFA'] == false)
+				throw new HttpException("Please validate our 2fa", 418);
+		}
 		return true;
 	}
 
