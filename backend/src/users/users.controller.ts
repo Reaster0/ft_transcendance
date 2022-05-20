@@ -61,7 +61,7 @@ export class UsersController {
 		if (user.is2FAEnabled == true) {
 			const token = req.cookies['jwt'];
 			const decode = jwt_decode(token);
-			console.log(decode);
+			//console.log(decode);
 			if (decode['twoFA'] == false)
 				throw new HttpException("Please validate our 2fa", 418);
 		}
