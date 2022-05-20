@@ -95,17 +95,18 @@ export class UsersController {
 		return this.usersService.getPartialUserInfo(userId);
 	}
 
+	/*
 	@Get('2fa')
 	@UseGuards(AuthGuard('jwt'), AuthUser)
-	/** Swagger **/
 	@ApiOperation({ summary: 'Activate or deactivate 2FA, depending on previous state.' })
 	@ApiOkResponse({ description: 'State of 2FA changed.' })
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
-	/** End of swagger **/
 	change2FAState(@Req() req: RequestUser) {
-		const user = req.user;
-		return this.usersService.modify2FA(user);
+		return ;
+	//	const user = req.user;
+		//return this.usersService.modify2FA(user);
 	}
+	*/
 
 	@Get(':id')
 	//@UseGuards(AuthGuard('jwt'), AuthUser)
