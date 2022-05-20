@@ -4,6 +4,7 @@ import NotFound from '../views/NotFound.vue'
 import LoginPage from "../views/LoginPage.vue";
 import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
+import TheGame from "../views/TheGame.vue";
 
 const routes = [
 	{
@@ -30,6 +31,11 @@ const routes = [
 		path: '/2auth',
 		name: "twoAuth",
 		component: TwoAuth
+	},
+	{
+		path: '/game',
+		name: "TheGame",
+		component: TheGame
 	},
 ]
 	const router = createRouter({

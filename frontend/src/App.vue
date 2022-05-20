@@ -16,7 +16,7 @@ import { isLogged, getUserInfo } from "./components/FetchFunctions.js"
 export default {
 	name: 'App',
 	components: {
-		NavDrawer
+		NavDrawer,
 	},
 	methods: {
 	redirect(){
@@ -29,6 +29,7 @@ export default {
 		this.$router.go(1);
 	},
   },
+
   setup(){
 		const store = useStore()
 
