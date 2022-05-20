@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus, 
+import { Injectable, NotFoundException, HttpException, HttpStatus,
 		StreamableFile, InternalServerErrorException, Res } from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -75,8 +75,10 @@ export class UsersService {
 		}
 		user = this.userRepository.create(createUserDto);
 		user.nickname = nickname;
+		// TODO redirect user to modify info page
 		return this.userRepository.save(user);
 	}
+
 
 	async updateUser(user: User, updateUser: UpdateUserDto) {
 		const { nickname, email } = updateUser;
@@ -188,9 +190,6 @@ export class UsersService {
 	}
 
 	async currentUser(user: User): Promise<Partial<User>>{
-		let userFound = await this.userRepository.findOne(user.id);
-		if (!user)
-			throw new NotFoundException('User not found');
 		let { username, ...res } = user;
 		return res;
 	}
