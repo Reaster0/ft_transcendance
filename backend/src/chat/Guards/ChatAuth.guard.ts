@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { User } from "src/users/entities/user.entity";
-import { UserFA } from "../interfaces/userFa.interface";
+import { UserFA } from "../../auth/interfaces/userFa.interface";
 import { ChatServices } from "../services/chat.service";
 
 
@@ -16,7 +16,8 @@ export class AuthChat implements CanActivate {
     }
 }
 
-function validateUser(user2fa: UserFA) {
+/*
+function validateUser(user2fa: UserFA) 
 
     const {user, twoFA} = user2fa;
     if (!user)
@@ -26,3 +27,4 @@ function validateUser(user2fa: UserFA) {
     }
     return true;
 }
+*/
