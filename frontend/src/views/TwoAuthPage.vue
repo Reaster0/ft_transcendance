@@ -10,8 +10,8 @@
 		<div v-if="imgQR">
 			<v-row justify="center">
 				<v-col cols="6">
-					<v-text-field @keydown.enter="submitCode" v-model="TwoFACode" label="2FA Code" color="white"></v-text-field>
-					<v-img :src="imgQR" max-height="600"></v-img>
+					<v-text-field @keydown.enter="submitCode" v-model="TwoFACode" label="2FA Code" color="white" counter="6" maxlength="6" max-width="100"></v-text-field>
+					<v-img :src="imgQR" max-height="400"></v-img>
 				</v-col>
 			</v-row>
 		</div>
