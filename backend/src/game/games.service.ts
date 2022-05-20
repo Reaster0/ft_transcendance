@@ -4,6 +4,7 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { UsersService } from '../users/services/users.service';
 import { AuthService } from '../auth/auth.service';
+import { Status } from '../common/enums/status.enum';
 
 @Injectable()
 export class GamesService {

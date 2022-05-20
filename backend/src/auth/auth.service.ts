@@ -36,4 +36,10 @@ export class AuthService {
           secret: user.decryptSecret(),
         })
       }
+
+      async enableTwoFA(user: User): Promise<void> {
+        if (user.is2FAEnabled)
+          return ;
+        this.userService.enableTwoFA(user.id);
+      }
 }
