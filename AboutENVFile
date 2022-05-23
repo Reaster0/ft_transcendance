@@ -23,4 +23,5 @@ ENCRYPTION_IV_LENGTH: Length for encryption intialization vector (16 by default)
 ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
  
 For avatar :
-DEFAULT_AVATAR: Avatar set by default
+DEFAULT_AVATAR: Avatar set by default, please be careful to add a supplementary
+'../' before your path as it'll be called from inside backend folder.
