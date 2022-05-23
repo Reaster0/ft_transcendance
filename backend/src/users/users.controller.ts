@@ -61,7 +61,6 @@ export class UsersController {
 		if (user.is2FAEnabled == true) {
 			const token = req.cookies['jwt'];
 			const decode = jwt_decode(token);
-			//console.log(decode);
 			if (decode['twoFA'] == false)
 				throw new HttpException("Please validate our 2fa", 418);
 		}
@@ -127,6 +126,7 @@ export class UsersController {
 	}
 
 	@Post('getOrRegister')
+	@UseGuards(AuthGuard('jwt'))
 	/** Swagger **/
 	@ApiOperation({summary: 'Retrieve existing user or register new user'})
 	@ApiCreatedResponse({ description: 'The user has been successfully retrieved or registered.', type : User })
