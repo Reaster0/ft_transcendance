@@ -82,15 +82,21 @@ export class UsersService {
 
 	async updateUser(user: User, updateUser: UpdateUserDto) {
 		const { nickname, email } = updateUser;
-		if (nickname)
-			user.nickname = nickname;
-		if (email)
-			user.email = email;
+		let find = await this.userRepository.findOne({ nickname: nickname });
+		if (find) {
+			throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
+		}
+		find = await this.userRepository.findOne({ email: email });
+		if (find) {
+			throw new HttpException('Email already taken.', HttpStatus.BAD_REQUEST);
+		}
 		try {
-			await this.userRepository.save(user);
+			user.nickname = nickname;
+			user.email = email;
+			return this.userRepository.save(user);
 		} catch (error) {
 			if (error == '23505')
-				throw new InternalServerErrorException('Username or email already taken');
+				throw new HttpException('Nickname or email already taken.', HttpStatus.BAD_REQUEST);
 			throw new InternalServerErrorException();
 		}
 	}
@@ -113,7 +119,7 @@ export class UsersService {
 		const eloRating = await require('elo-rating');
 		const result = eloRating.calculate(user.eloScore, opponentElo, userWon);
 		user.eloScore = result.playerRating;
-		await this.userRepository.save(user);
+		this.userRepository.save(user);
 	}
 
 	async addFriend(user: User, friendId: number) {
@@ -122,7 +128,7 @@ export class UsersService {
 			throw new  HttpException('User is already a friend', HttpStatus.BAD_REQUEST);			
 		}
 		user.friends.push(friendId);
-		await this.userRepository.save(user);
+		this.userRepository.save(user);
 	}
 
 	async removeFriend(user: User, friendId: number) {
@@ -131,7 +137,7 @@ export class UsersService {
 			throw new  HttpException('User is not a friend', HttpStatus.BAD_REQUEST);			
 		}	
 		user.friends.splice(found, 1);
-		await this.userRepository.save(user);
+		this.userRepository.save(user);
 	}
 
 	async addAvatar(user: User, avatarFilename: string, avatarBuffer: Buffer) {

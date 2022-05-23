@@ -102,21 +102,8 @@ export class UsersController {
 		return this.usersService.getPartialUserInfo(userId);
 	}
 
-	/*
-	@Get('2fa')
-	@UseGuards(AuthGuard('jwt'), AuthUser)
-	@ApiOperation({ summary: 'Activate or deactivate 2FA, depending on previous state.' })
-	@ApiOkResponse({ description: 'State of 2FA changed.' })
-	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
-	change2FAState(@Req() req: RequestUser) {
-		return ;
-	//	const user = req.user;
-		//return this.usersService.modify2FA(user);
-	}
-	*/
-
 	@Get(':id')
-	//@UseGuards(AuthGuard('jwt'), AuthUser)
+	@UseGuards(AuthGuard('jwt'), AuthUser)
 	/** Swagger **/
 	@ApiOperation({ summary: 'Get info of one user according to its id.' })
 	@ApiOkResponse({ description: 'Return content of one users depending on it\'s id.',  type: User })
@@ -177,7 +164,7 @@ export class UsersController {
 	@ApiOkResponse({description: 'User account'})
 	@ApiForbiddenResponse({ description: 'Only logged users can access it.'})
 	/** End of swagger **/
-	async updateUser(@Body() updateUser: UpdateUserDto, @Req() req: RequestUser, @Res({passthrough: true}) res: Response): Promise<void> {
+	async updateUser(@Body() updateUser: UpdateUserDto, @Req() req: RequestUser, @Res({passthrough: true}) res: Response) {
 		return this.usersService.updateUser(req.user, updateUser);
 	}
 
