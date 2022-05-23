@@ -61,7 +61,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				const matchId = uuid();
 				const newMatch = this.gamesService.setMatch(matchId, queue.slice(0, 2));
 				matchs.set(matchId, newMatch);
-				this.gamesService.sendToPlayers(newMatch, 'foundMatch');
+				this.gamesService.sendToPlayers(newMatch, 'foundMatch', newMatch.matchId);
 			}
 		} catch {
 			return client.disconnect();
@@ -69,21 +69,35 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('acceptGame')
-	handleAcceptGame(client: Socket) {
+	handleAcceptGame(client: Socket, matchId: string) {
 		try {
+			const match = matchs.get(matchId);
 			if (!client.data.user) {
 				return client.disconnect();
+			} else if (match === undefined) {
+				client.emit('requestError');
+				// throw error ?
+				return ;
 			}
-			// wait for other player ?
-			// launch game ?
+			if (this.gamesService.isPlayer(client, match) === false) {
+				client.emit('requestError');
+				//throw error ?
+				return ;
+			}
+			for (const user of match.readyUsers) {
+				if (user.id === client.data.user.id) {
+					return ;
+				}
+			}
+			match.readyUsers.push(client.data.user);
+			if (match.readyUsers.length >= 2) {
+				// start game !
+			}
 			// how to recuperate input ?
 		} catch {
 			return client.disconnect();
 		}
 	}
-
-
-	//@SuscribeMessage('refuseGame')
 
 	@SubscribeMessage('watchGame')
 	handleWatchGame(client: Socket, user: User) {
