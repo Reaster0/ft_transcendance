@@ -5,6 +5,7 @@ import LoginPage from "../views/LoginPage.vue";
 import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
+import EditUser from "../views/EditUser.vue";
 
 const routes = [
 	{
@@ -37,6 +38,11 @@ const routes = [
 		name: "TheGame",
 		component: TheGame
 	},
+	{
+		path: '/user/edit',
+		name: "editUser",
+		component: EditUser
+	}
 ]
 	const router = createRouter({
 	history: createWebHistory(process.env.BASE_URL),

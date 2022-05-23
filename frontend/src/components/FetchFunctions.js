@@ -47,3 +47,24 @@ export async function submit2FaCode(inputCode) {
 		return res.status == 201? true : false 
 	})
 }
+
+export async function getAvatarID(id) {
+	return await fetch("/api/users/getAvatar/" + id, {credentials: "include"})
+	.then(res => {
+		return res.status != 200? null : res.blob()})
+	.then(blob => {
+		return blob? URL.createObjectURL(blob) : blob
+	})
+}
+
+export async function updateUser(nick, mail) {
+	return await fetch("/api/users/settings", {
+		credentials: "include",
+		method: "PATCH",
+		body: JSON.stringify({ nickname: nick, email: mail}),
+	})
+	.then(res => {
+		console.log(JSON.stringify({ nickname: nick, email: mail}))
+		return res.status == 200? true : false
+	})
+}
