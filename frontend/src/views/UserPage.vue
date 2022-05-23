@@ -12,7 +12,7 @@
 				<h3>Connected: {{user.status}}</h3>
 				<h3>is2FAEnabled: {{user.is2FAEnabled}}</h3>
 			</v-col>
-				<v-img class="text">Avatar</v-img>
+				<v-img class="text" :src="avatar"></v-img>
 				<v-col cols="2">
 				<v-btn height="80" width="180" color="#FF82F4" class="text2" outlined rounded to="/user/edit">Edit</v-btn>
 				<h1 class="text2">PROFILE</h1>
@@ -36,7 +36,7 @@
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
-import { submit2FaCode } from "../components/FetchFunctions"
+import { submit2FaCode, getAvatarID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 
 
@@ -53,7 +53,8 @@ export default {
 
 		onMounted(async () => {
 			user.value = useStore().getters.whoAmI;
-			//avatar.value = await getAvatarID(user.value.id)
+			avatar.value = await getAvatarID(user.value.id)
+			console.log(avatar.value)
 		})
 
 		async function submitCode() {
