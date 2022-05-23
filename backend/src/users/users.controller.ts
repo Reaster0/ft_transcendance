@@ -133,6 +133,7 @@ export class UsersController {
 	@ApiBadRequestResponse()
 	/** End of swagger **/
 	retrieveOrCreateUser(@Body() createUserDto: CreateUserDto) : Promise <User> {
+		console.log(createUserDto);
 		return this.usersService.retrieveOrCreateUser(createUserDto);
 	}
 

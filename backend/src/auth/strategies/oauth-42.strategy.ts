@@ -21,7 +21,6 @@ export class OauthStrategy42 extends PassportStrategy(
     }
 
     async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<User> {
-        console.log(profile);
         const user = {
             nickname: profile['username'],
             username: profile['username'],

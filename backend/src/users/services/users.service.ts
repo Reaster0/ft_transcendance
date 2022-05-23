@@ -51,6 +51,8 @@ export class UsersService {
 
 	async retrieveOrCreateUser(createUserDto: CreateUserDto) {
 		const { username, email } = createUserDto;
+		console.log(username);
+		console.log(email);
 		let nickname = username;
 		let user = await this.userRepository.findOne({ username: username, email: email });
 		if (user) {
@@ -83,11 +85,11 @@ export class UsersService {
 	async updateUser(user: User, updateUser: UpdateUserDto) {
 		const { nickname, email } = updateUser;
 		let find = await this.userRepository.findOne({ nickname: nickname });
-		if (find) {
+		if (find && find != user) {
 			throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
 		}
 		find = await this.userRepository.findOne({ email: email });
-		if (find) {
+		if (find && find != user) {
 			throw new HttpException('Email already taken.', HttpStatus.BAD_REQUEST);
 		}
 		try {
@@ -95,8 +97,6 @@ export class UsersService {
 			user.email = email;
 			return this.userRepository.save(user);
 		} catch (error) {
-			if (error == '23505')
-				throw new HttpException('Nickname or email already taken.', HttpStatus.BAD_REQUEST);
 			throw new InternalServerErrorException();
 		}
 	}
@@ -220,7 +220,6 @@ export class UsersService {
 		return {
 			nickname: user.nickname,
 			eloScore: user.eloScore,
-			//profile_picture:
 		}
 	}
 }
