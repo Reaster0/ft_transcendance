@@ -14,7 +14,7 @@
 			</v-col>
 		</v-row>
 	</v-container>
-	<v-container>
+	<v-container v-if="!user.is2FAEnabled">
 		<v-row justify="center" align-content="space-around">
 			<v-btn height="150" width="150" elevation="2" icon outlined to="/2auth" user="user">
 				<v-img src="../assets/qr-code-logo.png"/>
@@ -22,10 +22,6 @@
 		</v-row>
 		<v-row justify="center">
 			<h1 class="text2">Enable 2FA</h1>
-		</v-row>
-		<v-row justify="center">
-			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="2FA Code for testing purpose" color="white" counter="6" maxlength="6"></v-text-field>
-			<h1 v-if="codeAccepted">Code Accepted!</h1>
 		</v-row>
 	</v-container>
 </v-container>

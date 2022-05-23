@@ -1,5 +1,11 @@
 <template>
-  <div v-if="!isLog">
+	<v-container v-if="need2fa">
+		<v-col md="4" offset-md="4">
+			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="Input 2FA Code" color="white" counter="6" maxlength="6"></v-text-field>
+			<h1 class="text">need to enter 2fa code</h1>
+		</v-col>
+	</v-container>
+  <div v-else-if="!isLog">
 	<v-container>
 		<v-row justify="center">
 			<v-btn loading rounded elevation="5" outlined width="500" height="500" href="/api/auth/login-42">
@@ -9,29 +15,58 @@
 		</v-row>
 	</v-container>
 	</div>
-	<div v-else>
-		<h1 align="center">YOU SHOULDNT BE HERE</h1>
-	</div>
+	<v-col v-else align="center">
+		<h1>YOU SHOULDNT BE HERE</h1>
+		<v-btn to="/user">GO TO USER PAGE</v-btn>
+	</v-col>
 </template>
 
 <script>
 import { ref } from 'vue'
-import { onMounted } from '@vue/runtime-core';
-import { isLogged } from '../components/FetchFunctions.js'
+// import { onMounted } from '@vue/runtime-core';
+// import { isLogged } from '../components/FetchFunctions.js'
+import { useStore } from 'vuex'
+import { computed } from 'vue'
+import { submit2FaCode, getUserInfo } from "../components/FetchFunctions"
+import { useRouter } from "vue-router";
 
 export default {
 	setup()
 	{
-		const isLog = ref(null)
-
-		onMounted(async() => {
-			isLog.value = await isLogged()
+		const router = useRouter()
+		const inputCode = ref(null)
+		const store = useStore()
+		const isLog = computed(() => {
+			return store.getters.isConnected;
+		})
+		const need2fa = computed(() => {
+			return store.getters.need2Fa;
 		})
 
-		return {isLog}
+		async function submitCode() {
+			if(await submit2FaCode(inputCode.value))
+			{
+				store.commit('setNeed2FA', false)
+				store.commit('setUser', await getUserInfo())
+				router.push('/user')
+			}
+		}
+
+		// const isLog = ref(null)
+
+		// onMounted(async() => {
+		// 	isLog.value = await isLogged()
+		// })
+
+		return {isLog, need2fa, inputCode, submitCode}
 	},
 }
 </script>
 
-<style>
+<style scoped>
+.text{
+	font-size: 3em;
+	font-weight: bold;
+	color: #04BBEC;
+}
 </style>
