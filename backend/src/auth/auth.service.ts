@@ -23,8 +23,8 @@ export class AuthService {
     return this.userService.retrieveOrCreateUser(user);
   }
 
-  async getUser(nickname: string): Promise<User> {
-    return this.userService.findUserBynickname(nickname);
+  async getUser(username: string): Promise<User> {
+      return this.userService.findUserByUsername(username);
   }
 
   async generateTwoFASecret(user: User)/*: Promise<twoFaI> */ {

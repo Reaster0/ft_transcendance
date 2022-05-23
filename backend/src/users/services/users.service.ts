@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus, 
+import { Injectable, NotFoundException, HttpException, HttpStatus,
 		StreamableFile, InternalServerErrorException, Res } from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -51,6 +51,8 @@ export class UsersService {
 
 	async retrieveOrCreateUser(createUserDto: CreateUserDto) {
 		const { username, email } = createUserDto;
+		console.log(username);
+		console.log(email);
 		let nickname = username;
 		let user = await this.userRepository.findOne({ username: username, email: email });
 		if (user) {
@@ -75,20 +77,26 @@ export class UsersService {
 		}
 		user = this.userRepository.create(createUserDto);
 		user.nickname = nickname;
+		// TODO redirect user to modify info page
 		return this.userRepository.save(user);
 	}
 
+
 	async updateUser(user: User, updateUser: UpdateUserDto) {
 		const { nickname, email } = updateUser;
-		if (nickname)
-			user.nickname = nickname;
-		if (email)
-			user.email = email;
+		let find = await this.userRepository.findOne({ nickname: nickname });
+		if (find && find != user) {
+			throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
+		}
+		find = await this.userRepository.findOne({ email: email });
+		if (find && find != user) {
+			throw new HttpException('Email already taken.', HttpStatus.BAD_REQUEST);
+		}
 		try {
-			await this.userRepository.save(user);
+			user.nickname = nickname;
+			user.email = email;
+			return this.userRepository.save(user);
 		} catch (error) {
-			if (error == '23505')
-				throw new InternalServerErrorException('Username or email already taken');
 			throw new InternalServerErrorException();
 		}
 	}
@@ -111,7 +119,7 @@ export class UsersService {
 		const eloRating = await require('elo-rating');
 		const result = eloRating.calculate(user.eloScore, opponentElo, userWon);
 		user.eloScore = result.playerRating;
-		await this.userRepository.save(user);
+		this.userRepository.save(user);
 	}
 
 	async addFriend(user: User, friendId: number) {
@@ -120,7 +128,7 @@ export class UsersService {
 			throw new  HttpException('User is already a friend', HttpStatus.BAD_REQUEST);			
 		}
 		user.friends.push(friendId);
-		await this.userRepository.save(user);
+		this.userRepository.save(user);
 	}
 
 	async removeFriend(user: User, friendId: number) {
@@ -129,7 +137,7 @@ export class UsersService {
 			throw new  HttpException('User is not a friend', HttpStatus.BAD_REQUEST);			
 		}	
 		user.friends.splice(found, 1);
-		await this.userRepository.save(user);
+		this.userRepository.save(user);
 	}
 
 	async addAvatar(user: User, avatarFilename: string, avatarBuffer: Buffer) {
@@ -191,10 +199,7 @@ export class UsersService {
 		return user.decryptSecret();
 	}
 
-	async currentUser(user: User): Promise<Partial<User>>{
-		let userFound = await this.userRepository.findOne(user.id);
-		if (!user)
-			throw new NotFoundException('User not found');
+	async currentUser(user: User): Promise<Partial<User>> {
 		let { username, twoFASecret, ...res } = user;
 		return res;
 	}
@@ -215,7 +220,6 @@ export class UsersService {
 		return {
 			nickname: user.nickname,
 			eloScore: user.eloScore,
-			//profile_picture:
 		}
 	}
 }
