@@ -26,9 +26,18 @@ export class GamesService {
 		for (let currMatch of matchs.values()) {
 			const matchPlayers = currMatch.players;
 			for (let currPlayer of matchPlayers) {
-				if (client == currPlayer.socket || client.data.user.id == currPlayer.user.id) {
+				if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	isPlayer(client: Socket, match: Match) : boolean {
+		for(let player of match.players) {
+			if (client.data.user.id === player.user.id) {
+				return true;
 			}
 		}
 		return false;
@@ -52,6 +61,7 @@ export class GamesService {
 		const match: Match = {
 			matchId: matchId,
 			players: matchPlayers,
+			readyUsers: new Array(),
 			watchers: new Array(),
 		};
 		return match;
