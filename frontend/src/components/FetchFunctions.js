@@ -1,5 +1,7 @@
 //all functions here return the results or NULL
 
+//import axios from "axios";
+
 export async function isLogged() {
 	console.log("check if user is logged")
 	return await fetch("/api/users/logged", {credentials: "include"})
@@ -61,10 +63,19 @@ export async function updateUser(nick, mail) {
 	return await fetch("/api/users/settings", {
 		credentials: "include",
 		method: "PATCH",
-		body: JSON.stringify({ nickname: nick, email: mail}),
+		body: JSON.stringify({
+			nickname: nick,
+			email: mail
+		}),
+		headers: {
+			'Content-type': 'application/json; charset=UTF-8',
+		},
 	})
 	.then(res => {
-		console.log(JSON.stringify({ nickname: nick, email: mail}))
+		console.log(JSON.stringify({
+			nickname: nick,
+			email: mail
+		}))
 		return res.status == 200? true : false
 	})
 }
