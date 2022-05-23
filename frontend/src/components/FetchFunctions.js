@@ -3,10 +3,17 @@
 export async function isLogged() {
 	console.log("check if user is logged")
 	return await fetch("/api/users/logged", {credentials: "include"})
-	.then(data => data.json())
-	.then((data) => {
-		return data.statusCode == 401? false : true
+	.then(res => {
+		if (res.status == 200)
+			return [true, false];
+		if (res.status == 418)
+			return [true, true];
+		return [false, false]
 	})
+	// .then(data => data.json())
+	// .then((data) => {
+	// 	return data.statusCode == 401? false : true
+	// })
 }
 
 export async function getUserInfo() {

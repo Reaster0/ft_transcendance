@@ -38,8 +38,8 @@ export default {
 			if (store.getters.isConnected) {
 				store.commit('setUser', await getUserInfo())
 			}
-	})
-  }
+		})
+	}
 }
 </script>
 
