@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
-import { Match } from './interfaces/match.interface';
+import { Match, State } from './interfaces/match.interface';
 import { Player } from './interfaces/player.interface';
 
 @Injectable()
@@ -63,6 +63,7 @@ export class GamesService {
 			players: matchPlayers,
 			readyUsers: new Array(),
 			watchers: new Array(),
+			state: State.SETTING,
 		};
 		return match;
 	}
