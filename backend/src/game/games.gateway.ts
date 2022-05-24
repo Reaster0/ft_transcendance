@@ -38,7 +38,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	async handleDisconnect(client: Socket) {
-		// check if user is in game or in waiting queue
+		// check if user is in game or in waiting queue, send a 'opponentLeft' if
+		// was an opponent
 		if (client.data.user) {
 			await this.usersService.changeStatus(client.data.user, Status.OFFLINE);
 		} else {
@@ -89,11 +90,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					return ;
 				}
 			}
+			client.join(matchId);
 			match.readyUsers.push(client.data.user);
 			if (match.readyUsers.length >= 2) {
 				// start game !
 			}
-			// how to recuperate input ?
 		} catch {
 			return client.disconnect();
 		}
