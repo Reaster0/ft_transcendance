@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid >
-      <v-row>
+      <v-row >
 		<!-- list of chat / search. maybe some buttons  -->
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
@@ -21,7 +21,7 @@
     <div id="app">
     <v-app id="inspire">
 		<v-list>
-			<v-list-item-group 	v-model="selectedItem" color="primary">
+			<v-list-item-group v-model="selectedItem" >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
@@ -39,8 +39,8 @@
 					</v-badge>
 					<v-divider class="mx-2" vertical></v-divider>
 					<v-list-item-content>
-					<v-list-item-title v-html="item.title"></v-list-item-title>
-					<v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
+					<v-list-item-title>{{item.title}}</v-list-item-title>
+					<v-list-item-subtitle>{{item.subtitle}}</v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
 					<v-divider
@@ -50,6 +50,24 @@
 				</template>
 			</v-list-item-group>
 		</v-list>
+    <!-- <v-card class="mx-auto"
+      max-width="500">
+      <v-list>
+        <v-list-item-group v-model="model">
+          <v-list-item
+            v-for="(item, i) in items"
+            :key="i"
+          >
+            <v-list-item-avatar>
+            <v-img :src="item.photo"></v-img>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title v-text="item.title"></v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-card> -->
     </v-app>
     </div>
     </v-col>
@@ -60,13 +78,13 @@
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
           <v-app id="inspire">
-            <v-card color="grey lighten-4" flat tile >
-              <v-toolbar dense>
+            <v-card color="rgba(0,0,0,0)" flat >
+              <v-toolbar dense >
                 <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
                 <v-badge bordered bottom color="green" dot offset-x="4" offset-y="30" class="spacetop" >
-                    <!-- <v-avatar class="spacetop" size="36" elevation="10"> -->
-                      <img src="https://smlycdn.akamaized.net/products/270x270-fill/d10a95bb3e/12439acabfc74705974471cc301653097c37adc4.jpg" />
-                    <!-- </v-avatar> -->
+                    <v-avatar class="spasetop" elevation="10">
+                      <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" />
+                    </v-avatar>
                 </v-badge>
                 <v-divider class="mx-2" vertical color="rgba(0,0,0,0)"></v-divider>
                 <v-toolbar-title>Equipe transcendance</v-toolbar-title>
@@ -185,47 +203,40 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-          <v-card class="text-center mt-8 mb-3" shaped >
+      
+          <v-card height="30%" class="text-center mt-2 mb-3" shaped >
              <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
-                <!-- <v-avatar size="60" elevation="10"> -->
+                <v-avatar size="50" elevation="10">
                   <img src="https://smlycdn.akamaized.net/products/270x270-fill/d10a95bb3e/12439acabfc74705974471cc301653097c37adc4.jpg" />
-                <!-- </v-avatar> -->
+                </v-avatar>
              </v-badge>
                 <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
                 <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
-                <v-list></v-list>
+                <!-- <v-list></v-list> -->
           </v-card>
+      
+        <!-- TABS  -->
+          <v-tabs
+            fixed-tabs
+            v-model="tab"
+          >
+            <v-tabs-slider color="amber darken-3"></v-tabs-slider>
+            <v-tab
+              v-for="(item, index) in items2"
+              :class="{active: currentTab === index}"
+              @click="currentTab = index"
+              :key="item"
+            >
+              {{ item.tabs }}
+            </v-tab>
+          </v-tabs>
+          <v-tabs-items v-model="tab">
+            <v-card flat>            
+              <div v-show="currentTab === 0"><v-card-text>LIST OF MEMBERS</v-card-text></div>
+              <div v-show="currentTab === 1"><v-card-text>LIST OF ADMINISTRATORS</v-card-text></div>
+            </v-card>
+          </v-tabs-items>
 
-			<div id="app">
-			<v-app id="inspire">
-				<v-toolbar
-					color="white"
-					dark
-					flat
-				>
-				<template v-slot:default>
-				<v-tabs>
-					<v-tabs-slider ></v-tabs-slider>
-					<v-tab
-					color="rgb(0,0,255)"
-					v-for="item in items2"
-					:key="item"
-					>
-					{{ item.tabs }}
-					</v-tab>
-				</v-tabs>
-				</template>
-				</v-toolbar>
-				<v-tabs-items v-model="tab">
-					<v-tab-item
-					v-for="item in items2"
-					:key="item"
-					>
-					{{ item.text }}
-					</v-tab-item>
-				</v-tabs-items>
-			</v-app>
-			</div>
   
         </v-col>
       </v-row>
@@ -242,7 +253,10 @@ export default
 {
   data: () => 
   ({
-    //  selected: [2],
+      selected: [2],
+      currentTab: 0,
+      tab: null,
+      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
       items: [
         {
           photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -270,46 +284,16 @@ export default
           title: "abaudot",
         },
       ],
+      model: 1,
       items2: [
-		{
-			tabs: 'Members',
-			// text: 'list of members / ',
-		},
-        {
-			tabs: 'Administrators',
-			// text: 'list of administrators',
-		}
+        {tabs: 'Members',},
+        {tabs: 'Administrators',}
       ],
-
+      text2: [
+      {t: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',},
+      {t: 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',},
+      ]
   }),
-  
-  // computed: 
-  // {
-  //   // theme() {
-  //   //   return this.$vuetify.theme.dark ? "dark" : "light";
-  //   // },
-    
-  // },
-    computed: {
-      className() {
-        return {
-          'chat__own': this.message.type === 'own',
-          'chat__others': this.message.type === 'others'
-        }
-      }
-    },
-    methods: {
-      sendMessage () {
-        this.resetIcon()
-        this.clearMessage()
-      },
-      clearMessage () {
-        this.message = ''
-      },
-      resetIcon () {
-        this.iconIndex = 0
-      },
-    },
 };
 
 </script>
@@ -322,16 +306,34 @@ export default
 }
 .spacebottom {
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 24px;
 }
 .spacetop {
-  padding-top: 50px;
+  padding-top: 20px;
   padding-bottom: 20px;
 }
 
 .offsetmess {
   padding-right: 10px;
   padding-left: 10px;
+}
+
+.container{
+  height:500px;
+  width:33vw;
+  background:orange;
+}
+
+@media (max-device-width: 1200px) {
+  .container{
+    width:50vw;
+  }
+}
+
+@media (max-device-width: 667px) {
+  .container{
+    width:100vw;
+  }
 }
 
 </style>
