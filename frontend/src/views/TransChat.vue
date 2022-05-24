@@ -34,7 +34,7 @@
 				>
 					<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
 					<v-list-item-avatar >
-					<v-img :src="item.photo" ></v-img>
+					<v-img :src="item.photo"  min-width="50px" min-height="50px"></v-img>
 					</v-list-item-avatar>
 					</v-badge>
 					<!-- <v-divider class="mx-2" vertical></v-divider> -->
