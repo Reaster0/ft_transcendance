@@ -1,5 +1,5 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, 
-		OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+		OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
 import { AuthService } from '../auth/auth.service';
@@ -8,6 +8,7 @@ import { User } from '../users/entities/user.entity';
 import { GamesService } from './games.service';
 import { Match } from './interfaces/match.interface';
 import { uuid } from 'uuidv4';
+import { Logger } from '@nestjs/common';
 
 let queue: Array<Socket> = new Array(); // Array of clients waiting for opponent
 let matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
@@ -21,6 +22,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	) {}
 
 	@WebSocketServer() server: Server;
+
+	private logger: Logger = new Logger('GameGateway');
+
+	afterInit(server: any) {
+		this.logger.log('Init game gateway');
+	}
 
 	async handleConnection(client: Socket) {
 		try {
@@ -54,7 +61,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!client.data.user) {
 				return client.disconnect();
 			}
-			if (this.gamesService.isWaiting(client, queue) == true || this.gamesService.isPlaying(client, matchs) == true) {
+			if (this.gamesService.isWaiting(client, queue) == false || this.gamesService.isPlaying(client, matchs) == true) {
 				return ;
 			}
 			queue.push(client);

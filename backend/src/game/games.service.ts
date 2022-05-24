@@ -64,6 +64,7 @@ export class GamesService {
 			readyUsers: new Array(),
 			watchers: new Array(),
 			state: State.SETTING,
+			winner: undefined,
 		};
 		return match;
 	}
@@ -71,6 +72,21 @@ export class GamesService {
 	sendToPlayers(match: Match, toSend: string, ...args) {
 		for (let player of match.players) {
 			player.socket.emit(toSend, ...args); // emit more info ?
+		}
+	}
+
+	playerWon(match: Match, player: Player) {
+		if (player.score == 10) {
+			match.winner = player;
+			return true;
+		}
+		return false;
+	}
+
+	scoreUp(match: Match, player: Player) {
+		player.score += 1;
+		if (this.playerWon(match, player) == true) {
+			match.state = State.FINISHED;
 		}
 	}
 }

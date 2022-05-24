@@ -15,4 +15,5 @@ export interface Match {
 	readyUsers:		Array<User>;
 	watchers: 		Array<Socket>;
 	state:			State;
+	winner:			Player;
 }
