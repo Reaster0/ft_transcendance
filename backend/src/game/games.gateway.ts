@@ -100,6 +100,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
+	@SubscribeMessage('gameInput')
+	handleGameInput(client: Socket, data: { matchId: string, input: string}) {
+		// Go to game for modification
+	}
+
 	@SubscribeMessage('watchGame')
 	handleWatchGame(client: Socket, user: User) {
 		try {
