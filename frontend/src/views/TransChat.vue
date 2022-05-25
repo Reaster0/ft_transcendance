@@ -10,45 +10,56 @@
 				label="Find user / group"
 				placeholder="Search"
             ></v-text-field>
-			<v-btn elevation="2">
+      <!-- <v-btn @click="overlay = !overlay" elevation="2"> -->
+			<v-btn v-on:click="create" elevation="2">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
 				<v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
 			</v-btn>
+      <v-overlay :value="overlay"></v-overlay>
 			</v-col>
+
+      
 		
 	
-    <div id="app">
+    <div id="app" class="text-left">
     <v-app id="inspire">
 		<v-list>
+      <!-- <v-simple-table dense> -->
 			<v-list-item-group v-model="selectedItem" >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
 				<v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
 				></v-divider>
-		
+
 				<v-list-item
 					v-else
 					:key="item.title"
 				>
+          <v-btn elevation="0" min-height="50px"  max-width="50px">
 					<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
 					<v-list-item-avatar >
 					<v-img :src="item.photo"  min-width="50px" min-height="50px"></v-img>
 					</v-list-item-avatar>
 					</v-badge>
+          </v-btn>
 					<!-- <v-divider class="mx-2" vertical></v-divider> -->
+          <!-- <v-card-actions class="justify-space-between"> -->
 					<v-list-item-content>
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
 					<v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle>
 					</v-list-item-content>
-				</v-list-item>
-					<v-divider
-						v-if="index < items.length"
-						:key="index"
-					></v-divider>
+          <!-- </v-card-actions> -->
+          <!-- <v-divider></v-divider> -->
+        </v-list-item>
+            <v-divider
+              v-if="index < items.length"
+              :key="index"
+            ></v-divider>
 				</template>
 			</v-list-item-group>
+      <!-- </v-simple-table> -->
 		</v-list>
     </v-app>
     </div>
@@ -63,11 +74,13 @@
             <v-card color="rgba(0,0,0,0)" flat >
               <v-toolbar dense >
                 <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
+                <v-btn elevation="0" min-height="50px"  max-width="50px">
                 <v-badge bordered bottom color="green" dot offset-x="4" offset-y="34" class="spacetop" >
                     <v-avatar class="col" elevation="10" size="40px">
                       <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="50" height="50">
                     </v-avatar>
                 </v-badge>
+                </v-btn>
                 <!-- <v-divider class="mx-2" vertical color="rgba(0,0,0,0)"></v-divider> -->
                 <v-toolbar-title class="offsetmess">Equipe transcendance</v-toolbar-title>
                 <v-btn icon>
@@ -82,11 +95,13 @@
             <!-- MESSAGE 4 OTHER -->
             <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
               <!-- ava chat -->
+              <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
                       <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
                 </v-avatar>
               </v-badge>
+              </v-btn>
             <!-- field chat -->
             <v-card class="mt-2 ml-2" max-width="450px">
               <v-list-item >
@@ -104,11 +119,13 @@
           <!-- MESSAGE 3 OTHER -->
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
               <!-- ava chat -->
+              <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
                       <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
                 </v-avatar>
               </v-badge>
+              </v-btn>
             <!-- field chat -->
             <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
             <v-card class="mt-2 ml-2" max-width="450px">
@@ -139,11 +156,13 @@
               </v-list-item>
             </v-card >
             <!-- ava chat -->
+            <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
               <v-avatar class="mt-n4 " size="32" elevation="2">
                     <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
               </v-avatar>
               </v-badge>
+            </v-btn>
           </v-toolbar>
 
 
@@ -162,21 +181,25 @@
               </v-list-item>
             </v-card >
             <!-- ava chat -->
+            <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
               <v-avatar class="mt-n4 " size="32" elevation="2">
                     <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
               </v-avatar>
               </v-badge>
+            </v-btn>
           </v-toolbar>
 
           <!-- MESSAGE 0 OTHER -->
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
               <!-- ava chat -->
+              <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
                       <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
                 </v-avatar>
               </v-badge>
+              </v-btn>
             <!-- field chat -->
             <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
             <v-card class="mt-2 ml-2" max-width="450px">
@@ -249,11 +272,13 @@
                       v-else
                       :key="item.title"
                     >
+                      <v-btn elevation="0" min-height="50px" max-width="50px">
                       <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
                       <v-list-item-avatar>
                       <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
                       </v-list-item-avatar>
                       </v-badge>
+                      </v-btn>
                       <!-- <v-divider class="mx-2" vertical></v-divider> -->
                       <v-list-item-content>
                       <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
@@ -280,11 +305,13 @@
                       v-else
                       :key="item.title"
                     >
+                      <v-btn elevation="0" min-height="50px" max-width="50px" >
                       <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
                       <v-list-item-avatar>
                       <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
                       </v-list-item-avatar>
                       </v-badge>
+                      </v-btn>
                       <!-- <v-divider class="mx-2" vertical></v-divider> -->
                       <v-list-item-content>
                       <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
@@ -317,6 +344,7 @@ export default
 {
   data: () => 
   ({
+      overlay: false,
       selected: [2],
       currentTab: 0,
       tab: null,
@@ -380,8 +408,27 @@ export default
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ]
+      ],
   }),
+  methods: {
+    create: function (event) 
+    {
+      // `this` fait référence à l'instance de Vue à l'intérieur de `methods`
+      // alert('Bonjour ' + this.name + ' !')
+      // `event` est l'évènement natif du DOM
+      if (event) 
+      {
+        alert('SUBPAGE OF TRANSCHAT MANAGEMENT WILL BE OPENED')
+      }
+    }
+  },
+  watch: {
+    overlay (val) {
+      val && setTimeout(() => {
+        this.overlay = false
+      }, 2000)
+    },
+  },
 };
 
 </script>

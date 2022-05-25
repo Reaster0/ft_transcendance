@@ -6,6 +6,7 @@ import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
 import Chat from "../views/TransChat.vue";
+import NewRoom from "../views/TC_newroom.vue";
 
 const routes = [
 	{
@@ -42,6 +43,11 @@ const routes = [
 		path: '/chat',
 		name: "transchat",
 		component: Chat
+	},
+	{
+		path: '/newroom',
+		name: "newroom",
+		component: NewRoom
 	},
 ]
 	const router = createRouter({
