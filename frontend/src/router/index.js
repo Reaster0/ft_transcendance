@@ -5,8 +5,9 @@ import LoginPage from "../views/LoginPage.vue";
 import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
-import Chat from "../views/TransChat.vue";
-import NewRoom from "../views/TC_newroom.vue";
+import Chat from "../views/TransChat_group.vue";
+import ChatPerson from "../views/TransChat_person.vue";
+import NewRoom from "../views/TransChat_create_room.vue";
 
 const routes = [
 	{
@@ -40,9 +41,14 @@ const routes = [
 		component: TheGame
 	},
 	{
-		path: '/chat',
-		name: "transchat",
+		path: '/chatgroup',
+		name: "transchatgroup",
 		component: Chat
+	},
+	{
+		path: '/chatperson',
+		name: "transchatperson",
+		component: ChatPerson
 	},
 	{
 		path: '/newroom',
