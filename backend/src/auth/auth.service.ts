@@ -52,11 +52,9 @@ export class AuthService {
   }
 
   async getUserBySocket(client: Socket): Promise<User> {
-    const cookie = client.handshake.headers['cookie'];
-    if (!cookie) {
-      console.log('cookie error');
-      throw new HttpException('cookie absent', 401);
-    }
+    const cookie = String(client.handshake.headers.auth);
+	if (!cookie)
+		throw new HttpException('cookie absent', 401);
     const { jwt: token } = parse(cookie);
     const payload: JwtPayload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
     const { username, twoFA } = payload;
