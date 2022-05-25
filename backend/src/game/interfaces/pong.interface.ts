@@ -1,3 +1,9 @@
+export enum Point {
+	LEFT = 'leftScore',
+	RIGHT = 'rightScore',
+	NONE = 'none',
+}
+
 export interface PosOrVec {
 	x: number;
 	y: number;

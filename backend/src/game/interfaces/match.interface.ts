@@ -1,6 +1,8 @@
 import { Player } from './player.interface';
 import { Socket } from 'socket.io';
 import { User } from '../../users/entities/user.entity';
+import { Pong } from './pong.interface';
+import { Interval } from '@nestjs/schedule';
 
 export enum State {
 	SETTING = 'SETTING',
@@ -14,6 +16,8 @@ export interface Match {
 	players:		Array<Player>;
 	readyUsers:		Array<User>;
 	watchers: 		Array<Socket>;
+	pong:			Pong;
 	state:			State;
 	winner:			Player;
+	interval:		typeof Interval;
 }

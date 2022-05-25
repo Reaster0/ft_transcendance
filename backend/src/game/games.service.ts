@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
 import { Match, State } from './interfaces/match.interface';
 import { Player } from './interfaces/player.interface';
+import { Pong } from './interfaces/pong.interface';
+import { PongService } from './pong.service';
+import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class GamesService {
 	constructor(
-		private readonly usersService: UsersService
+		private readonly usersService: UsersService,
+		private readonly pongService: PongService,
+		private schedulerRegistry: SchedulerRegistry,
 	) {}
 
 	isWaiting(client : Socket, queue: Array<Socket>): boolean {
@@ -63,8 +68,10 @@ export class GamesService {
 			players: matchPlayers,
 			readyUsers: new Array(),
 			watchers: new Array(),
+			pong: this.pongService.initPong(),
 			state: State.SETTING,
 			winner: undefined,
+			interval: null,
 		};
 		return match;
 	}
@@ -89,4 +96,18 @@ export class GamesService {
 			match.state = State.FINISHED;
 		}
 	}
+
+	startGame(server: Server, match: Match) {
+		server.to(match.matchId).emit('gameStarting');
+		match.state = State.ONGOING;
+		//const interval = this.schedulerRegistry.getInterval();
+		this.refreshGame(match);
+	}
+
+	@Interval('match', 50) // in ms
+	refreshGame(match: Match) {
+
+	}
+
+	clear
 }

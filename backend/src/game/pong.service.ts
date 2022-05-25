@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Player } from './interfaces/player.interface';
-import { PosOrVec, Ball, Paddle, Field, Pong } from './interfaces/pong.interface';
+import { Point, Ball, Paddle, Field, Pong } from './interfaces/pong.interface';
 
 @Injectable()
 export class PongService {
 	constructor() {}
 
-	initPong() {
+	initPong() : Pong {
 		let field = this.initField();
 		let ball = this.initBall(field);
 		let paddleR = this.initPaddle(field, false);
@@ -20,7 +19,7 @@ export class PongService {
 		return pong;
 	}
 
-	initField() {
+	initField() : Field {
 		let field: Field = {
 			width: 1,
 			length: 1,
@@ -29,7 +28,7 @@ export class PongService {
 		return field;		
 	}
 
-	initBall(field: Field) {
+	initBall(field: Field) : Ball {
 		let ball: Ball = {
 			pos: { x: field.length/2, y : field.length/2 },
 			vel: { x: 5, y: 5 },
@@ -39,7 +38,7 @@ export class PongService {
 		return ball;	
 	}
 
-	initPaddle(field: Field, left: boolean) {
+	initPaddle(field: Field, left: boolean) : Paddle {
 		const yValue = (left === true) ? (0 + field.length/50) : (field.length - field.length/50);
 		let paddle: Paddle = {
 			blcPos: { x: field.width/2, y: yValue },
@@ -47,13 +46,6 @@ export class PongService {
 			length: field.length/50,
 		}
 		return paddle;
-	}
-
-	resetBall(field: Field, ball: Ball) {
-		ball.pos.x = field.length/2;
-		ball.pos.y = field.width/2;
-		ball.speed = 5;
-		ball.vel.x *= -1;
 	}
 
 	calcBallPos(pong: Pong) {
@@ -83,7 +75,14 @@ export class PongService {
 		}
 	}
 
-	checkCollision(ball: Ball, paddle: Paddle) {
+	resetBall(field: Field, ball: Ball) {
+		ball.pos.x = field.length/2;
+		ball.pos.y = field.width/2;
+		ball.speed = 5;
+		ball.vel.x *= -1;
+	}
+
+	checkCollision(ball: Ball, paddle: Paddle) : boolean {
 		const padTop = paddle.blcPos.y + paddle.width;
 		const padBottom = paddle.blcPos.y;
 		const padLeft = paddle.blcPos.x;
@@ -97,7 +96,7 @@ export class PongService {
 			&& ballLeft < padRight && ballBottom > padTop);
 	}
 	
-	getBounce(ball: Ball, field: Field, paddle: Paddle) {
+	getBounce(ball: Ball, field: Field, paddle: Paddle) : void {
 		let collidePoint = (ball.pos.y - (paddle.blcPos.y + paddle.width/2)) / paddle.width/2;
 		let bounceAngle = collidePoint * Math.PI/4;
 		let direction = (ball.pos.x < field.length/2) ? 1 : -1;
@@ -106,14 +105,18 @@ export class PongService {
 		ball.speed += 0.1;
 	}
 
-	updateScore(field: Field, ball: Ball) {
-		if (ball.pos.x - ball.radius < 0 || ball.pos.x + ball.radius > field.length) {
+	getScore(field: Field, ball: Ball): Point {
+		if (ball.pos.x - ball.radius < 0) {
 			this.resetBall(field, ball);
-			//upgrade corresponding score
+			return Point.RIGHT;
+		} else if (ball.pos.x + ball.radius > field.length) {
+			this.resetBall(field, ball);
+			return Point.LEFT;
 		}
+		return Point.NONE;
 	}
 
-	movePaddle(field: Field, paddle: Paddle, input: string) {
+	movePaddle(field: Field, paddle: Paddle, input: string) : void {
 		if (input === 'UP') {
 			paddle.blcPos.y += field.width/7;
 		} else if (input === 'DOWN') {
@@ -125,5 +128,4 @@ export class PongService {
 			paddle.blcPos.y = 0 + field.offset;
 		}
 	}
-
 }

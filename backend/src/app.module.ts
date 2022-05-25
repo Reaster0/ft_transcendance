@@ -5,9 +5,11 @@ import { UsersModule } from './users/users.module';
 import * as Joi from '@hapi/joi';
 import { AuthModule } from './auth/auth.module';
 import { GamesModule } from './game/games.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: '../.env',
       validationSchema: Joi.object({
