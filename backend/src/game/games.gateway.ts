@@ -13,8 +13,8 @@ import { Logger } from '@nestjs/common';
 let queue: Array<Socket> = new Array(); // Array of clients waiting for opponent
 let matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
 
-@WebSocketGateway({ cors: true, namespace: '/game' })
-export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({ cors: { origin: '*' , credentials: true }, credentials: true, namespace: '/game' })
+export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly authService: AuthService,
@@ -31,12 +31,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	async handleConnection(client: Socket) {
 		try {
+			this.logger.log('connection established');
 			const user = await this.authService.getUserBySocket(client);
 			if (!user) {
+				this.logger.log('user not found');
 				return client.disconnect();
 			}
 			await this.usersService.changeStatus(user, Status.PLAYING);
+			this.logger.log('status changed');
 			client.data.user = user;
+			this.logger.log('after modification');
 			return client.emit('connected'); // maybe emit user ?
 		} catch {
 			// error ?
@@ -47,6 +51,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleDisconnect(client: Socket) {
 		// check if user is in game or in waiting queue, send a 'opponentLeft' if
 		// was an opponent
+		this.logger.log('disconnection');
 		if (client.data.user) {
 			await this.usersService.changeStatus(client.data.user, Status.OFFLINE);
 		} else {

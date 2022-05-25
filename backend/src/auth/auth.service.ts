@@ -53,17 +53,21 @@ export class AuthService {
 
   async getUserBySocket(client: Socket): Promise<User> {
     const cookie = client.handshake.headers['cookie'];
-    if (!cookie)
+    if (!cookie) {
+      console.log('cookie error');
       throw new HttpException('cookie absent', 401);
+    }
     const { jwt: token } = parse(cookie);
     const payload: JwtPayload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
     const { username, twoFA } = payload;
     const user: User = await this.userService.findUserByUsername(username);
-    if (!user)
+    if (!user) {
       throw new HttpException('User not found', 401);
+    }
     if (user.is2FAEnabled) {
-      if (!twoFA)
+      if (!twoFA) {
         throw new HttpException('Should have validate 2FA', 418);
+      }
     }
     return user;
   }
