@@ -8,33 +8,48 @@
 <script>
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
+import io from 'socket.io-client';
 
 export default {
 	setup(){
 		const connection = ref(null)
 
 		onMounted(() =>{
-			console.log("starting connection to websocket")
-			connection.value = new WebSocket("://localhost:3000/game")
-
-			connection.value.onmessage = (event) => {
-				console.log(event)
+			console.log(document.cookie.toString())
+			try {
+					connection.value = io('http://82.65.87.54:3000/game',{
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie} },
+					},
+				})
+				console.log("starting connection to websocket")
+			} catch (error) {
+				console.log("the error is:" + error)
 			}
 
-			connection.value.onopen = (event) => {
-				console.log(event)
-				console.log("connected to the server")
-			}
+			connection.value.on('joined', text => {
+				console.log(text)
+			})
 
-			connection.value.onclose = (event) => {
-				console.log(event)
-				console.log("disconnected from the server")
-			}
+			// connection.value.onmessage = (event) => {
+			// 	console.log("message from server:" + event)
+			// }
+
+			// connection.value.onopen = (event) => {
+			// 	console.log(event)
+			// 	console.log("connected to the server")
+			// }
+
+			// connection.value.onclose = (event) => {
+			// 	console.log(event)
+			// 	console.log("disconnected from the server")
+			// }
 		})
 
-		function sendMessage(message){
-			console.log(connection)
-			connection.value.send(message)
+		function sendMessage(){
+			connection.value.emit('joinGame', "lol")
+			console.log("emit")
+			//connection.value.send(message)
 		}
 
 			return { connection, sendMessage }
