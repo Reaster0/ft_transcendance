@@ -10,6 +10,7 @@
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';
+import { useKeypress } from "vue3-keypress";
 
 export default {
 	setup(){
@@ -53,6 +54,7 @@ export default {
 			}
 			})
 
+
 		function Play(){
 			connection.value.emit('joinGame')
 			console.log("joinGame")
@@ -63,10 +65,28 @@ export default {
 			console.log("acceptGame")
 		}
 
-		function GameInput(){
-			connection.value.emit('gameInput')
-			console.log("gameInput")
+		const GameInput = ({input}) =>{
+			console.log("gameInput" + input)
+			if (matchId.value)
+				connection.value.emit('gameInput', matchId, input)
 		}
+			useKeypress({
+			keyEvent: "keydown",
+			keyBinds: [
+				{
+					keyCode: 87,
+					success: () => {
+						connection.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
+					},
+				},
+				{
+					keyCode: 83,
+					success: () => {
+						connection.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
+					},
+				},
+			]
+			})
 
 			return { connection, Play, AcceptGame, GameInput, matchId }
 

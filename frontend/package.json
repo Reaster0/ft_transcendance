@@ -17,6 +17,7 @@
     "socket.io-client": "^4.5.1",
     "vue": "^3.2.13",
     "vue-router": "^4.0.15",
+    "vue3-keypress": "^4.0.1",
     "vuetify": "^3.0.0-beta.0",
     "vuex": "^4.0.2",
     "webfontloader": "^1.0.0"
