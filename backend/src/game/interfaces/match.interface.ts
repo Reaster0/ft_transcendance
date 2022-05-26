@@ -15,9 +15,7 @@ export interface Match {
 	matchId:		string;
 	players:		Array<Player>;
 	readyUsers:		Array<User>;
-	watchers: 		Array<Socket>;
 	pong:			Pong;
 	state:			State;
 	winner:			Player;
-	interval:		typeof Interval;
 }

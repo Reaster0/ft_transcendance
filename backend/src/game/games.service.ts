@@ -19,7 +19,7 @@ export class GamesService {
 			return true;
 		}
 		for (let sock of queue) {
-			if (sock.data.user.id == client.data.id) {
+			if (sock.data.user.id === client.data.id) {
 				return true;
 			}
 		}
@@ -33,6 +33,18 @@ export class GamesService {
 				if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	wantToWatch(client: Socket, watchers: Array<Socket>) {
+		if (watchers.includes(client)) {
+			return true;
+		}
+		for (let sock of watchers) {
+			if (sock.data.user.id === client.data.id) {
+				return true;
 			}
 		}
 		return false;
@@ -66,18 +78,37 @@ export class GamesService {
 			matchId: matchId,
 			players: matchPlayers,
 			readyUsers: new Array(),
-			watchers: new Array(),
 			pong: this.pongService.initPong(),
 			state: State.SETTING,
 			winner: undefined,
-			interval: null,
 		};
 		return match;
 	}
 
+	waitForPlayers(match: Match, matchs: Map<string, Match>) {
+		const timer = setTimeout(function() {
+			if (match.state === State.STARTING) {
+				clearTimeout(timer);
+			} else {
+				this.abortGame(match, matchs);
+			}
+		}, 10000, match, matchs);
+	}
+
+	abortGame(match: Match, matchs: Map<string, Match>) {
+		this.sendToPlayers(match, 'foundMatch', null);	
+		matchs.delete(match.matchId);
+	}
+
 	sendToPlayers(match: Match, toSend: string, ...args) {
 		for (let player of match.players) {
-			player.socket.emit(toSend, ...args); // emit more info ?
+			player.socket.emit(toSend, ...args);
+		}
+	}
+
+	sendToWatchers(watchers: Array<Socket>, toSend: string, ...args) {
+		for (let watcher of watchers) {
+			watcher.emit(toSend, ...args);
 		}
 	}
 
@@ -96,7 +127,7 @@ export class GamesService {
 		}
 	}
 
-	startGame(server: Server, match: Match) {
+	startGame(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
 		// Send: 'beReady' + player position  on field + match Id + opponent nickname 
 		match.players[0].socket.emit('beReady', 'left', match.matchId, match.players[1].user.nickname);
 		match.players[1].socket.emit('beReady', 'right', match.matchId, match.players[0].user.nickname);
@@ -107,13 +138,15 @@ export class GamesService {
 			if (count === 0) {
 				clearInterval(countdown);
 				match.state = State.ONGOING;
+				this.listGames(watchers, matchs);
 				server.to(match.matchId).emit('gameStarting');
 			}
 		}, 1000);
 		const intervalId = setInterval(function (match) { 
 			if (match.state === State.FINISHED) {
 				clearInterval(intervalId);
-				this.finishGame(match);
+				this.listGames(watchers, matchs);
+				this.finishGame(server, match);
 			} else {
 				this.refreshGame(server, match) 
 			}
@@ -121,7 +154,7 @@ export class GamesService {
 	}
 
 	playerInput(client: Socket, match: Match, input: string) {
-		if (this.isPlayer(client, match) == false || (input != 'UP' && input != 'DOWN')) {
+		if (this.isPlayer(client, match) === false || (input != 'UP' && input != 'DOWN')) {
 			client.emit('requestError');
 			return ;
 		}
@@ -134,21 +167,26 @@ export class GamesService {
 
 	refreshGame(server: Server, match: Match) {
 		this.pongService.calcBallPos(match.pong);
-		server.to(match.matchId).emit('gameUpdate', this.getBallFeatures(match), this.getPaddlesFeatures(match));
+		server.to(match.matchId).emit('gameUpdate', match.matchId, this.getBallFeatures(match), this.getPaddlesFeatures(match));
 		let point = this.pongService.getScore(match.pong.field, match.pong.ball);
 		let winner = false;
 		if (point != Point.NONE) {
 			if (point == Point.LEFT) {
 				this.scoreUp(match, match.players[0]);
-				winner = this.playerWon(match, match.players[0]);
+				if ((winner = this.playerWon(match, match.players[0])) === true) {
+					match.winner = match.players[0];
+				}
 			} else {
 				this.scoreUp(match, match.players[1]);
-				winner = this.playerWon(match, match.players[1]);
+				if ((winner = this.playerWon(match, match.players[1])) === true) {
+					match.winner = match.players[1];
+				}
 			}
 			// Send : 'score' + score player left side + score player right side
-			server.to(match.matchId).emit('score', match.players[0].score, match.players[1].score);
+			server.to(match.matchId).emit('score', match.matchId, match.players[0].score, match.players[1].score);
 		}
 		if (winner === true) {
+			server.to(match.matchId).emit('endGame', match.matchId, match.winner.user.nickname);
 			match.state = State.FINISHED;
 		}
 	}
@@ -162,8 +200,17 @@ export class GamesService {
 				 paddleR: { blcPos: { x: match.pong.paddleR.blcPos.x, y: match.pong.paddleR.blcPos.y }, width: match.pong.paddleR.width, length: match.pong.paddleR.length }};
 	}
 
-	finishGame(match: Match) {
-		// TODO
+	finishGame(server: Server, match: Match) {
+		server.socketsLeave(match.matchId);
+		// TODO set game inside DB
+	}
+
+	listGames(client: Socket, matchs: Map<string, Match>) {
+		for (let match of matchs.values()) {
+			if (match.state === State.ONGOING) {
+				client.emit('ongoingGame', match.matchId, match.players[0].user.nickname, match.players[1].user.nickname);
+			}
+		}
 	}
 
 }

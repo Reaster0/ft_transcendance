@@ -6,12 +6,13 @@ import { AuthService } from '../auth/auth.service';
 import { Status } from '../common/enums/status.enum';
 import { User } from '../users/entities/user.entity';
 import { GamesService } from './games.service';
-import { Match } from './interfaces/match.interface';
+import { Match, State } from './interfaces/match.interface';
 import { uuid } from 'uuidv4';
 import { Logger } from '@nestjs/common';
 
 let queue: Array<Socket> = new Array(); // Array of clients waiting for opponent
 let matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
+let watchers: Array<Socket> = new Array();
 
 @WebSocketGateway({ cors: { origin: '*' , credentials: true }, credentials: true, namespace: '/game' })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -34,14 +35,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.logger.log('connection established');
 			const user = await this.authService.getUserBySocket(client);
 			if (!user) {
-				this.logger.log('user not found');
 				return client.disconnect();
 			}
 			await this.usersService.changeStatus(user, Status.PLAYING);
-			this.logger.log('status changed');
 			client.data.user = user;
-			this.logger.log('after modification');
-			return client.emit('connected'); // maybe emit user ?
+			return client.emit('connectedToGame'); // maybe emit user ?
 		} catch {
 			// error ?
 			return client.disconnect();
@@ -66,7 +64,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (!client.data.user) {
 				return client.disconnect();
 			}
-			if (this.gamesService.isWaiting(client, queue) == false || this.gamesService.isPlaying(client, matchs) == true) {
+			if (this.gamesService.isWaiting(client, queue) === true
+				|| this.gamesService.isPlaying(client, matchs) === true) {
 				return ;
 			}
 			queue.push(client);
@@ -75,6 +74,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				const newMatch = this.gamesService.setMatch(matchId, queue.slice(0, 2));
 				matchs.set(matchId, newMatch);
 				this.gamesService.sendToPlayers(newMatch, 'foundMatch', newMatch.matchId);
+				this.gamesService.waitForPlayers(newMatch, matchs);
 			}
 		} catch {
 			return client.disconnect();
@@ -89,12 +89,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				return client.disconnect();
 			} else if (match == undefined) {
 				client.emit('requestError');
-				// throw error ?
 				return ;
 			}
 			if (this.gamesService.isPlayer(client, match) === false) {
 				client.emit('requestError');
-				//throw error ?
 				return ;
 			}
 			for (const user of match.readyUsers) {
@@ -105,7 +103,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.join(matchId);
 			match.readyUsers.push(client.data.user);
 			if (match.readyUsers.length >= 2) {
-				// start game !
+				match.state = State.STARTING;
+				this.gamesService.startGame(this.server, match, watchers, matchs);
 			}
 		} catch {
 			return client.disconnect();
@@ -114,24 +113,58 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage('gameInput')
 	handleGameInput(client: Socket, data: { matchId: string, input: string}) {
-		const match = matchs.get(data.matchId);
-		if (match == undefined) {
-			client.emit('requestError');
-			return ;
-		}
-		this.gamesService.playerInput(client, match, data.input);
-	}
-
-	@SubscribeMessage('watchGame')
-	handleWatchGame(client: Socket, user: User) {
 		try {
 			if (!client.data.user) {
 				return client.disconnect();
 			}
-			if (this.gamesService.isWaiting(client, queue) == true || this.gamesService.isPlaying(client, matchs) == true) {
+			const match = matchs.get(data.matchId);
+			if (match == undefined) {
+				client.emit('requestError');
 				return ;
 			}
-			// TODO continue function by sending all current matches
+			this.gamesService.playerInput(client, match, data.input);
+		} catch {
+			return client.disconnect();
+		}
+	}
+
+	@SubscribeMessage('watchGame')
+	handleWatchGame(client: Socket) {
+		try {
+			if (!client.data.user) {
+				return client.disconnect();
+			}
+			if (this.gamesService.isWaiting(client, queue) === true
+				|| this.gamesService.isPlaying(client, matchs) === true) {
+				return ;
+			}
+			watchers.push(client);
+			this.gamesService.listGames(client, matchs);
+		} catch {
+			return client.disconnect();
+		}
+	}
+
+	@SubscribeMessage('followGame')
+	handleFollowGame(client: Socket, matchId: string) {
+		try {
+			if (!client.data.user) {
+				return client.disconnect();
+			}
+			if (this.gamesService.isWaiting(client, queue) == true 
+				|| this.gamesService.isPlaying(client, matchs) == true) {
+				return ;
+			}
+			const index = watchers.indexOf(client);
+			if (index === -1) {
+				return ;
+			}
+			const match = matchs.get(matchId);
+			if (match.state != State.ONGOING) {
+				return ;
+			}
+			watchers.splice(index, 1);
+			client.join(matchId);
 		} catch {
 			return client.disconnect();
 		}
