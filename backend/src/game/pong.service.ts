@@ -8,13 +8,13 @@ export class PongService {
 	initPong() : Pong {
 		let field = this.initField();
 		let ball = this.initBall(field);
+		let paddleL = this.initPaddle(field, true);
 		let paddleR = this.initPaddle(field, false);
-		let paddleL = this.initPaddle(field,true);
 		let pong: Pong = {
 			field: field,
 			ball: ball,
-			paddleR: paddleR,
 			paddleL: paddleL,
+			paddleR: paddleR,
 		}
 		return pong;
 	}

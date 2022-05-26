@@ -5,14 +5,13 @@ import { Match, State } from './interfaces/match.interface';
 import { Player } from './interfaces/player.interface';
 import { Pong } from './interfaces/pong.interface';
 import { PongService } from './pong.service';
-import { Interval, SchedulerRegistry } from '@nestjs/schedule';
+import { Point } from './interfaces/pong.interface';
 
 @Injectable()
 export class GamesService {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly pongService: PongService,
-		private schedulerRegistry: SchedulerRegistry,
 	) {}
 
 	isWaiting(client : Socket, queue: Array<Socket>): boolean {
@@ -98,16 +97,73 @@ export class GamesService {
 	}
 
 	startGame(server: Server, match: Match) {
-		server.to(match.matchId).emit('gameStarting');
-		match.state = State.ONGOING;
-		//const interval = this.schedulerRegistry.getInterval();
-		this.refreshGame(match);
+		// Send: 'beReady' + player position  on field + match Id + opponent nickname 
+		match.players[0].socket.emit('beReady', 'left', match.matchId, match.players[1].user.nickname);
+		match.players[1].socket.emit('beReady', 'right', match.matchId, match.players[0].user.nickname);
+		let count = 3;
+		const countdown = setInterval(function() {
+			server.to(match.matchId).emit('countdown', String(count), match.matchId);
+			count--;
+			if (count === 0) {
+				clearInterval(countdown);
+				match.state = State.ONGOING;
+				server.to(match.matchId).emit('gameStarting');
+			}
+		}, 1000);
+		const intervalId = setInterval(function (match) { 
+			if (match.state === State.FINISHED) {
+				clearInterval(intervalId);
+				this.finishGame(match);
+			} else {
+				this.refreshGame(server, match) 
+			}
+		}, 50, match, server, match);
 	}
 
-	@Interval('match', 50) // in ms
-	refreshGame(match: Match) {
-
+	playerInput(client: Socket, match: Match, input: string) {
+		if (this.isPlayer(client, match) == false || (input != 'UP' && input != 'DOWN')) {
+			client.emit('requestError');
+			return ;
+		}
+		if (client.data.user.id === match.players[0].user.id) {
+			this.pongService.movePaddle(match.pong.field, match.pong.paddleL, input);
+		} else {
+			this.pongService.movePaddle(match.pong.field, match.pong.paddleR, input);		
+		}
 	}
 
-	clear
+	refreshGame(server: Server, match: Match) {
+		this.pongService.calcBallPos(match.pong);
+		server.to(match.matchId).emit('gameUpdate', this.getBallFeatures(match), this.getPaddlesFeatures(match));
+		let point = this.pongService.getScore(match.pong.field, match.pong.ball);
+		let winner = false;
+		if (point != Point.NONE) {
+			if (point == Point.LEFT) {
+				this.scoreUp(match, match.players[0]);
+				winner = this.playerWon(match, match.players[0]);
+			} else {
+				this.scoreUp(match, match.players[1]);
+				winner = this.playerWon(match, match.players[1]);
+			}
+			// Send : 'score' + score player left side + score player right side
+			server.to(match.matchId).emit('score', match.players[0].score, match.players[1].score);
+		}
+		if (winner === true) {
+			match.state = State.FINISHED;
+		}
+	}
+
+	getBallFeatures(match: Match) {
+		return { ball: { pos: { x: match.pong.ball.pos.x, y: match.pong.ball.pos.y }, radius: match.pong.ball.radius }};
+	}
+
+	getPaddlesFeatures(match: Match) {
+		return { paddleL : { blcPos: { x: match.pong.paddleL.blcPos.x, y: match.pong.paddleL.blcPos.y }, width: match.pong.paddleL.width, length: match.pong.paddleL.length },
+				 paddleR: { blcPos: { x: match.pong.paddleR.blcPos.x, y: match.pong.paddleR.blcPos.y }, width: match.pong.paddleR.width, length: match.pong.paddleR.length }};
+	}
+
+	finishGame(match: Match) {
+		// TODO
+	}
+
 }

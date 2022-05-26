@@ -87,7 +87,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const match = matchs.get(matchId);
 			if (!client.data.user) {
 				return client.disconnect();
-			} else if (match === undefined) {
+			} else if (match == undefined) {
 				client.emit('requestError');
 				// throw error ?
 				return ;
@@ -114,7 +114,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage('gameInput')
 	handleGameInput(client: Socket, data: { matchId: string, input: string}) {
-		// Go to game for modification
+		const match = matchs.get(data.matchId);
+		if (match == undefined) {
+			client.emit('requestError');
+			return ;
+		}
+		this.gamesService.playerInput(client, match, data.input);
 	}
 
 	@SubscribeMessage('watchGame')
