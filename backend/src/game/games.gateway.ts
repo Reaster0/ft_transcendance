@@ -74,8 +74,38 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				const newMatch = this.gamesService.setMatch(matchId, queue.slice(0, 2));
 				matchs.set(matchId, newMatch);
 				this.gamesService.sendToPlayers(newMatch, 'foundMatch', newMatch.matchId);
-				this.gamesService.waitForPlayers(newMatch, matchs);
+				this.gamesService.waitForPlayers(this.server, newMatch, matchs);
 			}
+		} catch {
+			return client.disconnect();
+		}
+	}
+
+	@SubscribeMessage('invitToGame')
+	handleInvitToGame(client : Socket, opponent: Socket) {
+		try {
+			if (!client.data.user || !opponent.data.user) {
+				opponent.emit('error');
+				client.emit('error');
+				opponent.disconnect();
+				client.disconnect();
+				return;
+			}
+			if (this.gamesService.isPlaying(client, matchs) === true) {
+				return ;
+			}
+			if (opponent.data.user === client.data.user.username) {
+				client.emit('requestError');
+				return client.disconnect();
+			}
+			const matchId = uuid();
+			let users = new Array();
+			users.push(client);
+			users.push(opponent);
+			const newMatch = this.gamesService.setMatch(matchId, users);
+			matchs.set(matchId, newMatch);
+			this.gamesService.sendToPlayers(newMatch, 'foundMatch', newMatch.matchId);
+			this.gamesService.waitForPlayers(this.server, newMatch, matchs);
 		} catch {
 			return client.disconnect();
 		}
@@ -139,7 +169,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				return ;
 			}
 			watchers.push(client);
-			this.gamesService.listGames(client, matchs);
+			this.gamesService.listGamesToOne(client, matchs);
 		} catch {
 			return client.disconnect();
 		}
@@ -151,8 +181,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (!client.data.user) {
 				return client.disconnect();
 			}
-			if (this.gamesService.isWaiting(client, queue) == true 
-				|| this.gamesService.isPlaying(client, matchs) == true) {
+			if (this.gamesService.isWaiting(client, queue) === true 
+				|| this.gamesService.isPlaying(client, matchs) === true) {
 				return ;
 			}
 			const index = watchers.indexOf(client);

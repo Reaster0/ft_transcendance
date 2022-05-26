@@ -85,18 +85,19 @@ export class GamesService {
 		return match;
 	}
 
-	waitForPlayers(match: Match, matchs: Map<string, Match>) {
+	waitForPlayers(server: Server, match: Match, matchs: Map<string, Match>) {
 		const timer = setTimeout(function() {
 			if (match.state === State.STARTING) {
 				clearTimeout(timer);
 			} else {
-				this.abortGame(match, matchs);
+				this.abortGame(server, match, matchs);
 			}
-		}, 10000, match, matchs);
+		}, 10000, server, match, matchs);
 	}
 
-	abortGame(match: Match, matchs: Map<string, Match>) {
-		this.sendToPlayers(match, 'foundMatch', null);	
+	abortGame(server: Server, match: Match, matchs: Map<string, Match>) {
+		this.sendToPlayers(match, 'foundMatch', null);
+		server.socketsLeave(match.matchId);
 		matchs.delete(match.matchId);
 	}
 
@@ -138,14 +139,14 @@ export class GamesService {
 			if (count === 0) {
 				clearInterval(countdown);
 				match.state = State.ONGOING;
-				this.listGames(watchers, matchs);
-				server.to(match.matchId).emit('gameStarting');
+				this.listGamesToAll(watchers, matchs);
+				server.to(match.matchId).emit('gameStarting', match.matchId);
 			}
 		}, 1000);
 		const intervalId = setInterval(function (match) { 
 			if (match.state === State.FINISHED) {
 				clearInterval(intervalId);
-				this.listGames(watchers, matchs);
+				this.listGamesToAll(watchers, matchs);
 				this.finishGame(server, match);
 			} else {
 				this.refreshGame(server, match) 
@@ -205,12 +206,25 @@ export class GamesService {
 		// TODO set game inside DB
 	}
 
-	listGames(client: Socket, matchs: Map<string, Match>) {
+	listGamesToOne(client: Socket, matchs: Map<string, Match>) {
+		client.emit('newList');
 		for (let match of matchs.values()) {
 			if (match.state === State.ONGOING) {
 				client.emit('ongoingGame', match.matchId, match.players[0].user.nickname, match.players[1].user.nickname);
 			}
 		}
+		client.emit('endList');
 	}
 
+	listGameToAll(watchers: Array<Socket>, matchs: Map<string, Match>) {
+		for (let client of watchers) {
+			client.emit('newList');
+			for (let match of matchs.values()) {
+				if (match.state === State.ONGOING) {
+					client.emit('ongoingGame', match.matchId, match.players[0].user.nickname, match.players[1].user.nickname);
+				}
+			}
+			client.emit('endList');
+		}
+	} 
 }
