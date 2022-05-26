@@ -6,7 +6,7 @@ import { Status } from '../../common/enums/status.enum';
 import * as crypto from 'crypto';
 import { Avatar } from './avatar.entity';
 import { Exclude } from 'class-transformer';
-import { GameHistory } from '../../game/entities/history.entity';
+import { GameHistory } from '../../game/entities/gamehistory.entity';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -40,11 +40,11 @@ export class User {
 
 	@Column({ type: 'text', nullable: true })
 	@ApiProperty({ type: String, description: 'User personal 2FA Secret (optional field)'})
-  	public twoFASecret?: string;
+  	twoFASecret?: string;
 	
 	@Column({ type: 'boolean', default: false })
 	@ApiProperty({ type: String, description: 'User as activate 2FA)'})
-  	public is2FAEnabled: boolean;
+  	is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
 	@ApiProperty({ type: [Number], description: 'User friends, identified by unique ids inside an array.'})
@@ -60,12 +60,12 @@ export class User {
 	eloScore: number;
 
 	@ApiProperty({ description: 'History of games won in relation with corresponding gameHistory entity.'})
-	@OneToMany(() => GameHistory,  game => game.winner) // how to select which player ?
-	gamesWon: GameHistory; 
+	@OneToMany(() => GameHistory,  game => game.winner, { cascade: true })
+	gamesWon: GameHistory[]; 
 
 	@ApiProperty({ description: 'History of games lost in relation with corresponding gameHistory entity.'})
-	@OneToMany(() => GameHistory,  game => game.looser) // how to select which player ?
-	gamesLost: GameHistory; 
+	@OneToMany(() => GameHistory,  game => game.looser, { cascade: true })
+	gamesLost: GameHistory[]; 
 
 	// Source of encryption : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()

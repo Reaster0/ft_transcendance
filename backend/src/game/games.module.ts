@@ -5,7 +5,7 @@ import { GameGateway } from './games.gateway';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from '../auth/auth.service';
 import { PongService } from './pong.service';
-import { GameHistory } from './entities/history.entity';
+import { GameHistory } from './entities/gamehistory.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 

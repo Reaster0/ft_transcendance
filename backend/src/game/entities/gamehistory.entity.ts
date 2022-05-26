@@ -3,7 +3,7 @@
 
 import { IsNumber } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('gameHistory')
@@ -13,12 +13,12 @@ export class GameHistory {
 	id: number;
 
 	@ApiProperty({ description: 'Winner of match, relation to corresponding user.' })
-	@ManyToOne(() => User, user => user.gamesWon)
-	winner: User;
+	@ManyToOne(() => User, user => user.gamesWon, { nullable: true })
+	winner?: User; //Can be null if user is deleted
 
 	@ApiProperty({ description: 'Looser of match, relation to corresponding user.' })
-	@ManyToOne(() => User, user => user.gamesLost)
-	looser: User;
+	@ManyToOne(() => User, user => user.gamesLost, { nullable: true })
+	looser?: User; //Can be null if user is deleted
 
 	@Column({ type: 'int' })
 	@ApiProperty({ type: Number, description: 'Winner score.' })
