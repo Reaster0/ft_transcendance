@@ -1,11 +1,12 @@
 import { IsEmail, IsNumber, IsAlphanumeric } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne,
-		JoinColumn } from 'typeorm';
+		JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
 import * as crypto from 'crypto';
 import { Avatar } from './avatar.entity';
 import { Exclude } from 'class-transformer';
+import { GameHistory } from '../../game/entities/history.entity';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -58,9 +59,13 @@ export class User {
 	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
 	eloScore: number;
 
-	// For game history and stats:
-	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
-	//matchHistory: Game; 
+	@ApiProperty({ description: 'History of games won in relation with corresponding gameHistory entity.'})
+	@OneToMany(() => GameHistory,  game => game.winner) // how to select which player ?
+	gamesWon: GameHistory; 
+
+	@ApiProperty({ description: 'History of games lost in relation with corresponding gameHistory entity.'})
+	@OneToMany(() => GameHistory,  game => game.looser) // how to select which player ?
+	gamesLost: GameHistory; 
 
 	// Source of encryption : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()

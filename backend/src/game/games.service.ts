@@ -38,6 +38,27 @@ export class GamesService {
 		return false;
 	}
 
+	getMatch(client: Socket, matchs: Map<string, Match>) : Match {
+		for (let currMatch of matchs.values()) {
+			const matchPlayers = currMatch.players;
+			for (let currPlayer of matchPlayers) {
+				if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
+					return currMatch;
+				}
+			}
+		}
+		return undefined;
+	}
+
+	getOpponent(client: Socket, match: Match) : Player {
+		for (let player of match.players) {
+			if (client != player.socket && client.data.user.id != player.user.id) {
+					return player;
+			}
+		}
+		return undefined;
+	}
+
 	wantToWatch(client: Socket, watchers: Array<Socket>) {
 		if (watchers.includes(client)) {
 			return true;
@@ -147,7 +168,7 @@ export class GamesService {
 			if (match.state === State.FINISHED) {
 				clearInterval(intervalId);
 				this.listGamesToAll(watchers, matchs);
-				this.finishGame(server, match);
+				this.finishGame(server, match, matchs);
 			} else {
 				this.refreshGame(server, match) 
 			}
@@ -187,7 +208,6 @@ export class GamesService {
 			server.to(match.matchId).emit('score', match.matchId, match.players[0].score, match.players[1].score);
 		}
 		if (winner === true) {
-			server.to(match.matchId).emit('endGame', match.matchId, match.winner.user.nickname);
 			match.state = State.FINISHED;
 		}
 	}
@@ -201,9 +221,12 @@ export class GamesService {
 				 paddleR: { blcPos: { x: match.pong.paddleR.blcPos.x, y: match.pong.paddleR.blcPos.y }, width: match.pong.paddleR.width, length: match.pong.paddleR.length }};
 	}
 
-	finishGame(server: Server, match: Match) {
+	finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
+		server.to(match.matchId).emit('endGame', match.matchId, match.winner.user.nickname);
 		server.socketsLeave(match.matchId);
 		// TODO set game inside DB
+		matchs.delete(match.matchId);
+		
 	}
 
 	listGamesToOne(client: Socket, matchs: Map<string, Match>) {

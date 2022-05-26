@@ -41,19 +41,28 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.data.user = user;
 			return client.emit('connectedToGame'); // maybe emit user ?
 		} catch {
-			// error ?
 			return client.disconnect();
 		}
 	}
 
 	async handleDisconnect(client: Socket) {
-		// check if user is in game or in waiting queue, send a 'opponentLeft' if
-		// was an opponent
 		this.logger.log('disconnection');
 		if (client.data.user) {
 			await this.usersService.changeStatus(client.data.user, Status.OFFLINE);
-		} else {
-			// error ?
+			if (this.gamesService.isWaiting(client, queue) === true) {
+				const index = queue.indexOf(client);
+				queue.splice(index, 1);
+			} else if (this.gamesService.isPlaying(client, matchs) === true) {
+				const match = this.gamesService.getMatch(client, matchs);
+				match.state = State.FINISHED;
+				const opponent = this.gamesService.getOpponent(client, match);
+				opponent.socket.emit('opponentDisconnected', match.matchId);
+				match.winner = opponent;
+				this.gamesService.finishGame(this.server, match, matchs);
+			} else if (this.gamesService.wantToWatch(client, watchers) === true) {
+				const index = watchers.indexOf(client);
+				watchers.splice(index, 1);
+			}
 		}
 		return client.disconnect();
 	}
