@@ -1,7 +1,8 @@
 <template>
 	<v-container>
 		<!-- <canva id="c"></canva> -->
-		<v-btn @click="sendMessage">send Msg</v-btn>
+		<v-btn @click="Play">Play</v-btn>
+		<v-btn v-if="matchId" @click="AcceptGame">joinGame</v-btn>
 	</v-container>
 </template>
 
@@ -13,6 +14,7 @@ import io from 'socket.io-client';
 export default {
 	setup(){
 		const connection = ref(null)
+		const matchId = ref(null)
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -31,28 +33,42 @@ export default {
 				console.log(text)
 			})
 
-			// connection.value.onmessage = (event) => {
-			// 	console.log("message from server:" + event)
-			// }
+			connection.value.on('foundMatch', res =>{
+				matchId.value = res
+				console.log(res)
+			})
 
-			// connection.value.onopen = (event) => {
-			// 	console.log(event)
-			// 	console.log("connected to the server")
-			// }
+			connection.value.onmessage = (event) => {
+				console.log("message from server:" + event)
+			}
 
-			// connection.value.onclose = (event) => {
-			// 	console.log(event)
-			// 	console.log("disconnected from the server")
-			// }
-		})
+			connection.value.onopen = (event) => {
+				console.log(event)
+				console.log("connected to the server")
+			}
 
-		function sendMessage(){
-			connection.value.emit('joinGame', "lol")
-			console.log("emit")
-			//connection.value.send(message)
+			connection.value.onclose = (event) => {
+				console.log(event)
+				console.log("disconnected from the server")
+			}
+			})
+
+		function Play(){
+			connection.value.emit('joinGame')
+			console.log("joinGame")
 		}
 
-			return { connection, sendMessage }
+		function AcceptGame(){
+			connection.value.emit('acceptGame', matchId.value)
+			console.log("acceptGame")
+		}
+
+		function GameInput(){
+			connection.value.emit('gameInput')
+			console.log("gameInput")
+		}
+
+			return { connection, Play, AcceptGame, GameInput, matchId }
 
 	}
 }
