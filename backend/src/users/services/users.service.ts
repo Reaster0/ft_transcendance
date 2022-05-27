@@ -222,4 +222,36 @@ export class UsersService {
 			eloScore: user.eloScore,
 		}
 	}
+
+//	async ConnectUser(soketID: string)
+	async getConnectedUser() : Promise<User[]> {
+		const connectedUser = this.userRepository.find({where: {status: Status.ONLINE}})
+		return connectedUser;
+	}
+
+	async updateBlockedUser(block: boolean, user: User, userToBlock: User): Promise<User> {
+		const userFound = user.blockedUID.find(element => element === userToBlock.id)
+
+		if (block === true && !userFound)
+		{
+			user.blockedUID.push(userToBlock.id);
+			try {
+				await this.userRepository.save(user);
+			} catch (error) {
+				console.log(error);
+				throw new InternalServerErrorException('add blocked user');
+			}
+		}
+		if (block === false && userFound) {
+			const index = user.blockedUID.indexOf(userToBlock.id);
+			user.blockedUID.splice(index, 1);
+			try {
+				await this.userRepository.save(user);
+			} catch (error) {
+				console.log(error);
+				throw new InternalServerErrorException('add blocked user');
+			}
+		}
+		return user;
+	}
 }

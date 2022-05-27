@@ -1,11 +1,15 @@
 import { IsEmail, IsNumber, IsAlphanumeric } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne,
-		JoinColumn } from 'typeorm';
+		JoinColumn, 
+		ManyToMany,
+		OneToMany} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
 import * as crypto from 'crypto';
 import { Avatar } from './avatar.entity';
 import { Exclude } from 'class-transformer';
+import { Chan } from 'src/chat/entities/chan.entity';
+import { Message } from 'src/chat/entities/message.entity';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -42,7 +46,7 @@ export class User {
   	public twoFASecret?: string;
 	
 	@Column({ type: 'boolean', default: false })
-	@ApiProperty({ type: String, description: 'User as activate 2FA)'})
+	@ApiProperty({ type: Boolean, description: 'User as activate 2FA)'})
   	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
@@ -57,6 +61,18 @@ export class User {
 	@Column({ type: 'int', default: 0 })
 	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
 	eloScore: number;
+
+	// CHAT STUFF --------
+	@Column({type: 'text', array: true, default: {}})
+	@ApiProperty({ type: String, description: 'Array of openned socket id)'})
+	soketID: string[];
+
+	@ManyToMany(() => Chan, channel => channel.users)
+  	channels: Chan[];
+
+  	@OneToMany(() => Message, message => message.user)
+  	messages: Message[];
+	//-----------------------
 
 	// For game history and stats:
 	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
