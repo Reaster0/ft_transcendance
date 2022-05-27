@@ -107,19 +107,18 @@ export class GamesService {
 	}
 
 	waitForPlayers(server: Server, match: Match, matchs: Map<string, Match>) {
+		let that = this;
 		const timer = setTimeout(function() {
-			if (match.state === State.STARTING) {
-				clearTimeout(timer);
-			} else {
-				this.abortGame(server, match, matchs);
-			}
+			that.abortGame(server, match, matchs);
 		}, 10000, server, match, matchs);
 	}
 
 	abortGame(server: Server, match: Match, matchs: Map<string, Match>) {
-		this.sendToPlayers(match, 'foundMatch', null);
-		server.socketsLeave(match.matchId);
-		matchs.delete(match.matchId);
+		if (match.state === State.SETTING) {
+			this.sendToPlayers(match, 'foundMatch', { matchId: null });
+			server.socketsLeave(match.matchId);
+			matchs.delete(match.matchId);
+		}
 	}
 
 	sendToPlayers(match: Match, toSend: string, ...args) {
@@ -151,20 +150,21 @@ export class GamesService {
 
 	startGame(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
 		// Send: 'beReady' + player position  on field + match Id + opponent nickname 
-		match.players[0].socket.emit('beReady', 'left', match.matchId, match.players[1].user.nickname);
-		match.players[1].socket.emit('beReady', 'right', match.matchId, match.players[0].user.nickname);
+		match.players[0].socket.emit('beReady', { pos: 'left', matchId: match.matchId, opponent: match.players[1].user.nickname });
+		match.players[1].socket.emit('beReady', { pos: 'right', matchId: match.matchId, opponent: match.players[0].user.nickname });
 		let count = 3;
 		const countdown = setInterval(function() {
-			server.to(match.matchId).emit('countdown', String(count), match.matchId);
+			match.players[0].socket.emit('test');
+			server.to(match.matchId).emit('countdown', { countdown: String(count), matchId: match.matchId });
 			count--;
 			if (count === 0) {
 				clearInterval(countdown);
-				match.state = State.ONGOING;
-				this.listGamesToAll(watchers, matchs);
-				server.to(match.matchId).emit('gameStarting', match.matchId);
 			}
-		}, 1000);
-		const intervalId = setInterval(function (match) { 
+		}, 1000, server, match);
+		match.state = State.ONGOING;
+		this.listGamesToAll(watchers, matchs);
+		server.to(match.matchId).emit('gameStarting', { matchId: match.matchId });
+		const intervalId = setInterval(() => { 
 			if (match.state === State.FINISHED) {
 				clearInterval(intervalId);
 				this.listGamesToAll(watchers, matchs);
@@ -189,7 +189,7 @@ export class GamesService {
 
 	refreshGame(server: Server, match: Match) {
 		this.pongService.calcBallPos(match.pong);
-		server.to(match.matchId).emit('gameUpdate', match.matchId, this.getBallFeatures(match), this.getPaddlesFeatures(match));
+		server.to(match.matchId).emit('gameUpdate', { matchId: match.matchId, ball: this.getBallFeatures(match), paddles: this.getPaddlesFeatures(match) });
 		let point = this.pongService.getScore(match.pong.field, match.pong.ball);
 		let winner = false;
 		if (point != Point.NONE) {
@@ -205,7 +205,7 @@ export class GamesService {
 				}
 			}
 			// Send : 'score' + score player left side + score player right side
-			server.to(match.matchId).emit('score', match.matchId, match.players[0].score, match.players[1].score);
+			server.to(match.matchId).emit('score', { matchId: match.matchId, leftScore: match.players[0].score, rightScore: match.players[1].score });
 		}
 		if (winner === true) {
 			match.state = State.FINISHED;
@@ -222,7 +222,7 @@ export class GamesService {
 	}
 
 	finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
-		server.to(match.matchId).emit('endGame', match.matchId, match.winner.user.nickname);
+		server.to(match.matchId).emit('endGame', { matchId: match.matchId, winner: match.winner.user.nickname });
 		server.socketsLeave(match.matchId);
 		// TODO set game inside DB
 		matchs.delete(match.matchId);
@@ -233,21 +233,15 @@ export class GamesService {
 		client.emit('newList');
 		for (let match of matchs.values()) {
 			if (match.state === State.ONGOING) {
-				client.emit('ongoingGame', match.matchId, match.players[0].user.nickname, match.players[1].user.nickname);
+				client.emit('ongoingGame', { matchId: match.matchId, leftPlayer: match.players[0].user.nickname, rightPlayer: match.players[1].user.nickname });
 			}
 		}
 		client.emit('endList');
 	}
 
-	listGameToAll(watchers: Array<Socket>, matchs: Map<string, Match>) {
+	listGamesToAll(watchers: Array<Socket>, matchs: Map<string, Match>) {
 		for (let client of watchers) {
-			client.emit('newList');
-			for (let match of matchs.values()) {
-				if (match.state === State.ONGOING) {
-					client.emit('ongoingGame', match.matchId, match.players[0].user.nickname, match.players[1].user.nickname);
-				}
-			}
-			client.emit('endList');
+			this.listGamesToOne(client, matchs);
 		}
 	} 
 }

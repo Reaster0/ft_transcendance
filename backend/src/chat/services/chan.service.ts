@@ -5,7 +5,7 @@ import { Repository } from "typeorm";
 import { Chan } from "../entities/chan.entity";
 import { ChanUser } from "../entities/chanUser.entity";
 import { SocketConnected } from "../entities/socketConnected";
-import { SocketJoined } from "../entities/soketJoined";
+import { SocketJoined } from "../entities/socketJoined";
 import { ChanI } from "../interfaces/channel.interface";
 import { ChanUserI } from "../interfaces/chanUser.interface";
 import { connectedSocketI } from "../interfaces/connectSocket.interface";
@@ -49,9 +49,9 @@ export class ChanServices {
 		return this.chanRepository.save(channel);
 	}
     async deleteChannel(channel: ChanI) {
-        if (!channel.id)
+        if (!channel.chanID)
             throw new InternalServerErrorException('bad request: deleteChannel');
-		const channelFound: Chan = await this.chanRepository.findOne(channel.id);
+		const channelFound: Chan = await this.chanRepository.findOne(channel.chanID);
 		if (channelFound) {
    /*
 			channelFound.users = []; //is this necessary ?

@@ -6,11 +6,12 @@ import { Chan } from "./entities/chan.entity";
 import { ChanUser } from "./entities/chanUser.entity";
 import { Message } from "./entities/message.entity";
 import { SocketConnected } from "./entities/socketConnected";
-import { SocketJoined } from "./entities/soketJoined";
+import { SocketJoined } from "./entities/socketJoined";
 import { ChanServices } from "./services/chan.service";
 import { ChatServices } from "./services/chat.service";
 import { ConnectService } from "./services/connect.service";
 import { MessageService } from "./services/message.service";
+import { AuthService } from '../auth/auth.service';
 
 @Module({
     imports: [
@@ -18,7 +19,7 @@ import { MessageService } from "./services/message.service";
         UsersModule,
     ],
     controllers: [],
-    providers: [ChatGateway, ChanServices, ChatServices, ConnectService, MessageService],
+    providers: [ChatGateway, ChanServices, ChatServices, ConnectService, MessageService, AuthService],
     exports: [ChatGateway],
 })
 export class ChatModule {}
