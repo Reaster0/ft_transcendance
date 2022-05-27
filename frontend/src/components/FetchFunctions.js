@@ -1,5 +1,7 @@
 //all functions here return the results or NULL
 
+//import axios from "axios";
+
 export async function isLogged() {
 	console.log("check if user is logged")
 	return await fetch("/api/users/logged", {credentials: "include"})
@@ -45,5 +47,35 @@ export async function submit2FaCode(inputCode) {
 	.then(res => {
 		console.log(res)
 		return res.status == 201? true : false 
+	})
+}
+
+export async function getAvatarID(id) {
+	return await fetch("/api/users/getAvatar/" + id, {credentials: "include"})
+	.then(res => {
+		return res.status != 200? null : res.blob()})
+	.then(blob => {
+		return blob? URL.createObjectURL(blob) : blob
+	})
+}
+
+export async function updateUser(nick, mail) {
+	return await fetch("/api/users/settings", {
+		credentials: "include",
+		method: "PATCH",
+		body: JSON.stringify({
+			nickname: nick,
+			email: mail
+		}),
+		headers: {
+			'Content-type': 'application/json; charset=UTF-8',
+		},
+	})
+	.then(res => {
+		console.log(JSON.stringify({
+			nickname: nick,
+			email: mail
+		}))
+		return res.status == 200? true : false
 	})
 }
