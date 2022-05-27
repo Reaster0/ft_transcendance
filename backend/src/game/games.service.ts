@@ -172,7 +172,7 @@ export class GamesService {
 			} else {
 				this.refreshGame(server, match) 
 			}
-		}, 50, match, server, match);
+		}, 16, match, server, match);
 	}
 
 	playerInput(client: Socket, match: Match, input: string) {
