@@ -5,6 +5,7 @@ import LoginPage from "../views/LoginPage.vue";
 import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
+import EditUser from "../views/EditUser.vue";
 import Chat from "../views/TransChat_group.vue";
 import ChatPerson from "../views/TransChat_person.vue";
 import NewRoom from "../views/TransChat_create_room.vue";
@@ -42,6 +43,11 @@ const routes = [
 		path: '/game',
 		name: "TheGame",
 		component: TheGame
+	},
+	{
+		path: '/user/edit',
+		name: "editUser",
+		component: EditUser
 	},
 	{
 		path: '/chatgroup',

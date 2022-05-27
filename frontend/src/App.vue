@@ -1,7 +1,7 @@
 <template>
 	<v-app>
 		<NavDrawer/>
-		<v-parallax min-height="1000" src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg">
+		<v-parallax min-height="1000" src="./assets/blurredy.jpg">
 		<router-view/>
 		</v-parallax>
 	</v-app>
