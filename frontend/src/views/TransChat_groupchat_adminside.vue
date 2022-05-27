@@ -10,13 +10,12 @@
 				label="Find user / group"
 				placeholder="Search"
             ></v-text-field>
-			<v-btn v-on:click="create" elevation="2">
+      <v-btn to="/newroom" elevation="2">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
 				<v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
 			</v-btn>
 			</v-col>
-
 
       
 		
@@ -24,6 +23,7 @@
     <div id="app" class="text-left">
     <v-app id="inspire">
 		<v-list>
+      <!-- <v-simple-table dense> -->
 			<v-list-item-group v-model="selectedItem" >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -59,24 +59,22 @@
     </v-col>
 
 
-
-		<!-- open channel -->
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
           <v-app id="inspire">
             <v-card color="rgba(0,0,0,0)" flat >
               <v-toolbar dense >
+                <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
                 <v-btn elevation="0" min-height="50px"  max-width="50px">
                 <v-badge bordered bottom color="green" dot offset-x="4" offset-y="34" class="spacetop" >
                     <v-avatar class="col" elevation="10" size="40px">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg" width="50" height="50">
+                      <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="50" height="50">
                     </v-avatar>
                 </v-badge>
                 </v-btn>
-                <v-toolbar-title class="offsetmess">anadege</v-toolbar-title>
+                <v-toolbar-title class="offsetmess">Equipe transcendance</v-toolbar-title>
               </v-toolbar>
             </v-card>
-
 
         <!-- <v-app> -->
             <!-- MESSAGE 4 OTHER -->
@@ -113,6 +111,8 @@
                 </v-avatar>
               </v-badge>
               </v-btn>
+            <!-- field chat -->
+            <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
             <v-card class="mt-2 ml-2" max-width="450px">
               <v-list-item >
                 <v-list-item-content>
@@ -185,6 +185,7 @@
                 </v-avatar>
               </v-badge>
               </v-btn>
+            <!-- field chat -->
             <v-card class="mt-2 ml-2" max-width="450px">
               <v-list-item >
                 <v-list-item-content>
@@ -216,39 +217,131 @@
           <v-card height="22%" class="text-center offsetphoto" shaped >
              <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
                    <v-avatar class="s" elevation="10" size="60px">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg" width="70" height="70">
+                      <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
                     </v-avatar>
              </v-badge>
-                <v-card-title class="layout justify-center">anadege</v-card-title>
-                <v-card-subtitle class="layout justify-center">Teammate</v-card-subtitle>
+                <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
+                <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
           </v-card>
-      
-      <div id="app">
-        <v-app id="inspire" class="pt-6">
-          <v-btn v-on:click="create" elevation="2" width="350px">
-            Block this user
-          </v-btn>
-          <v-scale-transition>
-            <div v-if="!loading" class="text-center">
-            <v-btn color="rgb(0,0,255)" @click="loading = true" elevation="2" width="350px">
-              <div  :style="{color: ' #ffffff'}">
-                Invite to play together
-              </div>
-            </v-btn>
-            </div>
-          </v-scale-transition>
-          <v-toolbar dense  color="rgba(0,0,0,0)">
-            <v-progress-linear
-              :active="loading"
-              :indeterminate="loading"
-              absolute
-              bottom
-              color="rgb(0,0,255)"
-            ></v-progress-linear>
-          </v-toolbar>
-        </v-app>
-      </div>
 
+          <div id="app" class="pt-6">
+          <v-btn v-on:click="create" elevation="2" width="350px" color="red">
+            Leave the chat room
+          </v-btn>
+          </div>
+          <div id="app">
+          <v-btn to="/roomsettings" elevation="2" width="350px">
+            Room settings
+          </v-btn>
+          </div>
+
+      
+        <!-- TABS  -->
+        <div id="app" class="pt-6">
+          <v-tabs
+            fixed-tabs
+            v-model="tab"
+          >
+            <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
+            <v-tab
+              color="rgb(0,0,255)"
+              v-for="(item, index) in items2"
+              :class="{active: currentTab === index}"
+              @click="currentTab = index"
+              :key="item"
+            >
+              {{ item.tabs }}
+            </v-tab>
+          </v-tabs>
+          <v-tabs-items v-model="tab">
+            <v-card flat>            
+              <div v-show="currentTab === 0">
+                <v-list>
+                  <v-list-item-group v-model="selectedItem" >
+                    <template v-for="(item, index) in members">
+                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
+                    ></v-subheader>
+                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
+                    ></v-divider>
+                
+                    <v-list-item
+                      v-else
+                      :key="item.title"
+                    >
+                      <v-btn to="/mu"
+                        icon
+                        v-bind="attrs"
+                        v-on="on"
+                        elevation="0"
+                      >
+                        <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
+                      </v-btn>
+
+                      <v-btn elevation="0" min-height="50px" max-width="50px">
+                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                      <v-list-item-avatar>
+                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
+                      </v-list-item-avatar>
+                      </v-badge>
+                      </v-btn>
+                      <v-list-item-content>
+                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                      <v-divider
+                        v-if="index < members.length"
+                        :key="index"
+                      ></v-divider>
+                    </template>
+                  </v-list-item-group>
+                </v-list>
+              </div>
+              <div v-show="currentTab === 1">
+                <v-list>
+                  <v-list-item-group v-model="selectedItem" >
+                    <template v-for="(item, index) in admins">
+                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
+                    ></v-subheader>
+                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
+                    ></v-divider>
+                
+                    <v-list-item
+                      v-else
+                      :key="item.title"
+                    >
+                      <v-btn to="/mu"
+                        icon
+                        v-bind="attrs"
+                        v-on="on"
+                        elevation="0"
+                      >
+                        <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
+                      </v-btn>
+                      
+                      <v-btn elevation="0" min-height="50px" max-width="50px" >
+                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                      <v-list-item-avatar>
+                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
+                      </v-list-item-avatar>
+                      </v-badge>
+                      </v-btn>
+                      <v-list-item-content>
+                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                      <v-divider
+                        v-if="index < admins.length"
+                        :key="index"
+                      ></v-divider>
+                    </template>
+                  </v-list-item-group>
+                </v-list>
+              </div>
+            </v-card>
+          </v-tabs-items>
+        </div>
+
+  
         </v-col>
       </v-row>
     </v-container>
@@ -264,6 +357,10 @@ export default
 {
   data: () => 
   ({
+      fav: true,
+      menu: false,
+      message: false,
+      hints: true,
       overlay: false,
       selected: [2],
       currentTab: 0,
@@ -329,14 +426,6 @@ export default
         title: "alkanaev",
       },
       ],
-      value: 10,
-      bufferValue: 20,
-      interval: 0,
-      loading: false,
-      dialog: false,
-      notifications: false,
-      sound: true,
-      widgets: false,
   }),
   methods: {
     create: function (event) 
@@ -346,46 +435,16 @@ export default
       // `event` est l'évènement natif du DOM
       if (event) 
       {
-        alert("ACTION THAT I CAN'T REPRODUCE")
+        alert('YOU ARE OWNER OR THE CHAT RROM\n IF YOU LEAVE THE ROOM - IT WILL BE DELETED AUTOMATICALLY')
       }
-    },
-    startBuffer () {
-      clearInterval(this.interval)
-
-      this.interval = setInterval(() => {
-        this.value += Math.random() * (15 - 5) + 5
-        this.bufferValue += Math.random() * (15 - 5) + 6
+    }
+  },
+  watch: {
+    overlay (val) {
+      val && setTimeout(() => {
+        this.overlay = false
       }, 2000)
     },
-  },
-  // watch: {
-  //   overlay (val) {
-  //     val && setTimeout(() => {
-  //       this.overlay = false
-  //     }, 2000)
-  //   },
-  // },
-  watch: {
-    value (val) {
-      if (val < 100) return
-
-      this.value = 0
-      this.bufferValue = 10
-      this.startBuffer()
-    },
-    loading (val) {
-      if (!val) return
-
-      setTimeout(() => (this.loading = false), 5000)
-    },
-  },
-
-  mounted () {
-    this.startBuffer()
-  },
-
-  beforeUnmount () {
-    clearInterval(this.interval)
   },
 };
 

@@ -2,13 +2,12 @@
   <v-app >
     <v-container fluid >
 
-      <!-- <v-card> -->
         <v-toolbar
           dark
           color="rgb(0,0,255)"
         >
           <v-btn
-            to="/chatgroup"
+            to="/adm"
             icon
             dark
             @click="dialog = false"
@@ -17,14 +16,14 @@
           </v-btn>
           <v-toolbar-title >
             <div :style="{color: ' #ffffff'}">
-              New chat room settings
+              Chat room settings
             </div>
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
             <v-btn to="/chatgroup" color = "ffffff" >
               <div :style="{color: ' #ffffff'}">
-                Create
+                SAVE
               </div>
             </v-btn>
           </v-toolbar-items>
@@ -33,13 +32,15 @@
 
                 <v-divider></v-divider>
 
-      <v-radio-group v-model="radios" class="spacebottom">
+      <v-radio-group v-model="radios">
         <v-list class="spacetop">
-        <v-radio value="Public">
+
+
+        <v-radio value="public">
           <template v-slot:label>
             <div>
             <p class="font-weight-black">
-              Public chat 
+              Make the chat room public
             </p>
             <p>
               Visible and accesible for anyone
@@ -47,28 +48,13 @@
             </div>
           </template>
         </v-radio>
-        <v-col cols="12" sm="6">
-            <v-btn elevation="2" class="offsetmess">
-              Upload avatar
-              <v-divider class="mx-2" vertical></v-divider>
-              <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
-            </v-btn>
-        </v-col>
-        <v-col cols="12" sm="6">
-            <v-text-field
-              class="spacetoponly"
-              clearable
-              label="Name of the room"
-              placeholder="name"
-            ></v-text-field>
-        </v-col>
 
                 <v-divider class="mb-6"></v-divider>
-        <v-radio value="Private">
+        <v-radio value="private">
           <template v-slot:label>
             <div>
             <p class="font-weight-black">
-              Private chat 
+              Make the chat room private
             </p>
             <p>
               Accecible for users that has a direct link
@@ -76,27 +62,14 @@
             </div>
           </template>
         </v-radio>
-        <v-col cols="12" sm="6">
-            <v-btn elevation="2" class="offsetmess">
-              Upload avatar
-              <v-divider class="mx-2" vertical></v-divider>
-              <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
-            </v-btn>
-        </v-col>
-        <v-col cols="12" sm="6">
-            <v-text-field
-              clearable
-              label="Name of the room"
-              placeholder="name"
-            ></v-text-field>
-        </v-col>
-
+        
                 <v-divider class="mb-6"></v-divider>
-        <v-radio value="Protected">
+
+        <v-radio value="protected">
           <template v-slot:label>
             <div>
             <p class="font-weight-black">
-              Protected chat 
+              Make the chat protected or change the password
             </p>
             <p>
               Accesible by the password
@@ -104,26 +77,28 @@
             </div>
           </template>
         </v-radio>
-
         <v-col cols="12" sm="6">
-            <v-btn elevation="2" class="offsetmess">
-              Upload avatar
-              <v-divider class="mx-2" vertical></v-divider>
-              <v-icon color="rgb(0,0,255)" > msdi-plus </v-icon>
-            </v-btn>
-        </v-col>
-        <v-col cols="12" sm="6">
-            <v-text-field
-              clearable
-              label="Name of the room"
-              placeholder="name"
-            ></v-text-field>
             <v-text-field
               clearable
               label="Set a password"
               placeholder="Password"
             ></v-text-field>
         </v-col>
+        
+                <v-divider class="mb-6"></v-divider>
+
+
+        <div>
+        <p class="font-weight-black offsetmess">
+          Change the avatar
+        </p>
+        </div>
+        <v-col cols="12" sm="6" class="offsetmess">
+            <v-btn elevation="2">
+              Upload new avatar
+            </v-btn>
+        </v-col>
+
         </v-list> 
       </v-radio-group>
     </v-container>
@@ -137,7 +112,11 @@
 // https://codesource.io/vue-export-default-vs-vue-new/
 export default 
 {
-
+  data: () => ({
+    public: false,
+    private: false,
+    protected: true,
+  }),
 };
 
 </script>

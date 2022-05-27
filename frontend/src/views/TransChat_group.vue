@@ -5,13 +5,11 @@
 		<!-- list of chat / search. maybe some buttons  -->
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
-            <v-text-field
+      <v-text-field
 				clearable
 				label="Find user / group"
 				placeholder="Search"
-            ></v-text-field>
-      <!-- <v-btn @click="overlay = !overlay" elevation="2"> -->
-			<!-- <v-btn v-on:click="create" elevation="2"> -->
+      ></v-text-field>
       <v-btn to="/newroom" elevation="2">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
@@ -26,7 +24,6 @@
     <div id="app" class="text-left">
     <v-app id="inspire">
 		<v-list>
-      <!-- <v-simple-table dense> -->
 			<v-list-item-group v-model="selectedItem" >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -45,14 +42,10 @@
 					</v-list-item-avatar>
 					</v-badge>
           </v-btn>
-					<!-- <v-divider class="mx-2" vertical></v-divider> -->
-          <!-- <v-card-actions class="justify-space-between"> -->
 					<v-list-item-content>
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
 					<v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle>
 					</v-list-item-content>
-          <!-- </v-card-actions> -->
-          <!-- <v-divider></v-divider> -->
         </v-list-item>
             <v-divider
               v-if="index < items.length"
@@ -60,7 +53,6 @@
             ></v-divider>
 				</template>
 			</v-list-item-group>
-      <!-- </v-simple-table> -->
 		</v-list>
     </v-app>
     </div>
@@ -74,7 +66,6 @@
           <v-app id="inspire">
             <v-card color="rgba(0,0,0,0)" flat >
               <v-toolbar dense >
-                <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
                 <v-btn elevation="0" min-height="50px"  max-width="50px">
                 <v-badge bordered bottom color="green" dot offset-x="4" offset-y="34" class="spacetop" >
                     <v-avatar class="col" elevation="10" size="40px">
@@ -82,15 +73,10 @@
                     </v-avatar>
                 </v-badge>
                 </v-btn>
-                <!-- <v-divider class="mx-2" vertical color="rgba(0,0,0,0)"></v-divider> -->
                 <v-toolbar-title class="offsetmess">Equipe transcendance</v-toolbar-title>
-                <!-- <v-btn icon>
-                  <v-icon>mdi-dots-vertical</v-icon>
-                </v-btn> -->
               </v-toolbar>
             </v-card>
-          <!-- </v-app> -->
-        <!-- </div> -->
+
 
         <!-- <v-app> -->
             <!-- MESSAGE 4 OTHER -->
@@ -239,16 +225,14 @@
              </v-badge>
                 <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
                 <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
-                <!-- <v-list></v-list> -->
           </v-card>
 
           <div id="app" class="pt-6">
-          <!-- <v-app id="inspire" class="pt-6"> -->
           <v-btn v-on:click="create" elevation="2" width="350px">
             Leave the chat room
           </v-btn>
-          <!-- </v-app> -->
           </div>
+
       
         <!-- TABS  -->
         <div id="app" class="pt-6">
@@ -282,6 +266,7 @@
                       v-else
                       :key="item.title"
                     >
+
                       <v-btn elevation="0" min-height="50px" max-width="50px">
                       <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
                       <v-list-item-avatar>
@@ -289,7 +274,6 @@
                       </v-list-item-avatar>
                       </v-badge>
                       </v-btn>
-                      <!-- <v-divider class="mx-2" vertical></v-divider> -->
                       <v-list-item-content>
                       <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
                       </v-list-item-content>
@@ -322,7 +306,6 @@
                       </v-list-item-avatar>
                       </v-badge>
                       </v-btn>
-                      <!-- <v-divider class="mx-2" vertical></v-divider> -->
                       <v-list-item-content>
                       <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
                       </v-list-item-content>
@@ -355,6 +338,10 @@ export default
 {
   data: () => 
   ({
+      fav: true,
+      menu: false,
+      message: false,
+      hints: true,
       overlay: false,
       selected: [2],
       currentTab: 0,
