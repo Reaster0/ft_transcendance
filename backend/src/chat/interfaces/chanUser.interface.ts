@@ -1,9 +1,9 @@
-import { ChanI } from "./channel.interface";
+import { ChanI } from './channel.interface';
 
 export interface ChanUserI {
-	id?: string;
-	userID: number;
-	ban?: Date;
-    mute?: Date;
-	chan: ChanI;
+  id?: string;
+  userID: number;
+  ban?: Date;
+  mute?: Date;
+  chan: ChanI;
 }
