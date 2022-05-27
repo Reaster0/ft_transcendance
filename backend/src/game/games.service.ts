@@ -107,19 +107,18 @@ export class GamesService {
 	}
 
 	waitForPlayers(server: Server, match: Match, matchs: Map<string, Match>) {
+		let that = this;
 		const timer = setTimeout(function() {
-			if (match.state === State.STARTING) {
-				clearTimeout(timer);
-			} else {
-				this.abortGame(server, match, matchs);
-			}
+			that.abortGame(server, match, matchs);
 		}, 10000, server, match, matchs);
 	}
 
 	abortGame(server: Server, match: Match, matchs: Map<string, Match>) {
-		this.sendToPlayers(match, 'foundMatch', null);
-		server.socketsLeave(match.matchId);
-		matchs.delete(match.matchId);
+		if (match.state === State.SETTING) {
+			this.sendToPlayers(match, 'foundMatch', null);
+			server.socketsLeave(match.matchId);
+			matchs.delete(match.matchId);
+		}
 	}
 
 	sendToPlayers(match: Match, toSend: string, ...args) {
@@ -151,20 +150,21 @@ export class GamesService {
 
 	startGame(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
 		// Send: 'beReady' + player position  on field + match Id + opponent nickname 
-		match.players[0].socket.emit('beReady', 'left', match.matchId, match.players[1].user.nickname);
-		match.players[1].socket.emit('beReady', 'right', match.matchId, match.players[0].user.nickname);
+		match.players[0].socket.emit('beReady', [ 'left', match.matchId, match.players[1].user.nickname ]);
+		match.players[1].socket.emit('beReady', [ 'right', match.matchId, match.players[0].user.nickname ]);
 		let count = 3;
 		const countdown = setInterval(function() {
+			match.players[0].socket.emit('test');
 			server.to(match.matchId).emit('countdown', String(count), match.matchId);
 			count--;
 			if (count === 0) {
 				clearInterval(countdown);
-				match.state = State.ONGOING;
-				this.listGamesToAll(watchers, matchs);
-				server.to(match.matchId).emit('gameStarting', match.matchId);
 			}
-		}, 1000);
-		const intervalId = setInterval(function (match) { 
+		}, 1000, server, match);
+		match.state = State.ONGOING;
+		this.listGamesToAll(watchers, matchs);
+		server.to(match.matchId).emit('gameStarting', match.matchId);
+		const intervalId = setInterval(() => { 
 			if (match.state === State.FINISHED) {
 				clearInterval(intervalId);
 				this.listGamesToAll(watchers, matchs);
@@ -239,7 +239,7 @@ export class GamesService {
 		client.emit('endList');
 	}
 
-	listGameToAll(watchers: Array<Socket>, matchs: Map<string, Match>) {
+	listGamesToAll(watchers: Array<Socket>, matchs: Map<string, Match>) {
 		for (let client of watchers) {
 			client.emit('newList');
 			for (let match of matchs.values()) {
