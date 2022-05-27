@@ -1,0 +1,16 @@
+import { User } from "src/users/entities/user.entity";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+
+@Entity()
+export class SocketConnected {
+
+	@PrimaryGeneratedColumn("uuid")
+	id: string;
+
+	@Column("text")
+	socketID: string;
+
+	@ManyToOne(() => User, user => user.connections, {onDelete:'CASCADE'})
+	@JoinColumn()
+	user: User;
+}
