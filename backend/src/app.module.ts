@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule} from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import * as Joi from '@hapi/joi';
-import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { GamesModule } from './game/games.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: '../.env',
       validationSchema: Joi.object({
@@ -27,6 +26,7 @@ import { AuthModule } from './auth/auth.module';
         ENCRYPTION_KEY: Joi.string().required(),
         ENCRYPTION_IV_LENGTH: Joi.number().required(),
         ENCRYPTION_ALGORITHM: Joi.string().required(),
+        DEFAULT_AVATAR: Joi.string().required(),
       isGlobal: true,
       }),
     }),
@@ -44,8 +44,9 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    GamesModule
   ],
-  controllers: [AppController],
-  providers: [AppService], //test JwtStrat
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
