@@ -7,7 +7,7 @@ import { Status } from '../common/enums/status.enum';
 import { User } from '../users/entities/user.entity';
 import { GamesService } from './games.service';
 import { Match, State } from './interfaces/match.interface';
-import { uuid } from 'uuidv4';
+import { v4 as uuid } from 'uuid';
 import { Logger } from '@nestjs/common';
 
 let queue: Array<Socket> = new Array(); // Array of clients waiting for opponent
@@ -60,7 +60,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				console.log('Opponent: ' + opponent);
 				console.log('Opponent nick: ' + opponent.user.nickname);
 				if ((opponent.socket).connected === true) {
-					(opponent.socket).emit('opponentDisconnected', match.matchId);
+					(opponent.socket).emit('opponentDisconnected', { matchId: match.matchId });
 				}
 				match.winner = opponent;
 				this.gamesService.finishGame(this.server, match, matchs);
