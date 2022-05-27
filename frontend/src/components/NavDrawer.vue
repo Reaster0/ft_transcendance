@@ -9,9 +9,11 @@
 			<router-link to="/" style="text-decoration: none; color: inherit;">
 				<span class="text-overline">Transcendance</span>
 			</router-link>
-
 		</v-toolbar-title>
 			<v-spacer></v-spacer>
+				<v-btn to="/chatgroup" flat color="grey" align-end="true">
+					Chat
+				</v-btn>
 				<v-btn v-if="!isLog" to="/login" flat color="grey" align-end="true">
 					Login
 					<v-icon>mdi-login</v-icon>
