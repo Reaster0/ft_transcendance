@@ -95,7 +95,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         if (chanUser && (chanUser.mute >= date || chanUser.ban >= date)) // User cannot send message !
             return;
         const createMessage: MessageI = await this.messageServices.create({...message, user: client.data.user});
-        const channel: ChanI = await this.chanServices.getChan(createMessage.channel.id);
+        const channel: ChanI = await this.chanServices.getChan(createMessage.channel.chanID);
         const connectedSocket : JoinedSocketI[] = await this.chanServices.findSocketByChannel(channel);
 
         const originalMessage = createMessage.content;
@@ -121,7 +121,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @UseGuards(AuthChat)
     @SubscribeMessage('joinChannel')
     async handleJoinChannel(client: Socket, channel: ChanI) {
-        const channelFound = await this.chanServices.getChan(channel.id);
+        const channelFound = await this.chanServices.getChan(channel.chanID);
         // privacy ------
         const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
         await this.chanServices.addSocket({socketID: client.id, user: client.data.user, chan: channel})

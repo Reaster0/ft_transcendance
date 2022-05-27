@@ -2,7 +2,7 @@ import { User } from "src/users/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChanUser } from "./chanUser.entity";
 import { Message } from "./message.entity";
-import { SocketJoined } from "./soketJoined";
+import { SocketJoined } from "./socketJoined";
 
 @Entity()
 export class Chan {

@@ -57,8 +57,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				const match = this.gamesService.getMatch(client, matchs);
 				match.state = State.FINISHED;
 				const opponent = this.gamesService.getOpponent(client, match);
-				console.log('Opponent: ' + opponent);
-				console.log('Opponent nick: ' + opponent.user.nickname);
 				if ((opponent.socket).connected === true) {
 					(opponent.socket).emit('opponentDisconnected', { matchId: match.matchId });
 				}

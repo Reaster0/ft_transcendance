@@ -11,9 +11,12 @@ export class SocketJoined {
 	@Column("text")
 	socketID: string;
 
-	@ManyToOne(() => User, user => user.joinedChannels, {onDelete:'CASCADE'})
+	// TODO please Aime, check that following is correct
+	//@ManyToOne(() => User, user => user.joinedChannels, {onDelete:'CASCADE'})
+	@ManyToOne(() => User, user => user.channels, {onDelete:'CASCADE'})
 	@JoinColumn()
 	user: User;
+	// TODO End of TODO
 
 	@ManyToOne(() => Chan, channel => channel.socketJoined, {onDelete:'CASCADE'})
 	@JoinColumn()

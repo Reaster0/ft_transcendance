@@ -59,25 +59,29 @@ export class User {
 	@ApiProperty({ enum: Status, type: String, description: 'User status, either offline/online/playing.'})
 	status: Status;
 
-	@Column({ type: 'int', default: 0 })
-	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
-	eloScore: number;
-
 	// CHAT STUFF --------
 	@Column({type: 'text', array: true, default: {}})
-	@ApiProperty({ type: String, description: 'Array of openned socket id)'})
-	soketID: string[];
+	@ApiProperty({ type: String, description: 'Array of opened socket id)'})
+	socketID: string[];
 
 	@ManyToMany(() => Chan, channel => channel.users)
   	channels: Chan[];
 
   	@OneToMany(() => Message, message => message.user)
   	messages: Message[];
+
+	// TODO Please Aime, take a look at the following to modify it
+	@Column({type: 'int', array: true, default: {}})
+	@ApiProperty({ type: Number, description: 'Blocked user identified by id.'})
+	blockedUID:  number[];
+	// TODO end of TODO
 	//-----------------------
 
-	// For game history and stats:
-	//@OneToMany(() => Game (game: Game) => game.player) // how to select which player ?
-	//matchHistory: Game; 
+	// GAME -----------------
+	@Column({ type: 'int', default: 0 })
+	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
+	eloScore: number;
+
 	@ApiProperty({ description: 'History of games won in relation with corresponding gameHistory entity.'})
 	@OneToMany(() => GameHistory,  game => game.winner, { cascade: true })
 	gamesWon: GameHistory[]; 
@@ -85,8 +89,8 @@ export class User {
 	@ApiProperty({ description: 'History of games lost in relation with corresponding gameHistory entity.'})
 	@OneToMany(() => GameHistory,  game => game.looser, { cascade: true })
 	gamesLost: GameHistory[]; 
+	// ------------------------
 
-	// Source of encryption : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()
 	@BeforeUpdate()
 	async encryptSecret() {
