@@ -51,8 +51,6 @@ export class UsersService {
 
 	async retrieveOrCreateUser(createUserDto: CreateUserDto) {
 		const { username, email } = createUserDto;
-		console.log(username);
-		console.log(email);
 		let nickname = username;
 		let user = await this.userRepository.findOne({ username: username, email: email });
 		if (user) {
