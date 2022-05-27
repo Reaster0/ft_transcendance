@@ -20,7 +20,7 @@ export class ChanUser {
                - Relations -
     --------------------------------------*/
 
-	@ManyToOne(() => Chan, channel => channel.chanUsers, {onDelete:'CASCADE'})
+	@ManyToOne(() => Chan, chan => chan.chanUsers, {onDelete:'CASCADE'})
 	@JoinColumn()
 	chan: Chan;
 }

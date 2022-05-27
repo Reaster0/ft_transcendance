@@ -1,7 +1,7 @@
 import { User } from "src/users/entities/user.entity";
 
 export interface ChanI {
-	chanID?: string;
+	id?: string;
 	chanName?: string;
 	date?: Date;
 	owner?: number; //owner id
