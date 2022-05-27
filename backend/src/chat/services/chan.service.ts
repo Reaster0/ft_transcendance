@@ -48,21 +48,23 @@ export class ChanServices {
 		}
 		return this.chanRepository.save(channel);
 	}
-    async deleteChannel(channel: ChanI) {
-        if (!channel.chanID)
-            throw new InternalServerErrorException('bad request: deleteChannel');
-		const channelFound: Chan = await this.chanRepository.findOne(channel.chanID);
+	async deleteChannel(channel: ChanI) {
+		/*
+ 		 if (!channel.id)
+	  		throw new InternalServerErrorException('bad request: deleteChannel');
+	  */
+		const channelFound: Chan = await this.chanRepository.findOne(channel.id);
 		if (channelFound) {
-   /*
-			channelFound.users = []; //is this necessary ?
-				try {
-					await this.chanRepository.save(channelFound);
-				} catch (error) {
-					console.log(error);
-					throw new InternalServerErrorException('failed to empty user list');
-				}
-    */
-            try {
+			/*
+					 channelFound.users = []; //is this necessary ?
+						 try {
+							 await this.chanRepository.save(channelFound);
+						 } catch (error) {
+							 console.log(error);
+							 throw new InternalServerErrorException('failed to empty user list');
+						 }
+			 */
+			try {
 				await this.chanRepository.delete(channelFound.id);
 			} catch (error) {
 				console.log(error);
@@ -71,53 +73,53 @@ export class ChanServices {
 		}
 	}
 
-    async getChannelsFromUser(userID: number): Promise <ChanI[]> {
+	async getChannelsFromUser(userID: number): Promise<ChanI[]> {
 		let query = this.chanRepository
-		.createQueryBuilder('chan')
-		.where('chan.publicChannel = true')
+			.createQueryBuilder('chan')
+			.where('chan.publicChannel = true')
 		const publicChannels: ChanI[] = await query.getMany(); // gater all public channel
 
 		query = this.chanRepository
-		.createQueryBuilder('chan')
-		.leftJoin('chan.users', 'users')
-		.where('users.id = :userID', {userID})
-		.andWhere('chan.publicChannel = false')
-		.leftJoinAndSelect('chan.users', 'all')
-		.leftJoinAndSelect('chan.chanUsers', 'all')
-		.orderBy('chan.date', 'DESC');
+			.createQueryBuilder('chan')
+			.leftJoin('chan.users', 'users')
+			.where('users.id = :userID', { userID })
+			.andWhere('chan.publicChannel = false')
+			.leftJoinAndSelect('chan.users', 'all')
+			.leftJoinAndSelect('chan.chanUsers', 'all')
+			.orderBy('chan.date', 'DESC');
 
 		const privateChannels: ChanI[] = await query.getMany();
-        console.log(privateChannels);
+		console.log(privateChannels);
 
 		const channels = publicChannels.concat(privateChannels);
 
-		channels.sort(function(date1,date2) {
+		channels.sort(function (date1, date2) {
 			let d1 = new Date(date1.date);
 			let d2 = new Date(date2.date);
 			if (d1 < d2) return 1;
 			else if (d1 > d2) return -1;
 			else return 0;
-		  });
+		});
 		return channels;
 	}
 
 	async getChan(channelID: string): Promise<ChanI> {
-		return this.chanRepository.findOne(channelID, {relations: ['users']});
+		return this.chanRepository.findOne(channelID, { relations: ['users'] });
 	}
 
-    async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
-        return this.chanUserRepository.findOne({where: { chan: channel, userId: userId }});
-    }
+	async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
+		return this.chanUserRepository.findOne({ where: { chan: channel, userId: userId } });
+	}
 
-    //-------------------------------------------------//
-    async findSocketByChannel(channel: ChanI): Promise<JoinedSocketI[]> {
-        return this.joinedSocketRepository.find({where: {channel: channel}, relations: ['user']});
-    }
+	//-------------------------------------------------//
+	async findSocketByChannel(channel: ChanI): Promise<JoinedSocketI[]> {
+		return this.joinedSocketRepository.find({ where: { channel: channel }, relations: ['user'] });
+	}
 
-    async addSocket(joinedChannel: JoinedSocketI): Promise<JoinedSocketI> {
-        return this.joinedSocketRepository.save(joinedChannel);
-    }
-    async removeSocket(socketID: string) {
-        return this.joinedSocketRepository.delete({socketID});
-    }
+	async addSocket(joinedChannel: JoinedSocketI): Promise<JoinedSocketI> {
+		return this.joinedSocketRepository.save(joinedChannel);
+	}
+	async removeSocket(socketID: string) {
+		return this.joinedSocketRepository.delete({ socketID });
+	}
 }

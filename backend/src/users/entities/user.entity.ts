@@ -2,7 +2,8 @@ import { IsEmail, IsNumber, IsAlphanumeric } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne,
 		JoinColumn, 
 		ManyToMany,
-		OneToMany} from 'typeorm';
+		OneToMany,
+		Connection} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
 import * as crypto from 'crypto';
@@ -11,6 +12,8 @@ import { Exclude } from 'class-transformer';
 import { Chan } from 'src/chat/entities/chan.entity';
 import { Message } from 'src/chat/entities/message.entity';
 import { GameHistory } from '../../game/entities/gamehistory.entity';
+import { SocketConnected } from 'src/chat/entities/socketConnected';
+import { SocketJoined } from 'src/chat/entities/socketJoined';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -60,21 +63,26 @@ export class User {
 	status: Status;
 
 	// CHAT STUFF --------
-	@Column({type: 'text', array: true, default: {}})
-	@ApiProperty({ type: String, description: 'Array of opened socket id)'})
-	socketID: string[];
-
+	@ApiProperty({ type: Chan, description: 'Channel the user as joined/created'})
 	@ManyToMany(() => Chan, channel => channel.users)
   	channels: Chan[];
 
+	
+	@ApiProperty({ type: Message, description: 'Message list the user as sended'})
   	@OneToMany(() => Message, message => message.user)
   	messages: Message[];
+	
+	@ApiProperty({ type: SocketConnected, description: 'Socket list for all chat service'})
+	@OneToMany(() => SocketConnected, connection => connection.user)
+	connections: SocketConnected[];
 
-	// TODO Please Aime, take a look at the following to modify it
+	@ApiProperty({ type: SocketJoined, description: 'Socket list for every channel the user is connected.'})
+	@OneToMany(() => SocketJoined, joinedChannel => joinedChannel.chan)
+  	joinedChannels: SocketJoined[];
+
 	@Column({type: 'int', array: true, default: {}})
 	@ApiProperty({ type: Number, description: 'Blocked user identified by id.'})
 	blockedUID:  number[];
-	// TODO end of TODO
 	//-----------------------
 
 	// GAME -----------------
