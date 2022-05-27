@@ -6,7 +6,7 @@
 		<v-row>
 			<v-col align="center">
 			<h1 class="text">Play the</h1>
-			<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0, 0.75)" to="/game">
+			<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
 				<h1 class="text rainbow">Game</h1>
 				</v-btn>
 			</v-col>

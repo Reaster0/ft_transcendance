@@ -27,6 +27,7 @@ export default {
 		const connection = ref(null)
 		const matchId = ref(null)
 		const fatalError = ref(false)
+		const gameData = ref({})
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -51,13 +52,16 @@ export default {
 				console.log("found match:" + res)
 			})
 
-			connection.value.on('beReady', (position, Id, rivalName) =>{
-				console.log("beReady:" + position + rivalName + Id)
+			connection.value.on('beReady', (params, lol, mdr) =>{
+				console.log("beReady:" + params)
+				gameData.value = params
+				console.log(gameData.value+lol+ mdr)
 			})
 
-			connection.value.onmessage = (event) => {
-				console.log("message from server:" + event)
-			}
+			connection.value.on('requestError', () =>{
+				console.log("requestError")
+				fatalError.value = true
+			})
 
 			connection.value.onopen = (event) => {
 				console.log(event)
@@ -127,8 +131,7 @@ export default {
   -webkit-transition: ease-out 0.4s;
   -moz-transition: ease-out 0.4s;
   transition: ease-out 0.4s;
-  margin: 100px auto 0 auto;
-
+  margin: 150px auto 0 auto;
 }
 
 .button_slide:hover {
