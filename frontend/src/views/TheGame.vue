@@ -1,7 +1,9 @@
 <template>
 	<v-container>
 		<!-- <canva id="c"></canva> -->
-		<v-btn @click="Play">Play</v-btn>
+		<v-card class="mx-auto" width="300" color="#ff3300">
+		<h1>Searching A Game...</h1>
+		</v-card>
 		<v-btn v-if="matchId" @click="AcceptGame">joinGame</v-btn>
 	</v-container>
 </template>
@@ -31,12 +33,16 @@ export default {
 			}
 
 			connection.value.on('joined', text => {
-				console.log(text)
+				console.log("joined" + text)
 			})
 
 			connection.value.on('foundMatch', res =>{
 				matchId.value = res
-				console.log(res)
+				console.log("found match:" + res)
+			})
+
+			connection.value.on('beReady', (position, Id, rivalName) =>{
+				console.log("beReady:" + position + rivalName + Id)
 			})
 
 			connection.value.onmessage = (event) => {
@@ -52,6 +58,8 @@ export default {
 				console.log(event)
 				console.log("disconnected from the server")
 			}
+
+			Play();
 			})
 
 
