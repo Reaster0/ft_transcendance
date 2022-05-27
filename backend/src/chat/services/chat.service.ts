@@ -47,9 +47,9 @@ export class ChatServices {
 		return this.chanRepository.save(channel);
 	}
     async deleteChannel(channel: ChanI) {
-        if (!channel.chanID)
+        if (!channel.id)
             throw new InternalServerErrorException('bad request: deleteChannel');
-		const channelFound: Chan = await this.chanRepository.findOne(channel.chanID);
+		const channelFound: Chan = await this.chanRepository.findOne(channel.id);
 		if (channelFound) {
    /*
 			channelFound.users = []; //is this necessary ?
