@@ -1,11 +1,19 @@
 <template>
-	<v-container>
-		<!-- <canva id="c"></canva> -->
-		<v-card class="mx-auto" width="300" color="#ff3300">
-		<h1>Searching A Game...</h1>
-		</v-card>
-		<v-btn v-if="matchId" @click="AcceptGame">joinGame</v-btn>
-	</v-container>
+<div>
+	<div v-if="!fatalError">
+		<v-container>
+			<!-- <canva id="c"></canva> -->
+
+			<v-row justify="center">
+				<div v-if="!matchId" class="button_slick">Searching A Game...</div>
+				<div v-else class="button_slide button_slick" @click="AcceptGame">a game has been found!</div>
+			</v-row>	
+		</v-container>
+	</div>
+	<v-row v-else justify="center">
+		<div class="button_slick">FATAL ERROR PLEASE REFRESH</div>
+	</v-row>
+</div>
 </template>
 
 <script>
@@ -18,6 +26,8 @@ export default {
 	setup(){
 		const connection = ref(null)
 		const matchId = ref(null)
+		const fatalError = ref(false)
+		const gameData = ref({})
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -27,6 +37,7 @@ export default {
 					polling: { extraHeaders: { auth: document.cookie} },
 					},
 				})
+				console.log(connection.value)
 				console.log("starting connection to websocket")
 			} catch (error) {
 				console.log("the error is:" + error)
@@ -41,13 +52,16 @@ export default {
 				console.log("found match:" + res)
 			})
 
-			connection.value.on('beReady', (position, Id, rivalName) =>{
-				console.log("beReady:" + position + rivalName + Id)
+			connection.value.on('beReady', (params, lol, mdr) =>{
+				console.log("beReady:" + params)
+				gameData.value = params
+				console.log(gameData.value+lol+ mdr)
 			})
 
-			connection.value.onmessage = (event) => {
-				console.log("message from server:" + event)
-			}
+			connection.value.on('requestError', () =>{
+				console.log("requestError")
+				fatalError.value = true
+			})
 
 			connection.value.onopen = (event) => {
 				console.log(event)
@@ -56,7 +70,7 @@ export default {
 
 			connection.value.onclose = (event) => {
 				console.log(event)
-				console.log("disconnected from the server")
+				fatalError.value = true
 			}
 
 			Play();
@@ -78,30 +92,51 @@ export default {
 			if (matchId.value)
 				connection.value.emit('gameInput', matchId, input)
 		}
-			useKeypress({
-			keyEvent: "keydown",
-			keyBinds: [
-				{
-					keyCode: 87,
-					success: () => {
-						connection.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
-					},
+		useKeypress({
+		keyEvent: "keydown",
+		keyBinds: [
+			{
+				keyCode: 87,
+				success: () => {
+					connection.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
 				},
-				{
-					keyCode: 83,
-					success: () => {
-						connection.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
-					},
+			},
+			{
+				keyCode: 83,
+				success: () => {
+					connection.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
 				},
-			]
-			})
+			},
+		]
+		})
 
-			return { connection, Play, AcceptGame, GameInput, matchId }
-
-	}
+		return { connection, Play, AcceptGame, GameInput, matchId, fatalError }
+	},
 }
 </script>
 
 <style>
+
+.button_slick {
+  color: #FFF;
+  border: 2px solid rgb(216, 2, 134);
+  background-color: #162944;
+  border-radius: 0px;
+  padding: 18px 36px;
+  display: inline-block;
+  font-family: monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  box-shadow: inset 0 0 0 0 #D80286;
+  -webkit-transition: ease-out 0.4s;
+  -moz-transition: ease-out 0.4s;
+  transition: ease-out 0.4s;
+  margin: 150px auto 0 auto;
+}
+
+.button_slide:hover {
+	cursor: pointer;
+	box-shadow: inset 0 100px 0 0 #D80286;
+}
 
 </style>
