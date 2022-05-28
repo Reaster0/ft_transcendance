@@ -14,10 +14,12 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
+      working-directory: ./backend
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - name: npm install, build, and test
+      working-director: ./backend
       run: |
         npm ci
         npm run build --if-present
