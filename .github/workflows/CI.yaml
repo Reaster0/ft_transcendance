@@ -19,4 +19,5 @@ jobs:
       - name: npms install, build and test
       - run: npm ci
       - run: npm run build --if-present
-      - run: npm start & npx wait-on http://localhost:3000
+      - run: npm start
+      - run: npx wait-on http://localhost:3000
