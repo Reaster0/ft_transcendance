@@ -12,6 +12,9 @@ import NewRoom from "../views/TransChat_create_room.vue";
 import MU from "../views/TransChat_manage_users.vue";
 import ADM from "../views/TransChat_groupchat_adminside.vue";
 import ChangeRoom from "../views/TransChat_change_room.vue";
+import { isLogged, getUserInfo } from "../components/FetchFunctions.js"
+import store from "../store/index.js"
+
 
 const routes = [
 	{
@@ -22,7 +25,10 @@ const routes = [
 	{
 		path: '/login',
 		name: "login",
-		component: LoginPage
+		component: LoginPage,
+		beforeEnter: () => {
+			return !store.getters.isConnected? true: "/"
+		}
 	},
 	{
 		path: '/:catchAll(.*)',
@@ -32,59 +38,96 @@ const routes = [
 	{
 		path: '/user',
 		name: "user",
-		component: UserPage
+		component: UserPage,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/2auth',
 		name: "twoAuth",
-		component: TwoAuth
+		component: TwoAuth,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/game',
 		name: "TheGame",
-		component: TheGame
+		component: TheGame,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/user/edit',
 		name: "editUser",
-		component: EditUser
+		component: EditUser,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/chatgroup',
 		name: "transchatgroup",
-		component: Chat
+		component: Chat,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/chatperson',
 		name: "transchatperson",
-		component: ChatPerson
+		component: ChatPerson,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/newroom',
 		name: "newroom",
-		component: NewRoom
+		component: NewRoom,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/roomsettings',
 		name: "changeroom",
-		component: ChangeRoom
+		component: ChangeRoom,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/mu',
 		name: "manageusers",
-		component: MU
+		component: MU,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/adm',
 		name: "groupchat_adminside",
-		component: ADM
+		component: ADM,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 ]
-	const router = createRouter({
-	history: createWebHistory(process.env.BASE_URL),
-	routes
-}
 
-)
+const router = createRouter({
+history: createWebHistory(process.env.BASE_URL),
+routes
+})
+
+
+router.beforeEach(async() => {
+	store.commit('setConnected', await isLogged())
+	if (store.getters.isConnected) {
+		store.commit('setUser', await getUserInfo())
+	}
+})
 
 export default router

@@ -16,12 +16,19 @@
 
 <script>
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
+import { useStore } from "vuex"
+import { onMounted } from "@vue/runtime-core"
+import { isLogged } from "../components/FetchFunctions.js"
 
 export default {
 	components: {
 		ParticlesBg
 	},
 	setup(){
+
+		onMounted(async() => {
+		useStore().commit('setConnected' , await isLogged())
+		})
 	}
 }
 </script>

@@ -12,7 +12,7 @@ const store = createStore({
 			status:	"",
 			eloScore:	0,
 		},
-		connected: true,
+		connected: false,
 		need2fa: false,
 	},
 	getters: {

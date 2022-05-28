@@ -1,7 +1,5 @@
 //all functions here return the results or NULL
 
-//import axios from "axios";
-
 export async function isLogged() {
 	console.log("check if user is logged")
 	return await fetch("/api/users/logged", {credentials: "include"})
@@ -12,10 +10,6 @@ export async function isLogged() {
 			return [true, true];
 		return [false, false]
 	})
-	// .then(data => data.json())
-	// .then((data) => {
-	// 	return data.statusCode == 401? false : true
-	// })
 }
 
 export async function getUserInfo() {

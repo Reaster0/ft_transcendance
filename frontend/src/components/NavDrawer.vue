@@ -26,15 +26,15 @@ import { computed } from 'vue'
 
 export default {
 	setup() {
-		const store = useStore();
-		
+		const store = useStore()
+
 		const isLog = computed(() => {
 			return store.getters.isConnected
 		})
 
 		async function logOut(){
-				await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
-				.then(store.commit('setConnected', false))
+			await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
+			.then(store.commit('setConnected', [false, false]))
 		}
 
 		return {isLog, logOut}
