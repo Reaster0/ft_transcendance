@@ -13,8 +13,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 15.x
-      - run: apt update
-      - run: apt -y install postgresql
+      - run: sudo apt update
+      - run: sudo apt -y install postgresql
       - run: |
           cp ci_env .env
           cd ./backend
