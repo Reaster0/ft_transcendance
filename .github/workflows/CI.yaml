@@ -18,7 +18,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: npm install, build, and test
-      working-director: ./backend
+      working-directory: ./backend
       run: |
         npm ci
         npm run build --if-present
