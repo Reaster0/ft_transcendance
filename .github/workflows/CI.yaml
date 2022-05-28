@@ -1,23 +1,26 @@
-name: Nest.js CI
+name: Node CI
 
 on: [push]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        node-version: [8.x, 10.x, 12.x]
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: npms install, build and test
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm start
-      - run: npx wait-on http://localhost:3000
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, build, and test
+      run: |
+        npm ci
+        npm run build --if-present
+        npm start & npx wait-on http://localhost:3000
+      env:
+        CI: true
