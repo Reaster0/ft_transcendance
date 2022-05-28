@@ -48,9 +48,9 @@ export class GameGateway
       if (!user) {
         return client.disconnect();
       }
-      this.logger.log('user connected: ' + user.nickname);
       await this.usersService.changeStatus(user, Status.PLAYING);
       client.data.user = user;
+      this.logger.log('user connected: ' + user.nickname);
       return client.emit('connectedToGame'); // maybe emit user ?
     } catch {
       return client.disconnect();
@@ -68,7 +68,7 @@ export class GameGateway
         const match = this.gamesService.getMatch(client, matchs);
         match.state = State.FINISHED;
         const opponent = this.gamesService.getOpponent(client, match);
-        if (opponent.socket.connected === true) {
+        if (opponent && opponent.socket && opponent.socket.connected === true) {
           opponent.socket.emit('opponentDisconnected', {
             matchId: match.matchId,
           });
@@ -89,10 +89,8 @@ export class GameGateway
       if (!client.data.user) {
         return client.disconnect();
       }
-      if (
-        this.gamesService.isWaiting(client, queue) === true ||
-        this.gamesService.isPlaying(client, matchs) === true
-      ) {
+      if (this.gamesService.isWaiting(client, queue) === true ||
+          this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
       queue.push(client);
@@ -100,11 +98,7 @@ export class GameGateway
         const matchId = uuid();
         const newMatch = this.gamesService.setMatch(matchId, queue.slice(0, 2));
         matchs.set(matchId, newMatch);
-        this.gamesService.sendToPlayers(
-          newMatch,
-          'foundMatch',
-          newMatch.matchId,
-        );
+        this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
       }
     } catch {

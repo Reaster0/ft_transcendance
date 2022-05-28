@@ -6,6 +6,7 @@ import { Player } from './interfaces/player.interface';
 import { Pong } from './interfaces/pong.interface';
 import { PongService } from './pong.service';
 import { Point } from './interfaces/pong.interface';
+import { match } from 'assert';
 
 @Injectable()
 export class GamesService {
@@ -28,13 +29,15 @@ export class GamesService {
 
   isPlaying(client: Socket, matchs: Map<string, Match>): boolean {
     for (const currMatch of matchs.values()) {
-      const matchPlayers = currMatch.players;
-      for (const currPlayer of matchPlayers) {
-        if (
-          client === currPlayer.socket ||
-          client.data.user.id === currPlayer.user.id
-        ) {
-          return true;
+      if (currMatch.state != State.FINISHED) {
+        const matchPlayers = currMatch.players;
+        for (const currPlayer of matchPlayers) {
+          if (
+            client === currPlayer.socket ||
+            client.data.user.id === currPlayer.user.id
+          ) {
+            return true;
+          }
         }
       }
     }
@@ -98,6 +101,7 @@ export class GamesService {
   setMatch(matchId: string, clients: Array<Socket>): Match {
     const matchPlayers: Array<Player> = [];
     for (const client of clients) {
+      console.log('socket:' + client.id + ' ' + client.data.user.id);
       const newPlayer = this.setPlayer(client);
       matchPlayers.push(newPlayer);
     }
