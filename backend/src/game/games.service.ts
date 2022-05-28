@@ -20,7 +20,7 @@ export class GamesService {
       return true;
     }
     for (const sock of queue) {
-      if (sock.data.user.id === client.data.id) {
+      if (sock.data.user.id === client.data.user.id) {
         return true;
       }
     }
@@ -32,10 +32,7 @@ export class GamesService {
       if (currMatch.state != State.FINISHED) {
         const matchPlayers = currMatch.players;
         for (const currPlayer of matchPlayers) {
-          if (
-            client === currPlayer.socket ||
-            client.data.user.id === currPlayer.user.id
-          ) {
+          if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
             return true;
           }
         }
@@ -48,10 +45,7 @@ export class GamesService {
     for (const currMatch of matchs.values()) {
       const matchPlayers = currMatch.players;
       for (const currPlayer of matchPlayers) {
-        if (
-          client === currPlayer.socket ||
-          client.data.user.id === currPlayer.user.id
-        ) {
+        if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
           return currMatch;
         }
       }
@@ -73,7 +67,7 @@ export class GamesService {
       return true;
     }
     for (const sock of watchers) {
-      if (sock.data.user.id === client.data.id) {
+      if (sock.data.user.id === client.data.user.id) {
         return true;
       }
     }
@@ -101,7 +95,6 @@ export class GamesService {
   setMatch(matchId: string, clients: Array<Socket>): Match {
     const matchPlayers: Array<Player> = [];
     for (const client of clients) {
-      console.log('socket:' + client.id + ' ' + client.data.user.id);
       const newPlayer = this.setPlayer(client);
       matchPlayers.push(newPlayer);
     }
