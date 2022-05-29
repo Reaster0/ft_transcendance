@@ -22,7 +22,7 @@
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn @click="NewChannel" color = "ffffff" >
+            <v-btn @click.prevent="NewChannel" color = "ffffff" >
               <div :style="{color: ' #ffffff'}">
                 Create
               </div>
