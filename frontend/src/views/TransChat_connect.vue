@@ -53,7 +53,7 @@ export default {
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
-					connection.value = io('http://82.65.87.54:3000/chat',{
+					connection.value = io('http://172.20.10.10:3000/chat',{
 					transportOptions: {
 					polling: { extraHeaders: { auth: document.cookie} },
 					},
