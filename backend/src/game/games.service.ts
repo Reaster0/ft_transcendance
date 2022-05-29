@@ -295,6 +295,7 @@ export class GamesService {
       winner: match.winner.user.nickname,
     });
     server.socketsLeave(match.matchId);
+    thisshouldnotwork!
     // TODO set game inside DB
     matchs.delete(match.matchId);
   }
