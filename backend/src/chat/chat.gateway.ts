@@ -39,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   /******* Connection ********/
   async handleConnection(client: Socket) {
+    console.log('connection');
     try {
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user; //important
@@ -72,6 +73,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @UseGuards(AuthChat)
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
+    console.log('create channel');
       const createChannel: ChanI = await this.chanServices.createChannel(channel, client.data.user);
       if (!createChannel)
           return false;
@@ -83,6 +85,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @UseGuards(AuthChat)
     @SubscribeMessage('deleteChannel')
     async onDeleteChannel(client: Socket, channel: ChanI) {
+        console.log('delet chan');
         await this.chanServices.deleteChannel(channel);
         await this.emitChannels();
     }
@@ -155,6 +158,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   async emitChannels() {
+    console.log('we emit all the chan for that user');
     const connections: connectedSocketI[] = await this.connectService.findAll();
     for (const connection of connections) {
         const channels: ChanI[] = await this.chanServices.getChannelsFromUser(connection.user.id);

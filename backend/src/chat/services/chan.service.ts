@@ -27,6 +27,7 @@ export class ChanServices {
 		let { chanName, publicChannel, password } = channel;
 		const name = await this.chanRepository.findOne({channelName: chanName});
 
+//		if (!name)
 		if (name) //channel name already exist
 			return null;
 		if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false) //isalphanum()
