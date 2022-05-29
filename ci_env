@@ -24,3 +24,5 @@ APPNAME=”transcendence”
  
 # Default avatar
 DEFAULT_AVATAR='../backend/image.png'
+
+MODE=CI

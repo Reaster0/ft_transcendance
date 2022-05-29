@@ -33,7 +33,7 @@ jobs:
           npm install typeorm
           npm install pg
           npm run build --if-present
-          npm run start --CI 2>&1 | tee CIoutput.txt
+          npm run start 2>&1 | tee CIoutput.txt
           if grep -q ERROR CIoutput.txt; then
             grep ERROR CIoutput.txt
             exit 1

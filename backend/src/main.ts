@@ -7,7 +7,7 @@ import { INestApplication } from '@nestjs/common';
 
 async function startServerCI(app: INestApplication) {
   const promise = app.listen(3000);
-  if (process.argv.slice(2).indexOf("CI") !== -1) {
+  if (process.env.MODE === 'CI') {
     await new Promise(r => setTimeout(r, 10 *1000));
     return app.close();
   }
