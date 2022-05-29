@@ -43,6 +43,9 @@ import io from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 
 export default {
+    chanName = false, 
+    password = false, 
+    publicChannel = false,
 	setup(){
 		const connection = ref(null)
 		const matchId = ref(null)
