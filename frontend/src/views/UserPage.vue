@@ -39,7 +39,6 @@ import { ref } from "vue"
 import { submit2FaCode, getAvatarID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 
-
 export default {
 	components: {
 		ParticlesBg
@@ -56,6 +55,7 @@ export default {
 			avatar.value = await getAvatarID(user.value.id)
 			console.log(avatar.value)
 		})
+
 
 		async function submitCode() {
 			codeAccepted.value = await submit2FaCode(inputCode.value)
