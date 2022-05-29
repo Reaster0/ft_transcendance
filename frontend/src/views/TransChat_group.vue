@@ -52,9 +52,8 @@
             clearable
             label="Write a message"
             placeholder="Message"
-            @keydown.enter.prevent="sending"
           ></v-text-field>
-          <v-btn @click="sending">Send</v-btn>
+          <v-btn >Send</v-btn>
           </v-toolbar>
         </v-app>
         </div>

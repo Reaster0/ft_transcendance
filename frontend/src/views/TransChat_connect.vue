@@ -43,7 +43,7 @@ import io from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 
 export default {
-    chanName : false, 
+    chanName : '', 
     password : false, 
     publicChannel : false,
 	setup()
@@ -79,20 +79,20 @@ export default {
 		}
 
 
-		const sending = ({input}) =>{
-			console.log("sendMessage" + input)
-		}
-			useKeypress({
-			keyEvent: "keydown",
-			keyBinds: 
-				{
-					keyCode: 13,
-					success: () => {
-                        connection.value.emit('sendMessage', {input: "Enter"})
-					},
-				},
-			})
-			return {connection, sending}
+		// const sending = ({input}) =>{
+		// 	console.log("sendMessage" + input)
+		// }
+		// 	useKeypress({
+		// 	keyEvent: "keydown",
+		// 	keyBinds: 
+		// 		{
+		// 			keyCode: 13,
+		// 			success: () => {
+        //                 connection.value.emit('sendMessage', {input: "Enter"})
+		// 			},
+		// 		},
+		// 	})
+		// 	return {connection, sending}
 
 	}
 }
