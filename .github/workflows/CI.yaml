@@ -33,5 +33,10 @@ jobs:
           npm install typeorm
           npm install pg
           npm run build --if-present
-          npm start & npx wait-on http://localhost:3000
-          npm stop
+          npm run start --CI 2>&1 | tee CIoutput.txt
+          if grep -q ERROR CIoutput.txt; then
+            grep ERROR CIoutput.txt
+            exit 1
+          else
+            exit 0
+          fi
