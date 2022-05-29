@@ -68,36 +68,6 @@ export default {
             connection.value.on('channel', (channels) => 
             {console.log("channel:" + channels)})
 
-
-
-
-			// connection.value.on('joined', text => {
-			// 	console.log("joined" + text)
-			// })
-
-			// connection.value.on('foundMatch', res =>{
-			// 	matchId.value = res
-			// 	console.log("found match:" + res)
-			// })
-
-			// connection.value.on('beReady', (position, Id, rivalName) =>{
-			// 	console.log("beReady:" + position + rivalName + Id)
-			// })
-
-			// connection.value.onmessage = (event) => {
-			// 	console.log("message from server:" + event)
-			// }
-
-			// connection.value.onopen = (event) => {
-			// 	console.log(event)
-			// 	console.log("connected to the server")
-			// }
-
-			// connection.value.onclose = (event) => {
-			// 	console.log(event)
-			// 	console.log("disconnected from the server")
-			// }
-
 			NewChannel();
 			})
 
@@ -122,7 +92,7 @@ export default {
 					},
 				},
 			})
-			return {connection, NewChannel, sending}
+			return {connection, sending}
 
 	}
 }
