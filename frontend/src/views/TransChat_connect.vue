@@ -80,6 +80,8 @@ export default {
 		//	console.log("createChannel");
 		//}
 
+		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
+
         function TestTest(){
 			console.log("befor createChannel");
 			connection.value.emit('createChannel');
