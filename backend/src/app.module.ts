@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import * as Joi from '@hapi/joi';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
 import { GamesModule } from './game/games.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -44,7 +45,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     UsersModule,
     AuthModule,
-    GamesModule
+    GamesModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

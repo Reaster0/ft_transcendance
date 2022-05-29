@@ -21,41 +21,7 @@
       
 		
 	
-    <div id="app" class="text-left">
-    <v-app id="inspire">
-		<v-list>
-			<v-list-item-group v-model="selectedItem" >
-				<template v-for="(item, index) in items">
-				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-				></v-subheader>
-				<v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-				></v-divider>
 
-				<v-list-item
-					v-else
-					:key="item.title"
-				>
-          <v-btn elevation="0" min-height="50px"  max-width="50px">
-					<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-					<v-list-item-avatar >
-					<v-img :src="item.photo"  min-width="50px" min-height="50px"></v-img>
-					</v-list-item-avatar>
-					</v-badge>
-          </v-btn>
-					<v-list-item-content>
-					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-					<v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle>
-					</v-list-item-content>
-        </v-list-item>
-            <v-divider
-              v-if="index < items.length"
-              :key="index"
-            ></v-divider>
-				</template>
-			</v-list-item-group>
-		</v-list>
-    </v-app>
-    </div>
     </v-col>
 
 
@@ -78,128 +44,7 @@
             </v-card>
 
 
-        <!-- <v-app> -->
-            <!-- MESSAGE 4 OTHER -->
-            <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <!-- ava chat -->
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <!-- field chat -->
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    It's funny
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            </v-toolbar>
-              
 
-          <!-- MESSAGE 3 OTHER -->
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <!-- ava chat -->
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <!-- field chat -->
-            <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    It's funny, to know hows websockets works i've made a testing branch (that i wont merge dont worry)
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-          </v-toolbar>
-
-
-          <!-- MESSAGE 2 -->
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-            <v-spacer></v-spacer>
-            <!-- field chat -->
-            <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
-              <v-list-item >
-                <v-list-item-content>
-                  <div  :style="{color: ' #ffffff'}" class="mb-2">
-                    Yeah, a lot of syntaxic sugar
-                  </div>
-                  <v-list-item-subtitle :style="{color: ' #ffffff'}"> 19:46 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            <!-- ava chat -->
-            <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-              <v-avatar class="mt-n4 " size="32" elevation="2">
-                    <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-              </v-avatar>
-              </v-badge>
-            </v-btn>
-          </v-toolbar>
-
-
-          <!-- MESSAGE 1 -->
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-            <v-spacer></v-spacer>
-            <!-- field chat -->
-            <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)" dark>
-              <v-list-item color = "ffffff" >
-                <v-list-item-content>
-                  <div :style="{color: ' #ffffff'}" class="mb-2">
-                    Use as much ts as possible. Then no pb
-                  </div>
-                  <v-list-item-subtitle :style="{color: ' #ffffff'}"> 19:50 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            <!-- ava chat -->
-            <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-              <v-avatar class="mt-n4 " size="32" elevation="2">
-                    <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-              </v-avatar>
-              </v-badge>
-            </v-btn>
-          </v-toolbar>
-
-          <!-- MESSAGE 0 OTHER -->
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <!-- ava chat -->
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <!-- field chat -->
-            <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    Ololo !
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-          </v-toolbar>
           
         
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop">
@@ -208,6 +53,7 @@
             label="Write a message"
             placeholder="Message"
           ></v-text-field>
+          <v-btn >Send</v-btn>
           </v-toolbar>
         </v-app>
         </div>
@@ -217,7 +63,7 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-          <v-card height="22%" class="text-center offsetphoto" shaped >
+          <v-card height="30%" class="text-center offsetphoto" shaped >
              <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
                    <v-avatar class="s" elevation="10" size="60px">
                       <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
@@ -256,65 +102,14 @@
               <div v-show="currentTab === 0">
                 <v-list>
                   <v-list-item-group v-model="selectedItem" >
-                    <template v-for="(item, index) in members">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-                    ></v-subheader>
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-                    ></v-divider>
-                
-                    <v-list-item
-                      v-else
-                      :key="item.title"
-                    >
-
-                      <v-btn elevation="0" min-height="50px" max-width="50px">
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar>
-                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                      </v-badge>
-                      </v-btn>
-                      <v-list-item-content>
-                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                      <v-divider
-                        v-if="index < members.length"
-                        :key="index"
-                      ></v-divider>
-                    </template>
+                    
                   </v-list-item-group>
                 </v-list>
               </div>
               <div v-show="currentTab === 1">
                 <v-list>
                   <v-list-item-group v-model="selectedItem" >
-                    <template v-for="(item, index) in admins">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-                    ></v-subheader>
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-                    ></v-divider>
-                
-                    <v-list-item
-                      v-else
-                      :key="item.title"
-                    >
-                      <v-btn elevation="0" min-height="50px" max-width="50px" >
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar>
-                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                      </v-badge>
-                      </v-btn>
-                      <v-list-item-content>
-                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                      <v-divider
-                        v-if="index < admins.length"
-                        :key="index"
-                      ></v-divider>
-                    </template>
+                    
                   </v-list-item-group>
                 </v-list>
               </div>

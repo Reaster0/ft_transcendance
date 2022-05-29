@@ -1,12 +1,19 @@
 import { IsEmail, IsNumber, IsAlphanumeric } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne,
-		JoinColumn, OneToMany } from 'typeorm';
+		JoinColumn, 
+		ManyToMany,
+		OneToMany,
+		Connection} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../../common/enums/status.enum';
 import * as crypto from 'crypto';
 import { Avatar } from './avatar.entity';
 import { Exclude } from 'class-transformer';
+import { Chan } from 'src/chat/entities/chan.entity';
+import { Message } from 'src/chat/entities/message.entity';
 import { GameHistory } from '../../game/entities/gamehistory.entity';
+import { SocketConnected } from 'src/chat/entities/socketConnected';
+import { SocketJoined } from 'src/chat/entities/socketJoined';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -43,8 +50,8 @@ export class User {
   	twoFASecret?: string;
 	
 	@Column({ type: 'boolean', default: false })
-	@ApiProperty({ type: String, description: 'User as activate 2FA)'})
-  	is2FAEnabled: boolean;
+	@ApiProperty({ type: Boolean, description: 'User as activate 2FA)'})
+  	public is2FAEnabled: boolean;
 
 	@Column({ type: 'int', array: true, default: {} })
 	@ApiProperty({ type: [Number], description: 'User friends, identified by unique ids inside an array.'})
@@ -55,6 +62,30 @@ export class User {
 	@ApiProperty({ enum: Status, type: String, description: 'User status, either offline/online/playing.'})
 	status: Status;
 
+	// CHAT STUFF --------
+	@ApiProperty({ type: Chan, description: 'Channel the user as joined/created'})
+	@ManyToMany(() => Chan, channel => channel.users)
+  	channels: Chan[];
+
+	
+	@ApiProperty({ type: Message, description: 'Message list the user as sended'})
+  	@OneToMany(() => Message, message => message.user)
+  	messages: Message[];
+	
+	@ApiProperty({ type: SocketConnected, description: 'Socket list for all chat service'})
+	@OneToMany(() => SocketConnected, connection => connection.user)
+	connections: SocketConnected[];
+
+	@ApiProperty({ type: SocketJoined, description: 'Socket list for every channel the user is connected.'})
+	@OneToMany(() => SocketJoined, joinedChannel => joinedChannel.chan)
+  	joinedChannels: SocketJoined[];
+
+	@Column({type: 'int', array: true, default: {}})
+	@ApiProperty({ type: Number, description: 'Blocked user identified by id.'})
+	blockedUID:  number[];
+	//-----------------------
+
+	// GAME -----------------
 	@Column({ type: 'int', default: 0 })
 	@ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.'})
 	eloScore: number;
@@ -66,8 +97,8 @@ export class User {
 	@ApiProperty({ description: 'History of games lost in relation with corresponding gameHistory entity.'})
 	@OneToMany(() => GameHistory,  game => game.looser, { cascade: true })
 	gamesLost: GameHistory[]; 
+	// ------------------------
 
-	// Source of encryption : https://gist.github.com/vlucas/2bd40f62d20c1d49237a109d491974eb
 	@BeforeInsert()
 	@BeforeUpdate()
 	async encryptSecret() {
