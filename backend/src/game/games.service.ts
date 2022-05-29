@@ -157,12 +157,7 @@ export class GamesService {
     }
   }
 
-  startGame(
-    server: Server,
-    match: Match,
-    watchers: Array<Socket>,
-    matchs: Map<string, Match>,
-  ) {
+  startGame( server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
     // Send: 'beReady' + player position  on field + match Id + opponent nickname
     match.players[0].socket.emit('beReady', {
       pos: 'left',
@@ -175,40 +170,28 @@ export class GamesService {
       opponent: match.players[0].user.nickname,
     });
     let count = 3;
-    const countdown = setInterval(
-      function () {
+    const countdown = setInterval(function () {
         match.players[0].socket.emit('test');
-        server.to(match.matchId).emit('countdown', {
-          countdown: String(count),
-          matchId: match.matchId,
-        });
+        server.to(match.matchId).emit('countdown', { countdown: String(count),
+          matchId: match.matchId });
         count--;
         if (count === 0) {
           clearInterval(countdown);
         }
-      },
-      1000,
-      server,
-      match,
-    );
+      }, 1000, server, match );
     match.state = State.ONGOING;
     this.listGamesToAll(watchers, matchs);
     server.to(match.matchId).emit('gameStarting', { matchId: match.matchId });
-    const intervalId = setInterval(
-      () => {
+    const that = this;
+    const intervalId = setInterval(() => {
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
-          this.listGamesToAll(watchers, matchs);
-          this.finishGame(server, match, matchs);
+          that.listGamesToAll(watchers, matchs);
+          that.finishGame(server, match, matchs);
         } else {
-          this.refreshGame(server, match);
+          that.refreshGame(server, match);
         }
-      },
-      16,
-      match,
-      server,
-      match,
-    );
+      }, 16, match, server, match);
   }
 
   playerInput(client: Socket, match: Match, input: string) {
