@@ -24,7 +24,8 @@
     <v-app id="inspire">
 		<v-list>
       <!-- <v-simple-table dense> -->
-			<v-list-item-group v-model="selectedItem" >
+			<!-- <v-list-item-group v-model="selectedItem" > -->
+      <v-list-item-group >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
@@ -257,7 +258,8 @@
             <v-card flat>            
               <div v-show="currentTab === 0">
                 <v-list>
-                  <v-list-item-group v-model="selectedItem" >
+                  <!-- <v-list-item-group v-model="selectedItem" > -->
+                  <v-list-item-group >
                     <template v-for="(item, index) in members">
                     <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
                     ></v-subheader>
@@ -298,7 +300,8 @@
               </div>
               <div v-show="currentTab === 1">
                 <v-list>
-                  <v-list-item-group v-model="selectedItem" >
+                  <!-- <v-list-item-group v-model="selectedItem" > -->
+                    <v-list-item-group>
                     <template v-for="(item, index) in admins">
                     <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
                     ></v-subheader>

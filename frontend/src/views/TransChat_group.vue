@@ -101,16 +101,10 @@
             <v-card flat>            
               <div v-show="currentTab === 0">
                 <v-list>
-                  <v-list-item-group v-model="selectedItem" >
-                    
-                  </v-list-item-group>
                 </v-list>
               </div>
               <div v-show="currentTab === 1">
                 <v-list>
-                  <v-list-item-group v-model="selectedItem" >
-                    
-                  </v-list-item-group>
                 </v-list>
               </div>
             </v-card>
