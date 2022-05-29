@@ -1,11 +1,11 @@
 <template>
-	<v-container>
-		<!-- <canva id="c"></canva> -->
-		<v-card class="mx-auto" width="300" color="#ff3300">
-		<h1>Searching A Game...</h1>
-		</v-card>
-		<v-btn v-if="matchId" @click="AcceptGame">joinGame</v-btn>
-	</v-container>
+<div>
+	<v-row justify="center">
+			<div class="button_slick button_slide" @click="TestTest">
+				caca
+			</div>
+	</v-row>
+</div>
 </template>
 
 <!-- Aimé Julien 42, [29 May 2022 at 12:50:30]:
@@ -40,7 +40,7 @@ for bloking or unblocking  a user:
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';
-import { useKeypress } from "vue3-keypress";
+//import { useKeypress } from "vue3-keypress";
 
 export default {
     chanName : '', 
@@ -49,7 +49,7 @@ export default {
 	setup()
     {
 		const connection = ref(null)
-		const matchId = ref(null)
+		//const matchId = ref(null)
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -68,20 +68,22 @@ export default {
             connection.value.on('channel', (channels) => 
             {console.log("channel:" + channels)})
 
-			NewChannel();
+//			NewChannel();
             TestTest();
 			})
 
         // берет аргс и создает новый канал
-        // { chanName: string, password:string, publicChannel: boolean }
-		function NewChannel(chanName, password, publicChannel){
-			connection.value.emit('createChannel', chanName, password, publicChannel)
-			console.log("createChannel")
-		}
+        //i { chanName: string, password:string, publicChannel: boolean }
+		//function NewChannel(chanName, password, publicChannel){
+		//	console.log("befor createChannel");
+		//	connection.value.emit('createChannel', chanName, password, publicChannel);
+		//	console.log("createChannel");
+		//}
 
         function TestTest(){
-			connection.value.emit('createChannel')
-			console.log("createChannel")
+			console.log("befor createChannel");
+			connection.value.emit('createChannel');
+			console.log("after createChannel")
 		}
 
         // useKeypress({
