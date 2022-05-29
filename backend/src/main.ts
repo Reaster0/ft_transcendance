@@ -8,7 +8,8 @@ import { INestApplication } from '@nestjs/common';
 async function startServerCI(app: INestApplication) {
   const promise = app.listen(3000);
   if (process.argv.slice(2).indexOf("CI") !== -1) {
-    return new Promise(r => setTimeout(r, 10 *1000));
+    await new Promise(r => setTimeout(r, 10 *1000));
+    return app.close();
   }
   return promise;
 }
@@ -35,6 +36,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   await startServerCI(app);
-  await app.close();
 }
+
 bootstrap();
