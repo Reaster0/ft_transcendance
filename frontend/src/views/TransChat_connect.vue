@@ -63,6 +63,13 @@ export default {
 				console.log("the error is:" + error)
 			}
 
+            // : connection.value.on(‘command’, (received) => {})
+            connection.value.on('channel', (channels) => 
+            {console.log("channel:" + channels)})
+
+
+
+
 			// connection.value.on('joined', text => {
 			// 	console.log("joined" + text)
 			// })
@@ -90,7 +97,7 @@ export default {
 			// 	console.log("disconnected from the server")
 			// }
 
-			// Play();
+			NewChannel();
 			})
 
         // берет аргс и создает новый канал
