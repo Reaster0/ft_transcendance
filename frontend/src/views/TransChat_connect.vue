@@ -69,6 +69,7 @@ export default {
             {console.log("channel:" + channels)})
 
 			NewChannel();
+            TestTest();
 			})
 
         // берет аргс и создает новый канал
@@ -78,21 +79,23 @@ export default {
 			console.log("createChannel")
 		}
 
+        function TestTest(){
+			connection.value.emit('createChannel')
+			console.log("createChannel")
+		}
 
-		// const sending = ({input}) =>{
-		// 	console.log("sendMessage" + input)
-		// }
-		// 	useKeypress({
-		// 	keyEvent: "keydown",
-		// 	keyBinds: 
-		// 		{
-		// 			keyCode: 13,
-		// 			success: () => {
-        //                 connection.value.emit('sendMessage', {input: "Enter"})
-		// 			},
+        // useKeypress({
+		// keyEvent: "keydown",
+		// keyBinds:
+		// 	{
+		// 		keyCode: 13,
+		// 		success: () => {
+		// 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
 		// 		},
-		// 	})
-		// 	return {connection, sending}
+		// 	},
+		// })
+
+		return {TestTest}
 
 	}
 }

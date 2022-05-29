@@ -45,8 +45,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     UsersModule,
     AuthModule,
+    GamesModule,
     ChatModule,
-    GamesModule
   ],
   controllers: [],
   providers: [],

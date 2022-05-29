@@ -17,7 +17,8 @@ import { MessageService } from './services/message.service';
 import { JoinedSocketI } from './interfaces/joinedSocket.interface';
 
 
-@WebSocketGateway({ namespace: '/chat', cors: { origin: process.env.FRONTEND, credentials: true } }) //maybe chage origin
+//@WebSocketGateway({ namespace: '/chat', cors: { origin: process.env.FRONTEND, credentials: true } }) //maybe chage origin
+@WebSocketGateway({ cors: { origin: '*' , credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   constructor(
     private readonly chatServices: ChatServices,

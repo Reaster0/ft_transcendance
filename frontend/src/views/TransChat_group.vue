@@ -186,7 +186,9 @@
             clearable
             label="Write a message"
             placeholder="Message"
+            @click.prevent="TestTest"
           ></v-text-field>
+          <v-btn color="blue" @click="TestTest" to="/">Send</v-btn>
           </v-toolbar>
         </v-app>
         </div>

@@ -5,26 +5,20 @@
 			<h1 class="text">need to enter 2fa code</h1>
 		</v-col>
 	</v-container>
-  <div v-else-if="!isLog">
-	<v-container>
-		<v-row justify="center">
-			<v-btn loading rounded elevation="5" outlined width="500" height="500" href="/api/auth/login-42">
-				<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
-				AUTH
-			</v-btn>
-		</v-row>
-	</v-container>
+	<div v-else-if="!isLog">
+		<v-container>
+			<v-row justify="center">
+				<v-btn loading rounded elevation="5" outlined width="500" height="500" href="/api/auth/login-42">
+					<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
+					AUTH
+				</v-btn>
+			</v-row>
+		</v-container>
 	</div>
-	<v-col v-else align="center">
-		<h1>YOU SHOULDNT BE HERE</h1>
-		<v-btn to="/user">GO TO USER PAGE</v-btn>
-	</v-col>
 </template>
 
 <script>
 import { ref } from 'vue'
-// import { onMounted } from '@vue/runtime-core';
-// import { isLogged } from '../components/FetchFunctions.js'
 import { useStore } from 'vuex'
 import { computed } from 'vue'
 import { submit2FaCode, getUserInfo } from "../components/FetchFunctions"
@@ -51,12 +45,6 @@ export default {
 				router.push('/user')
 			}
 		}
-
-		// const isLog = ref(null)
-
-		// onMounted(async() => {
-		// 	isLog.value = await isLogged()
-		// })
 
 		return {isLog, need2fa, inputCode, submitCode}
 	},
