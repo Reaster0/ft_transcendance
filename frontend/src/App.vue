@@ -9,9 +9,6 @@
 
 <script>
 import NavDrawer from "./components/NavDrawer.vue"
-import { useStore } from "vuex"
-import { onMounted } from "@vue/runtime-core"
-import { isLogged, getUserInfo } from "./components/FetchFunctions.js"
 
 export default {
 	name: 'App',
@@ -31,14 +28,6 @@ export default {
   },
 
   setup(){
-		const store = useStore()
-
-		onMounted(async() => {
-			store.commit('setConnected' ,await isLogged())
-			if (store.getters.isConnected) {
-				store.commit('setUser', await getUserInfo())
-			}
-		})
 	}
 }
 </script>
