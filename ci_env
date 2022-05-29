@@ -1,0 +1,26 @@
+### ENV variables for database configuration ###
+# Use by backend/app.module.ts and docker-compose.yml
+DATABASE_USER=postgres
+DATABASE_PASSWORD=randompass
+DATABASE_NAME=postgres
+DATABASE_PORT=5432
+DATABASE_HOST=localhost
+
+#42Access
+CLIENT_ID='onsenfou'
+CLIENT_SECRET='onsenfou'
+CALLBACK_URL='http://localhost:3000/auth/callback'
+JWT_SECRET='onsenfou'
+JWT_EXPIRATION_TIME=36000000000000
+
+#FrondENd
+FRONTEND='http://localhost:8080/login'
+
+# Variables for secret encryption
+ENCRYPTION_KEY='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' # Must be 32 char (256 bit)
+ENCRYPTION_IV_LENGTH=16
+ENCRYPTION_ALGORITHM=aes-256-ctr
+APPNAME=”transcendence”
+ 
+# Default avatar
+DEFAULT_AVATAR='../backend/image.png'

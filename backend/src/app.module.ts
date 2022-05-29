@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule} from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import * as Joi from '@hapi/joi';
@@ -28,7 +28,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         ENCRYPTION_IV_LENGTH: Joi.number().required(),
         ENCRYPTION_ALGORITHM: Joi.string().required(),
         DEFAULT_AVATAR: Joi.string().required(),
-      isGlobal: true,
+        isGlobal: true,
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -40,13 +40,13 @@ import { ScheduleModule } from '@nestjs/schedule';
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
         autoLoadEntities: true, //Load automatically entities without specifying the array
-        synchronize: true // Synch DB with entities each time we load the app TODO disable when production
+        synchronize: true, // Synch DB with entities each time we load the app TODO disable when production
       }),
     }),
     UsersModule,
     AuthModule,
     ChatModule,
-    GamesModule
+    GamesModule,
   ],
   controllers: [],
   providers: [],
