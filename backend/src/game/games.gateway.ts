@@ -89,7 +89,6 @@ export class GameGateway
       }
       if (this.gamesService.isWaiting(client, queue) === true ||
           this.gamesService.isPlaying(client, matchs) === true) {
-        this.logger.log('user already in queue/playing');
         return;
       }
       queue.push(client);
