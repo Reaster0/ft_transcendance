@@ -110,7 +110,7 @@ export class PongService {
     const direction = ball.pos.x < field.length / 2 ? 1 : -1;
     ball.vel.x = direction * ball.speed * Math.cos(bounceAngle);
     ball.vel.y = ball.speed * Math.sin(bounceAngle);
-    ball.speed += 0.1;
+    ball.speed += (field.length / (60 * 1000));
   }
 
   getScore(field: Field, ball: Ball): Point {
