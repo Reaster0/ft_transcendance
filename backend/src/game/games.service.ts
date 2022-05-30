@@ -140,6 +140,10 @@ export class GamesService {
     }
   }
 
+  emitToMatch(server: Server, match: Match, toEmit: string, ...args) {
+    server.to(match.matchId).emit(toEmit, ...args);
+  }
+
   playerWon(match: Match, player: Player) {
     if (player.score == 10) {
       match.winner = player;
@@ -155,26 +159,22 @@ export class GamesService {
     }
   }
 
-  startGame( server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
+  startGame(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
     // Send: 'beReady' + player position  on field + match Id + opponent nickname
-    match.players[0].socket.emit('beReady', { pos: 'left', matchId: match.matchId,
-      opponent: match.players[1].user.nickname });
-    match.players[1].socket.emit('beReady', { pos: 'right', matchId: match.matchId,
-      opponent: match.players[0].user.nickname });
+    match.players[0].socket.emit('beReady', { pos: 'left', opponent: match.players[1].user.nickname });
+    match.players[1].socket.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
     let count = 3;
+    const that = this;
     const countdown = setInterval(function () {
-        match.players[0].socket.emit('test');
-        server.to(match.matchId).emit('countdown', { countdown: String(count),
-          matchId: match.matchId });
+        that.emitToMatch(server, match, 'countdown', { countdown: String(count) });
         count--;
         if (count === 0) {
           clearInterval(countdown);
         }
-      }, 1000, server, match );
+      }, 1000, server, match);
     match.state = State.ONGOING;
     this.listGamesToAll(watchers, matchs);
     server.to(match.matchId).emit('gameStarting', { matchId: match.matchId });
-    const that = this;
     const intervalId = setInterval(() => {
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
@@ -187,10 +187,7 @@ export class GamesService {
   }
 
   playerInput(client: Socket, match: Match, input: string) {
-    if (
-      this.isPlayer(client, match) === false ||
-      (input != 'UP' && input != 'DOWN')
-    ) {
+    if (this.isPlayer(client, match) === false || (input != 'UP' && input != 'DOWN')) {
       client.emit('requestError');
       return;
     }
