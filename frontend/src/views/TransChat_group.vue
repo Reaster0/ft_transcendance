@@ -428,7 +428,6 @@ export default
     {
 		const connection = ref(null)
     const chats = ref(null)
-		// const matchId = ref(null)
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
