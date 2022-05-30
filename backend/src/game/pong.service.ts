@@ -81,7 +81,7 @@ export class PongService {
   resetBall(field: Field, ball: Ball) {
     ball.pos.x = field.length / 2;
     ball.pos.y = field.width / 2;
-    ball.speed = 5;
+    ball.speed = field.length / (60 * 1000);
     ball.vel.x *= -1;
   }
 
