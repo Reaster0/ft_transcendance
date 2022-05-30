@@ -5,7 +5,7 @@ import { Match, State } from './interfaces/match.interface';
 import { Player } from './interfaces/player.interface';
 import { PongService } from './pong.service';
 import { Point } from './interfaces/pong.interface';
-import { Repository, Connection } from 'typeorm';
+import { Repository } from 'typeorm';
 import { GameHistory } from './entities/gamehistory.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
@@ -160,7 +160,7 @@ export class GamesService {
   }
 
   startGame(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
-    // Send: 'beReady' + player position  on field + match Id + opponent nickname
+    // Send: 'beReady' + player position  on field + opponent nickname
     match.players[0].socket.emit('beReady', { pos: 'left', opponent: match.players[1].user.nickname });
     match.players[1].socket.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
     let count = 3;
