@@ -198,7 +198,7 @@ export class GamesService {
     }
   }
 
-  refreshGame(server: Server, match: Match) {
+  async refreshGame(server: Server, match: Match) {
     this.pongService.calcBallPos(match.pong);
     server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
       paddles: this.getPaddlesFeatures(match) });
@@ -219,6 +219,7 @@ export class GamesService {
       // Send : 'score' + score player left side + score player right side
       server.to(match.matchId).emit('score', { leftScore: match.players[0].score,
         rightScore: match.players[1].score });
+      await new Promise(r => setTimeout(r, 1000));
     }
     if (winner === true) {
       match.state = State.FINISHED;
@@ -226,12 +227,8 @@ export class GamesService {
   }
 
   getBallFeatures(match: Match) {
-    return {
-      ball: {
-        pos: { x: match.pong.ball.pos.x, y: match.pong.ball.pos.y },
-        radius: match.pong.ball.radius,
-      },
-    };
+    return { ball: { pos: { x: match.pong.ball.pos.x, y: match.pong.ball.pos.y },
+        radius: match.pong.ball.radius }};
   }
 
   getPaddlesFeatures(match: Match) {
