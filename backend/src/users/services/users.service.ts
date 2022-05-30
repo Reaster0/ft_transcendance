@@ -260,14 +260,8 @@ export class UsersService {
     return connectedUser;
   }
 
-  async updateBlockedUser(
-    block: boolean,
-    user: User,
-    userToBlock: User,
-  ): Promise<User> {
-    const userFound = user.blockedUID.find(
-      (element) => element === userToBlock.id,
-    );
+  async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {
+    const userFound = user.blockedUID.find((element) => element === userToBlock.id);
 
     if (block === true && !userFound) {
       user.blockedUID.push(userToBlock.id);
@@ -290,4 +284,9 @@ export class UsersService {
     }
     return user;
   }
+
+  async getStats(user: User) {
+    
+  }
+
 }

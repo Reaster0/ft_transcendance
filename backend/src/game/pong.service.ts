@@ -32,7 +32,7 @@ export class PongService {
     const ball: Ball = {
       pos: { x: field.length / 2, y: field.length / 2 },
       vel: { x: 5, y: 5 },
-      speed: field.length / 60,
+      speed: field.length / (60 * 1000),
       radius: field.length / 60,
     };
     return ball;
