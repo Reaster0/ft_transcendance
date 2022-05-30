@@ -68,17 +68,63 @@ export default {
             connection.value.on('channel', (channels) => 
             {console.log("channel:" + channels)})
 
-//			NewChannel();
+			NewChannel();
             TestTest();
+			SendingMessage();
+			JoinChannel();
+			LeaveChannel();
+			BlockUser();
 			})
 
         // берет аргс и создает новый канал
-        //i { chanName: string, password:string, publicChannel: boolean }
-		//function NewChannel(chanName, password, publicChannel){
-		//	console.log("befor createChannel");
-		//	connection.value.emit('createChannel', chanName, password, publicChannel);
-		//	console.log("createChannel");
-		//}
+        // for creating a new channel/room: 
+		// - createChannel { chanName: string, password:string, publicChannel: boolean }
+		function NewChannel(chanName, password, publicChannel)
+		{
+			console.log("before createChannel");
+			connection.value.emit('createChannel', chanName, password, publicChannel);
+			console.log("after createChannel");
+		}
+
+		// for sending message:
+		// -  message {content: string, channel: Chan, ...}
+		function SendingMessage(content, channel)
+		{
+			console.log("before message");
+			connection.value.emit('message', content, channel);
+			console.log("after message");
+		}
+
+		// for joinning a existing channel
+		// - joinChannel { id: string }
+		function JoinChannel(id)
+		{
+			console.log("before joinChannel");
+			connection.value.emit('joinChannel', id);
+			console.log("after joinChannel");
+		}
+
+		// (or just put a channel in argument
+
+		// for leaving channel:
+		// - leaveChannel { channel or id: string}
+		function LeaveChannel(channel)
+		{
+			console.log("before leaveChannel");
+			connection.value.emit('leaveChannel', channel);
+			console.log("after leaveChannel");
+		}
+
+
+		// for bloking or unblocking  a user:
+		// - blockUser{ user: User, block: boolean } // true => block false => unblock
+		function BlockUser(user, block)
+		{
+			console.log("before blockUser");
+			connection.value.emit('blockUser', user, block);
+			console.log("after blockUser");
+		}
+
 
 		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
 
@@ -87,6 +133,11 @@ export default {
 			connection.value.emit('createChannel');
 			console.log("after createChannel")
 		}
+
+
+
+
+
 
         // useKeypress({
 		// keyEvent: "keydown",
