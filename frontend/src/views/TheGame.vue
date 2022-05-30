@@ -1,6 +1,6 @@
 <template>
 <div>
-	<div v-if="!gameData.gameStarted">
+	<div v-if="gameData.gameStarted">
 		<v-row justify="center">
 				<div class="button_slick button_slide" @click="Play">
 					SearchGame
@@ -19,7 +19,7 @@
 		</v-row>
 	</div>
 	<div v-else>
-		<!-- canva here -->
+		<canvas id="pongGame" style="background-color: black;"></canvas>
 	</div>
 </div>
 </template>
@@ -40,17 +40,31 @@ export default {
 			gameStarted: false,
 			pos: "",
 			opponent: "",
-			ball: { pos: { x: 0, y: 0 } },
-			paddleL: { bclPos: { x: 0, y: 0 }, width: 0, height: 0 },
-			paddleR: { bclPos: { x: 0, y: 0 }, width: 0, height: 0 },
+			ball: { pos: { x: 30, y: 50 }, radius: 10},
+			paddleL: { bclPos: { x: 15, y: 25 }, width: 5, height: 15 },
+			paddleR: { bclPos: { x: 280, y: 100 }, width: 5, height: 15 },
 			score: { leftScore: 0, rightScore: 0 },
 			winner: "",
 		})
 
-		onMounted(() =>{
-			console.log(document.cookie.toString())
+		onMounted(async() =>{
+
+
+			const canvas = document.getElementById('pongGame');
+			const ctx = canvas.getContext('2d');
+			canvas.width = window.innerWidth
+			canvas.height = window.innerHeight
+			console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
+			ctx.fillStyle = '#fff'
+			ctx.fillRect(gameData.value.paddleL.bclPos.x, gameData.value.paddleL.bclPos.y, gameData.value.paddleL.width, gameData.value.paddleL.height)
+			ctx.fillRect(gameData.value.paddleR.bclPos.x, gameData.value.paddleR.bclPos.y, gameData.value.paddleR.width, gameData.value.paddleR.height)
+			ctx.beginPath();
+			ctx.arc(gameData.value.ball.pos.x, gameData.value.ball.pos.y, gameData.value.ball.radius, 0, Math.PI*2, false);
+			ctx.closePath();
+			ctx.fill();
+
 			try {
-				gameSocket.value = io('http://82.65.87.54:3000/game',{
+				gameSocket.value = await io('http://82.65.87.54:3000/game',{
 				transportOptions: {
 				polling: { extraHeaders: { auth: document.cookie} },
 				}})
@@ -84,8 +98,7 @@ export default {
 			})
 
 			gameSocket.value.on('gameUpdate', params =>{
-				console.log("update")
-				console.log(gameData.value.winner)
+				console.log(JSON.stringify(params))
 				gameData.value.ball = params.ball
 				gameData.value.paddleL = params.paddleL
 				gameData.value.paddleR = params.paddleR
@@ -115,8 +128,8 @@ export default {
 				console.log(event)
 				fatalError.value = true
 			}
-
 			Play();
+
 			})
 
 		onBeforeRouteLeave(() => {
@@ -137,12 +150,6 @@ export default {
 		function AcceptGame(){
 			gameSocket.value.emit('acceptGame', matchId.value)
 			console.log("acceptGame")
-		}
-
-		const GameInput = ({input}) =>{
-			console.log("gameInput" + input)
-			if (matchId.value)
-				gameSocket.value.emit('gameInput', matchId, input)
 		}
 
 		const Disconnect = () =>{
@@ -168,7 +175,7 @@ export default {
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, GameInput, matchId, fatalError, gameData }
+		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData }
 	},
 }
 </script>
