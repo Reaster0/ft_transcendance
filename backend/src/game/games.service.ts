@@ -200,8 +200,8 @@ export class GamesService {
 
   async refreshGame(server: Server, match: Match) {
     this.pongService.calcBallPos(match.pong);
-    server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
-      paddles: this.getPaddlesFeatures(match) });
+    server.to(match.matchId).emit('gameUpdate', this.getBallFeatures(match),
+      this.getPaddlesFeatures(match));
     const point = this.pongService.getScore(match.pong.field, match.pong.ball);
     let winner = false;
     if (point != Point.NONE) {
