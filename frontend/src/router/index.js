@@ -80,49 +80,49 @@ const routes = [
 		path: '/chatgroup',
 		name: "transchatgroup",
 		component: Chat,
-		// beforeEnter: () => {
-		// 	return store.getters.isConnected? true: "/login"
-		// }
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/chatperson',
 		name: "transchatperson",
 		component: ChatPerson,
-		// beforeEnter: () => {
-		// 	return store.getters.isConnected? true: "/login"
-		// }
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/newroom',
 		name: "newroom",
 		component: NewRoom,
-		// beforeEnter: () => {
-		// 	return store.getters.isConnected? true: "/login"
-		// }
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/roomsettings',
 		name: "changeroom",
 		component: ChangeRoom,
-		// beforeEnter: () => {
-		// 	return store.getters.isConnected? true: "/login"
-		// }
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/mu',
 		name: "manageusers",
 		component: MU,
-		// beforeEnter: () => {
-		// 	return store.getters.isConnected? true: "/login"
-		// }
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 	{
 		path: '/adm',
 		name: "groupchat_adminside",
 		component: ADM,
-		// beforeEnter: () => {
-		// 	return store.getters.isConnected? true: "/login"
-		// }
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
 	},
 ]
 

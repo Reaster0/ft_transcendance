@@ -427,6 +427,7 @@ export default
 	setup()
     {
 		const connection = ref(null)
+    const chats = ref({})
 		//const matchId = ref(null)
 
 		onMounted(() =>{
@@ -450,8 +451,13 @@ export default
         // : connection.value.on(‘command’, (received) => {})
 
         // channel : get all the chanel the user is connected
-        connection.value.on('channel', (channels) => 
-        {console.log("channel:" + channels)})
+        // connection.value.on('channel', (channels) => 
+        // {console.log("channel:" + channels)})
+        connection.value.on('channel', (channels) =>{
+          console.log("channel" + channels)
+          chats.value = channels
+          console.log(":::::" + chats.value)
+        })
 
 			// NewChannel();
       // TestTest();
