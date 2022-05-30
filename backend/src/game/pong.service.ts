@@ -21,8 +21,8 @@ export class PongService {
 
   initField(): Field {
     const field: Field = {
-      width: 1,
       length: 1,
+      width: 1,
       offset: 1 / 80,
     };
     return field;
@@ -30,8 +30,8 @@ export class PongService {
 
   initBall(field: Field): Ball {
     const ball: Ball = {
-      pos: { x: field.length / 2, y: field.length / 2 },
-      vel: { x: field.length / 240, y: field.length / 240 },
+      pos: { x: field.length / 2, y: field.width / 2 },
+      vel: { x: field.length / 240, y: field.width / 240 },
       speed: 5,
       radius: field.length / 60,
     };
@@ -39,12 +39,11 @@ export class PongService {
   }
 
   initPaddle(field: Field, left: boolean): Paddle {
-    const yValue =
-      left === true ? 0 + field.length / 50 : field.length - field.length / 50;
+    const xValue = left === true ? 0 + field.length / 50 : field.length - field.length / 50;
     const paddle: Paddle = {
-      blcPos: { x: field.width / 2, y: yValue },
-      width: field.width / 7,
+      blcPos: { x: xValue, y: field.width / 2 },
       length: field.length / 50,
+      width: field.width / 7,
     };
     return paddle;
   }
@@ -95,12 +94,8 @@ export class PongService {
     const ballLeft = ball.pos.x - ball.radius;
     const ballRight = ball.pos.x + ball.radius;
 
-    return (
-      ballRight > padLeft &&
-      ballTop < padBottom &&
-      ballLeft < padRight &&
-      ballBottom > padTop
-    );
+    return (ballRight > padLeft && ballTop < padBottom && ballLeft < padRight &&
+      ballBottom > padTop);
   }
 
   getBounce(ball: Ball, field: Field, paddle: Paddle): void {
@@ -114,7 +109,7 @@ export class PongService {
   }
 
   getScore(field: Field, ball: Ball): Point {
-    if ((ball.pos.x - ball.radius) < 0.000000000000000) {
+    if ((ball.pos.x - ball.radius) < 0) {
       this.resetBall(field, ball);
       return Point.RIGHT;
     } else if ((ball.pos.x + ball.radius) > field.length) {

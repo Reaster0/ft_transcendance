@@ -117,7 +117,7 @@ export class GameGateway
       if (this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
-      if (opponent.data.user === client.data.user.username) {
+      if (opponent.data.user.id === client.data.user.id) {
         client.emit('requestError');
         return client.disconnect();
       }
