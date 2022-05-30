@@ -193,7 +193,7 @@
               placeholder="Message"
               @click.prevent="TestTest"
             ></v-text-field>
-            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="TestTest">
+            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="SendingMessage">
               <div  :style="{color: ' #ffffff'}">
                 send
               </div>
@@ -219,7 +219,8 @@
           </v-card>
 
           <div id="app" class="pt-6">
-          <v-btn v-on:click="create" elevation="2" width="350px">
+                      <!-- if clicked "leave" - activate "join". and opposite -->
+          <v-btn elevation="2" width="350px" @click="LeaveChannel">
             Leave the chat room
           </v-btn>
           </div>
@@ -441,16 +442,23 @@ export default
 				console.log("the error is:" + error)
 			}
 
-            // : connection.value.on(‘command’, (received) => {})
-            connection.value.on('channel', (channels) => 
-            {console.log("channel:" + channels)})
+        // ============= info you can retrive ======
+        // - channel : get all the chanel the user is connected
+        // - connectedUsers : get all user.id of user connected..... (but the function feels wrong....)
+        // - messageSended
 
-			NewChannel();
-      TestTest();
-			SendingMessage();
-			JoinChannel();
-			LeaveChannel();
-			BlockUser();
+        // : connection.value.on(‘command’, (received) => {})
+
+        // channel : get all the chanel the user is connected
+        connection.value.on('channel', (channels) => 
+        {console.log("channel:" + channels)})
+
+			// NewChannel();
+      // TestTest();
+			// SendingMessage();
+			// JoinChannel();
+			// LeaveChannel();
+			// BlockUser();
 			})
 
         // берет аргс и создает новый канал
