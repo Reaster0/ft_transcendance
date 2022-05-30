@@ -3,16 +3,20 @@ import { Server, Socket } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
 import { Match, State } from './interfaces/match.interface';
 import { Player } from './interfaces/player.interface';
-import { Pong } from './interfaces/pong.interface';
 import { PongService } from './pong.service';
 import { Point } from './interfaces/pong.interface';
-import { match } from 'assert';
+import { Repository, Connection } from 'typeorm';
+import { GameHistory } from './entities/gamehistory.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class GamesService {
   constructor(
     private readonly usersService: UsersService,
     private readonly pongService: PongService,
+    @InjectRepository(GameHistory)
+    private gamesRepository: Repository<GameHistory>,
   ) {}
 
   isWaiting(client: Socket, queue: Array<Socket>): boolean {
@@ -111,15 +115,9 @@ export class GamesService {
 
   waitForPlayers(server: Server, match: Match, matchs: Map<string, Match>) {
     const that = this;
-    const timer = setTimeout(
-      function () {
+    const timer = setTimeout(function () {
         that.abortGame(server, match, matchs);
-      },
-      10000,
-      server,
-      match,
-      matchs,
-    );
+      }, 10000, server, match, matchs );
   }
 
   abortGame(server: Server, match: Match, matchs: Map<string, Match>) {
@@ -159,16 +157,10 @@ export class GamesService {
 
   startGame( server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
     // Send: 'beReady' + player position  on field + match Id + opponent nickname
-    match.players[0].socket.emit('beReady', {
-      pos: 'left',
-      matchId: match.matchId,
-      opponent: match.players[1].user.nickname,
-    });
-    match.players[1].socket.emit('beReady', {
-      pos: 'right',
-      matchId: match.matchId,
-      opponent: match.players[0].user.nickname,
-    });
+    match.players[0].socket.emit('beReady', { pos: 'left', matchId: match.matchId,
+      opponent: match.players[1].user.nickname });
+    match.players[1].socket.emit('beReady', { pos: 'right', matchId: match.matchId,
+      opponent: match.players[0].user.nickname });
     let count = 3;
     const countdown = setInterval(function () {
         match.players[0].socket.emit('test');
@@ -211,11 +203,8 @@ export class GamesService {
 
   refreshGame(server: Server, match: Match) {
     this.pongService.calcBallPos(match.pong);
-    server.to(match.matchId).emit('gameUpdate', {
-      matchId: match.matchId,
-      ball: this.getBallFeatures(match),
-      paddles: this.getPaddlesFeatures(match),
-    });
+    server.to(match.matchId).emit('gameUpdate', { matchId: match.matchId,
+      ball: this.getBallFeatures(match), paddles: this.getPaddlesFeatures(match) });
     const point = this.pongService.getScore(match.pong.field, match.pong.ball);
     let winner = false;
     if (point != Point.NONE) {
@@ -231,11 +220,8 @@ export class GamesService {
         }
       }
       // Send : 'score' + score player left side + score player right side
-      server.to(match.matchId).emit('score', {
-        matchId: match.matchId,
-        leftScore: match.players[0].score,
-        rightScore: match.players[1].score,
-      });
+      server.to(match.matchId).emit('score', { matchId: match.matchId,
+        leftScore: match.players[0].score, rightScore: match.players[1].score });
     }
     if (winner === true) {
       match.state = State.FINISHED;
@@ -272,13 +258,11 @@ export class GamesService {
     };
   }
 
-  finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
-    server.to(match.matchId).emit('endGame', {
-      matchId: match.matchId,
-      winner: match.winner.user.nickname,
-    });
+  async finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
+    server.to(match.matchId).emit('endGame', { matchId: match.matchId, winner: match.winner.user.nickname });
     server.socketsLeave(match.matchId);
-    // TODO set game inside DB
+    const history = await this.registerGameHistory(match);
+    await this.modifyPlayersElo(history.winner, history.looser);
     matchs.delete(match.matchId);
   }
 
@@ -286,11 +270,8 @@ export class GamesService {
     client.emit('newList');
     for (const match of matchs.values()) {
       if (match.state === State.ONGOING) {
-        client.emit('ongoingGame', {
-          matchId: match.matchId,
-          leftPlayer: match.players[0].user.nickname,
-          rightPlayer: match.players[1].user.nickname,
-        });
+        client.emit('ongoingGame', { matchId: match.matchId, leftPlayer: match.players[0].user.nickname,
+          rightPlayer: match.players[1].user.nickname });
       }
     }
     client.emit('endList');
@@ -300,5 +281,27 @@ export class GamesService {
     for (const client of watchers) {
       this.listGamesToOne(client, matchs);
     }
+  }
+
+  async registerGameHistory(match: Match) {
+    const winnerUser = match.winner.user;
+    const winnerScore = match.winner.score;
+    let looserUser = undefined;
+    let looserScore = undefined;
+    if (winnerUser.id === match.players[0].user.id) {
+      looserUser = match.players[1].user;
+      looserScore = match.players[1].score;
+    } else {
+      looserUser = match.players[0].user;
+      looserScore = match.players[0].score;
+    }
+    const history = await this.gamesRepository.create({ winner: winnerUser, looser: looserUser,
+      winnerScore: winnerScore, looserScore: looserScore });
+    return await this.gamesRepository.save(history);
+  }
+
+  async modifyPlayersElo(winner: User, looser: User) {
+    await this.usersService.modifyElo(winner, looser.eloScore, true);
+    await this.usersService.modifyElo(looser, winner.eloScore, false);
   }
 }

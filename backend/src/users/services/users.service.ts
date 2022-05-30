@@ -11,7 +11,6 @@ import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../user.dto';
-import { JwtService } from '@nestjs/jwt';
 import { Status } from '../../common/enums/status.enum';
 import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
@@ -23,7 +22,6 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
     private readonly avatarsService: AvatarsService,
     private connection: Connection,
   ) {}
