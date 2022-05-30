@@ -1,23 +1,26 @@
 <template>
 <div>
-	<v-row justify="center">
-			<div class="button_slick button_slide" @click="Play">
-				SearchGame
-			</div>
-	</v-row>
-	<div v-if="!fatalError">
-		<v-container>
-			<!-- <canva id="c"></canva> -->
-
-			<v-row justify="center">
-				<div v-if="!matchId" class="button_slick big_button">Searching A Game...(but press the btn)</div>
-				<div v-else class="button_slide button_slick big_button" @click="AcceptGame">a game has been found!</div>
-			</v-row>
-		</v-container>
+	<div v-if="!gameData.gameStarted">
+		<v-row justify="center">
+				<div class="button_slick button_slide" @click="Play">
+					SearchGame
+				</div>
+		</v-row>
+		<div v-if="!fatalError">
+			<v-container>
+				<v-row justify="center">
+					<div v-if="!matchId" class="button_slick big_button">Searching A Game...(but press the btn)</div>
+					<div v-else class="button_slide button_slick big_button" @click="AcceptGame">a game has been found!</div>
+				</v-row>
+			</v-container>
+		</div>
+		<v-row v-else justify="center">
+			<div class="button_slick big_button">FATAL ERROR PLEASE REFRESH</div>
+		</v-row>
 	</div>
-	<v-row v-else justify="center">
-		<div class="button_slick big_button">FATAL ERROR PLEASE REFRESH</div>
-	</v-row>
+	<div v-else>
+		<!-- canva here -->
+	</div>
 </div>
 </template>
 
@@ -33,7 +36,16 @@ export default {
 		const gameSocket = ref(null)
 		const matchId = ref(null)
 		const fatalError = ref(false)
-		const gameData = ref({})
+		const gameData = ref({
+			gameStarted: false,
+			pos: "",
+			opponent: "",
+			ball: { pos: { x: 0, y: 0 } },
+			paddleL: { bclPos: { x: 0, y: 0 }, width: 0, height: 0 },
+			paddleR: { bclPos: { x: 0, y: 0 }, width: 0, height: 0 },
+			score: { leftScore: 0, rightScore: 0 },
+			winner: "",
+		})
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -42,7 +54,6 @@ export default {
 				transportOptions: {
 				polling: { extraHeaders: { auth: document.cookie} },
 				}})
-				console.log(gameSocket.value)
 				console.log("starting connection to websocket")
 			} catch (error) {
 				console.log("the error is:" + error)
@@ -57,10 +68,37 @@ export default {
 				console.log("found match:" + res)
 			})
 
-			gameSocket.value.on('beReady', (params, lol, mdr) =>{
-				console.log("beReady:" + params)
-				gameData.value = params
-				console.log(gameData.value+lol+ mdr)
+			gameSocket.value.on('beReady', params =>{
+				console.log("beReady:")
+				gameData.value.pos = params.pos
+				gameData.value.opponent = params.opponent
+				gameData.value.gameStarted = true
+			})
+
+			gameSocket.value.on('countdown', params =>{
+				console.log("countdown:" + params.countdown)
+			})
+
+			gameSocket.value.on('gameStarting', () =>{
+				console.log("gameStarting:")
+			})
+
+			gameSocket.value.on('gameUpdate', params =>{
+				console.log("update")
+				console.log(gameData.value.winner)
+				gameData.value.ball = params.ball
+				gameData.value.paddleL = params.paddleL
+				gameData.value.paddleR = params.paddleR
+			})
+
+			gameSocket.value.on('score', params =>{
+				console.log("score")
+				gameData.value.score = params.score
+			})
+
+			gameSocket.value.on('endGame', params =>{
+				console.log("endGame")
+				gameData.value.winner = params.winner
 			})
 
 			gameSocket.value.on('requestError', () =>{
@@ -78,7 +116,7 @@ export default {
 				fatalError.value = true
 			}
 
-			// Play();
+			Play();
 			})
 
 		onBeforeRouteLeave(() => {
@@ -130,7 +168,7 @@ export default {
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, GameInput, matchId, fatalError }
+		return { Disconnect, Play, AcceptGame, GameInput, matchId, fatalError, gameData }
 	},
 }
 </script>
