@@ -427,8 +427,8 @@ export default
 	setup()
     {
 		const connection = ref(null)
-    const chats = ref({})
-		//const matchId = ref(null)
+    const chats = ref(null)
+		// const matchId = ref(null)
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -453,13 +453,14 @@ export default
         // channel : get all the chanel the user is connected
         // connection.value.on('channel', (channels) => 
         // {console.log("channel:" + channels)})
-        connection.value.on('channel', (channels) =>{
-          console.log("channel" + channels)
-          chats.value = channels
+        connection.value.on('channel', (channel) =>{
+          console.log("-----------------------------------")
+          chats.value = channel
           console.log(":::::" + chats.value)
         })
 
-			// NewChannel();
+
+			NewChannel();
       // TestTest();
 			// SendingMessage();
 			// JoinChannel();
@@ -472,9 +473,14 @@ export default
 		// - createChannel { chanName: string, password:string, publicChannel: boolean }
 		function NewChannel(chanName, password, publicChannel)
 		{
+      if (!chanName)
+        chanName = "Caca"
+      if (!publicChannel)
+        publicChannel = true
 			console.log("before createChannel");
 			connection.value.emit('createChannel', chanName, password, publicChannel);
 			console.log("after createChannel");
+
 		}
 
 		// for sending message:
