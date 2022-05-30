@@ -200,8 +200,8 @@ export class GamesService {
 
   async refreshGame(server: Server, match: Match) {
     this.pongService.calcBallPos(match.pong);
-    server.to(match.matchId).emit('gameUpdate', this.getBallFeatures(match),
-      this.getPaddlesFeatures(match));
+    server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
+     paddle: this.getPaddlesFeatures(match)});
     const point = this.pongService.getScore(match.pong.field, match.pong.ball);
     let winner = false;
     if (point != Point.NONE) {
@@ -227,13 +227,13 @@ export class GamesService {
   }
 
   getBallFeatures(match: Match) {
-    return { ball: { pos: { x: match.pong.ball.pos.x, y: match.pong.ball.pos.y },
-        radius: match.pong.ball.radius }};
+    return { pos: { x: match.pong.ball.pos.x, y: match.pong.ball.pos.y },
+        radius: match.pong.ball.radius };
   }
 
   getPaddlesFeatures(match: Match) {
     return {
-      paddleL: {
+      L: {
         blcPos: {
           x: match.pong.paddleL.blcPos.x,
           y: match.pong.paddleL.blcPos.y,
@@ -241,7 +241,7 @@ export class GamesService {
         width: match.pong.paddleL.width,
         length: match.pong.paddleL.length,
       },
-      paddleR: {
+      R: {
         blcPos: {
           x: match.pong.paddleR.blcPos.x,
           y: match.pong.paddleR.blcPos.y,
