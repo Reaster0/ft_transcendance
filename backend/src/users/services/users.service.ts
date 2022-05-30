@@ -3,7 +3,7 @@ import { Injectable, NotFoundException, HttpException, HttpStatus, StreamableFil
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { CreateUserDto, UpdateUserDto, UserStatsDto } from '../user.dto';
+import { CreateUserDto, UpdateUserDto } from '../user.dto';
 import { Status } from '../../common/enums/status.enum';
 import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
