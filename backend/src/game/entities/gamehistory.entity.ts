@@ -13,12 +13,12 @@ export class GameHistory {
   id: number;
 
   @ManyToOne(() => User, (user) => user.gamesWon, { nullable: true })
-  @ApiProperty({ description: 'Winner of match, relation to corresponding user.' })
-  winner?: User; //Can be null if user is deleted
+  @ApiProperty({ description: 'Winner of match, relation to corresponding user. Can be null if user is deleted.' })
+  winner?: User;
 
   @ManyToOne(() => User, (user) => user.gamesLost, { nullable: true })
-  @ApiProperty({ description: 'Looser of match, relation to corresponding user.' })
-  looser?: User; //Can be null if user is deleted
+  @ApiProperty({ description: 'Looser of match, relation to corresponding user. Can be null if user is deleted.' })
+  looser?: User;
 
   @Column({ type: 'int' })
   @ApiProperty({ type: Number, description: 'Winner score.' })

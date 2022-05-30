@@ -8,6 +8,7 @@ import {
   IsAlphanumeric,
   MinLength,
   MaxLength,
+  IsNumber
 } from 'class-validator';
 
 // DTO for user registration //
@@ -43,4 +44,18 @@ export class UpdateUserDto {
   @IsEmail()
   @IsOptional()
   readonly email?: string;
+}
+
+export class UserStatsDto {
+  @ApiProperty({ type: Number, description: 'number of matchs won' })
+  @IsNumber()
+  readonly nbMatchsWon: number;
+ 
+  @ApiProperty({ type: Number, description: 'number of matchs lost' })
+  @IsNumber()
+  readonly nbMatchsLost: number;  
+
+  @ApiProperty({ type: Number, description: 'Elo score, equivalent to level' })
+  @IsNumber()
+  readonly eloScore: number;  
 }

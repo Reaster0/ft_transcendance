@@ -49,14 +49,10 @@ export const avatarOptions = {
       cb(null, true);
     } else {
       cb(
-        new HttpException(
-          `Unsupported file type ${extname(file.originalname)}`,
-          HttpStatus.BAD_REQUEST,
-        ),
-        false,
-      );
+        new HttpException(`Unsupported file type ${extname(file.originalname)}`, 
+          HttpStatus.BAD_REQUEST), false);
     }
-  },
+  }
 };
 
 @ApiTags('users')
@@ -70,28 +66,12 @@ export class UsersController {
 
   private logger: Logger = new Logger('UserController');
 
-  @Get()
-  @UseGuards(AuthGuard('jwt'), AuthUser)
-  /** Swagger **/
-  @ApiOperation({ summary: 'Get list of all users' })
-  @ApiOkResponse({ description: 'List of all users.' })
-  @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
-  /** End of swagger **/
-  findAllUsers(): Promise<User[]> {
-    this.logger.log('Get() route called');
-    return this.usersService.findAllUsers();
-  }
-
   @Get('logged')
   @UseGuards(AuthGuard('jwt')) // modification for evan
   /** Swagger **/
   @ApiOperation({ summary: 'Check if user is logged through token.' })
-  @ApiOkResponse({
-    description:
-      "Return true if the User is properly logged else: \
-	 return 401 if the token is absent and 418 if it doesn't make tea.",
-    type: Boolean,
-  })
+  @ApiOkResponse({ description: "Return true if the User is properly logged else: \
+    return 401 if the token is absent and 418 if it doesn't make tea.", type: Boolean })
   @ApiNotFoundResponse({ description: 'Not found.' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
