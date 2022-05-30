@@ -241,15 +241,6 @@ export class UsersService {
     return user;
   }
 
-  getStats(user: User): UserStatsDto {
-    const matchsWon = user.gamesWon.length;
-    const matchsLost = user.gamesLost.length;
-    const eloScore = user.eloScore;
-    const statsDto: UserStatsDto = { nbMatchsWon: matchsWon, nbMatchsLost: matchsLost,
-      eloScore: eloScore };
-    return statsDto;
-  }
-
   getGameHistory(user: User): GameHistory[] {
     let gameHistory = [];
     if (user.gamesWon) {

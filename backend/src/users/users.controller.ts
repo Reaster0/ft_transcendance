@@ -138,14 +138,11 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'Get info of one user according to its id.' })
-  @ApiOkResponse({
-    description: "Return content of one users depending on it's id.",
-    type: User,
-  })
+  @ApiOkResponse({ description: "Return content of one users depending on it's id.", type: User })
   @ApiNotFoundResponse({ description: 'User with given id not found.' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  findSpecificUser(@Param('id') id: number): Promise<User> {
+  async findSpecificUser(@Param('id') id: number): Promise<User> {
     this.logger.log("Get(':id') route.");
     return this.usersService.findUserById('' + id);
   }
@@ -158,12 +155,22 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'User with given username not found.' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  async getAvatar(
-    @Param('id', ParseIntPipe) id: number,
-    @Res({ passthrough: true }) res,
-  ) {
-    this.logger.log("Get('getAVatar/:id') route called.");
+  async getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
+    this.logger.log("Get('getAvatar/:id') route called.");
     return await this.usersService.getAvatarByAvatarId(id, res);
+  }
+
+  @Get('getHistory/:id')
+  @UseGuards(AuthGuard('jwt'), AuthUser)
+  /** Swagger **/
+  @ApiOperation({ summary: "Getting game history as array of GameHistory." })
+  @ApiOkResponse({ description: 'Return game history.' })
+  @ApiNotFoundResponse({ description: 'User with given id not found.' })
+  @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
+  /** End of swagger **/
+  async getHistory(@Param('id') id: string) {
+    const user = await this.usersService.findUserById(id);
+    return await this.usersService.getGameHistory(user);
   }
 
   @Post('getOrRegister')
