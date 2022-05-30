@@ -5,11 +5,15 @@
 		<!-- list of chat / search. maybe some buttons  -->
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
-      <v-text-field
-				clearable
-				label="Find user / group"
-				placeholder="Search"
-      ></v-text-field>
+      <div class="d-flex">
+        <v-text-field
+          clearable
+          label="Find user / group"
+          placeholder="Search"
+          height = "50px"
+        ></v-text-field>
+         <v-btn  height="54px" @click="TestTest"><v-icon right dark>mdi-magnify</v-icon></v-btn>
+    </div>
       <v-btn to="/newroom" elevation="2">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
@@ -181,15 +185,21 @@
           </v-toolbar> -->
           
         
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop">
-          <v-text-field
-            clearable
-            label="Write a message"
-            placeholder="Message"
-            @click.prevent="TestTest"
-          ></v-text-field>
-          <v-btn color="blue" @click="TestTest">Send</v-btn>
-          </v-toolbar>
+          <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
+          <div class="d-flex">
+            <v-text-field
+              clearable
+              label="Write a message"
+              placeholder="Message"
+              @click.prevent="TestTest"
+            ></v-text-field>
+            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="TestTest">
+              <div  :style="{color: ' #ffffff'}">
+                send
+              </div>
+            </v-btn>
+          </div>
+          <!-- </v-toolbar> -->
         </v-app>
         </div>
         </v-col>

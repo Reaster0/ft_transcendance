@@ -7,7 +7,7 @@ import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
 import EditUser from "../views/EditUser.vue";
 import Chat from "../views/TransChat_group.vue";
-import TheChat from "../views/TransChat_connect.vue";
+// import TheChat from "../views/TransChat_connect.vue";
 import ChatPerson from "../views/TransChat_person.vue";
 import NewRoom from "../views/TransChat_create_room.vue";
 import MU from "../views/TransChat_manage_users.vue";
@@ -80,49 +80,49 @@ const routes = [
 		path: '/chatgroup',
 		name: "transchatgroup",
 		component: Chat,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
+		// beforeEnter: () => {
+		// 	return store.getters.isConnected? true: "/login"
+		// }
 	},
 	{
 		path: '/chatperson',
 		name: "transchatperson",
 		component: ChatPerson,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
+		// beforeEnter: () => {
+		// 	return store.getters.isConnected? true: "/login"
+		// }
 	},
 	{
 		path: '/newroom',
 		name: "newroom",
 		component: NewRoom,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
+		// beforeEnter: () => {
+		// 	return store.getters.isConnected? true: "/login"
+		// }
 	},
 	{
 		path: '/roomsettings',
 		name: "changeroom",
 		component: ChangeRoom,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
+		// beforeEnter: () => {
+		// 	return store.getters.isConnected? true: "/login"
+		// }
 	},
 	{
 		path: '/mu',
 		name: "manageusers",
 		component: MU,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
+		// beforeEnter: () => {
+		// 	return store.getters.isConnected? true: "/login"
+		// }
 	},
 	{
 		path: '/adm',
 		name: "groupchat_adminside",
 		component: ADM,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
+		// beforeEnter: () => {
+		// 	return store.getters.isConnected? true: "/login"
+		// }
 	},
 ]
 
