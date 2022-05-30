@@ -315,6 +315,11 @@
 <script>
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
+  import { onMounted } from "@vue/runtime-core"
+  import { ref } from "vue"
+  import io from 'socket.io-client';
+  //import { useKeypress } from "vue3-keypress";
+
 export default 
 {
   data: () => 
@@ -408,6 +413,61 @@ export default
       }, 2000)
     },
   },
+  setup()
+  {
+    const connection = ref(null)
+    //const matchId = ref(null)
+
+    onMounted(() =>{
+      console.log(document.cookie.toString())
+      try {
+          connection.value = io('http://172.20.10.10:3000/chatgroup',{
+          transportOptions: {
+          polling: { extraHeaders: { auth: document.cookie} },
+          },
+        })
+        console.log("starting connection to websocket")
+      } catch (error) {
+        console.log("the error is:" + error)
+      }
+
+            // : connection.value.on(‘command’, (received) => {})
+            connection.value.on('channel', (channels) => 
+            {console.log("channel:" + channels)})
+
+//			NewChannel();
+            TestTest();
+      })
+
+        // берет аргс и создает новый канал
+        //i { chanName: string, password:string, publicChannel: boolean }
+    //function NewChannel(chanName, password, publicChannel){
+    //	console.log("befor createChannel");
+    //	connection.value.emit('createChannel', chanName, password, publicChannel);
+    //	console.log("createChannel");
+    //}
+
+    /// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
+
+    function TestTest(){
+      console.log("before createChannel");
+      connection.value.emit('createChannel');
+      console.log("after createChannel")
+    }
+
+        // useKeypress({
+    // keyEvent: "keydown",
+    // keyBinds:
+    // 	{
+    // 		keyCode: 13,
+    // 		success: () => {
+    // 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
+    // 		},
+    // 	},
+    // })
+
+    return {TestTest}
+  }
 };
 
 </script>
