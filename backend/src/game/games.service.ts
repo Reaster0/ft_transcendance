@@ -163,6 +163,8 @@ export class GamesService {
     // Send: 'beReady' + player position  on field + opponent nickname
     match.players[0].socket.emit('beReady', { pos: 'left', opponent: match.players[1].user.nickname });
     match.players[1].socket.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
+    server.to(match.matchId).emit('dimensions', { ballRad: match.pong.ball.radius.toFixed(3),
+      padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) })
     let count = 3;
     const that = this;
     const countdown = setInterval(function () {
@@ -227,28 +229,13 @@ export class GamesService {
   }
 
   getBallFeatures(match: Match) {
-    return { pos: { x: match.pong.ball.pos.x, y: match.pong.ball.pos.y },
-        radius: match.pong.ball.radius };
+    return { x: match.pong.ball.pos.x.toFixed(3), y: match.pong.ball.pos.y.toFixed(3) };
   }
 
   getPaddlesFeatures(match: Match) {
     return {
-      L: {
-        blcPos: {
-          x: match.pong.paddleL.blcPos.x,
-          y: match.pong.paddleL.blcPos.y,
-        },
-        width: match.pong.paddleL.width,
-        length: match.pong.paddleL.length,
-      },
-      R: {
-        blcPos: {
-          x: match.pong.paddleR.blcPos.x,
-          y: match.pong.paddleR.blcPos.y,
-        },
-        width: match.pong.paddleR.width,
-        length: match.pong.paddleR.length,
-      },
+      L: { x: match.pong.paddleL.blcPos.x.toFixed(3),  y: match.pong.paddleL.blcPos.y.toFixed(3) },
+      R: { x: match.pong.paddleR.blcPos.x.toFixed(3), y: match.pong.paddleR.blcPos.y.toFixed(3) }
     };
   }
 
