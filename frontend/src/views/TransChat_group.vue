@@ -423,61 +423,108 @@ export default
       }, 2000)
     },
   },
-  setup()
-  {
-    const connection = ref(null)
-    //const matchId = ref(null)
+	setup()
+    {
+		const connection = ref(null)
+		//const matchId = ref(null)
 
-    onMounted(() =>{
-      console.log(document.cookie.toString())
-      try {
-          connection.value = io('http://172.20.10.10:3000/chatgroup',{
-          transportOptions: {
-          polling: { extraHeaders: { auth: document.cookie} },
-          },
-        })
-        console.log("starting connection to websocket")
-      } catch (error) {
-        console.log("the error is:" + error)
-      }
+		onMounted(() =>{
+			console.log(document.cookie.toString())
+			try {
+					connection.value = io('http://172.20.10.10:3000/chat',{
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie} },
+					},
+				})
+				console.log("starting connection to websocket")
+			} catch (error) {
+				console.log("the error is:" + error)
+			}
 
             // : connection.value.on(‘command’, (received) => {})
             connection.value.on('channel', (channels) => 
             {console.log("channel:" + channels)})
 
-//			NewChannel();
-            TestTest();
-      })
+			NewChannel();
+      TestTest();
+			SendingMessage();
+			JoinChannel();
+			LeaveChannel();
+			BlockUser();
+			})
 
         // берет аргс и создает новый канал
-        //i { chanName: string, password:string, publicChannel: boolean }
-    //function NewChannel(chanName, password, publicChannel){
-    //	console.log("befor createChannel");
-    //	connection.value.emit('createChannel', chanName, password, publicChannel);
-    //	console.log("createChannel");
-    //}
+        // for creating a new channel/room: 
+		// - createChannel { chanName: string, password:string, publicChannel: boolean }
+		function NewChannel(chanName, password, publicChannel)
+		{
+			console.log("before createChannel");
+			connection.value.emit('createChannel', chanName, password, publicChannel);
+			console.log("after createChannel");
+		}
 
-    /// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
+		// for sending message:
+		// -  message {content: string, channel: Chan, ...}
+		function SendingMessage(content, channel)
+		{
+			console.log("before message");
+			connection.value.emit('message', content, channel);
+			console.log("after message");
+		}
+
+		// for joinning a existing channel
+		// - joinChannel { id: string }
+		function JoinChannel(id)
+		{
+			console.log("before joinChannel");
+			connection.value.emit('joinChannel', id);
+			console.log("after joinChannel");
+		}
+
+		// (or just put a channel in argument
+
+		// for leaving channel:
+		// - leaveChannel { channel or id: string}
+		function LeaveChannel(channel)
+		{
+			console.log("before leaveChannel");
+			connection.value.emit('leaveChannel', channel);
+			console.log("after leaveChannel");
+		}
+
+
+		// for bloking or unblocking  a user:
+		// - blockUser{ user: User, block: boolean } // true => block false => unblock
+		function BlockUser(user, block)
+		{
+			console.log("before blockUser");
+			connection.value.emit('blockUser', user, block);
+			console.log("after blockUser");
+		}
+
+
+		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
 
     function TestTest(){
-      console.log("before createChannel");
-      connection.value.emit('createChannel');
-      console.log("after createChannel")
-    }
+			console.log("befor createChannel");
+			connection.value.emit('createChannel');
+			console.log("after createChannel")
+		}
 
-        // useKeypress({
-    // keyEvent: "keydown",
-    // keyBinds:
-    // 	{
-    // 		keyCode: 13,
-    // 		success: () => {
-    // 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
-    // 		},
-    // 	},
-    // })
+    // useKeypress({
+		// keyEvent: "keydown",
+		// keyBinds:
+		// 	{
+		// 		keyCode: 13,
+		// 		success: () => {
+		// 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
+		// 		},
+		// 	},
+		// })
 
-    return {TestTest}
-  }
+		return {TestTest, NewChannel, SendingMessage, JoinChannel, LeaveChannel, BlockUser}
+
+	}
 };
 
 </script>
