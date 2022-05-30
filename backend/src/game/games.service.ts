@@ -174,7 +174,7 @@ export class GamesService {
       }, 1000, server, match);
     match.state = State.ONGOING;
     this.listGamesToAll(watchers, matchs);
-    server.to(match.matchId).emit('gameStarting', { matchId: match.matchId });
+    server.to(match.matchId).emit('gameStarting');
     const intervalId = setInterval(() => {
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
@@ -200,8 +200,8 @@ export class GamesService {
 
   refreshGame(server: Server, match: Match) {
     this.pongService.calcBallPos(match.pong);
-    server.to(match.matchId).emit('gameUpdate', { matchId: match.matchId,
-      ball: this.getBallFeatures(match), paddles: this.getPaddlesFeatures(match) });
+    server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
+      paddles: this.getPaddlesFeatures(match) });
     const point = this.pongService.getScore(match.pong.field, match.pong.ball);
     let winner = false;
     if (point != Point.NONE) {
@@ -217,8 +217,8 @@ export class GamesService {
         }
       }
       // Send : 'score' + score player left side + score player right side
-      server.to(match.matchId).emit('score', { matchId: match.matchId,
-        leftScore: match.players[0].score, rightScore: match.players[1].score });
+      server.to(match.matchId).emit('score', { leftScore: match.players[0].score,
+        rightScore: match.players[1].score });
     }
     if (winner === true) {
       match.state = State.FINISHED;
@@ -256,7 +256,7 @@ export class GamesService {
   }
 
   async finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
-    server.to(match.matchId).emit('endGame', { matchId: match.matchId, winner: match.winner.user.nickname });
+    server.to(match.matchId).emit('endGame', { winner: match.winner.user.nickname });
     server.socketsLeave(match.matchId);
     const history = await this.registerGameHistory(match);
     await this.modifyPlayersElo(history.winner, history.looser);

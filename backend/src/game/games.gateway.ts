@@ -69,9 +69,7 @@ export class GameGateway
         match.state = State.FINISHED;
         const opponent = this.gamesService.getOpponent(client, match);
         if (opponent && opponent.socket && opponent.socket.connected === true) {
-          opponent.socket.emit('opponentDisconnected', {
-            matchId: match.matchId,
-          });
+          opponent.socket.emit('opponentDisconnected');
         }
         match.winner = opponent;
         this.gamesService.finishGame(this.server, match, matchs);
