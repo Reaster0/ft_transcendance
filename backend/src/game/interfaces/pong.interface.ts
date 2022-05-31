@@ -17,7 +17,7 @@ export interface Ball {
 }
 
 export interface Paddle {
-  blcPos: PosOrVec; // blc = bottom left corner
+  tlcPos: PosOrVec; // tlc = top left corner
   length: number;
   width: number;
 }
