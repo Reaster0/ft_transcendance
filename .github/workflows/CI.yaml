@@ -1,0 +1,42 @@
+name: Node.js CI
+
+on: [pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: randompass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 15.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 15.x
+      - run: |
+          cp ci_env .env
+          cd ./backend
+          npm ci
+          npm install typeorm
+          npm install pg
+          npm run build --if-present
+          npm run start 2>&1 | tee CIoutput.txt
+          if grep -q ERROR CIoutput.txt; then
+            grep ERROR CIoutput.txt
+            exit 1
+          else
+            exit 0
+          fi

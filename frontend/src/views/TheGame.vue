@@ -55,6 +55,7 @@ export default {
 
 			try {
 				gameSocket.value = await io('http://82.65.87.54:3000/game',{
+				//gameSocket.value = await io('http://localhost:3000/game',{
 				transportOptions: {
 				polling: { extraHeaders: { auth: document.cookie} },
 				}})

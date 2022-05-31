@@ -7,7 +7,7 @@ import { UsersService } from 'src/users/services/users.service';
 import { toFileStream } from 'qrcode';
 import { Socket } from 'socket.io';
 import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
-import { parse } from 'cookie'
+import { parse } from 'cookie';
 import { JwtService } from '@nestjs/jwt';
 import { throwError } from 'rxjs';
 
@@ -17,19 +17,23 @@ export class AuthService {
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async validateUser(user: CreateUserDto): Promise<User> {
     return this.userService.retrieveOrCreateUser(user);
   }
 
   async getUser(username: string): Promise<User> {
-      return this.userService.findUserByUsername(username);
+    return this.userService.findUserByUsername(username);
   }
 
-  async generateTwoFASecret(user: User)/*: Promise<twoFaI> */ {
+  async generateTwoFASecret(user: User) /*: Promise<twoFaI> */ {
     const secret: string = authenticator.generateSecret();
-    const authUrl: string = authenticator.keyuri(user.email, process.env.APPNAME, secret);
+    const authUrl: string = authenticator.keyuri(
+      user.email,
+      process.env.APPNAME,
+      secret,
+    );
     await this.userService.setTwoFASecret(user, secret);
     return { secret, authUrl };
   }
@@ -42,21 +46,21 @@ export class AuthService {
     return authenticator.verify({
       token: twoFACode,
       secret: user.decryptSecret(),
-    })
+    });
   }
 
   async enableTwoFA(user: User): Promise<void> {
-    if (user.is2FAEnabled)
-      return;
+    if (user.is2FAEnabled) return;
     this.userService.enableTwoFA(user.id);
   }
 
   async getUserBySocket(client: Socket): Promise<User> {
     const cookie = String(client.handshake.headers.auth);
-	if (!cookie)
-		throw new HttpException('cookie absent', 401);
+    if (!cookie) throw new HttpException('cookie absent', 401);
     const { jwt: token } = parse(cookie);
-    const payload: JwtPayload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+    const payload: JwtPayload = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
     const { username, twoFA } = payload;
     const user: User = await this.userService.findUserByUsername(username);
     if (!user) {

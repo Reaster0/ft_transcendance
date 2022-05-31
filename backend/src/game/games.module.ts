@@ -8,10 +8,9 @@ import { PongService } from './pong.service';
 import { GameHistory } from './entities/gamehistory.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-
 @Module({
-  imports: [UsersModule, TypeOrmModule.forFeature([GameHistory]),],
+  imports: [UsersModule, TypeOrmModule.forFeature([GameHistory])],
   controllers: [GamesController],
-  providers: [GamesService, GameGateway, AuthService, PongService]
+  providers: [GamesService, GameGateway, AuthService, PongService],
 })
 export class GamesModule {}
