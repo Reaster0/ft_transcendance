@@ -15,7 +15,7 @@
 			</v-container>
 		</div>
 		<v-row v-else justify="center">
-			<div class="button_slick big_button">FATAL ERROR PLEASE REFRESH</div>
+			<div class="button_slick big_button ">FATAL ERROR PLEASE REFRESH</div>
 		</v-row>
 	</div>
 	<div v-show="gameData.gameStarted">
@@ -40,19 +40,17 @@ export default {
 			gameStarted: false,
 			pos: "",
 			opponent: "",
-			ball: { radius: 10},
+			ball: {x: 0, y: 0, radius: 10},
 			paddle:{ width: 5, height: 15 },
+			paddleL: { x: 0, y: 0 },
+			paddleR: { x: 0, y: 0 },
 			score: { leftScore: 0, rightScore: 0 },
 			winner: "",
 		})
+		let canvas
+		let ctx
 
 		onMounted(async() =>{
-
-			const canvas = document.getElementById('pongGame');
-			const ctx = canvas.getContext('2d');
-			canvas.width = window.innerWidth
-			canvas.height = window.innerHeight
-			console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
 
 			try {
 				gameSocket.value = io('http://82.65.87.54:3000/game',{
@@ -95,27 +93,32 @@ export default {
 
 			gameSocket.value.on('gameStarting', () =>{
 				console.log("gameStarting:")
+				canvas = document.getElementById('pongGame');
+				canvas.width = window.innerWidth
+				canvas.height = window.innerHeight
+				ctx = canvas.getContext('2d');
+				gameData.value.gameStarted = true
+				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
 			})
 
-			gameSocket.value.on('gameUpdate', params =>{
-				console.log(JSON.stringify(params))
-				const ballPos = params.ball
-				const paddleLPos = params.paddle.L
-				const paddleRPos = params.paddle.R
-				console.log("ball position x:" + ballPos.x + " y:" + ballPos.y + " ball radus:" +
-				gameData.value.ball.radius + " \npaddleL x:" + paddleLPos.x + " y:" + paddleRPos.y +
-				" \npaddleR x:" + paddleRPos.x + " y:" + paddleLPos.y +
-				"\npaddle width:" + gameData.value.paddle.width + " paddle length:" + gameData.value.paddle.height)
+	canvas = document.getElementById('pongGame');
+			canvas.width = window.innerWidth
+				canvas.height = window.innerHeight
+				ctx = canvas.getContext('2d');
 
-				ctx.fillStyle = '#000';
-				ctx.fillRect(0, 0, canvas.width, canvas.height)
-				ctx.fillStyle = '#fff'
-				ctx.fillRect(paddleLPos.x * canvas.width, paddleLPos.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
-				ctx.fillRect(paddleRPos.x * canvas.width, paddleRPos.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
-				ctx.beginPath();
-				ctx.arc(ballPos.x * canvas.width, ballPos.y * canvas.height, gameData.value.ball.radius * canvas.height, 0, Math.PI*2, false);
-				ctx.closePath();
-				ctx.fill();
+
+			gameSocket.value.on('gameUpdate', params =>{
+				// console.log(JSON.stringify(params))
+
+				gameData.value.ball.x = params.ball.x
+				gameData.value.ball.y = params.ball.y
+				gameData.value.paddleL = params.paddle.L
+				gameData.value.paddleR = params.paddle.R
+
+				// console.log("ball position x:" +gameData.value.ball.x + " y:" +gameData.value.ball.y + " ball radus:" +
+				// gameData.value.ball.radius + " \npaddleL x:" + gameData.value.paddleL.x + " y:" + gameData.value.paddleR.y +
+				// " \npaddleR x:" + gameData.value.paddleR.x + " y:" + gameData.value.paddleL.y +
+				// "\npaddle width:" + gameData.value.paddle.width + " paddle length:" + gameData.value.paddle.height)
 			})
 
 			gameSocket.value.on('score', params =>{
@@ -143,7 +146,9 @@ export default {
 				fatalError.value = true
 			}
 			//Play();
-
+			window.setInterval(renderFrame, 1000/60)
+			// const frames = 
+			// window.clearInterval(frames)
 			})
 
 		onBeforeRouteLeave(() => {
@@ -166,9 +171,25 @@ export default {
 			console.log("acceptGame")
 		}
 
-		const Disconnect = () =>{
+		function Disconnect(){
 			gameSocket.value.disconnect()
 			console.log("disconnect")
+		}
+
+		function renderFrame() {
+			// console.log("renderFrame")
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, canvas.width, canvas.height)
+			ctx.fillStyle = '#fff'
+			ctx.fillRect(gameData.value.paddleL.x * canvas.width, gameData.value.paddleL.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
+			ctx.fillRect(gameData.value.paddleR.x * canvas.width, gameData.value.paddleR.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
+			ctx.beginPath();
+			ctx.arc(gameData.value.ball.x * canvas.width,gameData.value.ball.y * canvas.height, gameData.value.ball.radius * canvas.height, 0, Math.PI*2, false);
+			ctx.closePath();
+			ctx.fill();
+
+
+			// renderFrame()
 		}
 
 		useKeypress({
