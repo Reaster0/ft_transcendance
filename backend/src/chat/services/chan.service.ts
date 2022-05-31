@@ -27,30 +27,35 @@ export class ChanServices {
     let { chanName, publicChannel, password } = channel;
     const name = await this.chanRepository.findOne({ channelName: chanName });
 
-    if (name)
-      //channel name already exist
-      return null;
-    if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false)
-      //isalphanum()
-      return null;
+//		if (!name)
+		if (name) //channel name already exist
+			return null;
+		if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false) //isalphanum()
+			return null;
+        
+
+		channel.users.push(creator);
+		channel.adminUsers = [];
+		console.log('coucou');
+		channel.owner = creator.id;
+		console.log('coucou');
 
     channel.users.push(creator);
     channel.adminUsers = [];
     channel.owner = creator.id;
 
-    if (!password) password = null;
-
-    //will see
-    if (publicChannel === false) {
-      if (password) {
-        const salt = await bcrypt.genSalt();
-        channel.password = await bcrypt.hash(password, salt);
-      }
-    }
-    return this.chanRepository.save(channel);
-  }
-  async deleteChannel(channel: ChanI) {
-    /*
+  //will see 
+		if (publicChannel === false) {
+			if (password) {
+				const salt = await bcrypt.genSalt();
+				channel.password = await bcrypt.hash(password, salt);
+            }
+		}
+		console.log(channel);
+		return this.chanRepository.save(channel);
+	}
+	async deleteChannel(channel: ChanI) {
+		/*
  		 if (!channel.id)
 	  		throw new InternalServerErrorException('bad request: deleteChannel');
 	  */
@@ -108,11 +113,10 @@ export class ChanServices {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-  async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
-    return this.chanUserRepository.findOne({
-      where: { chan: channel, userId: userId },
-    });
-  }
+	async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
+		console.log(userId, channel);
+		return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
+	}
 
   //-------------------------------------------------//
   async findSocketByChannel(channel: ChanI): Promise<JoinedSocketI[]> {

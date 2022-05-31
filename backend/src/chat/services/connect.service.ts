@@ -17,23 +17,20 @@ export class ConnectService {
     private readonly userServices: UsersService,
   ) {}
 
-  async connectUser(client: Socket, user: User) {
-    await this.userService.changeStatus(user, Status.ONLINE); // maybe useless;
-    await this.connectedRepository.save({ socketID: client.id, user });
-  }
+    async connectUser(client: Socket, user: User) {
+        await this.userService.changeStatus(user, Status.ONLINE); // maybe useless;
+        await this.connectedRepository.save({socketID: client.id, user: user});
+    }
 
-  async disconnectUser(socket: string) {
-    const connectSocket = await this.connectedRepository.find({
-      where: { socketID: socket },
-    });
-    await this.userService.changeStatus(connectSocket[0].user, Status.OFFLINE); // maybe useless;
-    await this.connectedRepository.delete(socket);
-  }
+    async disconnectUser(socketID: string, user: User) {
+        await this.userService.changeStatus(user, Status.OFFLINE); // maybe useless;
+        await this.connectedRepository.delete({socketID});
+    }
 
-  async findAll(): Promise<connectedSocketI[]> {
-    const connections = await this.connectedRepository.find({
-      relations: ['user'],
-    });
-    return connections;
-  }
+    async findAll(): Promise<connectedSocketI[]> {
+		const connections = await this.connectedRepository.find({ relations: ["user"] });
+		return connections;
+	}
+
+
 }

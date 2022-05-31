@@ -5,11 +5,15 @@
 		<!-- list of chat / search. maybe some buttons  -->
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
-      <v-text-field
-				clearable
-				label="Find user / group"
-				placeholder="Search"
-      ></v-text-field>
+      <div class="d-flex">
+        <v-text-field
+          clearable
+          label="Find user / group"
+          placeholder="Search"
+          height = "50px"
+        ></v-text-field>
+         <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn>
+    </div>
       <v-btn to="/newroom" elevation="2">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
@@ -23,7 +27,7 @@
 	
     <div id="app" class="text-left">
     <v-app id="inspire">
-		<v-list>
+		<!-- <v-list>
 			<v-list-item-group v-model="selectedItem" >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -53,7 +57,7 @@
             ></v-divider>
 				</template>
 			</v-list-item-group>
-		</v-list>
+		</v-list> -->
     </v-app>
     </div>
     </v-col>
@@ -77,11 +81,7 @@
               </v-toolbar>
             </v-card>
 
-
-        <!-- <v-app> -->
-            <!-- MESSAGE 4 OTHER -->
-            <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <!-- ava chat -->
+            <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
               <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -89,7 +89,6 @@
                 </v-avatar>
               </v-badge>
               </v-btn>
-            <!-- field chat -->
             <v-card class="mt-2 ml-2" max-width="450px">
               <v-list-item >
                 <v-list-item-content>
@@ -103,9 +102,7 @@
             </v-toolbar>
               
 
-          <!-- MESSAGE 3 OTHER -->
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <!-- ava chat -->
               <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -113,8 +110,6 @@
                 </v-avatar>
               </v-badge>
               </v-btn>
-            <!-- field chat -->
-            <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
             <v-card class="mt-2 ml-2" max-width="450px">
               <v-list-item >
                 <v-list-item-content>
@@ -127,11 +122,8 @@
             </v-card >
           </v-toolbar>
 
-
-          <!-- MESSAGE 2 -->
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
             <v-spacer></v-spacer>
-            <!-- field chat -->
             <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
               <v-list-item >
                 <v-list-item-content>
@@ -142,7 +134,6 @@
                 </v-list-item-content>
               </v-list-item>
             </v-card >
-            <!-- ava chat -->
             <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
               <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -152,11 +143,8 @@
             </v-btn>
           </v-toolbar>
 
-
-          <!-- MESSAGE 1 -->
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
             <v-spacer></v-spacer>
-            <!-- field chat -->
             <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)" dark>
               <v-list-item color = "ffffff" >
                 <v-list-item-content>
@@ -167,7 +155,6 @@
                 </v-list-item-content>
               </v-list-item>
             </v-card >
-            <!-- ava chat -->
             <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
               <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -177,9 +164,7 @@
             </v-btn>
           </v-toolbar>
 
-          <!-- MESSAGE 0 OTHER -->
           <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <!-- ava chat -->
               <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -187,8 +172,6 @@
                 </v-avatar>
               </v-badge>
               </v-btn>
-            <!-- field chat -->
-            <!-- <v-card class="mt-2 ml-2" max-width="350px"> -->
             <v-card class="mt-2 ml-2" max-width="450px">
               <v-list-item >
                 <v-list-item-content>
@@ -199,16 +182,25 @@
                 </v-list-item-content>
               </v-list-item>
             </v-card >
-          </v-toolbar>
+          </v-toolbar> -->
           
         
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop">
-          <v-text-field
-            clearable
-            label="Write a message"
-            placeholder="Message"
-          ></v-text-field>
-          </v-toolbar>
+          <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
+          <div class="d-flex">
+            <v-text-field
+              clearable
+              label="Write a message"
+              placeholder="Message"
+              @click.prevent="log"
+              v-model="txt"
+            ></v-text-field>
+            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)">
+              <div  :style="{color: ' #ffffff'}">
+                send
+              </div>
+            </v-btn>
+          </div>
+          <!-- </v-toolbar> -->
         </v-app>
         </div>
         </v-col>
@@ -228,7 +220,8 @@
           </v-card>
 
           <div id="app" class="pt-6">
-          <v-btn v-on:click="create" elevation="2" width="350px">
+                      <!-- if clicked "leave" - activate "join". and opposite -->
+          <v-btn elevation="2" width="350px" @click="leaveChannel">
             Leave the chat room
           </v-btn>
           </div>
@@ -254,7 +247,7 @@
           <v-tabs-items v-model="tab">
             <v-card flat>            
               <div v-show="currentTab === 0">
-                <v-list>
+                <!-- <v-list>
                   <v-list-item-group v-model="selectedItem" >
                     <template v-for="(item, index) in members">
                     <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -284,10 +277,10 @@
                       ></v-divider>
                     </template>
                   </v-list-item-group>
-                </v-list>
+                </v-list> -->
               </div>
               <div v-show="currentTab === 1">
-                <v-list>
+                <!-- <v-list>
                   <v-list-item-group v-model="selectedItem" >
                     <template v-for="(item, index) in admins">
                     <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -316,7 +309,7 @@
                       ></v-divider>
                     </template>
                   </v-list-item-group>
-                </v-list>
+                </v-list> -->
               </div>
             </v-card>
           </v-tabs-items>
@@ -334,10 +327,15 @@
 <script>
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-export default 
-{
-  data: () => 
-  ({
+  import { onMounted } from "@vue/runtime-core"
+  import { ref } from "vue"
+  import io from 'socket.io-client';
+//import { onBeforeRouteLeave } from "vue-router";
+import { useStore } from "vuex";
+  //import { useKeypress } from "vue3-keypress";
+
+export default {
+  data: () => ({
       fav: true,
       menu: false,
       message: false,
@@ -407,18 +405,56 @@ export default
         title: "alkanaev",
       },
       ],
+      txt: '',
+      mesasages: [],
+      channels: [],
+      currentUser: useStore().getters.whoAmI,
+
+      currentChannel: {
+        id: '',
+        chanName: '',
+        date: new Date,
+        update_date: new Date,
+        owner: 0,
+        publicChannel: true,
+        password: '',
+        users: [],
+        adminUsers: [],
+        joinChannel: [],
+        messages: []
+      },
+
+      userBanned: false,
+      userMuted: false,
+      banDate: new Date,
+      muteDate: new Date,
+
+      newChannel: {
+        name:'',
+        public: true,
+        password: '',
+        members: [],
+        admins: [],
+        },
+
+      protectByPassword: false,
+
+      channelSettings: {
+        password: '',
+        applyPassword: false,
+        members: [],
+      },
   }),
+
   methods: {
     create: function (event) 
     {
-      // `this` fait référence à l'instance de Vue à l'intérieur de `methods`
-      // alert('Bonjour ' + this.name + ' !')
-      // `event` est l'évènement natif du DOM
       if (event) 
       {
         alert('SUBPAGE OF TRANSCHAT MANAGEMENT WILL BE OPENED')
       }
     }
+//there -----------
   },
   watch: {
     overlay (val) {
@@ -427,6 +463,137 @@ export default
       }, 2000)
     },
   },
+	setup()
+    {
+		const connection = ref(null)
+    const chats = ref(null)
+
+		onMounted(() =>{
+			console.log(document.cookie.toString())
+			try {
+					connection.value = io('http://:3000/chat',{
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie} },
+					},
+				})
+				console.log("starting connection to websocket")
+			} catch (error) {
+				console.log("the error is:" + error)
+			}
+
+        // ============= info you can retrive ======
+        // - channel : get all the chanel the user is connected
+        // - connectedUsers : get all user.id of user connected..... (but the function feels wrong....)
+        // - messageSended
+
+        // : connection.value.on(‘command’, (received) => {})
+
+        // channel : get all the chanel the user is connected
+        // connection.value.on('channel', (channels) => 
+        // {console.log("channel:" + channels)})
+        connection.value.on('channel', (channel) =>{
+          console.log("-----------------------------------")
+          chats.value = channel
+          console.log(":::::" + chats.value)
+        })
+
+
+//			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
+      // TestTest();
+			// SendingMessage();
+			// JoinChannel();
+			// LeaveChannel();
+			// BlockUser();
+			})
+      
+    /*
+    onBeforeRouteLeave(() => {
+        const answer = window.confirm("disconect from chat ?")
+        if (answer) {
+          connection.value.disconnect();
+          return true;
+          }
+        return false;
+		})      */
+        // берет аргс и создает новый канал
+        // for creating a new channel/room: 
+		// - createChannel { chanName: string, password:string, publicChannel: boolean }
+  /* dont know how to handel the fact that this is done in a other file */
+		function createChannel(chanName, password, publicChannel)
+		{
+			console.log("before createChannel");
+			connection.value.emit('createChannel', {chanName, users: [], password, publicChannel});
+			console.log("after createChannel");
+		}
+
+		// for sending message:
+		// -  message {content: string, channel: Chan, ...}
+		function sendingMessage(content, channel)
+		{
+      console.log(content, channel);
+      if (!content)
+        return ;
+      connection.value.emit('message', {content, channel});
+      //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
+			console.log("after message");
+		}
+
+		// for joinning a existing channel
+		// - joinChannel { id: string }
+		function joinChannel(id)
+		{
+			console.log("before joinChannel");
+			connection.value.emit('joinChannel', id);
+			console.log("after joinChannel");
+		}
+
+		// (or just put a channel in argument
+
+		// for leaving channel:
+		// - leaveChannel { channel or id: string}
+		function leaveChannel(channel)
+		{
+			console.log("before leaveChannel");
+			connection.value.emit('leaveChannel', channel);
+			console.log("after leaveChannel");
+		}
+
+
+		// for bloking or unblocking  a user:
+		// - blockUser{ user: User, block: boolean } // true => block false => unblock
+		function blockUser(user, block)
+		{
+			console.log("before blockUser");
+			connection.value.emit('blockUser', user, block);
+			console.log("after blockUser");
+		}
+
+    const disconnect = () =>{
+			connection.value.disconnect()
+			console.log("disconnect")
+		}
+
+    const log = () => {
+      console.log('something happenned');
+    }
+
+
+		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
+
+    // useKeypress({
+		// keyEvent: "keydown",
+		// keyBinds:
+		// 	{
+		// 		keyCode: 13,
+		// 		success: () => {
+		// 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
+		// 		},
+		// 	},
+		// })
+
+		return { log, disconnect ,createChannel, sendingMessage, joinChannel, leaveChannel, blockUser}
+
+	}
 };
 
 </script>

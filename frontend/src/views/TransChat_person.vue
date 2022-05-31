@@ -5,11 +5,15 @@
 		<!-- list of chat / search. maybe some buttons  -->
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
-            <v-text-field
-				clearable
-				label="Find user / group"
-				placeholder="Search"
-            ></v-text-field>
+      <div class="d-flex">
+        <v-text-field
+          clearable
+          label="Find user / group"
+          placeholder="Search"
+          height = "50px"
+        ></v-text-field>
+         <v-btn  height="54px" @click="TestTest"><v-icon right dark>mdi-magnify</v-icon></v-btn>
+    </div>
 			<v-btn v-on:click="create" elevation="2">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
@@ -24,7 +28,8 @@
     <div id="app" class="text-left">
     <v-app id="inspire">
 		<v-list>
-			<v-list-item-group v-model="selectedItem" >
+			<!-- <v-list-item-group v-model="selectedItem" > -->
+      <v-list-item-group >
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
@@ -198,13 +203,21 @@
           </v-toolbar>
           
         
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop">
-          <v-text-field
-            clearable
-            label="Write a message"
-            placeholder="Message"
-          ></v-text-field>
-          </v-toolbar>
+          <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
+          <div class="d-flex">
+            <v-text-field
+              clearable
+              label="Write a message"
+              placeholder="Message"
+              @click.prevent="TestTest"
+            ></v-text-field>
+            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="TestTest">
+              <div  :style="{color: ' #ffffff'}">
+                send
+              </div>
+            </v-btn>
+          </div>
+          <!-- </v-toolbar> -->
         </v-app>
         </div>
         </v-col>

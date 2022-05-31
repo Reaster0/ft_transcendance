@@ -25,7 +25,7 @@ export class ChanUser {
                - Relations -
     --------------------------------------*/
 
-  @ManyToOne(() => Chan, (chan) => chan.chanUsers, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  chan: Chan;
+	@ManyToOne(() => Chan, chan => chan.socketJoined, {onDelete:'CASCADE'})
+	@JoinColumn()
+	chan: Chan;
 }
