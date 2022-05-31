@@ -122,7 +122,7 @@ export class GamesService {
 
   abortGame(server: Server, match: Match, matchs: Map<string, Match>) {
     if (match.state === State.SETTING) {
-      this.sendToPlayers(match, 'foundMatch', { matchId: null });
+      this.sendToPlayers(match, 'foundMatch', null );
       server.socketsLeave(match.matchId);
       matchs.delete(match.matchId);
     }
@@ -178,13 +178,13 @@ export class GamesService {
     this.listGamesToAll(watchers, matchs);
     server.to(match.matchId).emit('gameStarting');
     const intervalId = setInterval(() => {
-        //if (match.state === State.FINISHED) {
-        //  clearInterval(intervalId);
-        //  that.listGamesToAll(watchers, matchs);
-        //  that.finishGame(server, match, matchs);
-        //} else {
+        if (match.state === State.FINISHED) {
+          clearInterval(intervalId);
+          that.listGamesToAll(watchers, matchs);
+          that.finishGame(server, match, matchs);
+        }  else {
           that.refreshGame(server, match);
-        //}
+        }
       }, 5, match, server, match);
   }
 
@@ -221,7 +221,6 @@ export class GamesService {
       // Send : 'score' + score player left side + score player right side
       server.to(match.matchId).emit('score', { leftScore: match.players[0].score,
         rightScore: match.players[1].score });
-      setTimeout(function() {}, 1000);
     }
     if (winner === true) {
       match.state = State.FINISHED;
