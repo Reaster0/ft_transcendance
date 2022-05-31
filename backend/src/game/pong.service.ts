@@ -120,9 +120,9 @@ export class PongService {
 
   movePaddle(field: Field, paddle: Paddle, input: string): void {
     if (input === 'UP') {
-      paddle.tlcPos.y += field.width / 7;
-    } else if (input === 'DOWN') {
       paddle.tlcPos.y -= field.width / 7;
+    } else if (input === 'DOWN') {
+      paddle.tlcPos.y += field.width / 7;
     }
     if (paddle.tlcPos.y + paddle.width > field.width - field.offset) {
       paddle.tlcPos.y = field.width - field.offset;
