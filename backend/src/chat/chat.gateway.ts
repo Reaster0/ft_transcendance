@@ -94,6 +94,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     console.log(message);
     //1) get the sender role
     const chanUser: ChanUserI = await this.chanServices.findUserByChannel(message.channel, client.data.user.id);
+    console.log(chanUser);
     let date = new Date;
     //2) accordingly to the sender role the sender is unable to send message => return ;
     if (chanUser && (chanUser.mute >= date || chanUser.ban >= date)) // User cannot send message !

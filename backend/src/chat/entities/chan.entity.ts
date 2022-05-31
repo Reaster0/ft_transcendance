@@ -40,7 +40,7 @@ export class Chan {
 	users: User[];
 
 	@OneToMany(() => ChanUser, chanUser => chanUser.chan, { cascade: true }) // Users roles
-	chanUsers: ChanUser[];
+	chanUsers: ChanUser[]; //rool
 
 	@OneToMany(() => Message, message => message.channel, { cascade: true }) // all message in that channel
 	messages: Message[];
