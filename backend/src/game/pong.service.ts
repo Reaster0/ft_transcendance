@@ -31,8 +31,8 @@ export class PongService {
   initBall(field: Field): Ball {
     const ball: Ball = {
       pos: { x: field.length / 2, y: field.width / 2 },
-      vel: { x: field.length / 240, y: field.width / 240 },
-      speed: 5,
+      vel: { x: field.length / 480, y: field.width / 240 },
+      speed: field.length / 240,
       radius: field.length / 60,
     };
     return ball;
@@ -54,21 +54,21 @@ export class PongService {
 
     ball.pos.x = ball.pos.x + ball.vel.x;
     ball.pos.y = ball.pos.y + ball.vel.y;
+    console.log('ball: ' + ball.pos.x.toFixed(3) + ' ' + ball.pos.y.toFixed(3));
+    console.log('vel: ' + ball.vel.x.toFixed(3) + ' ' + ball.vel.y.toFixed(3));
     if (ball.pos.y - ball.radius < 0 + field.offset) {
-      ball.pos.y = 0 + field.offset;
       ball.vel.y *= -1;
+      ball.pos.y = 0 + field.offset + ball.vel.y + ball.radius;
     } else if (ball.pos.y + ball.radius > field.width - field.offset) {
-      ball.pos.y = field.width - field.offset;
       ball.vel.y *= -1;
+      ball.pos.y = field.width - field.offset + ball.vel.y - ball.radius;
     }
     let collision = false;
     let paddle = undefined;
-    if (ball.pos.x < field.length / 4) {
-      // can affinate this
+    if ((ball.pos.x - ball.radius) <= (field.offset + pong.paddleL.length)) {
       collision = this.checkCollision(ball, pong.paddleL);
       paddle = pong.paddleL;
-    } else if (ball.pos.x > (field.length / 4) * 3) {
-      // can affinate this
+    } else if ((ball.pos.x + ball.radius) >= (field.length - field.offset - pong.paddleR.length)) {
       collision = this.checkCollision(ball, pong.paddleR);
       paddle = pong.paddleR;
     }
@@ -99,19 +99,20 @@ export class PongService {
   }
 
   getBounce(ball: Ball, field: Field, paddle: Paddle): void {
-    const collidePoint = (ball.pos.y - (paddle.tlcPos.y + paddle.width / 2)) / paddle.width / 2;
-    const bounceAngle = (collidePoint * Math.PI) / 4;
-    const direction = ball.pos.x < field.length / 2 ? 1 : -1;
+    const collidePoint = (ball.pos.y - (paddle.tlcPos.y + paddle.width / 2)) / (paddle.width / 2);
+    const bounceAngle = collidePoint * (Math.PI / 4);
+    const direction = (ball.pos.x < field.length / 2) ? 1 : -1;
     ball.vel.x = direction * ball.speed * Math.cos(bounceAngle);
     ball.vel.y = ball.speed * Math.sin(bounceAngle);
-    ball.speed += 0.1;
+    ball.speed += field.length / 480;
   }
 
   getScore(field: Field, ball: Ball): Point {
-    if ((ball.pos.x - ball.radius) < 0) {
+    console.log('Score');
+    if ((ball.pos.x - ball.radius) < (0 - field.offset)) {
       this.resetBall(field, ball);
       return Point.RIGHT;
-    } else if ((ball.pos.x + ball.radius) > field.length) {
+    } else if ((ball.pos.x + ball.radius) > (field.length + field.offset)) {
       this.resetBall(field, ball);
       return Point.LEFT;
     }
@@ -124,9 +125,9 @@ export class PongService {
     } else if (input === 'DOWN') {
       paddle.tlcPos.y += field.width / 7;
     }
-    if (paddle.tlcPos.y + paddle.width > field.width - field.offset) {
-      paddle.tlcPos.y = field.width - field.offset;
-    } else if (paddle.tlcPos.y < 0 + field.offset) {
+    if (paddle.tlcPos.y + paddle.width >= field.width - field.offset) {
+      paddle.tlcPos.y = field.width - field.offset  - paddle.width;
+    } else if (paddle.tlcPos.y <= 0 + field.offset) {
       paddle.tlcPos.y = 0 + field.offset;
     }
   }

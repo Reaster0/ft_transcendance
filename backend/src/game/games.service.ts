@@ -178,14 +178,14 @@ export class GamesService {
     this.listGamesToAll(watchers, matchs);
     server.to(match.matchId).emit('gameStarting');
     const intervalId = setInterval(() => {
-        if (match.state === State.FINISHED) {
-          clearInterval(intervalId);
-          that.listGamesToAll(watchers, matchs);
-          that.finishGame(server, match, matchs);
-        } else {
+        //if (match.state === State.FINISHED) {
+        //  clearInterval(intervalId);
+        //  that.listGamesToAll(watchers, matchs);
+        //  that.finishGame(server, match, matchs);
+        //} else {
           that.refreshGame(server, match);
-        }
-      }, 16, match, server, match);
+        //}
+      }, 5, match, server, match);
   }
 
   playerInput(client: Socket, match: Match, input: string) {
@@ -221,7 +221,7 @@ export class GamesService {
       // Send : 'score' + score player left side + score player right side
       server.to(match.matchId).emit('score', { leftScore: match.players[0].score,
         rightScore: match.players[1].score });
-      await new Promise(r => setTimeout(r, 1000));
+      setTimeout(function() {}, 1000);
     }
     if (winner === true) {
       match.state = State.FINISHED;
