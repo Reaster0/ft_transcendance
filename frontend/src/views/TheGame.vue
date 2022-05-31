@@ -40,32 +40,19 @@ export default {
 			gameStarted: false,
 			pos: "",
 			opponent: "",
-			ball: { pos: { x: 30, y: 50 }, radius: 10},
-			paddle:{L: { blcPos: { x: 15, y: 25 }, width: 5, length: 15 },
-					R: { blcPos: { x: 280, y: 100 }, width: 5, length: 15 },
-			},
+			ball: { radius: 10},
+			paddle:{ width: 5, height: 15 },
 			score: { leftScore: 0, rightScore: 0 },
 			winner: "",
 		})
 
 		onMounted(async() =>{
 
-
 			const canvas = document.getElementById('pongGame');
 			const ctx = canvas.getContext('2d');
 			canvas.width = window.innerWidth
 			canvas.height = window.innerHeight
 			console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
-			// canvas.width = window.innerWidth
-			// canvas.height = window.innerHeight
-			// console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
-			// ctx.fillStyle = '#fff'
-			// ctx.fillRect(gameData.value.L.blcPos.x, gameData.value.L.blcPos.y, gameData.value.L.width, gameData.value.L.height)
-			// ctx.fillRect(gameData.value.R.blcPos.x, gameData.value.R.blcPos.y, gameData.value.R.width, gameData.value.R.height)
-			// ctx.beginPath();
-			// ctx.arc(gameData.value.ball.pos.x, gameData.value.ball.pos.y, gameData.value.ball.radius, 0, Math.PI*2, false);
-			// ctx.closePath();
-			// ctx.fill();
 
 			try {
 				gameSocket.value = await io('http://82.65.87.54:3000/game',{
@@ -93,6 +80,14 @@ export default {
 				gameData.value.gameStarted = true
 			})
 
+			gameSocket.value.on('dimensions', params =>{
+				console.log("dimensions:")
+				gameData.value.ball.radius = params.ballRad
+				gameData.value.paddle.height = params.padWidth
+				gameData.value.paddle.width = params.padLength
+				console.log("ball radius =" + JSON.stringify(gameData.value.ball.radius) + " paddle width =" + JSON.stringify(gameData.value.paddle.width) + " paddle length =" + JSON.stringify(gameData.value.paddle.height))
+			})
+
 			gameSocket.value.on('countdown', params =>{
 				console.log("countdown:" + params.countdown)
 			})
@@ -103,19 +98,21 @@ export default {
 
 			gameSocket.value.on('gameUpdate', params =>{
 				console.log(JSON.stringify(params))
-				gameData.value.ball = params.ball
-				gameData.value.paddle.L = params.paddle.L
-				gameData.value.paddle.R = params.paddle.R
-				console.log("ball position x:" + gameData.value.ball.pos.x + " y:" + gameData.value.ball.pos.y + " ball radus:" +
-				gameData.value.ball.radius + " \npaddleL x:" + gameData.value.paddle.L.blcPos.x + " y:" + gameData.value.paddle.L.blcPos.y +
-				" width:" + gameData.value.paddle.L.width + " length:" + gameData.value.paddle.L.length +
-				" \npaddleR x:" + gameData.value.paddle.R.blcPos.x + " y:" + gameData.value.paddle.R.blcPos.y + " width:" + gameData.value.paddle.R.width + " length:" + gameData.value.paddle.R.length)
+				const ballPos = params.ball
+				const paddleLPos = params.paddle.L
+				const paddleRPos = params.paddle.R
+				console.log("ball position x:" + ballPos.x + " y:" + ballPos.y + " ball radus:" +
+				gameData.value.ball.radius + " \npaddleL x:" + paddleLPos.x + " y:" + paddleRPos.y +
+				" \npaddleR x:" + paddleRPos.x + " y:" + paddleLPos.y +
+				"\npaddle width:" + gameData.value.paddle.width + " paddle length:" + gameData.value.paddle.height)
 
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, canvas.width, canvas.height)
 				ctx.fillStyle = '#fff'
-				ctx.fillRect(gameData.value.paddle.L.blcPos.x * canvas.width, gameData.value.paddle.L.blcPos.y * canvas.height, gameData.value.paddle.L.width * canvas.width, gameData.value.paddle.L.length * canvas.height)
-				ctx.fillRect(gameData.value.paddle.R.blcPos.x * canvas.width, gameData.value.paddle.R.blcPos.y * canvas.height, gameData.value.paddle.R.width * canvas.width, gameData.value.paddle.R.length * canvas.height)
+				ctx.fillRect(paddleLPos.x * canvas.width, paddleLPos.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
+				ctx.fillRect(paddleRPos.x * canvas.width, paddleRPos.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
 				ctx.beginPath();
-				ctx.arc(gameData.value.ball.pos.x * canvas.width, gameData.value.ball.pos.y * canvas.height, gameData.value.ball.radius, 0, Math.PI*2, false);
+				ctx.arc(ballPos.x * canvas.width, ballPos.y * canvas.height, gameData.value.ball.radius * canvas.height, 0, Math.PI*2, false);
 				ctx.closePath();
 				ctx.fill();
 			})
