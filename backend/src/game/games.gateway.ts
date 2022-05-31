@@ -17,7 +17,7 @@ import { Logger } from '@nestjs/common';
 
 const queue: Array<Socket> = []; // Array of clients waiting for opponent
 const matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
-const watchers: Array<Socket> = [];
+const watchers: Array<Socket> = []; // Array of clients waiting to 
 
 @WebSocketGateway({
   cors: { origin: '*', credentials: true },

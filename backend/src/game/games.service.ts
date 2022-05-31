@@ -234,8 +234,8 @@ export class GamesService {
 
   getPaddlesFeatures(match: Match) {
     return {
-      L: { x: match.pong.paddleL.blcPos.x.toFixed(3), y: match.pong.paddleL.blcPos.y.toFixed(3) },
-      R: { x: match.pong.paddleR.blcPos.x.toFixed(3), y: match.pong.paddleR.blcPos.y.toFixed(3) }
+      L: { x: match.pong.paddleL.tlcPos.x.toFixed(3), y: match.pong.paddleL.tlcPos.y.toFixed(3) },
+      R: { x: match.pong.paddleR.tlcPos.x.toFixed(3), y: match.pong.paddleR.tlcPos.y.toFixed(3) }
     };
   }
 
