@@ -32,12 +32,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @WebSocketServer() server: Server
   private logger: Logger = new Logger('ChatGateway');
 
-  /* test
   @SubscribeMessage('msgToServer')
   handleMessage(client: Socket, payload: string): void {
     this.server.emit('msgToClient', payload);
   }
-  */
 
   /******* Connection ********/
   async handleConnection(client: Socket) {
@@ -55,19 +53,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   /******* Disconection ********/
   async handleDisconnect(client: Socket) {
-    await this.connectService.disconnectUser(client.id)
-    this.logger.log(`Client disconnected: ${client.data.user.username}`);
+    await this.connectService.disconnectUser(client.id, client.data.user);
     this.updateUsersStatus();
     client.disconnect();
+    this.logger.log(`Client disconnected: ${client.data.user.username}`);
   }
 
   /*********** .  . Create Channel **************** */
   @UseGuards(AuthChat)
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
+  this.logger.log(channel);
+  if(!client.data.user)
+    client.disconnect();
     const createChannel: ChanI = await this.chanServices.createChannel(channel, client.data.user);
-    if (!createChannel)
+    if (!createChannel) {
+      this.logger.log(`ERROR will creating: ${createChannel.chanName}`);
       return false;
+    }
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.chanName} created`);
     return true;

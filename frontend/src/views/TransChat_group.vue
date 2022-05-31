@@ -12,7 +12,7 @@
           placeholder="Search"
           height = "50px"
         ></v-text-field>
-         <v-btn  height="54px" @click="TestTest"><v-icon right dark>mdi-magnify</v-icon></v-btn>
+         <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn>
     </div>
       <v-btn to="/newroom" elevation="2">
 				Create new chat room
@@ -191,9 +191,10 @@
               clearable
               label="Write a message"
               placeholder="Message"
-              @click.prevent="TestTest"
+              @click.prevent="log"
+              v-model="txt"
             ></v-text-field>
-            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="SendingMessage">
+            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)">
               <div  :style="{color: ' #ffffff'}">
                 send
               </div>
@@ -220,7 +221,7 @@
 
           <div id="app" class="pt-6">
                       <!-- if clicked "leave" - activate "join". and opposite -->
-          <v-btn elevation="2" width="350px" @click="LeaveChannel">
+          <v-btn elevation="2" width="350px" @click="leaveChannel">
             Leave the chat room
           </v-btn>
           </div>
@@ -329,12 +330,12 @@
   import { onMounted } from "@vue/runtime-core"
   import { ref } from "vue"
   import io from 'socket.io-client';
+//import { onBeforeRouteLeave } from "vue-router";
+import { useStore } from "vuex";
   //import { useKeypress } from "vue3-keypress";
 
-export default 
-{
-  data: () => 
-  ({
+export default {
+  data: () => ({
       fav: true,
       menu: false,
       message: false,
@@ -404,18 +405,56 @@ export default
         title: "alkanaev",
       },
       ],
+      txt: '',
+      mesasages: [],
+      channels: [],
+      currentUser: useStore().getters.whoAmI,
+
+      currentChannel: {
+        id: '',
+        chanName: '',
+        date: new Date,
+        update_date: new Date,
+        owner: 0,
+        publicChannel: true,
+        password: '',
+        users: [],
+        adminUsers: [],
+        joinChannel: [],
+        messages: []
+      },
+
+      userBanned: false,
+      userMuted: false,
+      banDate: new Date,
+      muteDate: new Date,
+
+      newChannel: {
+        name:'',
+        public: true,
+        password: '',
+        members: [],
+        admins: [],
+        },
+
+      protectByPassword: false,
+
+      channelSettings: {
+        password: '',
+        applyPassword: false,
+        members: [],
+      },
   }),
+
   methods: {
     create: function (event) 
     {
-      // `this` fait référence à l'instance de Vue à l'intérieur de `methods`
-      // alert('Bonjour ' + this.name + ' !')
-      // `event` est l'évènement natif du DOM
       if (event) 
       {
         alert('SUBPAGE OF TRANSCHAT MANAGEMENT WILL BE OPENED')
       }
     }
+//there -----------
   },
   watch: {
     overlay (val) {
@@ -432,7 +471,7 @@ export default
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
-					connection.value = io('http://localhost:3000/chatgroup',{
+					connection.value = io('http://:3000/chat',{
 					transportOptions: {
 					polling: { extraHeaders: { auth: document.cookie} },
 					},
@@ -459,41 +498,47 @@ export default
         })
 
 
-			NewChannel();
+//			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
       // TestTest();
 			// SendingMessage();
 			// JoinChannel();
 			// LeaveChannel();
 			// BlockUser();
 			})
-
+      
+    /*
+    onBeforeRouteLeave(() => {
+        const answer = window.confirm("disconect from chat ?")
+        if (answer) {
+          connection.value.disconnect();
+          return true;
+          }
+        return false;
+		})      */
         // берет аргс и создает новый канал
         // for creating a new channel/room: 
 		// - createChannel { chanName: string, password:string, publicChannel: boolean }
-		function NewChannel(chanName, password, publicChannel)
+  /* dont know how to handel the fact that this is done in a other file */
+		function createChannel(chanName, password, publicChannel)
 		{
-      if (!chanName)
-        chanName = "Caca"
-      if (!publicChannel)
-        publicChannel = true
 			console.log("before createChannel");
-			connection.value.emit('createChannel', chanName, password, publicChannel);
+			connection.value.emit('createChannel', {chanName, users: [], password, publicChannel});
 			console.log("after createChannel");
-
 		}
 
 		// for sending message:
 		// -  message {content: string, channel: Chan, ...}
-		function SendingMessage(content, channel)
+		function sendingMessage(content, channel)
 		{
-			console.log("before message");
-			connection.value.emit('message', content, channel);
+      console.log(content, channel);
+      //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
+    //connection.value.emit('message', content, channel);
 			console.log("after message");
 		}
 
 		// for joinning a existing channel
 		// - joinChannel { id: string }
-		function JoinChannel(id)
+		function joinChannel(id)
 		{
 			console.log("before joinChannel");
 			connection.value.emit('joinChannel', id);
@@ -504,7 +549,7 @@ export default
 
 		// for leaving channel:
 		// - leaveChannel { channel or id: string}
-		function LeaveChannel(channel)
+		function leaveChannel(channel)
 		{
 			console.log("before leaveChannel");
 			connection.value.emit('leaveChannel', channel);
@@ -514,21 +559,24 @@ export default
 
 		// for bloking or unblocking  a user:
 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
-		function BlockUser(user, block)
+		function blockUser(user, block)
 		{
 			console.log("before blockUser");
 			connection.value.emit('blockUser', user, block);
 			console.log("after blockUser");
 		}
 
+    const disconnect = () =>{
+			connection.value.disconnect()
+			console.log("disconnect")
+		}
+
+    const log = () => {
+      console.log('something happenned');
+    }
+
 
 		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
-
-    function TestTest(){
-			console.log("befor createChannel");
-			connection.value.emit('createChannel');
-			console.log("after createChannel")
-		}
 
     // useKeypress({
 		// keyEvent: "keydown",
@@ -541,7 +589,7 @@ export default
 		// 	},
 		// })
 
-		return {TestTest, NewChannel, SendingMessage, JoinChannel, LeaveChannel, BlockUser}
+		return { log, disconnect ,createChannel, sendingMessage, joinChannel, leaveChannel, blockUser}
 
 	}
 };

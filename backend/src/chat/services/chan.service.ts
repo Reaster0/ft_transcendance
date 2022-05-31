@@ -33,9 +33,12 @@ export class ChanServices {
 		if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false) //isalphanum()
 			return null;
         
+
 		channel.users.push(creator);
 		channel.adminUsers = [];
+		console.log('coucou');
 		channel.owner = creator.id;
+		console.log('coucou');
 
 		if (!password)
 			password = null;
@@ -47,6 +50,7 @@ export class ChanServices {
 				channel.password = await bcrypt.hash(password, salt);
             }
 		}
+		console.log(channel);
 		return this.chanRepository.save(channel);
 	}
 	async deleteChannel(channel: ChanI) {
