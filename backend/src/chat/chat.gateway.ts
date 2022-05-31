@@ -60,7 +60,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /*********** .  . Create Channel **************** */
-  @UseGuards(AuthChat)
+  //@UseGuards(AuthChat)
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
   this.logger.log(channel);
@@ -77,7 +77,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /************* . . Delete Channel **************** */
-  @UseGuards(AuthChat)
+ // @UseGuards(AuthChat)
   @SubscribeMessage('deleteChannel')
   async onDeleteChannel(client: Socket, channel: ChanI) {
     
@@ -86,13 +86,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log(`delete Channel: ${channel.chanName}`);
   }
 
-  @UseGuards(AuthChat)
+//  @UseGuards(AuthChat)
   @SubscribeMessage('message')
   async onSendMessage(client: Socket, message: MessageI) {
     
     this.logger.log('sending message');
+    console.log(message);
     //1) get the sender role
-    const chanUser: ChanUserI = await this.chanServices.findUserByChannel(message.channel, client.data.user.userId);
+    const chanUser: ChanUserI = await this.chanServices.findUserByChannel(message.channel, client.data.user.id);
     let date = new Date;
     //2) accordingly to the sender role the sender is unable to send message => return ;
     if (chanUser && (chanUser.mute >= date || chanUser.ban >= date)) // User cannot send message !
@@ -125,7 +126,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /************** . Join Channel *************/
-  @UseGuards(AuthChat)
+//  @UseGuards(AuthChat)
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChanI) {
     const channelFound = await this.chanServices.getChan(channel.id);
@@ -137,7 +138,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /********************* Leave Channel ********************/
-  @UseGuards(AuthChat)
+ // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
   async handleLeaveChannel(client: Socket) {
     await this.chanServices.removeSocket(client.id);
@@ -145,7 +146,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /********************* Block user *********************/
-  @UseGuards(AuthChat)
+  //@UseGuards(AuthChat)
   @SubscribeMessage('blockUser')
   async blockOrDefiUser(client: Socket, data: any): Promise<User> {
     const { user, block } = data;

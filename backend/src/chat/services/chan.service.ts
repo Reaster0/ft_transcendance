@@ -113,7 +113,7 @@ export class ChanServices {
 	}
 
 	async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
-		return this.chanUserRepository.findOne({ where: { chan: channel, userId: userId } });
+		return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
 	}
 
 	//-------------------------------------------------//

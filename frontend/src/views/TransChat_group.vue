@@ -531,8 +531,10 @@ export default {
 		function sendingMessage(content, channel)
 		{
       console.log(content, channel);
+      if (!content)
+        return ;
+      connection.value.emit('message', {content, channel});
       //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
-    //connection.value.emit('message', content, channel);
 			console.log("after message");
 		}
 
