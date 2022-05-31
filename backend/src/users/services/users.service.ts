@@ -172,12 +172,8 @@ export class UsersService {
 
   async setTwoFASecret(user: User, secret: string): Promise<void> {
     user.twoFASecret = secret;
+    user.twoFASecret = await user.encryptSecret();
     await this.userRepository.save(user);
-  }
-
-  async modify2FA(user: User): Promise<void> {
-    const enable = !user.is2FAEnabled;
-    await this.userRepository.update(user.id, { is2FAEnabled: enable });
   }
 
   async enableTwoFA(id: number): Promise<void> {

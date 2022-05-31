@@ -89,9 +89,7 @@ export class User {
   gamesLost: GameHistory[];
   // ------------------------
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  encryptSecret() {
+  async encryptSecret() {
     if (!this.twoFASecret) {
       return;
     }

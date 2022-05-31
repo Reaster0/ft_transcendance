@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Point, Ball, Paddle, Field, Pong } from './interfaces/pong.interface';
+import { PosOrVec, Point, Ball, Paddle, Field, Pong } from './interfaces/pong.interface';
 
 @Injectable()
 export class PongService {
@@ -31,8 +31,8 @@ export class PongService {
   initBall(field: Field): Ball {
     const ball: Ball = {
       pos: { x: field.length / 2, y: field.width / 2 },
-      vel: { x: field.length / 1500, y: field.width / 1500 },
-      speed: field.length / 3000,
+      vel:  this.initBallVelocity(field, Math.random() > 0.5),
+      speed: field.length / 500,
       radius: field.length / 60,
     };
     return ball;
@@ -46,6 +46,19 @@ export class PongService {
       width: field.width / 7,
     };
     return paddle;
+  }
+
+  initBallVelocity(field: Field, goingRight: boolean): PosOrVec {
+    let dir = 1;
+    if (goingRight === true) {
+      dir = -1;
+    }
+    let yValue = Math.random() * (0.00075 + 0.00075) - 0.00075;
+    let vel: PosOrVec = {
+      x: dir * (field.length / 1000),
+      y : yValue,
+    };
+    return vel;
   }
 
   calcBallPos(pong: Pong) {
@@ -76,11 +89,10 @@ export class PongService {
   }
 
   resetBall(field: Field, ball: Ball) {
-    const dir = ball.vel.x > 0 ? -1 : -1;
     ball.pos.x = field.length / 2;
     ball.pos.y = field.width / 2;
-    ball.vel.x *= -1;
-    ball.speed = field.length / 3000;
+    ball.speed = field.length / 500;
+    ball.vel = this.initBallVelocity(field, ball.vel.x > 0 ? true : false);
   }
 
   checkCollision(ball: Ball, paddle: Paddle): boolean {
@@ -103,7 +115,7 @@ export class PongService {
     const direction = (ball.pos.x < field.length / 2) ? 1 : -1;
     ball.vel.x = direction * ball.speed * Math.cos(bounceAngle);
     ball.vel.y = ball.speed * Math.sin(bounceAngle);
-    ball.speed += ball.speed;
+    ball.speed *= 1.1;
 
   }
 

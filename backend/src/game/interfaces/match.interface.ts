@@ -8,6 +8,7 @@ export enum State {
   SETTING = 'SETTING',
   STARTING = 'STARTING',
   ONGOING = 'ONGOING',
+  SCORE = 'SCORE',
   FINISHED = 'FINISHED',
 }
 

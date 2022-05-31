@@ -222,11 +222,7 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   set2FASecret(@Req() req: RequestUser, @Body('secret') secret: string) {
-    this.logger.log(
-      "Post('secret') route called by user " +
-        req.user.username +
-        ' (username)',
-    );
+    this.logger.log("Post('secret') route called by user " + req.user.username + ' (username)');
     return this.usersService.setTwoFASecret(req.user, secret);
   }
 

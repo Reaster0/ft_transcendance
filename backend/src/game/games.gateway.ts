@@ -206,10 +206,8 @@ export class GameGateway
       if (!client.data.user) {
         return client.disconnect();
       }
-      if (
-        this.gamesService.isWaiting(client, queue) === true ||
-        this.gamesService.isPlaying(client, matchs) === true
-      ) {
+      if (this.gamesService.isWaiting(client, queue) === true ||
+        this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
       const index = watchers.indexOf(client);
@@ -217,7 +215,7 @@ export class GameGateway
         return;
       }
       const match = matchs.get(matchId);
-      if (match.state != State.ONGOING) {
+      if (match.state != State.ONGOING && match.state != State.SCORE) {
         return;
       }
       watchers.splice(index, 1);

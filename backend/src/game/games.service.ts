@@ -160,32 +160,47 @@ export class GamesService {
   }
 
   startGame(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
-    // Send: 'beReady' + player position  on field + opponent nickname
     match.players[0].socket.emit('beReady', { pos: 'left', opponent: match.players[1].user.nickname });
     match.players[1].socket.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
     server.to(match.matchId).emit('dimensions', { ballRad: match.pong.ball.radius.toFixed(3),
-      padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) })
+      padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) });
+    server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
+      paddle: this.getPaddlesFeatures(match)});
+    match.state = State.ONGOING;
+    this.listGamesToAll(watchers, matchs);
     let count = 3;
     const that = this;
     const countdown = setInterval(function () {
         that.emitToMatch(server, match, 'countdown', { countdown: String(count) });
         count--;
         if (count === 0) {
+          that.gameExec(server, match, watchers, matchs);
           clearInterval(countdown);
         }
-      }, 1000, server, match);
-    match.state = State.ONGOING;
-    this.listGamesToAll(watchers, matchs);
+      }, 1000, server, match, watchers, matchs);
+  }
+
+  gameExec(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
+    const that = this;
+    let count = 0;
     server.to(match.matchId).emit('gameStarting');
     const intervalId = setInterval(() => {
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
           that.listGamesToAll(watchers, matchs);
           that.finishGame(server, match, matchs);
-        }  else {
+        } else if (match.state === State.SCORE) {
+          count++;
+          server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
+            paddle: this.getPaddlesFeatures(match)});
+          if (count === 300) {
+            count = 0;
+            match.state = State.ONGOING;    
+          }
+        } else {
           that.refreshGame(server, match);
         }
-      }, 5, match, server, match);
+      }, 5, match, server, match);  
   }
 
   playerInput(client: Socket, match: Match, input: string) {
@@ -218,9 +233,9 @@ export class GamesService {
           match.winner = match.players[1];
         }
       }
-      // Send : 'score' + score player left side + score player right side
       server.to(match.matchId).emit('score', { leftScore: match.players[0].score,
         rightScore: match.players[1].score });
+      match.state = State.SCORE;
     }
     if (winner === true) {
       match.state = State.FINISHED;
@@ -249,7 +264,7 @@ export class GamesService {
   listGamesToOne(client: Socket, matchs: Map<string, Match>) {
     client.emit('newList');
     for (const match of matchs.values()) {
-      if (match.state === State.ONGOING) {
+      if (match.state === State.ONGOING || match.state === State.SCORE) {
         client.emit('ongoingGame', { matchId: match.matchId, leftPlayer: match.players[0].user.nickname,
           rightPlayer: match.players[1].user.nickname });
       }
