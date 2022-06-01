@@ -39,7 +39,7 @@ export class PongService {
   }
 
   initPaddle(field: Field, left: boolean): Paddle {
-    const xValue = left === true ? 0 + field.length / 50 : field.length - field.length / 50;
+    const xValue = left === true ? 0 + field.length / 50 : field.length - 2 * field.length / 50;
     const paddle: Paddle = {
       tlcPos: { x: xValue, y: field.width / 2 },
       length: field.length / 50,
