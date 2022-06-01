@@ -24,7 +24,7 @@ import { AuthService } from '../auth/auth.service';
     ]),
     UsersModule,
   ],
-  controllers: [],
+  controllers: [ChatServices],
   providers: [
     ChatGateway,
     ChanServices,
