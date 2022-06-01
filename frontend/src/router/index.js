@@ -10,6 +10,9 @@ import Chat from "../views/TransChat_group.vue";
 // import TheChat from "../views/TransChat_connect.vue";
 import ChatPerson from "../views/TransChat_person.vue";
 import NewRoom from "../views/TransChat_create_room.vue";
+import NewRoomPublic from "../views/TransChat_create_room_public.vue";
+import NewRoomPrivate from "../views/TransChat_create_room_private.vue";
+import NewRoomProtected from "../views/TransChat_create_room_protected.vue";
 import MU from "../views/TransChat_manage_users.vue";
 import ADM from "../views/TransChat_groupchat_adminside.vue";
 import ChangeRoom from "../views/TransChat_change_room.vue";
@@ -94,8 +97,32 @@ const routes = [
 	},
 	{
 		path: '/newroom',
-		name: "newroom",
+		name: "NewRoom",
 		component: NewRoom,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/publicroom',
+		name: "PublicRoom",
+		component: NewRoomPublic,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/privateroom',
+		name: "PrivateRoom",
+		component: NewRoomPrivate,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/protectedroom',
+		name: "ProtectedRoom",
+		component: NewRoomProtected,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}
