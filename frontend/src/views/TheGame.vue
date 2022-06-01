@@ -2,6 +2,8 @@
 <div>
 	<div v-if="!gameStarted">
 		<v-row justify="center">
+				<div class="button_slick">W ⬆️</div>
+				<div class="button_slick">S ⬇️</div>
 		</v-row>
 		<div v-if="!fatalError">
 			<v-container>
@@ -19,6 +21,8 @@
 	<div v-show="gameStarted">
 		<canvas id="pongGame"></canvas>
 	</div>
+	<img id="left_arrow" :src="require('../assets/arrow-left.png')" style="display:none"/>
+	<img id="right_arrow" :src="require('../assets/arrow-right.png')" style="display:none"/>
 </div>
 </template>
 
@@ -28,6 +32,7 @@ import { ref, watch } from "vue"
 import io from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
+// import image from "../assets/arrow-left.png"
 
 export default {
 	setup(){
@@ -50,6 +55,7 @@ export default {
 		let ctx = null
 		let framesId = null
 		let winText = null
+		let showInfo = true
 
 		onMounted(async() =>{
 
@@ -79,7 +85,13 @@ export default {
 				console.log("beReady:")
 				gameData.value.pos = params.pos
 				gameData.value.opponent = params.opponent
-				gameData.value.gameStarted = true
+
+				canvas = document.getElementById('pongGame');
+				canvas.width = window.innerWidth
+				canvas.height = window.innerHeight
+				ctx = canvas.getContext('2d');
+				gameStarted.value = true
+				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
 			})
 
 			gameSocket.value.on('dimensions', params =>{
@@ -96,12 +108,7 @@ export default {
 
 			gameSocket.value.on('gameStarting', () =>{
 				console.log("gameStarting:")
-				canvas = document.getElementById('pongGame');
-				canvas.width = window.innerWidth
-				canvas.height = window.innerHeight
-				ctx = canvas.getContext('2d');
-				gameStarted.value = true
-				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
+				showInfo = false
 			})
 
 			gameSocket.value.on('gameUpdate', params =>{
@@ -143,7 +150,6 @@ export default {
 				console.log(event)
 				fatalError.value = true
 			}
-
 			})
 
 		watch(gameStarted, (gameChange) =>{
@@ -206,6 +212,14 @@ export default {
 			{
 				ctx.font = "50px Monospace"
 				ctx.fillText(winText, 0.25 * canvas.width, 0.5 * canvas.height);
+			}
+			if (showInfo){
+				if (gameData.value.pos == "left")
+					ctx.drawImage(document.getElementById('left_arrow') , 0.2 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
+				else
+					ctx.drawImage(document.getElementById('right_arrow') , 0.6 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
+				ctx.font = "50px Monospace"
+				ctx.fillText("VS " + gameData.value.opponent, 0.42 * canvas.width, 0.9 * canvas.height);
 			}
 		}
 
