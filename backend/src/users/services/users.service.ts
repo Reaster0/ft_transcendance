@@ -43,10 +43,6 @@ export class UsersService {
     if (user) {
       return user;
     }
-    user = await this.userRepository.findOne({ username: username });
-    if (user) {
-      throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
-    }
     user = await this.userRepository.findOne({ email: email });
     if (user) {
       throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
@@ -184,7 +180,7 @@ export class UsersService {
     return user.decryptSecret();
   }
 
-  async currentUser(user: User): Promise<Partial<User>> {
+  currentUser(user: User): Partial<User> {
     const { username, twoFASecret, ...res } = user;
     return res;
   }

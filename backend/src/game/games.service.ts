@@ -145,7 +145,7 @@ export class GamesService {
   }
 
   playerWon(match: Match, player: Player) {
-    if (player.score == 10) {
+    if (player.score === 10) {
       match.winner = player;
       return true;
     }
@@ -154,7 +154,7 @@ export class GamesService {
 
   scoreUp(match: Match, player: Player) {
     player.score += 1;
-    if (this.playerWon(match, player) == true) {
+    if (this.playerWon(match, player) === true) {
       match.state = State.FINISHED;
     }
   }
@@ -224,7 +224,7 @@ export class GamesService {
     const point = this.pongService.getScore(match.pong.field, match.pong.ball);
     let winner = false;
     if (point != Point.NONE) {
-      if (point == Point.LEFT) {
+      if (point === Point.LEFT) {
         this.scoreUp(match, match.players[0]);
         if ((winner = this.playerWon(match, match.players[0])) === true) {
           match.winner = match.players[0];
