@@ -64,7 +64,7 @@
 
 
 <script>
-
+import axios from 'axios'
 export default
 {
   name: "NewRoomProtected",
@@ -81,8 +81,18 @@ export default
         name: this.name,
         password: this.password,
       };
-      console.log(data);
+      // console.log(data);
       console.log("submitted");
+      axios.post("http://localhost:8080/protectedroom", data)
+        .then(
+          res => {
+            console.log(res);
+          }
+        ).catch(
+            err => {
+            console.log(err);
+          }   
+        )
     }
   }
 }

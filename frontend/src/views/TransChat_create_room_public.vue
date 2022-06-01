@@ -20,7 +20,7 @@
             </div>
           </v-toolbar-title>
           <v-spacer></v-spacer>
-          <button class="btn btn-primary btn-block" :style="{color: ' #ffffff'}">SUBMIT</button>
+          <button class="btn btn-primary btn-block" :style="{color: ' #ffffff'}" to="/">SUBMIT</button>
         </v-toolbar>
 
 
