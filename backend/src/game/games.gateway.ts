@@ -94,7 +94,7 @@ export class GameGateway
       queue.push(client);
       if (queue.length >= 2) {
         const matchId = uuid();
-        const newMatch = this.gamesService.setMatch(matchId, queue.slice(0, 2));
+        const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2));
         matchs.set(matchId, newMatch);
         this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
