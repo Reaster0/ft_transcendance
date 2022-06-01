@@ -73,7 +73,9 @@
                 <v-btn elevation="0" min-height="50px"  max-width="50px">
                 <v-badge bordered bottom color="green" dot offset-x="4" offset-y="34" class="spacetop" >
                     <v-avatar class="col" elevation="10" size="40px">
-                      <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="50" height="50">
+                      <div id="app">
+                      <img v-bind:src="require('../assets/Screenshot.png')" width="50" height="50">
+                      </div>
                     </v-avatar>
                 </v-badge>
                 </v-btn>
@@ -333,6 +335,8 @@
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
   //import { useKeypress } from "vue3-keypress";
+
+  
 
 export default {
   data: () => ({

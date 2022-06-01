@@ -59,7 +59,7 @@
 
 
 <script>
-
+import axios from 'axios'
 export default
 {
   name: "NewRoomPrivate",
@@ -74,8 +74,18 @@ export default
       const data = {
         name: this.name,
       };
-      console.log(data);
+      // console.log(data);
       console.log("submitted");
+      axios.post("http://localhost:3000/privateroom", data)
+        .then(
+          res => {
+            console.log(res);
+          }
+        ).catch(
+            err => {
+            console.log(err);
+          }   
+        )
     }
   }
 }

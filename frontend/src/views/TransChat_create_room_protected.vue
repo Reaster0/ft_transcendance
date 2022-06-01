@@ -83,7 +83,7 @@ export default
       };
       // console.log(data);
       console.log("submitted");
-      axios.post("http://localhost:8080/protectedroom", data)
+      axios.post("http://localhost:3000/chat/protectedroom", data)
         .then(
           res => {
             console.log(res);
@@ -91,7 +91,7 @@ export default
         ).catch(
             err => {
             console.log(err);
-          }   
+          }
         )
     }
   }

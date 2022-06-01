@@ -9,5 +9,15 @@ export class ChatController {
         //logic
     }
 
+    @Post('privateroom') //localhost:3000/chat/privateroom
+    privateRoom(/*arguments*/){
+        //logic
+    }
+
+    @Post('publicroom') //localhost:3000/chat/publicroom
+    publicRoom(/*arguments*/){
+        //logic
+    }
+
 
 }

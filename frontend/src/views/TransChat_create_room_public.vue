@@ -60,20 +60,11 @@
 </template>
 
 
-
-<!-- <template>
-  <form @submit.prevent="handleSubmit">
-    <div class="form-group">
-      <label>Password</label>
-      <input type="text" class="form-control" v-model="password" placeholder="Password"/><input>
-    </div>
-    <button class="btn btn-primary btn-block">Submit</button>
-  </form>
-</template> -->
-
-
-
 <script>
+import axios from 'axios'
+// import { onMounted } from "@vue/runtime-core"
+// import { ref } from "vue"
+// import io from 'socket.io-client';
 
 export default
 {
@@ -89,10 +80,38 @@ export default
       const data = {
         name: this.name,
       };
-      console.log(data);
+      // console.log(data);
       console.log("submitted");
+      axios.post("http://localhost:3000/chat/publicroom", data)
+        .then(
+          res => {
+            console.log(res);
+          }
+        ).catch(
+            err => {
+            console.log(err);
+          }   
+        )
     }
-  }
+  },
+	// setup()
+  //   {
+	// 	const connection = ref(null)
+
+	// 	onMounted(() =>{
+	// 		console.log(document.cookie.toString())
+	// 		try {
+	// 				connection.value = io('http://localhost:3000/chat/publicroom',{
+	// 				transportOptions: {
+	// 				polling: { extraHeaders: { auth: document.cookie} },
+	// 				},
+	// 			})
+	// 			console.log("senfing")
+	// 		} catch (error) {
+	// 			console.log("err of senfing " + error)
+	// 		}
+  //   })
+  // }
 }
 
 
