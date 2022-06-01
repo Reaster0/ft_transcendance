@@ -12,6 +12,7 @@ import { ChatServices } from './services/chat.service';
 import { ConnectService } from './services/connect.service';
 import { MessageService } from './services/message.service';
 import { AuthService } from '../auth/auth.service';
+import { ChatController } from './chat.controller';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { AuthService } from '../auth/auth.service';
     ]),
     UsersModule,
   ],
-  controllers: [ChatServices],
+  controllers: [ChatController],
   providers: [
     ChatGateway,
     ChanServices,
