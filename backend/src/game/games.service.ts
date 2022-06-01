@@ -171,12 +171,14 @@ export class GamesService {
     let count = 3;
     const that = this;
     const countdown = setInterval(function () {
-        that.emitToMatch(server, match, 'countdown', { countdown: String(count) });
-        count--;
-        if (count === 0) {
-          that.gameExec(server, match, watchers, matchs);
-          clearInterval(countdown);
-        }
+      if (count > 0) {
+          that.emitToMatch(server, match, 'countdown', { countdown: String(count) });
+      }
+      if (count < 0) {
+        that.gameExec(server, match, watchers, matchs);
+        clearInterval(countdown);
+      }
+      count--;
       }, 1000, server, match, watchers, matchs);
   }
 
