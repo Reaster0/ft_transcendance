@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="handleSubmit">
+      <form @submit.prevent="join">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -61,39 +61,62 @@
 
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 // import { onMounted } from "@vue/runtime-core"
 // import { ref } from "vue"
-// import io from 'socket.io-client';
+import io from 'socket.io-client';
 
 export default
 {
   name: "NewRoomPublic",
-  methods: 
-  {
-    data(){
-      return{
-        name: '',
-      }
-    },
-    handleSubmit(){
-      const data = {
-        name: this.name,
-      };
-      // console.log(data);
-      console.log("submitted");
-      axios.post("http://localhost:3000/chat/publicroom", data)
-        .then(
-          res => {
-            console.log(res);
-          }
-        ).catch(
-            err => {
-            console.log(err);
-          }   
-        )
-    }
+  data() {
+    return {
+      created: false,
+      name: "",
+    };
   },
+  methods: {
+    join() {
+      console.log(this.created);
+      console.log(this.name);
+      this.created = true;
+      this.socketInstance = io("http://localhost:3000");
+      this.socketInstance.on(
+
+      )
+    },
+  },
+
+
+
+
+  // methods: 
+  // {
+  //   data(){
+  //     return{
+  //       name: '',
+  //     }
+  //   },
+  //   handleSubmit(){
+  //     const data = {
+  //       name: this.name,
+  //     };
+  //     console.log(data);
+  //     console.log("submitted");
+  //     axios.post("http://localhost:3000/chat/publicroom", data)
+  //       .then(
+  //         res => {
+  //           console.log(res);
+  //         }
+  //       ).catch(
+  //           err => {
+  //           console.log(err);
+  //         }   
+  //       )
+  //   }
+  // },
+
+  
 	// setup()
   //   {
 	// 	const connection = ref(null)
@@ -110,6 +133,9 @@ export default
 	// 		} catch (error) {
 	// 			console.log("err of senfing " + error)
 	// 		}
+
+  //     connection.value.on('name', (name) => 
+  //       {console.log("cname:" + name)})
   //   })
   // }
 }
