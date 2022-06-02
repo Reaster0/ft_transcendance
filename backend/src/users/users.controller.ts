@@ -175,10 +175,7 @@ export class UsersController {
   @Patch('settings')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
-  @ApiOperation({
-    summary: 'Update user info (from user perspective)',
-    description: 'Update username or email',
-  })
+  @ApiOperation({ summary: 'Update user info (from user perspective)', description: 'Update nickname.'})
   @ApiOkResponse({ description: 'User account' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/

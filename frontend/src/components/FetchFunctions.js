@@ -53,13 +53,12 @@ export async function getAvatarID(id) {
 	})
 }
 
-export async function updateUser(nick, mail) {
+export async function updateUser(nick) {
 	return await fetch("/api/users/settings", {
 		credentials: "include",
 		method: "PATCH",
 		body: JSON.stringify({
-			nickname: nick,
-			email: mail
+			nickname: nick
 		}),
 		headers: {
 			'Content-type': 'application/json; charset=UTF-8',
@@ -67,8 +66,7 @@ export async function updateUser(nick, mail) {
 	})
 	.then(res => {
 		console.log(JSON.stringify({
-			nickname: nick,
-			email: mail
+			nickname: nick
 		}))
 		return res.status == 200? true : false
 	})

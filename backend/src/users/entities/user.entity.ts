@@ -27,11 +27,6 @@ export class User {
   @IsAlphanumeric()
   nickname: string;
 
-  @Column({ type: 'text', unique: true })
-  @ApiProperty({ type: String, description: 'User email. Must be under email format.' })
-  @IsEmail()
-  email: string;
-
   @Column({ type: 'int', nullable: true })
   @ApiProperty({ type: Number, description: "Avatar id (inside avatar table) of user's avatar." })
   avatarId?: number;

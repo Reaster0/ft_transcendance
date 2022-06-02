@@ -9,7 +9,6 @@ import { Socket } from 'socket.io';
 import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
 import { parse } from 'cookie';
 import { JwtService } from '@nestjs/jwt';
-import { throwError } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +29,7 @@ export class AuthService {
   async generateTwoFASecret(user: User) /*: Promise<twoFaI> */ {
     const secret: string = authenticator.generateSecret();
     const authUrl: string = authenticator.keyuri(
-      user.email,
+      user.username,
       process.env.APPNAME,
       secret,
     );

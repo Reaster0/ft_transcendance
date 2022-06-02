@@ -38,14 +38,10 @@ export class UsersService {
   }
 
   async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
-    const { username, email } = createUserDto;
+    const { username } = createUserDto;
     let user = await this.userRepository.findOne({ username: username });
     if (user) {
       return user;
-    }
-    user = await this.userRepository.findOne({ email: email });
-    if (user) {
-      throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
     }
     user = this.userRepository.create(createUserDto);
     user.nickname = await this.generateNickname(username);
@@ -68,18 +64,13 @@ export class UsersService {
   }
 
   async updateUser(user: User, updateUser: UpdateUserDto) : Promise<User> {
-    const { nickname, email } = updateUser;
+    const { nickname } = updateUser;
     let find = await this.userRepository.findOne({ nickname: nickname });
     if (find && find != user) {
       throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
     }
-    find = await this.userRepository.findOne({ email: email });
-    if (find && find != user) {
-      throw new HttpException('Email already taken.', HttpStatus.BAD_REQUEST);
-    }
     try {
       user.nickname = nickname;
-      user.email = email;
       return this.userRepository.save(user);
     } catch (error) {
       throw new InternalServerErrorException();

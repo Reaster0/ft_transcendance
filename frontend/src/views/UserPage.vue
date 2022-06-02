@@ -4,12 +4,8 @@
 	<v-container v-if="user">
 		<v-row>
 			<v-col class="text">
-				<h3>User ID: {{user.id}}</h3>
 				<h3>nickname: {{user.nickname}}</h3>
-				<h3>username: {{user.username}}</h3>
-				<h3>email: {{user.email}}</h3>
 				<h3>Elo: {{user.eloScore}}</h3>
-				<h3>Connected: {{user.status}}</h3>
 				<h3>is2FAEnabled: {{user.is2FAEnabled}}</h3>
 			</v-col>
 				<v-img class="text" :src="avatar"></v-img>
