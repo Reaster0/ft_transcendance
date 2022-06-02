@@ -52,7 +52,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.updateUsersStatus();
     } catch {
       this.logger.log('Failed to retrive user from client');
-      return client.disconnect()
+      return client.disconnect();
     }
     this.logger.log(`Client connected: ${client.id}`);
   }
@@ -62,7 +62,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     await this.connectService.disconnectUser(client.id, client.data.user);
     this.updateUsersStatus();
     client.disconnect();
-    this.logger.log(`Client disconnected: ${client.data.user.username}`);
+    this.logger.log(`Client disconnected: ${client}`);
   }
 
   /*********** .  . Create Channel **************** */

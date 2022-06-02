@@ -23,7 +23,8 @@ export class ConnectService {
     }
 
     async disconnectUser(socketID: string, user: User) {
-        await this.userService.changeStatus(user, Status.OFFLINE); // maybe useless;
+        if (user)
+          await this.userService.changeStatus(user, Status.OFFLINE); // maybe useless;
         await this.connectedRepository.delete({socketID});
     }
 
