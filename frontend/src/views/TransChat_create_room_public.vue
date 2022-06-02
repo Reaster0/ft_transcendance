@@ -35,7 +35,8 @@
             </p>
             </div>
         <v-col cols="12" sm="6">
-            <v-btn elevation="2" class="offsetmess">
+          <input type="file" ref="file" style="display: none">
+            <v-btn elevation="2" class="offsetmess" @click="$refs.file.click()">
               Upload avatar
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
@@ -80,7 +81,7 @@ export default
       console.log(this.created);
       console.log(this.name);
       this.created = true;
-      this.socketInstance = io("http://:3000/chat");
+      this.socketInstance = io("http://localhost:3000/chat");
       this.socketInstance.on(
 
       )

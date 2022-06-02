@@ -34,7 +34,8 @@
             </div>
 
         <v-col cols="12" sm="6">
-            <v-btn elevation="2" class="offsetmess">
+          <input type="file" ref="file" style="display: none">
+            <v-btn elevation="2" class="offsetmess" @click="$refs.file.click()">
               Upload avatar
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
