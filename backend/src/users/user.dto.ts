@@ -8,6 +8,7 @@ import {
   IsAlphanumeric,
   MinLength,
   MaxLength,
+  IsNumber
 } from 'class-validator';
 
 // DTO for user registration //

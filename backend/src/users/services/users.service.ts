@@ -1,41 +1,30 @@
-import {
-  Injectable,
-  NotFoundException,
-  HttpException,
-  HttpStatus,
-  StreamableFile,
-  InternalServerErrorException,
-  Res,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, HttpException, HttpStatus, StreamableFile, InternalServerErrorException,
+  Res } from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../user.dto';
-import { JwtService } from '@nestjs/jwt';
 import { Status } from '../../common/enums/status.enum';
 import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
+import { GameHistory } from '../../game/entities/gamehistory.entity';
+import { Avatar } from '../entities/avatar.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
     private readonly avatarsService: AvatarsService,
     private connection: Connection,
   ) {}
 
-  findAllUsers(): Promise<User[]> {
-    return this.userRepository.find();
-  }
-
   async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id);
     if (!user) {
-      throw new NotFoundException(`User #${id} not found.`);
+      throw new NotFoundException(`User ${id} (id) not found.`);
     }
     return user;
   }
@@ -48,46 +37,26 @@ export class UsersService {
     return user;
   }
 
-  async findUserBynickname(nickname: string): Promise<User> {
-    const user = await this.userRepository.findOne({ nickname: nickname });
-    if (!user) {
-      throw new NotFoundException(
-        `User ${nickname} not found(nickname) not found.`,
-      );
-    }
-    return user;
-  }
-
-  async retrieveOrCreateUser(createUserDto: CreateUserDto) {
+  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
     const { username, email } = createUserDto;
-    let nickname = username;
-    let user = await this.userRepository.findOne({
-      username: username,
-      email: email,
-    });
+    let user = await this.userRepository.findOne({ username: username });
     if (user) {
       return user;
     }
-    user = await this.userRepository.findOne({ username: username });
-    if (user) {
-      throw new HttpException(
-        'There seems to be something wrong with your 42auth account. Please contact an administrator.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     user = await this.userRepository.findOne({ email: email });
     if (user) {
-      throw new HttpException(
-        'There seems to be something wrong with your 42auth account. Please contact an administrator.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
     }
-    const letters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    while (
-      (user = await this.userRepository.findOne({ nickname: nickname })) &&
-      nickname.length < 4
-    ) {
+    user = this.userRepository.create(createUserDto);
+    user.nickname = await this.generateNickname(username);
+    // TODO redirect user to modify info page
+    return this.userRepository.save(user);
+  }
+
+  async generateNickname(nickname: string): Promise<string> {
+    let user = undefined;
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    while ((user = await this.userRepository.findOne({ nickname: nickname })) && nickname.length < 4) {
       const randomChar = letters[Math.floor(Math.random() * letters.length)];
       if (nickname.length > 15) {
         nickname = randomChar;
@@ -95,20 +64,14 @@ export class UsersService {
         nickname += randomChar;
       }
     }
-    user = this.userRepository.create(createUserDto);
-    user.nickname = nickname;
-    // TODO redirect user to modify info page
-    return this.userRepository.save(user);
+    return nickname;    
   }
 
-  async updateUser(user: User, updateUser: UpdateUserDto) {
+  async updateUser(user: User, updateUser: UpdateUserDto) : Promise<User> {
     const { nickname, email } = updateUser;
     let find = await this.userRepository.findOne({ nickname: nickname });
     if (find && find != user) {
-      throw new HttpException(
-        'Nickname already taken.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
     }
     find = await this.userRepository.findOne({ email: email });
     if (find && find != user) {
@@ -123,62 +86,53 @@ export class UsersService {
     }
   }
 
-  async removeUser(user: User) {
+  async removeUser(user: User): Promise<void> {
     const friends = user.friends;
     const id = user.id;
     for (let i = 0; i < friends.length; i++) {
       const otherUser = await this.userRepository.findOne({ id: friends[i] });
       this.removeFriend(otherUser, id);
     }
-    return await this.userRepository.remove(user);
+    await this.userRepository.remove(user);
   }
 
-  async changeStatus(user: User, newStatus: Status) {
-    return this.userRepository.update(user.id, { status: newStatus });
+  async changeStatus(user: User, newStatus: Status): Promise<void> {
+    await this.userRepository.update(user.id, { status: newStatus });
   }
 
-  async modifyElo(user: User, opponentElo: number, userWon: boolean) {
+  async modifyElo(user: User, opponentElo: number, userWon: boolean): Promise<void> {
     const eloRating = await require('elo-rating');
     const result = eloRating.calculate(user.eloScore, opponentElo, userWon);
     user.eloScore = result.playerRating;
-    this.userRepository.save(user);
+    await this.userRepository.save(user);
   }
 
-  async addFriend(user: User, friendId: number) {
+  async addFriend(user: User, friendId: number): Promise <void> {
     const found = await user.friends.find((element) => friendId);
     if (found) {
-      throw new HttpException(
-        'User is already a friend',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('User is already a friend', HttpStatus.BAD_REQUEST);
     }
     user.friends.push(friendId);
-    this.userRepository.save(user);
+    await this.userRepository.save(user);
   }
 
-  async removeFriend(user: User, friendId: number) {
+  async removeFriend(user: User, friendId: number): Promise<void> {
     const found = await user.friends.indexOf(friendId);
     if (found == -1) {
       throw new HttpException('User is not a friend', HttpStatus.BAD_REQUEST);
     }
     user.friends.splice(found, 1);
-    this.userRepository.save(user);
+    await this.userRepository.save(user);
   }
 
-  async addAvatar(user: User, avatarFilename: string, avatarBuffer: Buffer) {
+  async addAvatar(user: User, avatarFilename: string, avatarBuffer: Buffer): Promise<Avatar> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const oldAvatarId = user.avatarId;
-      const newAvatar = await this.avatarsService.uploadAvatar(
-        avatarFilename,
-        avatarBuffer,
-        queryRunner,
-      );
-      await queryRunner.manager.update(User, user.id, {
-        avatarId: newAvatar.id,
-      });
+      const newAvatar = await this.avatarsService.uploadAvatar(avatarFilename, avatarBuffer, queryRunner);
+      await queryRunner.manager.update(User, user.id, { avatarId: newAvatar.id });
       if (oldAvatarId) {
         await this.avatarsService.deleteAvatarById(oldAvatarId, queryRunner);
       }
@@ -192,13 +146,11 @@ export class UsersService {
     }
   }
 
-  async getAvatarByAvatarId(avatarId: number, @Res({ passthrough: true }) res) {
+  async getAvatarByAvatarId(avatarId: number, @Res({ passthrough: true }) res): Promise<StreamableFile> {
     const avatar = await this.avatarsService.getAvatarById(avatarId);
     if (!avatar) {
       const filename = process.env.DEFAULT_AVATAR;
-      const stream = createReadStream(
-        join(process.cwd(), process.env.DEFAULT_AVATAR),
-      );
+      const stream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR),);
       res.set({
         'Content-Disposition': `inline; filename="${filename}"`,
         'Content-Type': 'image',
@@ -214,25 +166,21 @@ export class UsersService {
     return new StreamableFile(stream);
   }
 
-  async setTwoFASecret(user: User, secret: string): Promise<User> {
+  async setTwoFASecret(user: User, secret: string): Promise<void> {
     user.twoFASecret = secret;
-    return this.userRepository.save(user);
+    user.twoFASecret = await user.encryptSecret();
+    await this.userRepository.save(user);
   }
 
-  async modify2FA(user: User) {
-    const enable = !user.is2FAEnabled;
-    return this.userRepository.update(user.id, { is2FAEnabled: enable });
-  }
-
-  async enableTwoFA(id: number) {
+  async enableTwoFA(id: number): Promise<void> {
     await this.userRepository.update(id, { is2FAEnabled: true });
   }
 
-  async getSecret(user: User) {
+  getSecret(user: User): string {
     return user.decryptSecret();
   }
 
-  async currentUser(user: User): Promise<Partial<User>> {
+  currentUser(user: User): Partial<User> {
     const { username, twoFASecret, ...res } = user;
     return res;
   }
@@ -240,7 +188,9 @@ export class UsersService {
   async userInfo(userName: string): Promise<Partial<User>> {
     let user: User = undefined;
     user = await this.userRepository.findOne({ username: userName });
-    if (!user) throw new NotFoundException('No user found');
+    if (!user) {
+      throw new NotFoundException('No user found');
+    }
     const { username, twoFASecret, ...res } = user;
     return res;
   }
@@ -248,13 +198,9 @@ export class UsersService {
   async getPartialUserInfo(id: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) return user;
-    return {
-      nickname: user.nickname,
-      eloScore: user.eloScore,
-    };
+    return { nickname: user.nickname, eloScore: user.eloScore };
   }
 
-  //	async ConnectUser(soketID: string)
   async getConnectedUser(): Promise<User[]> {
     const connectedUser = this.userRepository.find({
       where: { status: Status.ONLINE },
@@ -262,14 +208,8 @@ export class UsersService {
     return connectedUser;
   }
 
-  async updateBlockedUser(
-    block: boolean,
-    user: User,
-    userToBlock: User,
-  ): Promise<User> {
-    const userFound = user.blockedUID.find(
-      (element) => element === userToBlock.id,
-    );
+  async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {
+    const userFound = user.blockedUID.find((element) => element === userToBlock.id);
 
     if (block === true && !userFound) {
       user.blockedUID.push(userToBlock.id);
@@ -292,4 +232,16 @@ export class UsersService {
     }
     return user;
   }
+
+  getGameHistory(user: User): GameHistory[] {
+    let gameHistory = [];
+    if (user.gamesWon) {
+      gameHistory = gameHistory.concat(user.gamesWon);
+    }
+    if (user.gamesLost) {
+      gameHistory = gameHistory.concat(user.gamesLost);
+    }
+    return gameHistory;
+  }
+
 }

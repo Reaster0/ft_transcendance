@@ -1,49 +1,70 @@
 <template>
 <div>
-	<v-row justify="center">
-			<div class="button_slick button_slide" @click="Play">
-				SearchGame
-			</div>
-	</v-row>
-	<div v-if="!fatalError">
-		<v-container>
-			<!-- <canva id="c"></canva> -->
-
-			<v-row justify="center">
-				<div v-if="!matchId" class="button_slick big_button">Searching A Game...(but press the btn)</div>
-				<div v-else class="button_slide button_slick big_button" @click="AcceptGame">a game has been found!</div>
-			</v-row>
-		</v-container>
+	<div v-if="!gameStarted">
+		<v-row justify="center">
+				<div class="button_slick">W ⬆️</div>
+				<div class="button_slick">S ⬇️</div>
+		</v-row>
+		<div v-if="!fatalError">
+			<v-container>
+				<v-row justify="center">
+					<div v-if="!searchingGame" class="button_slick button_slide big_button" @click="Play">SearchGame</div>
+					<div v-else-if="!matchId" class="button_slick big_button">Searching A Game...</div>
+					<div v-else class="button_slide button_slick big_button" @click="AcceptGame">a game has been found!</div>
+				</v-row>
+			</v-container>
+		</div>
+		<v-row v-else justify="center">
+			<div class="button_slick big_button ">FATAL ERROR PLEASE REFRESH</div>
+		</v-row>
 	</div>
-	<v-row v-else justify="center">
-		<div class="button_slick big_button">FATAL ERROR PLEASE REFRESH</div>
-	</v-row>
+	<div v-show="gameStarted">
+		<canvas id="pongGame"></canvas>
+	</div>
+	<img id="left_arrow" :src="require('../assets/arrow-left.png')" style="display:none"/>
+	<img id="right_arrow" :src="require('../assets/arrow-right.png')" style="display:none"/>
 </div>
 </template>
 
 <script>
 import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import io from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
+// import image from "../assets/arrow-left.png"
 
 export default {
 	setup(){
 		const gameSocket = ref(null)
 		const matchId = ref(null)
+		const searchingGame = ref(false)
 		const fatalError = ref(false)
-		const gameData = ref({})
+		const gameData = ref({
+			pos: "",
+			opponent: "",
+			ball: {x: 0, y: 0, radius: 10},
+			paddle:{ width: 5, height: 15 },
+			paddleL: { x: 0, y: 0 },
+			paddleR: { x: 0, y: 0 },
+			score: { leftScore: 0, rightScore: 0 },
+			winner: "",
+		})
+		const gameStarted = ref(false)
+		let canvas = null
+		let ctx = null
+		let framesId = null
+		let winText = null
+		let showInfo = true
 
-		onMounted(() =>{
-			console.log(document.cookie.toString())
+		onMounted(async() =>{
+
 			try {
-				gameSocket.value = io('http://82.65.87.54:3000/game',{
-				//gameSocket.value = io('http://localhost:3000/game',{
+				//gameSocket.value = io('http://82.65.87.54:3000/game',{
+				gameSocket.value = io('http://localhost:3000/game',{
 				transportOptions: {
 				polling: { extraHeaders: { auth: document.cookie} },
 				}})
-				console.log(gameSocket.value)
 				console.log("starting connection to websocket")
 			} catch (error) {
 				console.log("the error is:" + error)
@@ -55,18 +76,69 @@ export default {
 
 			gameSocket.value.on('foundMatch', res =>{
 				matchId.value = res
-				console.log("found match:" + res)
+				console.log("found match:" + JSON.stringify(res))
+				if (!res)
+					gameStarted.value = false
 			})
 
-			gameSocket.value.on('beReady', (params, lol, mdr) =>{
-				console.log("beReady:" + params)
-				gameData.value = params
-				console.log(gameData.value+lol+ mdr)
+			gameSocket.value.on('beReady', params =>{
+				console.log("beReady:")
+				gameData.value.pos = params.pos
+				gameData.value.opponent = params.opponent
+
+				canvas = document.getElementById('pongGame');
+				canvas.width = window.innerWidth
+				canvas.height = window.innerHeight
+				ctx = canvas.getContext('2d');
+				gameStarted.value = true
+				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
+			})
+
+			gameSocket.value.on('dimensions', params =>{
+				console.log("dimensions:")
+				gameData.value.ball.radius = params.ballRad
+				gameData.value.paddle.height = params.padWidth
+				gameData.value.paddle.width = params.padLength
+				console.log("ball radius =" + JSON.stringify(gameData.value.ball.radius) + " paddle width =" + JSON.stringify(gameData.value.paddle.width) + " paddle length =" + JSON.stringify(gameData.value.paddle.height))
+			})
+
+			gameSocket.value.on('countdown', params =>{
+				console.log("countdown:" + params.countdown)
+			})
+
+			gameSocket.value.on('gameStarting', () =>{
+				console.log("gameStarting:")
+				showInfo = false
+			})
+
+			gameSocket.value.on('gameUpdate', params =>{
+
+				gameData.value.ball.x = params.ball.x
+				gameData.value.ball.y = params.ball.y
+				gameData.value.paddleL = params.paddle.L
+				gameData.value.paddleR = params.paddle.R
+
+				// console.log("ball position x:" +gameData.value.ball.x + " y:" +gameData.value.ball.y + " ball radus:" +
+				// gameData.value.ball.radius + " \npaddleL x:" + gameData.value.paddleL.x + " y:" + gameData.value.paddleR.y +
+				// " \npaddleR x:" + gameData.value.paddleR.x + " y:" + gameData.value.paddleL.y +
+				// "\npaddle width:" + gameData.value.paddle.width + " paddle length:" + gameData.value.paddle.height)
+			})
+
+			gameSocket.value.on('score', params =>{
+				gameData.value.score = params
+			})
+
+			gameSocket.value.on('endGame', params =>{
+				console.log("endGame:" + JSON.stringify(params))
+				gameData.value.winner = params.winner
+				if (params.winner != gameData.value.opponent)
+					winText = "well done neo keep dreaming"
+				else
+					winText = "wake up neo you're loosing"
 			})
 
 			gameSocket.value.on('requestError', () =>{
 				console.log("requestError")
-				// fatalError.value = true
 			})
 
 			gameSocket.value.onopen = (event) => {
@@ -78,9 +150,23 @@ export default {
 				console.log(event)
 				fatalError.value = true
 			}
-
-			// Play();
 			})
+
+		watch(gameStarted, (gameChange) =>{
+			if (gameChange)
+			{
+				if (!canvas)
+				{
+					canvas = document.getElementById('pongGame');
+					canvas.width = window.innerWidth
+					canvas.height = window.innerHeight
+					ctx = canvas.getContext('2d');
+				}
+				framesId = window.setInterval(renderFrame, 16)
+			}
+			else
+				window.clearInterval(framesId)
+		})
 
 		onBeforeRouteLeave(() => {
 			const answer = window.confirm("Are you sure you want to leave the game?")
@@ -94,6 +180,7 @@ export default {
 
 		function Play(){
 			gameSocket.value.emit('joinGame')
+			searchingGame.value = true
 			console.log("joinGame")
 		}
 
@@ -102,15 +189,38 @@ export default {
 			console.log("acceptGame")
 		}
 
-		const GameInput = ({input}) =>{
-			console.log("gameInput" + input)
-			if (matchId.value)
-				gameSocket.value.emit('gameInput', matchId, input)
-		}
-
-		const Disconnect = () =>{
+		function Disconnect(){
 			gameSocket.value.disconnect()
 			console.log("disconnect")
+		}
+
+		function renderFrame() {
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, canvas.width, canvas.height)
+			ctx.fillStyle = '#00ff00'
+			ctx.fillRect(gameData.value.paddleL.x * canvas.width, gameData.value.paddleL.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
+			ctx.fillRect(gameData.value.paddleR.x * canvas.width, gameData.value.paddleR.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
+			ctx.beginPath()
+			ctx.arc(gameData.value.ball.x * canvas.width,gameData.value.ball.y * canvas.height, gameData.value.ball.radius * canvas.height, 0, Math.PI*2, false)
+			ctx.closePath()
+			ctx.fill()
+			ctx.font = "75px Monospace"
+			ctx.fillText(gameData.value.score.leftScore, 0.4 * canvas.width, 0.1 * canvas.height);
+			ctx.fillText(gameData.value.score.rightScore, 0.6 * canvas.width, 0.1 * canvas.height);
+
+			if (winText)
+			{
+				ctx.font = "50px Monospace"
+				ctx.fillText(winText, 0.25 * canvas.width, 0.5 * canvas.height);
+			}
+			if (showInfo){
+				if (gameData.value.pos == "left")
+					ctx.drawImage(document.getElementById('left_arrow') , 0.2 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
+				else
+					ctx.drawImage(document.getElementById('right_arrow') , 0.6 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
+				ctx.font = "50px Monospace"
+				ctx.fillText("VS " + gameData.value.opponent, 0.42 * canvas.width, 0.9 * canvas.height);
+			}
 		}
 
 		useKeypress({
@@ -131,7 +241,7 @@ export default {
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, GameInput, matchId, fatalError }
+		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame}
 	},
 }
 </script>

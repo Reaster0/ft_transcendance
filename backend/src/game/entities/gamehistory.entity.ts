@@ -9,23 +9,16 @@ import { ApiProperty } from '@nestjs/swagger';
 @Entity('gameHistory')
 export class GameHistory {
   @PrimaryGeneratedColumn()
-  @ApiProperty({
-    type: Number,
-    description: 'An unique id number attributed to each finished match.',
-  })
+  @ApiProperty({ type: Number, description: 'An unique id number attributed to each finished match.' })
   id: number;
 
-  @ApiProperty({
-    description: 'Winner of match, relation to corresponding user.',
-  })
   @ManyToOne(() => User, (user) => user.gamesWon, { nullable: true })
-  winner?: User; //Can be null if user is deleted
+  @ApiProperty({ description: 'Winner of match, relation to corresponding user. Can be null if user is deleted.' })
+  winner?: User;
 
-  @ApiProperty({
-    description: 'Looser of match, relation to corresponding user.',
-  })
   @ManyToOne(() => User, (user) => user.gamesLost, { nullable: true })
-  looser?: User; //Can be null if user is deleted
+  @ApiProperty({ description: 'Looser of match, relation to corresponding user. Can be null if user is deleted.' })
+  looser?: User;
 
   @Column({ type: 'int' })
   @ApiProperty({ type: Number, description: 'Winner score.' })

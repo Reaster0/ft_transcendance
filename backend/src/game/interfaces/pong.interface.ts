@@ -17,14 +17,14 @@ export interface Ball {
 }
 
 export interface Paddle {
-  blcPos: PosOrVec; // blc = bottom left corner
-  width: number;
+  tlcPos: PosOrVec; // tlc = top left corner
   length: number;
+  width: number;
 }
 
 export interface Field {
-  width: number;
   length: number;
+  width: number;
   offset: number;
 }
 

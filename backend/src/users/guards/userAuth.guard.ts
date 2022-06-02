@@ -14,7 +14,7 @@ import { User } from '../entities/user.entity';
 function validateRequest(request: RequestUser) {
   const user: User = request.user;
   const decode = jwt_decode(request.cookies.jwt);
-  if (user.is2FAEnabled == true) {
+  if (user.is2FAEnabled === true) {
     if (decode['twoFA'] === false) throw new ForbiddenException('need 2FA');
   }
   return true;
