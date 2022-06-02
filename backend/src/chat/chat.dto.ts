@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsAlphanumeric, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 
 export class CreateChannelDto {

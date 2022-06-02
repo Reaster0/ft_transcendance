@@ -82,7 +82,7 @@ export default
       };
       // console.log(data);
       console.log("submitted");
-      axios.post("http://localhost:3000/chat/publicroom", data)
+      axios.post("http://localhost:3000/api/chat/publicroom", data)
         .then(
           res => {
             console.log(res);
