@@ -73,22 +73,29 @@ export class ChanServices {
     }
   }
 
-  async getChannelsFromUser(userID: number): Promise<ChanI[]> {
+  async getChannelsFromUser(id: number): Promise<ChanI[]> {
+    console.log('lets try a complex querry');
+    console.log(id);
+
     let query = this.chanRepository
       .createQueryBuilder('chan')
       .where('chan.publicChannel = true');
     const publicChannels: ChanI[] = await query.getMany(); // gater all public channel
+    console.log('---- public  Channel -----');
+    console.log(publicChannels);
 
     query = this.chanRepository
       .createQueryBuilder('chan')
       .leftJoin('chan.users', 'users')
-      .where('users.id = :userID', { userID })
+      .where('users.id = :id', { id })
       .andWhere('chan.publicChannel = false')
-      .leftJoinAndSelect('chan.users', 'all')
-      .leftJoinAndSelect('chan.chanUsers', 'all')
+      .leftJoinAndSelect('chan.users', 'all_user')
+      .leftJoinAndSelect('chan.chanUsers', 'all_chanUser')
       .orderBy('chan.date', 'DESC');
 
+    //console.log(query);
     const privateChannels: ChanI[] = await query.getMany();
+    console.log('---- private Channel -----');
     console.log(privateChannels);
 
     const channels = publicChannels.concat(privateChannels);
@@ -100,6 +107,7 @@ export class ChanServices {
       else if (d1 > d2) return -1;
       else return 0;
     });
+
     return channels;
   }
 

@@ -28,10 +28,18 @@ export class ConnectService {
         await this.connectedRepository.delete({socketID});
     }
 
-    async findAll(): Promise<connectedSocketI[]> {
-		const connections = await this.connectedRepository.find({ relations: ["user"] });
-		return connections;
-	}
+  async findAll(): Promise<connectedSocketI[]> {
+    console.log('try');
+    //const connections = await this.connectedUserRepository.find({ relations: ["user"] });
+    try {
+      const connections = await this.connectedRepository.find({ relations: ["user"] });
+      //console.log(connections);
+      return connections;
+    } catch {
+      console.log('fail to retrive relation user for connectec repo');
+      return undefined;
+    }
+  }
 
 
 }

@@ -118,6 +118,7 @@ export class User {
     type: SocketConnected,
     description: 'Socket list for all chat service',
   })
+
   @OneToMany(() => SocketConnected, (connection) => connection.user)
   connections: SocketConnected[];
 

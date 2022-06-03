@@ -42,7 +42,6 @@ export class Chan {
 	@Column('boolean', {default: false})
 	directMessage: boolean;
 
-
   /*-------------------------------------
         - Relations -
     --------------------------------------*/
