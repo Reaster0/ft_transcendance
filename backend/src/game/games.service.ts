@@ -270,8 +270,12 @@ export class GamesService {
   async finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
     server.to(match.matchId).emit('endGame', { winner: match.winner.user.nickname });
     server.socketsLeave(match.matchId);
-    const history = await this.registerGameHistory(match);
-    await this.modifyPlayersElo(history.winner, history.looser);
+    try {
+      const history = await this.registerGameHistory(match);
+      await this.modifyPlayersElo(history.winner, history.looser);
+    } catch {
+      throw new Error('Something went wrong with game history database.');
+    }
     matchs.delete(match.matchId);
   }
 
