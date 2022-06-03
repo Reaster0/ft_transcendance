@@ -38,10 +38,6 @@ export class ChanServices {
 		channel.adminUsers = [];
 		channel.owner = creator.id;
 
-    channel.users.push(creator);
-    channel.adminUsers = [];
-    channel.owner = creator.id;
-
   //will see 
 		if (publicChannel === false) {
 			if (password) {
