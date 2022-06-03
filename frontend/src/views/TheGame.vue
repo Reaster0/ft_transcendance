@@ -87,7 +87,7 @@ export default {
 
 				canvas = document.getElementById('pongGame');
 				canvas.width = window.innerWidth
-				canvas.height = window.innerHeight * 0.95
+				canvas.height = window.innerHeight
 				ctx = canvas.getContext('2d');
 				gameStarted.value = true
 				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
