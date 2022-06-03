@@ -102,7 +102,7 @@ export default
       {
         // const channame = this.name;
         const password = "";
-        const publ = true;
+        const publ = false;
         // const user = this.currentUser;
         console.log("name: " + name)
         if (name != '')
