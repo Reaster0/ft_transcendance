@@ -81,7 +81,7 @@ export default
     };
   },
   methods: {
-    async submitbutton() {
+    submitbutton() {
       // console.log(this.created);
       console.log(this.name);
       console.log(this.file);
@@ -89,7 +89,7 @@ export default
       const connection = ref(null)
       console.log(document.cookie.toString())
       try {
-          connection.value = await io('http://localhost:3000/chat',{
+          connection.value = io('http://localhost:3000/chat',{
           transportOptions: {
           polling: { extraHeaders: { auth: document.cookie} },
           },
