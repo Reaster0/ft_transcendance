@@ -3,9 +3,9 @@
 	<particles-bg type="cobweb" :bg="true"/>
 	<div class="center">
 		<div class="overlay">
-			<v-col>
-			<h1>{{user.nickname}}</h1>
-			<h1>{{user.eloScore}}</h1>
+			<v-col align="center">
+				<h1>{{user.nickname}}</h1>
+				<h1>{{user.eloScore}}📈</h1>
 			</v-col>
 		</div>
 
@@ -50,10 +50,12 @@ export default {
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
 
 h1{
+	justify-self: center;
 	font-size: 4em;
  font-weight: bold;
  font-family: 'Rajdhani', sans-serif;
 	color: #04BBEC;
+	// margin-left: 20%;
 }
 
 .center{
