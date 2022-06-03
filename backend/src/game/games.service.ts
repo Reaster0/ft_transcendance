@@ -92,6 +92,7 @@ export class GamesService {
       socket: client,
       user: client.data.user,
       score: 0,
+      lastAction: 0,
     };
     return player;
   }
@@ -117,7 +118,7 @@ export class GamesService {
     const that = this;
     const timer = setTimeout(function () {
         that.abortGame(server, match, matchs);
-      }, 10000, server, match, matchs );
+      }, 1000 * 30, server, match, matchs );
   }
 
   abortGame(server: Server, match: Match, matchs: Map<string, Match>) {
@@ -184,9 +185,13 @@ export class GamesService {
 
   gameExec(server: Server, match: Match, watchers: Array<Socket>, matchs: Map<string, Match>) {
     const that = this;
+    const startTime = Date.now();
     let count = 0;
     server.to(match.matchId).emit('gameStarting');
+    match.players[0].lastAction = startTime;
+    match.players[1].lastAction = startTime;
     const intervalId = setInterval(() => {
+        that.checkPlayersPresents(server, match);
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
           that.listGamesToAll(watchers, matchs);
@@ -196,13 +201,18 @@ export class GamesService {
           server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
             paddle: this.getPaddlesFeatures(match)});
           if (count === 300) {
-            count = 0;
             match.state = State.ONGOING;    
           }
+        } else if (match.state === State.PAUSED) {
+          count++;
+          if (count === 3500) { // a little over 10 sec
+            that.playerIsAbsent(server, match);
+          }1
         } else {
+          count = 0;
           that.refreshGame(server, match);
         }
-      }, 5, match, server, match);  
+      }, 5, server, match);  
   }
 
   playerInput(client: Socket, match: Match, input: string) {
@@ -212,8 +222,10 @@ export class GamesService {
     }
     if (client.data.user.id === match.players[0].user.id) {
       this.pongService.movePaddle(match.pong.field, match.pong.paddleL, input);
+      match.players[0].lastAction = Date.now();
     } else {
       this.pongService.movePaddle(match.pong.field, match.pong.paddleR, input);
+      match.players[1].lastAction = Date.now();
     }
   }
 
@@ -300,5 +312,30 @@ export class GamesService {
   async modifyPlayersElo(winner: User, looser: User) {
     await this.usersService.modifyElo(winner, looser.eloScore, true);
     await this.usersService.modifyElo(looser, winner.eloScore, false);
+  }
+
+  checkPlayersPresents(server: Server, match: Match): void {
+    const now = Date.now();
+    if (match.state === State.ONGOING && now - match.players[0].lastAction > 1000 * 15) {
+      server.to(match.matchId).emit('waitingForPlayer', { nickname: match.players[0].user.nickname });
+      match.state = State.PAUSED;
+    } else if (match.state === State.ONGOING && now - match.players[1].lastAction > 1000 * 15) {
+      server.to(match.matchId).emit('waitingForPlayer', { nickname: match.players[1].user.nickname });
+      match.state = State.PAUSED;
+    } else if (match.state === State.PAUSED && now - match.players[0].lastAction <= 1000 * 10 && now - match.players[1].lastAction <= 1000 * 10) {
+      match.state = State.ONGOING;
+    }
+  }
+
+  playerIsAbsent(server: Server, match: Match) {
+    let absent = match.players[0];
+    let winner = match.players[1];
+    if (match.players[0].lastAction > match.players[1].lastAction) {
+      absent = match.players[1];
+      winner = match.players[0];
+    }
+    server.to(match.matchId).emit('playerAbsent', { nickname: absent.user.nickname });
+    match.winner = winner;
+    match.state = State.FINISHED;
   }
 }
