@@ -327,9 +327,9 @@
 <script>
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-  import { onMounted } from "@vue/runtime-core"
-  import { ref } from "vue"
-  import io from 'socket.io-client';
+  // import { onMounted } from "@vue/runtime-core"
+  // import { ref } from "vue"
+  // import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
   //import { useKeypress } from "vue3-keypress";
@@ -465,137 +465,137 @@ export default {
       }, 2000)
     },
   },
-	setup()
-    {
-		const connection = ref(null)
-    const chats = ref(null)
+// 	setup()
+//     {
+// 		const connection = ref(null)
+//     const chats = ref(null)
 
-		onMounted(() =>{
-			console.log(document.cookie.toString())
-			try {
-					connection.value = io('http://:3000/chat',{
-					transportOptions: {
-					polling: { extraHeaders: { auth: document.cookie} },
-					},
-				})
-				console.log("starting connection to websocket")
-			} catch (error) {
-				console.log("the error is:" + error)
-			}
+// 		onMounted(() =>{
+// 			console.log(document.cookie.toString())
+// 			try {
+// 					connection.value = io('http://:3000/chat',{
+// 					transportOptions: {
+// 					polling: { extraHeaders: { auth: document.cookie} },
+// 					},
+// 				})
+// 				console.log("starting connection to websocket")
+// 			} catch (error) {
+// 				console.log("the error is:" + error)
+// 			}
 
-        // ============= info you can retrive ======
-        // - channel : get all the chanel the user is connected
-        // - connectedUsers : get all user.id of user connected..... (but the function feels wrong....)
-        // - messageSended
+//         // ============= info you can retrive ======
+//         // - channel : get all the chanel the user is connected
+//         // - connectedUsers : get all user.id of user connected..... (but the function feels wrong....)
+//         // - messageSended
 
-        // : connection.value.on(‘command’, (received) => {})
+//         // : connection.value.on(‘command’, (received) => {})
 
-        // channel : get all the chanel the user is connected
-        // connection.value.on('channel', (channels) => 
-        // {console.log("channel:" + channels)})
-        connection.value.on('channel', (channel) =>{
-          console.log("-----------------------------------")
-          chats.value = channel
-          console.log(":::::" + chats.value)
-        })
+//         // channel : get all the chanel the user is connected
+//         // connection.value.on('channel', (channels) => 
+//         // {console.log("channel:" + channels)})
+//         connection.value.on('channel', (channel) =>{
+//           console.log("-----------------------------------")
+//           chats.value = channel
+//           console.log(":::::" + chats.value)
+//         })
 
 
-//			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
-      // TestTest();
-			// SendingMessage();
-			// JoinChannel();
-			// LeaveChannel();
-			// BlockUser();
-			})
+// //			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
+//       // TestTest();
+// 			// SendingMessage();
+// 			// JoinChannel();
+// 			// LeaveChannel();
+// 			// BlockUser();
+// 			})
       
-    /*
-    onBeforeRouteLeave(() => {
-        const answer = window.confirm("disconect from chat ?")
-        if (answer) {
-          connection.value.disconnect();
-          return true;
-          }
-        return false;
-		})      */
-        // берет аргс и создает новый канал
-        // for creating a new channel/room: 
-		// - createChannel { chanName: string, password:string, publicChannel: boolean }
-  /* dont know how to handel the fact that this is done in a other file */
-		function createChannel(chanName, password, publicChannel)
-		{
-			console.log("before createChannel");
-			connection.value.emit('createChannel', {chanName, users: [], password, publicChannel});
-			console.log("after createChannel");
-		}
+//     /*
+//     onBeforeRouteLeave(() => {
+//         const answer = window.confirm("disconect from chat ?")
+//         if (answer) {
+//           connection.value.disconnect();
+//           return true;
+//           }
+//         return false;
+// 		})      */
+//         // берет аргс и создает новый канал
+//         // for creating a new channel/room: 
+// 		// - createChannel { chanName: string, password:string, publicChannel: boolean }
+//   /* dont know how to handel the fact that this is done in a other file */
+// 		function createChannel(chanName, password, publicChannel)
+// 		{
+// 			console.log("before createChannel");
+// 			connection.value.emit('createChannel', {chanName, users: [], password, publicChannel});
+// 			console.log("after createChannel");
+// 		}
 
-		// for sending message:
-		// -  message {content: string, channel: Chan, ...}
-		function sendingMessage(content, channel)
-		{
-      console.log(content, channel);
-      if (!content)
-        return ;
-      connection.value.emit('message', {content, channel});
-      //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
-			console.log("after message");
-		}
+// 		// for sending message:
+// 		// -  message {content: string, channel: Chan, ...}
+// 		function sendingMessage(content, channel)
+// 		{
+//       console.log(content, channel);
+//       if (!content)
+//         return ;
+//       connection.value.emit('message', {content, channel});
+//       //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
+// 			console.log("after message");
+// 		}
 
-		// for joinning a existing channel
-		// - joinChannel { id: string }
-		function joinChannel(id)
-		{
-			console.log("before joinChannel");
-			connection.value.emit('joinChannel', id);
-			console.log("after joinChannel");
-		}
+// 		// for joinning a existing channel
+// 		// - joinChannel { id: string }
+// 		function joinChannel(id)
+// 		{
+// 			console.log("before joinChannel");
+// 			connection.value.emit('joinChannel', id);
+// 			console.log("after joinChannel");
+// 		}
 
-		// (or just put a channel in argument
+// 		// (or just put a channel in argument
 
-		// for leaving channel:
-		// - leaveChannel { channel or id: string}
-		function leaveChannel(channel)
-		{
-			console.log("before leaveChannel");
-			connection.value.emit('leaveChannel', channel);
-			console.log("after leaveChannel");
-		}
-
-
-		// for bloking or unblocking  a user:
-		// - blockUser{ user: User, block: boolean } // true => block false => unblock
-		function blockUser(user, block)
-		{
-			console.log("before blockUser");
-			connection.value.emit('blockUser', user, block);
-			console.log("after blockUser");
-		}
-
-    const disconnect = () =>{
-			connection.value.disconnect()
-			console.log("disconnect")
-		}
-
-    const log = () => {
-      console.log('something happenned');
-    }
+// 		// for leaving channel:
+// 		// - leaveChannel { channel or id: string}
+// 		function leaveChannel(channel)
+// 		{
+// 			console.log("before leaveChannel");
+// 			connection.value.emit('leaveChannel', channel);
+// 			console.log("after leaveChannel");
+// 		}
 
 
-		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
+// 		// for bloking or unblocking  a user:
+// 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
+// 		function blockUser(user, block)
+// 		{
+// 			console.log("before blockUser");
+// 			connection.value.emit('blockUser', user, block);
+// 			console.log("after blockUser");
+// 		}
 
-    // useKeypress({
-		// keyEvent: "keydown",
-		// keyBinds:
-		// 	{
-		// 		keyCode: 13,
-		// 		success: () => {
-		// 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
-		// 		},
-		// 	},
-		// })
+//     const disconnect = () =>{
+// 			connection.value.disconnect()
+// 			console.log("disconnect")
+// 		}
 
-		return { log, disconnect ,createChannel, sendingMessage, joinChannel, leaveChannel, blockUser}
+//     const log = () => {
+//       console.log('something happenned');
+//     }
 
-	}
+
+// 		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
+
+//     // useKeypress({
+// 		// keyEvent: "keydown",
+// 		// keyBinds:
+// 		// 	{
+// 		// 		keyCode: 13,
+// 		// 		success: () => {
+// 		// 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
+// 		// 		},
+// 		// 	},
+// 		// })
+
+// 		return { log, disconnect ,createChannel, sendingMessage, joinChannel, leaveChannel, blockUser}
+
+// 	}
 };
 
 </script>

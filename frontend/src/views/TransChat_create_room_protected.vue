@@ -108,7 +108,7 @@ export default
       function submitIt(name, password)
       {
         // const channame = this.name;
-        const publ = true;
+        const publ = false;
         // const user = this.currentUser;
         console.log("name: " + name)
         console.log("password: " + password)
