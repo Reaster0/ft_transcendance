@@ -87,7 +87,7 @@ export default {
 
 				canvas = document.getElementById('pongGame');
 				canvas.width = window.innerWidth
-				canvas.height = window.innerHeight
+				canvas.height = window.innerHeight * 0.95
 				ctx = canvas.getContext('2d');
 				gameStarted.value = true
 				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
@@ -98,7 +98,6 @@ export default {
 				gameData.value.ball.radius = params.ballRad
 				gameData.value.paddle.height = params.padWidth
 				gameData.value.paddle.width = params.padLength
-				console.log("ball radius =" + JSON.stringify(gameData.value.ball.radius) + " paddle width =" + JSON.stringify(gameData.value.paddle.width) + " paddle length =" + JSON.stringify(gameData.value.paddle.height))
 			})
 
 			gameSocket.value.on('countdown', params =>{
