@@ -69,12 +69,8 @@ export class UsersService {
     if (find && find != user) {
       throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
     }
-    try {
-      user.nickname = nickname;
-      return this.userRepository.save(user);
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    user.nickname = nickname;
+    return this.userRepository.save(user);
   }
 
   async removeUser(user: User): Promise<void> {
@@ -159,7 +155,7 @@ export class UsersService {
 
   async setTwoFASecret(user: User, secret: string): Promise<void> {
     user.twoFASecret = secret;
-    user.twoFASecret = await user.encryptSecret();
+    user.twoFASecret = user.encryptSecret();
     await this.userRepository.save(user);
   }
 
@@ -167,12 +163,16 @@ export class UsersService {
     await this.userRepository.update(id, { is2FAEnabled: true });
   }
 
+  async disableTwoFA(id: number): Promise<void> {
+    await this.userRepository.update(id, { is2FAEnabled: false, twoFASecret: null });
+  }
+
   getSecret(user: User): string {
     return user.decryptSecret();
   }
 
   currentUser(user: User): Partial<User> {
-    const { username, twoFASecret, ...res } = user;
+    const { username, twoFASecret, is2FAEnabled, ...res } = user;
     return res;
   }
 
@@ -182,17 +182,17 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    const { username, twoFASecret, ...res } = user;
+    const { username, twoFASecret, is2FAEnabled, ...res } = user;
     return res;
   }
 
   async getPartialUserInfo(id: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) return user;
-    return { nickname: user.nickname, eloScore: user.eloScore };
+    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
   }
 
-  async getConnectedUser(): Promise<User[]> {
+  async getConnectedUsers(): Promise<User[]> {
     const connectedUser = this.userRepository.find({
       where: { status: Status.ONLINE },
     });
@@ -204,22 +204,12 @@ export class UsersService {
 
     if (block === true && !userFound) {
       user.blockedUID.push(userToBlock.id);
-      try {
-        await this.userRepository.save(user);
-      } catch (error) {
-        console.log(error);
-        throw new InternalServerErrorException('add blocked user');
-      }
+      await this.userRepository.save(user);
     }
     if (block === false && userFound) {
       const index = user.blockedUID.indexOf(userToBlock.id);
       user.blockedUID.splice(index, 1);
-      try {
-        await this.userRepository.save(user);
-      } catch (error) {
-        console.log(error);
-        throw new InternalServerErrorException('add blocked user');
-      }
+      await this.userRepository.save(user);
     }
     return user;
   }

@@ -81,7 +81,7 @@ export class User {
   gamesLost: GameHistory[];
   // ------------------------
 
-  async encryptSecret() {
+  encryptSecret() {
     if (!this.twoFASecret) {
       return;
     }

@@ -188,7 +188,7 @@ export class ChatGateway
 
   /****** Emit Service ******/
   async updateUsersStatus() {
-    const connectedUsers: User[] = await this.userServices.getConnectedUser();
+    const connectedUsers: User[] = await this.userServices.getConnectedUsers();
     //return this.server.emit('connectedUsers', connectedUsers); // user or user.id ?
     const connectUsersID: number[] = [];
     for (const user of connectedUsers) connectUsersID.push(user.id);
