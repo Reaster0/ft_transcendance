@@ -6,7 +6,7 @@ export interface ChanI {
   date?: Date;
   owner?: number; //owner id
   users?: User[];
-  adminUsers?: string[];
+  adminUsers?: number[];
   password?: string;
   publicChannel?: boolean;
 }

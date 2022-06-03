@@ -5,7 +5,7 @@ import { Status } from 'src/common/enums/status.enum';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Repository } from 'typeorm';
-import { SocketConnected } from '../entities/socketConnected';
+import { SocketConnected } from '../entities/socketsUser';
 import { connectedSocketI } from '../interfaces/connectSocket.interface';
 
 @Injectable()

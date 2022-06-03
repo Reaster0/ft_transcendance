@@ -2,10 +2,10 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Chan } from '../entities/chan.entity';
-import { ChanUser } from '../entities/chanUser.entity';
-import { SocketConnected } from '../entities/socketConnected';
-import { SocketJoined } from '../entities/socketJoined';
+import { Chan } from '../entities/channel.entity';
+import { ChanUser } from '../entities/channelUser.entity';
+import { SocketConnected } from '../entities/socketsUser';
+import { SocketJoined } from '../entities/sockets-connected-to-channel';
 import { ChanI } from '../interfaces/channel.interface';
 import { ChanUserI } from '../interfaces/chanUser.interface';
 import { connectedSocketI } from '../interfaces/connectSocket.interface';
@@ -32,7 +32,6 @@ export class ChanServices {
 			return null;
 		if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false) //isalphanum()
 			return null;
-        
 
 		channel.users.push(creator);
 		channel.adminUsers = [];
@@ -43,11 +42,12 @@ export class ChanServices {
 			if (password) {
 				const salt = await bcrypt.genSalt();
 				channel.password = await bcrypt.hash(password, salt);
-            }
+      }
 		}
 		console.log(channel);
 		return this.chanRepository.save(channel);
 	}
+
 	async deleteChannel(channel: ChanI) {
 		/*
  		 if (!channel.id)

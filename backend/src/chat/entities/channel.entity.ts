@@ -9,9 +9,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ChanUser } from './chanUser.entity';
+import { ChanUser } from './channelUser.entity';
 import { Message } from './message.entity';
-import { SocketJoined } from './socketJoined';
+import { SocketJoined } from './sockets-connected-to-channel';
 
 @Entity()
 export class Chan {
@@ -37,7 +37,11 @@ export class Chan {
   password: string;
 
   @Column('simple-array', { default: [] })
-  adminUsers: string[];
+  adminUsers: number[];
+
+	@Column('boolean', {default: false})
+	directMessage: boolean;
+
 
   /*-------------------------------------
         - Relations -
@@ -62,7 +66,6 @@ export class Chan {
 	@Column("simple-array", {default: []})
 	authPrivateChannelUsers: number[];
 
-	@Column('boolean', {default: false})
-	directMessage: boolean;
+
 */
 }

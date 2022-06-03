@@ -16,11 +16,11 @@ import { Status } from '../../common/enums/status.enum';
 import * as crypto from 'crypto';
 import { Avatar } from './avatar.entity';
 import { Exclude } from 'class-transformer';
-import { Chan } from '../../chat/entities/chan.entity';
+import { Chan } from '../../chat/entities/channel.entity';
 import { Message } from '../../chat/entities/message.entity';
 import { GameHistory } from '../../game/entities/gamehistory.entity';
-import { SocketConnected } from '../../chat/entities/socketConnected';
-import { SocketJoined } from '../../chat/entities/socketJoined';
+import { SocketConnected } from '../../chat/entities/socketsUser';
+import { SocketJoined } from '../../chat/entities/sockets-connected-to-channel';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
