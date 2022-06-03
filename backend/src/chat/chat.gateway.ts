@@ -186,7 +186,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   /****** Emit Service ******/
   async updateUsersStatus() {
-    const connectedUsers: User[] = await this.userServices.getConnectedUser();
+    const connectedUsers: User[] = await this.userServices.getConnectedUsers();
     //return this.server.emit('connectedUsers', connectedUsers); // user or user.id ?
     let connectUsersID: number[] = [];
     for (const user of connectedUsers)

@@ -1,7 +1,7 @@
 import { UsersService } from './services/users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, UseInterceptors,
   UseGuards, Req, Query, Patch, Res, UploadedFile, Delete, ParseIntPipe, HttpException,
-  HttpStatus, Logger } from '@nestjs/common';
+  HttpStatus, Logger, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags, ApiNotFoundResponse,
   ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
@@ -49,15 +49,19 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   logged(@Req() req: RequestUser): boolean {
-    this.logger.log("Get('logged') route called by user " + req.user.username + ' (username)');
-    const user: User = req.user;
-    if (user.is2FAEnabled === true) {
-      const token = req.cookies['jwt'];
-      const decode = jwt_decode(token);
-      if (decode['twoFA'] === false)
-        throw new HttpException('Please validate our 2fa', 418);
+    try {
+      this.logger.log("Get('logged') route called by user " + req.user.username + ' (username)');
+      const user: User = req.user;
+      if (user.is2FAEnabled === true) {
+        const token = req.cookies['jwt'];
+        const decode = jwt_decode(token);
+        if (decode['twoFA'] === false)
+          throw new HttpException('Please validate our 2fa', 418);
+      }
+      return true;
+    } catch (e) {
+      throw e;
     }
-    return true;
   }
 
   @Get('/currentUser')
@@ -68,9 +72,13 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   currentUser(@Req() req: RequestUser): Partial<User> {
-    this.logger.log("Get('currentUser') route called by user " + req.user.username + ' (username)');
-    const user: User = req.user;
-    return this.usersService.currentUser(user);
+    try {
+      this.logger.log("Get('currentUser') route called by user " + req.user.username + ' (username)');
+      const user: User = req.user;
+      return this.usersService.currentUser(user);
+    } catch (e) {
+      throw e;
+    }
   }
 
   @Get('/userInfo')
@@ -81,8 +89,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   userInfo(@Query('username') username: string): Promise<Partial<User>> {
-    this.logger.log("Get('userInfo') route called for user " + username + ' (username)');
-    return this.usersService.userInfo(username);
+    try {
+      this.logger.log("Get('userInfo') route called for user " + username + ' (username)');
+      return this.usersService.userInfo(username);
+    } catch (e) {
+      throw e;
+    }
   }
 
   @Get('/partialInfo')
@@ -93,8 +105,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   getPartialUserInfo(@Query('userId') userId: string): Promise<Partial<User>> {
-    this.logger.log("Get('partialInfo') route called for user " + userId + ' (user id)');
-    return this.usersService.getPartialUserInfo(userId);
+    try {
+      this.logger.log("Get('partialInfo') route called for user " + userId + ' (user id)');
+      return this.usersService.getPartialUserInfo(userId);
+    } catch (e) {
+      throw e;
+    }
   }
 
   @Get(':id')
@@ -106,8 +122,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   findSpecificUser(@Param('id') id: number): Promise<User> {
-    this.logger.log("Get(':id') route.");
-    return this.usersService.findUserById('' + id);
+    try {
+      this.logger.log("Get(':id') route.");
+      return this.usersService.findUserById('' + id);
+    } catch (e) {
+      throw e;
+    }
   }
 
   @Get('getAvatar/:id')
@@ -119,8 +139,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
-    this.logger.log("Get('getAvatar/:id') route called.");
-    return this.usersService.getAvatarByAvatarId(id, res);
+    try {
+      this.logger.log("Get('getAvatar/:id') route called.");
+      return this.usersService.getAvatarByAvatarId(id, res);
+    } catch(e) {
+      throw e;
+    }
   }
 
   @Get('getHistory/:id')
@@ -132,9 +156,13 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   async getHistory(@Param('id') id: string) {
-    this.logger.log("Get('getHistory/:id') route called.");
-    const user = await this.usersService.findUserById(id);
-    return this.usersService.getGameHistory(user);
+    try {
+      this.logger.log("Get('getHistory/:id') route called.");
+      const user = await this.usersService.findUserById(id);
+      return this.usersService.getGameHistory(user);
+    } catch(e) {
+      throw (e);
+    }
   }
 
   @Post('getOrRegister')
@@ -145,8 +173,12 @@ export class UsersController {
   @ApiBadRequestResponse()
   /** End of swagger **/
   retrieveOrCreateUser(@Body() createUserDto: CreateUserDto): Promise<User> {
-    this.logger.log("Post('getOrRegister') route called for user " + createUserDto.username + ' (username)');
-    return this.usersService.retrieveOrCreateUser(createUserDto);
+    try {
+      this.logger.log("Post('getOrRegister') route called for user " + createUserDto.username + ' (username)');
+      return this.usersService.retrieveOrCreateUser(createUserDto);
+    } catch (e) {
+      throw (e);
+    }
   }
 
   @Post('uploadAvatar')
@@ -157,8 +189,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   uploadAvatar(@Req() req: RequestUser, @UploadedFile() file: Express.Multer.File) {
-    this.logger.log("Post('uploadAvatar') route called by user " + req.user.username + ' (username)');
-    return this.usersService.addAvatar(req.user, file.originalname, file.buffer);
+    try {
+      this.logger.log("Post('uploadAvatar') route called by user " + req.user.username + ' (username)');
+      return this.usersService.addAvatar(req.user, file.originalname, file.buffer);
+    } catch (e) {
+      throw (e);
+    }
   }
 
   @Post('secret')
@@ -168,8 +204,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   set2FASecret(@Req() req: RequestUser, @Body('secret') secret: string) {
-    this.logger.log("Post('secret') route called by user " + req.user.username + ' (username)');
-    return this.usersService.setTwoFASecret(req.user, secret);
+    try {
+      this.logger.log("Post('secret') route called by user " + req.user.username + ' (username)');
+      return this.usersService.setTwoFASecret(req.user, secret);
+    } catch (e) {
+      throw (e);
+    }
   }
 
   @Patch('settings')
@@ -180,8 +220,12 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   updateUser(@Body() updateUser: UpdateUserDto, @Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
-    this.logger.log("Post('settings') route called by user " + req.user.username + ' (username)');
-    return this.usersService.updateUser(req.user, updateUser);
+    try {
+      this.logger.log("Post('settings') route called by user " + req.user.username + ' (username)');
+      return this.usersService.updateUser(req.user, updateUser);
+    } catch(e) {
+      throw (e);
+    }
   }
 
   @Patch('login')
@@ -191,8 +235,12 @@ export class UsersController {
   @ApiCreatedResponse({ description: 'The user has been successfully login.', type: User})
   /** End of swagger **/
   loginUser(@Req() req: RequestUser) {
-    this.logger.log("Patch('login') route called by user " + req.user.username + ' (username)');
-    return this.usersService.changeStatus(req.user, Status.ONLINE);
+    try {
+      this.logger.log("Patch('login') route called by user " + req.user.username + ' (username)');
+      return this.usersService.changeStatus(req.user, Status.ONLINE);
+    } catch (e) {
+      throw (e);
+    }
   }
 
   @Patch('logout')
@@ -202,9 +250,13 @@ export class UsersController {
   @ApiCreatedResponse({ description: 'The user has been successfully logout.' })
   /** End of swagger **/
   logoutUser(@Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
-    this.logger.log("Patch('logout') route called by user " + req.user.username + ' (username)');
-    this.usersService.changeStatus(req.user, Status.OFFLINE);
-    res.clearCookie('jwt');
+    try {
+      this.logger.log("Patch('logout') route called by user " + req.user.username + ' (username)');
+      this.usersService.changeStatus(req.user, Status.OFFLINE);
+      res.clearCookie('jwt');
+    } catch (e) {
+      throw e;
+    }
   }
 
   @Delete('deleteAccount')
@@ -213,8 +265,12 @@ export class UsersController {
   @ApiOkResponse({ description: 'User successfully deleted.', type: User })
   /** End of swagger **/
   removeUser(@Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
-    this.logger.log("Delete('deleteAccount') route called by user " + req.user.username + ' (username)');
-    this.usersService.removeUser(req.user);
-    res.clearCookie('jwt');
+    try {
+      this.logger.log("Delete('deleteAccount') route called by user " + req.user.username + ' (username)');
+      this.usersService.removeUser(req.user);
+      res.clearCookie('jwt');
+    } catch (e) {
+      throw e;
+    }
   }
 }
