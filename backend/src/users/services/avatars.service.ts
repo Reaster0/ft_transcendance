@@ -10,15 +10,8 @@ export class AvatarsService {
     private AvatarsRepository: Repository<Avatar>,
   ) {}
 
-  async uploadAvatar(
-    avatarFilename: string,
-    avatarBuffer: Buffer,
-    queryRunner: QueryRunner,
-  ) {
-    const newAvatar = await this.AvatarsRepository.create({
-      avatarFilename: avatarFilename,
-      avatarBuffer: avatarBuffer,
-    });
+  async uploadAvatar(avatarFilename: string, avatarBuffer: Buffer, queryRunner: QueryRunner) {
+    const newAvatar = await this.AvatarsRepository.create({ avatarFilename: avatarFilename, avatarBuffer: avatarBuffer });
     await queryRunner.manager.save(Avatar, newAvatar);
     return newAvatar;
   }

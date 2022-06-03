@@ -6,7 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { toFileStream } from 'qrcode';
 import { Socket } from 'socket.io';
-import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { parse } from 'cookie';
 import { JwtService } from '@nestjs/jwt';
 

@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Post,
-  Redirect,
   Req,
   Res,
   UnauthorizedException,
@@ -12,13 +11,12 @@ import {
 import { Request, Response } from 'express';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RequestUser } from './interfaces/requestUser.interface';
 import { twoFACodeDto } from './dto/twoFACode.dto';
-import { secureHeapUsed } from 'crypto';
 
 @ApiTags('Authentification Process Controller')
 @Controller('auth')
