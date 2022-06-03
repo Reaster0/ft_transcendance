@@ -121,7 +121,7 @@ export default
         // connection.value.emit('createChannel', {channame, users: [], password, publ});
         console.log("name: " + name)
         if (name != '')
-          connection.value.emit('createChannel', {name, users: [], password, publ});   
+          connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
 
       return { submitIt }

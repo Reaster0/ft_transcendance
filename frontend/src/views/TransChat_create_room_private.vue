@@ -106,7 +106,7 @@ export default
         // const user = this.currentUser;
         console.log("name: " + name)
         if (name != '')
-          connection.value.emit('createChannel', {name, users: [], password, publ});   
+          connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});    
       }
 
       return { submitIt }
