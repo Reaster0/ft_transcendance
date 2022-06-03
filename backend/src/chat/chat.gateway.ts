@@ -12,7 +12,6 @@ import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { ChatServices } from './services/chat.service';
-import { Status } from 'src/common/enums/status.enum';
 import { AuthChat } from './Guards/ChatAuth.guard';
 import { ChanI } from './interfaces/channel.interface';
 import { MessageI } from './interfaces/message.interface';

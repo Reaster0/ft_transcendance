@@ -10,7 +10,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthUser } from './guards/userAuth.guard';
 import { Response } from 'express';
 import { RequestUser } from 'src/auth/interfaces/requestUser.interface';
-import { Status } from '../common/enums/status.enum';
+import { Status } from './enums/status.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AvatarsService } from './services/avatars.service';
 import { extname } from 'path';

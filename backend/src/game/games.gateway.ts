@@ -3,7 +3,7 @@ import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayInit, OnG
 import { Socket, Server } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
 import { AuthService } from '../auth/auth.service';
-import { Status } from '../common/enums/status.enum';
+import { Status } from '../users/enums/status.enum';
 import { GamesService } from './games.service';
 import { Match, State } from './interfaces/match.interface';
 import { v4 as uuid } from 'uuid';

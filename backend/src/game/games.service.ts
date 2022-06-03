@@ -198,8 +198,8 @@ export class GamesService {
           that.finishGame(server, match, matchs);
         } else if (match.state === State.SCORE) {
           count++;
-          server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
-            paddle: this.getPaddlesFeatures(match)});
+          server.to(match.matchId).emit('gameUpdate', { ball: that.getBallFeatures(match),
+            paddle: that.getPaddlesFeatures(match)});
           if (count === 300) {
             match.state = State.ONGOING;    
           }
@@ -207,7 +207,7 @@ export class GamesService {
           count++;
           if (count === 3500) { // a little over 10 sec
             that.playerIsAbsent(server, match);
-          }1
+          }
         } else {
           count = 0;
           that.refreshGame(server, match);
@@ -270,8 +270,12 @@ export class GamesService {
   async finishGame(server: Server, match: Match, matchs: Map<string, Match>) {
     server.to(match.matchId).emit('endGame', { winner: match.winner.user.nickname });
     server.socketsLeave(match.matchId);
-    const history = await this.registerGameHistory(match);
-    await this.modifyPlayersElo(history.winner, history.looser);
+    try {
+      const history = await this.registerGameHistory(match);
+      await this.modifyPlayersElo(history.winner, history.looser);
+    } catch {
+      throw new Error('Something went wrong with game history database.');
+    }
     matchs.delete(match.matchId);
   }
 
@@ -322,7 +326,7 @@ export class GamesService {
     } else if (match.state === State.ONGOING && now - match.players[1].lastAction > 1000 * 15) {
       server.to(match.matchId).emit('waitingForPlayer', { nickname: match.players[1].user.nickname });
       match.state = State.PAUSED;
-    } else if (match.state === State.PAUSED && now - match.players[0].lastAction <= 1000 * 10 && now - match.players[1].lastAction <= 1000 * 10) {
+    } else if (match.state === State.PAUSED && now - match.players[0].lastAction <= 1000 * 15 && now - match.players[1].lastAction <= 1000 * 15) {
       match.state = State.ONGOING;
     }
   }
