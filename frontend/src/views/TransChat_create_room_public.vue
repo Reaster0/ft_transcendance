@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitbutton">
+      <form @submit.prevent="submitIt(this.name)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -20,7 +20,7 @@
             </div>
           </v-toolbar-title>
           <v-spacer></v-spacer>
-          <button class="btn btn-primary btn-block" :style="{color: ' #ffffff'}" to="/">SUBMIT</button>
+          <button class="btn btn-primary btn-block" :style="{color: ' #ffffff'}" to="/" >SUBMIT</button>
         </v-toolbar>
 
 
@@ -64,7 +64,7 @@
 
 <script>
 // import axios from 'axios'
-// import { onMounted } from "@vue/runtime-core"
+import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';
 // import { useStore } from "vuex";
@@ -76,6 +76,7 @@ export default
     return {
       // created: false,
       name: "",
+      txt: "",
       file: [],
       // currentUser: useStore().getters.whoAmI,
     };
@@ -86,25 +87,9 @@ export default
       console.log(this.name);
       console.log(this.file);
       this.created = true;
-      const connection = ref(null)
-      console.log(document.cookie.toString())
-      try {
-          connection.value = io('http://localhost:3000/chat',{
-          transportOptions: {
-          polling: { extraHeaders: { auth: document.cookie} },
-          },
-        })
-        console.log("starting connection to websocket")
-      } catch (error) {
-        console.log("the error is:" + error)
-      }
-      const channame = this.name;
-      const password = "";
-      const publ = true;
-      // const user = this.currentUser;
-      // emit only if this.name isnt empty
-      if (this.name != '')
-      connection.value.emit('createChannel', {channame, users: [], password, publ});
+      
+
+
 
     },
     previewFiles(event) {
@@ -113,7 +98,39 @@ export default
     }
   },
 
+  setup()
+  {
+      const connection = ref(null)
+      onMounted(() =>{
+        console.log(document.cookie.toString())
+        try {
+            connection.value = io('http://localhost:3000/chat',{
+            transportOptions: {
+            polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          console.log("starting connection to websocket")
+        } catch (error) {
+          console.log("the error is:" + error)
+        }
+      })
 
+      function submitIt(name)
+      {
+        // const channame = this.name;
+        const password = "";
+        const publ = true;
+        // const user = this.currentUser;
+        // emit only if this.name isnt empty
+        // if (this.name != '')
+        // connection.value.emit('createChannel', {channame, users: [], password, publ});
+        console.log("name: " + name)
+        if (name != '')
+          connection.value.emit('createChannel', {name, users: [], password, publ});   
+      }
+
+      return { submitIt }
+  }
 
 
   // methods: 
