@@ -4,7 +4,7 @@ import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../user.dto';
-import { Status } from '../../common/enums/status.enum';
+import { Status } from '../enums/status.enum';
 import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';
@@ -69,12 +69,8 @@ export class UsersService {
     if (find && find != user) {
       throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
     }
-    try {
-      user.nickname = nickname;
-      return this.userRepository.save(user);
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    user.nickname = nickname;
+    return this.userRepository.save(user);
   }
 
   async removeUser(user: User): Promise<void> {
@@ -159,7 +155,7 @@ export class UsersService {
 
   async setTwoFASecret(user: User, secret: string): Promise<void> {
     user.twoFASecret = secret;
-    user.twoFASecret = await user.encryptSecret();
+    user.twoFASecret = user.encryptSecret();
     await this.userRepository.save(user);
   }
 
@@ -167,12 +163,16 @@ export class UsersService {
     await this.userRepository.update(id, { is2FAEnabled: true });
   }
 
+  async disableTwoFA(id: number): Promise<void> {
+    await this.userRepository.update(id, { is2FAEnabled: false, twoFASecret: null });
+  }
+
   getSecret(user: User): string {
     return user.decryptSecret();
   }
 
   currentUser(user: User): Partial<User> {
-    const { username, twoFASecret, ...res } = user;
+    const { username, twoFASecret, is2FAEnabled, ...res } = user;
     return res;
   }
 
@@ -182,17 +182,17 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    const { username, twoFASecret, ...res } = user;
+    const { username, twoFASecret, is2FAEnabled, ...res } = user;
     return res;
   }
 
   async getPartialUserInfo(id: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) return user;
-    return { nickname: user.nickname, eloScore: user.eloScore };
+    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
   }
 
-  async getConnectedUser(): Promise<User[]> {
+  async getConnectedUsers(): Promise<User[]> {
     const connectedUser = this.userRepository.find({
       where: { status: Status.ONLINE },
     });
@@ -204,33 +204,55 @@ export class UsersService {
 
     if (block === true && !userFound) {
       user.blockedUID.push(userToBlock.id);
-      try {
-        await this.userRepository.save(user);
-      } catch (error) {
-        console.log(error);
-        throw new InternalServerErrorException('add blocked user');
-      }
+      await this.userRepository.save(user);
     }
     if (block === false && userFound) {
       const index = user.blockedUID.indexOf(userToBlock.id);
       user.blockedUID.splice(index, 1);
-      try {
-        await this.userRepository.save(user);
-      } catch (error) {
-        console.log(error);
-        throw new InternalServerErrorException('add blocked user');
-      }
+      await this.userRepository.save(user);
     }
     return user;
   }
 
-  getGameHistory(user: User): GameHistory[] {
-    let gameHistory = [];
+  async getGameHistory(id: number) {
+    const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost'] });
+    if (!user) {
+      throw new NotFoundException(`User ${id} (id) not found.`); 
+    }
+    let nbMatchs = 0;
+    let count = 0;
+    let gameHistory = {};
     if (user.gamesWon) {
-      gameHistory = gameHistory.concat(user.gamesWon);
+      let gamesWon = {};
+      nbMatchs = user.gamesWon.length;
+      for (let game of user.gamesWon) {
+        let gameInfo = undefined;
+        if (game.looser && game.looser.nickname) {
+          gameInfo = { score: game.winnerScore, opponent: game.looser.nickname, opponentScore: game.looserScore };
+        } else {
+          gameInfo = { score: game.winnerScore, opponent: 'deleted user', opponentScore: game.looserScore };
+        }
+        //gamesWon.push({game: gameInfo});
+      }
+      gameHistory = { nb: nbMatchs, info: gamesWon };
+    } else {
+      gameHistory = { nb: 0, info: {} };
     }
     if (user.gamesLost) {
-      gameHistory = gameHistory.concat(user.gamesLost);
+      let gamesLost = {};
+      nbMatchs = user.gamesLost.length;
+      for (let game of user.gamesLost) {
+        let gameInfo = undefined;
+        if (game.looser && game.winner.nickname) {
+          gameInfo = { score: game.looserScore, opponent: game.winner.nickname, opponentScore: game.looserScore };
+        } else {
+          gameInfo = { score: game.looserScore, opponent: 'deleted user', opponentScore: game.winnerScore };
+        }
+        gamesLost += JSON.stringify(gameInfo);
+      }
+      gameHistory = { won: gameHistory, lost: { nb: nbMatchs, info: gamesLost }};
+    } else {
+      gameHistory = { won: gameHistory, lost: { nb: 0, info: {} }};
     }
     return gameHistory;
   }
