@@ -76,7 +76,6 @@ export default
     return {
       // created: false,
       name: "",
-      txt: "",
       file: [],
       // currentUser: useStore().getters.whoAmI,
     };
@@ -87,10 +86,6 @@ export default
       console.log(this.name);
       console.log(this.file);
       this.created = true;
-      
-
-
-
     },
     previewFiles(event) {
         this.file = event.target.files[0];
@@ -131,56 +126,6 @@ export default
 
       return { submitIt }
   }
-
-
-  // methods: 
-  // {
-  //   data(){
-  //     return{
-  //       name: '',
-  //     }
-  //   },
-  //   handleSubmit(){
-  //     const data = {
-  //       name: this.name,
-  //     };
-  //     console.log(data);
-  //     console.log("submitted");
-  //     axios.post("http://localhost:3000/chat/publicroom", data)
-  //       .then(
-  //         res => {
-  //           console.log(res);
-  //         }
-  //       ).catch(
-  //           err => {
-  //           console.log(err);
-  //         }   
-  //       )
-  //   }
-  // },
-
-  
-	// setup()
-  //   {
-	// 	const connection = ref(null)
-
-	// 	onMounted(() =>{
-	// 		console.log(document.cookie.toString())
-	// 		try {
-	// 				connection.value = io('http://localhost:3000/chat/publicroom',{
-	// 				transportOptions: {
-	// 				polling: { extraHeaders: { auth: document.cookie} },
-	// 				},
-	// 			})
-	// 			console.log("senfing")
-	// 		} catch (error) {
-	// 			console.log("err of senfing " + error)
-	// 		}
-
-  //     connection.value.on('name', (name) => 
-  //       {console.log("cname:" + name)})
-  //   })
-  // }
 }
 
 

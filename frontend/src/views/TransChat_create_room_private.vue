@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="handleSubmit">
+      <form @submit.prevent="submitIt(this.name)">
 
         <v-toolbar
           dark
@@ -55,38 +55,61 @@
 
 
 <script>
-import axios from 'axios'
+import { onMounted } from "@vue/runtime-core"
+import { ref } from "vue"
+import io from 'socket.io-client';
 export default
 {
   name: "NewRoomPrivate",
-  methods: 
-  {
-    data(){
-      return{
-        name: '',
-      }
-    },
-    handleSubmit(){
-      const data = {
-        name: this.name,
-      };
-      // console.log(data);
-      console.log("submitted");
-      axios.post("http://localhost:3000/privateroom", data)
-        .then(
-          res => {
-            console.log(res);
-          }
-        ).catch(
-            err => {
-            console.log(err);
-          }   
-        )
+  data() {
+    return {
+      // created: false,
+      name: "",
+      file: [],
+      // currentUser: useStore().getters.whoAmI,
+    };
+  },
+  methods: {
+    submitbutton() {
+      // console.log(this.created);
+      console.log(this.name);
+      console.log(this.file);
+      this.created = true;
     },
     previewFiles(event) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     }
+  },
+  setup()
+  {
+      const connection = ref(null)
+      onMounted(() =>{
+        console.log(document.cookie.toString())
+        try {
+            connection.value = io('http://localhost:3000/chat',{
+            transportOptions: {
+            polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          console.log("starting connection to websocket")
+        } catch (error) {
+          console.log("the error is:" + error)
+        }
+      })
+
+      function submitIt(name)
+      {
+        // const channame = this.name;
+        const password = "";
+        const publ = true;
+        // const user = this.currentUser;
+        console.log("name: " + name)
+        if (name != '')
+          connection.value.emit('createChannel', {name, users: [], password, publ});   
+      }
+
+      return { submitIt }
   }
 }
 
