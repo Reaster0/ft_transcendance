@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="join">
+      <form @submit.prevent="submitbutton">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -67,7 +67,7 @@
 // import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';
-
+// import { useStore } from "vuex";
 
 export default
 {
@@ -77,10 +77,11 @@ export default
       // created: false,
       name: "",
       file: [],
+      // currentUser: useStore().getters.whoAmI,
     };
   },
   methods: {
-    join() {
+    async submitbutton() {
       // console.log(this.created);
       console.log(this.name);
       console.log(this.file);
@@ -88,7 +89,7 @@ export default
       const connection = ref(null)
       console.log(document.cookie.toString())
       try {
-          connection.value = io('http://localhost:3000/chat',{
+          connection.value = await io('http://localhost:3000/chat',{
           transportOptions: {
           polling: { extraHeaders: { auth: document.cookie} },
           },
@@ -100,6 +101,9 @@ export default
       const channame = this.name;
       const password = "";
       const publ = true;
+      // const user = this.currentUser;
+      // emit only if this.name isnt empty
+      if (this.name != '')
       connection.value.emit('createChannel', {channame, users: [], password, publ});
 
     },
