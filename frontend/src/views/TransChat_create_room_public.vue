@@ -65,8 +65,9 @@
 <script>
 // import axios from 'axios'
 // import { onMounted } from "@vue/runtime-core"
-// import { ref } from "vue"
+import { ref } from "vue"
 import io from 'socket.io-client';
+
 
 export default
 {
@@ -84,10 +85,23 @@ export default
       console.log(this.name);
       console.log(this.file);
       this.created = true;
-      this.socketInstance = io("http://localhost:3000/chat");
-      this.socketInstance.on(
+      const connection = ref(null)
+      console.log(document.cookie.toString())
+      try {
+          connection.value = io('http://localhost:3000/chat',{
+          transportOptions: {
+          polling: { extraHeaders: { auth: document.cookie} },
+          },
+        })
+        console.log("starting connection to websocket")
+      } catch (error) {
+        console.log("the error is:" + error)
+      }
+      const channame = this.name;
+      const password = "";
+      const publ = true;
+      connection.value.emit('createChannel', {channame, users: [], password, publ});
 
-      )
     },
     previewFiles(event) {
         this.file = event.target.files[0];
