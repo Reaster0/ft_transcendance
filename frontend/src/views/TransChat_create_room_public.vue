@@ -35,12 +35,13 @@
             </p>
             </div>
         <v-col cols="12" sm="6">
-          <input type="file" ref="file" style="display: none">
-            <v-btn elevation="2" class="offsetmess" @click="$refs.file.click()">
+          <!-- <input type="file" ref="file" style="display: none"> -->
+          <input type="file" @change="previewFiles" multiple >
+            <!-- <v-btn elevation="2" class="offsetmess" @change="previewFiles" v-model="file">
               Upload avatar
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
-            </v-btn>
+            </v-btn> -->
         </v-col>
         <v-col cols="12" sm="6">
             <v-text-field
@@ -72,20 +73,26 @@ export default
   name: "NewRoomPublic",
   data() {
     return {
-      created: false,
+      // created: false,
       name: "",
+      file: [],
     };
   },
   methods: {
     join() {
-      console.log(this.created);
+      // console.log(this.created);
       console.log(this.name);
+      console.log(this.file);
       this.created = true;
       this.socketInstance = io("http://localhost:3000/chat");
       this.socketInstance.on(
 
       )
     },
+    previewFiles(event) {
+        this.file = event.target.files[0];
+        console.log(event.target.files[0]);
+    }
   },
 
 
