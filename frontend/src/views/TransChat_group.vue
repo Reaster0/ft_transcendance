@@ -328,8 +328,8 @@
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
   // import { onMounted } from "@vue/runtime-core"
-  // import { ref } from "vue"
-  // import io from 'socket.io-client';
+  import { ref } from "vue"
+  import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
   //import { useKeypress } from "vue3-keypress";
@@ -465,10 +465,10 @@ export default {
       }, 2000)
     },
   },
-// 	setup()
-//     {
-// 		const connection = ref(null)
-//     const chats = ref(null)
+	setup()
+    {
+		const connection = ref(null)
+    // const chats = ref(null)
 
 // 		onMounted(() =>{
 // 			console.log(document.cookie.toString())
@@ -530,15 +530,26 @@ export default {
 
 // 		// for sending message:
 // 		// -  message {content: string, channel: Chan, ...}
-// 		function sendingMessage(content, channel)
-// 		{
-//       console.log(content, channel);
-//       if (!content)
-//         return ;
-//       connection.value.emit('message', {content, channel});
-//       //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
-// 			console.log("after message");
-// 		}
+		function sendingMessage(content, channel)
+		{
+      console.log(document.cookie.toString())
+			try {
+					connection.value = io('http://:3000/chat',{
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie} },
+					},
+				})
+				console.log("starting connection to websocket")
+			} catch (error) {
+				console.log("the error is:" + error)
+			}
+      console.log(content, channel);
+      if (!content)
+        return ;
+      connection.value.emit('message', {content, channel});
+      //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
+			console.log("after message");
+		}
 
 // 		// for joinning a existing channel
 // 		// - joinChannel { id: string }
@@ -593,9 +604,9 @@ export default {
 // 		// 	},
 // 		// })
 
-// 		return { log, disconnect ,createChannel, sendingMessage, joinChannel, leaveChannel, blockUser}
+		return { sendingMessage}
 
-// 	}
+	}
 };
 
 </script>
