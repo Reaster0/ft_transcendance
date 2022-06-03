@@ -70,8 +70,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
   this.logger.log(channel);
-  if(!client.data.user)
+  if(!client.data.user) {
     client.disconnect();
+    return false;
+  }
     const createChannel: ChanI = await this.chanServices.createChannel(channel, client.data.user);
     if (!createChannel) {
       this.logger.log(`ERROR will creating: ${createChannel.chanName}`);
