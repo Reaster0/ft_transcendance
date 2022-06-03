@@ -324,8 +324,6 @@
   </v-app>
 </template>
 
-
-
 <script>
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/

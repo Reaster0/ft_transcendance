@@ -69,35 +69,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //@UseGuards(AuthChat)
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
-  this.logger.log(channel);
-  if(!client.data.user) {
-    client.disconnect();
-    return false;
-  }
-    const createChannel: ChanI = await this.chanServices.createChannel(channel, client.data.user);
-    if (!createChannel) {
-      this.logger.log(`ERROR will creating: ${createChannel.chanName}`);
+    this.logger.log(channel);
+
+    if (!client.data.user) {
+      console.log('didnt got the time to get the user :(');
+      client.disconnect();
       return false;
     }
+    const createChannel: ChanI = await this.chanServices.createChannel(channel, client.data.user);
+
+    if (!createChannel) {
+      this.logger.log(`ERROR will creating: ${channel.chanName}`);
+      return false;
+    }
+
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.chanName} created`);
     return true;
   }
 
   /************* . . Delete Channel **************** */
- // @UseGuards(AuthChat)
+  // @UseGuards(AuthChat)
   @SubscribeMessage('deleteChannel')
   async onDeleteChannel(client: Socket, channel: ChanI) {
-    
+
     await this.chanServices.deleteChannel(channel);
     await this.emitChannels();
     this.logger.log(`delete Channel: ${channel.chanName}`);
   }
 
-//  @UseGuards(AuthChat)
+  //  @UseGuards(AuthChat)
   @SubscribeMessage('message')
   async onSendMessage(client: Socket, message: MessageI) {
-    
+
     this.logger.log('sending message');
     console.log(message);
     //1) get the sender role
@@ -135,7 +139,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /************** . Join Channel *************/
-//  @UseGuards(AuthChat)
+  //  @UseGuards(AuthChat)
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChanI) {
     const channelFound = await this.chanServices.getChan(channel.id);
@@ -147,7 +151,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /********************* Leave Channel ********************/
- // @UseGuards(AuthChat)
+  // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
   async handleLeaveChannel(client: Socket) {
     await this.chanServices.removeSocket(client.id);
