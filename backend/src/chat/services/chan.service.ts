@@ -36,9 +36,7 @@ export class ChanServices {
 
 		channel.users.push(creator);
 		channel.adminUsers = [];
-		console.log('coucou');
 		channel.owner = creator.id;
-		console.log('coucou');
 
     channel.users.push(creator);
     channel.adminUsers = [];
