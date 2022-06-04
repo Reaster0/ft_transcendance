@@ -217,6 +217,9 @@ export class UsersService {
   getGameHistory(user: User): GameHistory[] {
     let gameHistory = [];
     if (user.gamesWon) {
+      //for (game of user.gamesWon) {
+      //  const gameInfo = {}
+      //}
       gameHistory = gameHistory.concat(user.gamesWon);
     }
     if (user.gamesLost) {
