@@ -11,7 +11,7 @@ import { ChanServices } from './services/chan.service';
 import { ChatServices } from './services/chat.service';
 import { ConnectService } from './services/connect.service';
 import { MessageService } from './services/message.service';
-import { AuthService } from '../auth/auth.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +23,7 @@ import { AuthService } from '../auth/auth.service';
       SocketJoined,
     ]),
     UsersModule,
+    AuthModule
   ],
   controllers: [],
   providers: [
@@ -31,7 +32,6 @@ import { AuthService } from '../auth/auth.service';
     ChatServices,
     ConnectService,
     MessageService,
-    AuthService,
   ],
   exports: [ChatGateway],
 })

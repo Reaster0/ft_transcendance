@@ -6,7 +6,6 @@
 			<v-col class="text">
 				<h3>nickname: {{user.nickname}}</h3>
 				<h3>Elo: {{user.eloScore}}</h3>
-				<h3>is2FAEnabled: {{user.is2FAEnabled}}</h3>
 			</v-col>
 				<v-img class="text" :src="avatar"></v-img>
 				<v-col cols="2">
