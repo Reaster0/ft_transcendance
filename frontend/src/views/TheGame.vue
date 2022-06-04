@@ -60,8 +60,8 @@ export default {
 		onMounted(async() =>{
 
 			try {
-				//gameSocket.value = io('http://82.65.87.54:3000/game',{
-				gameSocket.value = io('http://localhost:3000/game',{
+				gameSocket.value = io('http://82.65.87.54:3000/game',{
+				// gameSocket.value = io('http://localhost:3000/game',{
 				transportOptions: {
 				polling: { extraHeaders: { auth: document.cookie} },
 				}})
@@ -88,7 +88,7 @@ export default {
 
 				canvas = document.getElementById('pongGame');
 				canvas.width = window.innerWidth
-				canvas.height = window.innerHeight * 0.95
+				canvas.height = window.innerHeight
 				ctx = canvas.getContext('2d');
 				gameStarted.value = true
 				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
