@@ -4,7 +4,6 @@ const store = createStore({
 	state: {
 		user: {
 			nickname:	"",
-			is2FAEnabled:	false,
 			friends:	[],
 			status:	"",
 			eloScore:	0,
