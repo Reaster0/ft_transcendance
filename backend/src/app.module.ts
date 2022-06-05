@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { GamesModule } from './game/games.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -42,6 +44,9 @@ import { ScheduleModule } from '@nestjs/schedule';
         autoLoadEntities: true, //Load automatically entities without specifying the array
         synchronize: true, // Synch DB with entities each time we load the app TODO disable when production
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
     }),
     UsersModule,
     AuthModule,

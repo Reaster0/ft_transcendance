@@ -17,7 +17,7 @@ import { Logger } from '@nestjs/common';
 
 const queue: Array<Socket> = []; // Array of clients waiting for opponent
 const matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
-const watchers: Array<Socket> = [];
+const watchers: Array<Socket> = []; // Array of clients waiting to 
 
 @WebSocketGateway({
   cors: { origin: '*', credentials: true },
@@ -69,9 +69,7 @@ export class GameGateway
         match.state = State.FINISHED;
         const opponent = this.gamesService.getOpponent(client, match);
         if (opponent && opponent.socket && opponent.socket.connected === true) {
-          opponent.socket.emit('opponentDisconnected', {
-            matchId: match.matchId,
-          });
+          opponent.socket.emit('opponentDisconnected');
         }
         match.winner = opponent;
         this.gamesService.finishGame(this.server, match, matchs);
@@ -91,13 +89,12 @@ export class GameGateway
       }
       if (this.gamesService.isWaiting(client, queue) === true ||
           this.gamesService.isPlaying(client, matchs) === true) {
-        this.logger.log('user already in queue/playing');
         return;
       }
       queue.push(client);
       if (queue.length >= 2) {
         const matchId = uuid();
-        const newMatch = this.gamesService.setMatch(matchId, queue.slice(0, 2));
+        const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2));
         matchs.set(matchId, newMatch);
         this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
@@ -120,7 +117,7 @@ export class GameGateway
       if (this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
-      if (opponent.data.user === client.data.user.username) {
+      if (opponent.data.user.id === client.data.user.id) {
         client.emit('requestError');
         return client.disconnect();
       }
@@ -209,10 +206,8 @@ export class GameGateway
       if (!client.data.user) {
         return client.disconnect();
       }
-      if (
-        this.gamesService.isWaiting(client, queue) === true ||
-        this.gamesService.isPlaying(client, matchs) === true
-      ) {
+      if (this.gamesService.isWaiting(client, queue) === true ||
+        this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
       const index = watchers.indexOf(client);
@@ -220,7 +215,7 @@ export class GameGateway
         return;
       }
       const match = matchs.get(matchId);
-      if (match.state != State.ONGOING) {
+      if (match.state != State.ONGOING && match.state != State.SCORE) {
         return;
       }
       watchers.splice(index, 1);
