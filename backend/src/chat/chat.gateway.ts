@@ -17,11 +17,11 @@ import { AuthChat } from './Guards/ChatAuth.guard';
 import { ChanI } from './interfaces/channel.interface';
 import { MessageI } from './interfaces/message.interface';
 import { ConnectService } from './services/connect.service';
-import { connectedSocketI } from './interfaces/connectSocket.interface';
+import { connectedSocketI } from './interfaces/socketUser.interface';
 import { ChanServices } from './services/chan.service';
-import { ChanUserI } from './interfaces/chanUser.interface';
+import { ChanUserI } from './interfaces/channelUser.interface';
 import { MessageService } from './services/message.service';
-import { JoinedSocketI } from './interfaces/joinedSocket.interface';
+import { JoinedSocketI } from './interfaces/sockets-connected-to-channel.interface';
 
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
@@ -58,6 +58,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /******* Disconection ********/
+  @SubscribeMessage('disconnect')
   async handleDisconnect(client: Socket) {
     await this.connectService.disconnectUser(client.id, client.data.user);
     this.updateUsersStatus();
@@ -135,7 +136,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   afterInit(server: Server) {
-    this.logger.log('Init');
+    this.logger.log('Chat is Init');
   }
 
   /************** . Join Channel *************/
@@ -143,6 +144,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChanI) {
     const channelFound = await this.chanServices.getChan(channel.id);
+    if (! channelFound) return ; // better handel in get chan and catch
     // privacy ------
     const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
     await this.chanServices.addSocket({ socketID: client.id, user: client.data.user, chan: channel })
@@ -156,6 +158,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async handleLeaveChannel(client: Socket) {
     await this.chanServices.removeSocket(client.id);
     this.logger.log(`${client.data.user.username} leave a channel`);
+  }
+
+  
+  /* Owner can edit the channel */
+  @SubscribeMessage('editChannel')
+  async updateChannel(client: Socket, input: any): Promise<boolean> {
+      const { channel } = input;
+      const channelFound = await this.chanServices.getChan(channel.id);
+
+      const ret: Boolean = await this.chanServices.updateChannel(channelFound, input.info)
+      if (ret === true){
+          await this.emitChannels();
+          return true;
+      }
+      return false;
   }
 
   /********************* Block user *********************/

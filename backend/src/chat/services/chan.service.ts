@@ -4,12 +4,10 @@ import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Chan } from '../entities/channel.entity';
 import { ChanUser } from '../entities/channelUser.entity';
-import { SocketConnected } from '../entities/socketsUser';
 import { SocketJoined } from '../entities/sockets-connected-to-channel';
 import { ChanI } from '../interfaces/channel.interface';
-import { ChanUserI } from '../interfaces/chanUser.interface';
-import { connectedSocketI } from '../interfaces/connectSocket.interface';
-import { JoinedSocketI } from '../interfaces/joinedSocket.interface';
+import { ChanUserI } from '../interfaces/channelUser.interface';
+import { JoinedSocketI } from '../interfaces/sockets-connected-to-channel.interface';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -44,7 +42,7 @@ export class ChanServices {
 				channel.password = await bcrypt.hash(password, salt);
       }
 		}
-		console.log(channel);
+		//console.log(channel);
 		return this.chanRepository.save(channel);
 	}
 
@@ -73,9 +71,23 @@ export class ChanServices {
     }
   }
 
+  async updateChannel(channel: ChanI, info: any): Promise<Boolean> {
+		const { applyPassword, password, removePassword } = info;
+
+    if (applyPassword && password) {
+      if (/^([a-zA-Z0-9]+)$/.test(password) === false)
+        return false;
+      const salt = await bcrypt.genSalt();
+      channel.password = await bcrypt.hash(password, salt);
+    }
+    if (removePassword)
+      channel.password = '';
+    
+    await this.chanRepository.save(channel);
+    return true;
+  }
+
   async getChannelsFromUser(id: number): Promise<ChanI[]> {
-    console.log('lets try a complex querry');
-    console.log(id);
 
     let query = this.chanRepository
       .createQueryBuilder('chan')
@@ -96,7 +108,7 @@ export class ChanServices {
     //console.log(query);
     const privateChannels: ChanI[] = await query.getMany();
     console.log('---- private Channel -----');
-    console.log(privateChannels);
+    //console.log(privateChannels);
 
     const channels = publicChannels.concat(privateChannels);
 
@@ -115,10 +127,10 @@ export class ChanServices {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-	async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
-		console.log(userId, channel);
-		return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
-	}
+  async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
+    console.log(userId, channel); //this look strange
+    return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
+  }
 
   //-------------------------------------------------//
   async findSocketByChannel(channel: ChanI): Promise<JoinedSocketI[]> {

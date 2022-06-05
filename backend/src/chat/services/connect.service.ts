@@ -6,7 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Repository } from 'typeorm';
 import { SocketConnected } from '../entities/socketsUser';
-import { connectedSocketI } from '../interfaces/connectSocket.interface';
+import { connectedSocketI } from '../interfaces/socketUser.interface';
 
 @Injectable()
 export class ConnectService {
