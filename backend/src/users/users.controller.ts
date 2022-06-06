@@ -195,7 +195,7 @@ export class UsersController {
   uploadAvatar(@Req() req: RequestUser, @UploadedFile() file: Express.Multer.File) {
     try {
       this.logger.log("Post('uploadAvatar') route called by user " + req.user.username + ' (username)');
-      return this.usersService.addAvatar(req.user, file.originalname, file.buffer);
+      return this.usersService.addAvatar(req.user, file.buffer);
     } catch (e) {
       throw (e);
     }
