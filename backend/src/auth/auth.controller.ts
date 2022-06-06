@@ -43,7 +43,7 @@ export class AuthController {
       twoFA: false,
     };
     const jwtToken: string = await this.jwtService.sign(payload);
-    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie
+    res.cookie('jwt', jwtToken, { httpOnly: true, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie
     res.redirect(process.env.FRONTEND); //back to frontend
   }
 
@@ -68,7 +68,7 @@ export class AuthController {
     }
     const payload: JwtPayload = { username: req.user['username'], twoFA: true };
     const jwtToken: string = await this.jwtService.sign(payload);
-    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie
+    res.cookie('jwt', jwtToken, { httpOnly: true, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie
     this.authService.enableTwoFA(req.user);
     return true;
   }
