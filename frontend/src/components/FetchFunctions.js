@@ -58,7 +58,7 @@ export async function updateUser(nick) {
 		credentials: "include",
 		method: "PATCH",
 		body: JSON.stringify({
-			nickname: nick
+			nickname: nick,
 		}),
 		headers: {
 			'Content-type': 'application/json; charset=UTF-8',
@@ -66,8 +66,21 @@ export async function updateUser(nick) {
 	})
 	.then(res => {
 		console.log(JSON.stringify({
-			nickname: nick
+			nickname: nick,
 		}))
 		return res.status == 200? true : false
+	})
+}
+
+export async function uploadAvatar(file) {
+	const formData = new FormData()
+	formData.append('avatar', file.target.files[0])
+	return await fetch("/api/users/uploadAvatar", {
+		credentials: "include",
+		method: "POST",
+		body: formData
+		})
+	.then((res)=>{
+		return res.status == 201? true : false 
 	})
 }
