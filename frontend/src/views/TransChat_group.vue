@@ -27,8 +27,9 @@
 	
     <div id="app" class="text-left">
     <v-app id="inspire">
-		<!-- <v-list>
+		<v-list>
 			<v-list-item-group v-model="selectedItem" >
+
 				<template v-for="(item, index) in items">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
@@ -39,16 +40,16 @@
 					v-else
 					:key="item.title"
 				>
-          <v-btn elevation="0" min-height="50px"  max-width="50px">
+          <!-- <v-btn elevation="0" min-height="50px"  max-width="50px">
 					<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
 					<v-list-item-avatar >
 					<v-img :src="item.photo"  min-width="50px" min-height="50px"></v-img>
 					</v-list-item-avatar>
 					</v-badge>
-          </v-btn>
+          </v-btn> -->
 					<v-list-item-content>
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-					<v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle>
+					<!-- <v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle> -->
 					</v-list-item-content>
         </v-list-item>
             <v-divider
@@ -57,7 +58,7 @@
             ></v-divider>
 				</template>
 			</v-list-item-group>
-		</v-list> -->
+		</v-list>
     </v-app>
     </div>
     </v-col>
@@ -327,7 +328,7 @@
 <script>
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-  // import { onMounted } from "@vue/runtime-core"
+  import { onMounted } from "@vue/runtime-core"
   import { ref } from "vue"
   import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
@@ -346,8 +347,9 @@ export default {
       selected: [2],
       currentTab: 0,
       tab: null,
+      items: [],
       items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
-      items: [
+      items_: [
         {
           photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
           subtitle: "My cat stole my keys !",
@@ -468,45 +470,43 @@ export default {
 	setup()
     {
 		const connection = ref(null)
-    // const chats = ref(null)
 
-// 		onMounted(() =>{
-// 			console.log(document.cookie.toString())
-// 			try {
-// 					connection.value = io('http://:3000/chat',{
-// 					transportOptions: {
-// 					polling: { extraHeaders: { auth: document.cookie} },
-// 					},
-// 				})
-// 				console.log("starting connection to websocket")
-// 			} catch (error) {
-// 				console.log("the error is:" + error)
-// 			}
-
-//         // ============= info you can retrive ======
-//         // - channel : get all the chanel the user is connected
-//         // - connectedUsers : get all user.id of user connected..... (but the function feels wrong....)
-//         // - messageSended
-
-//         // : connection.value.on(‘command’, (received) => {})
-
-//         // channel : get all the chanel the user is connected
-//         // connection.value.on('channel', (channels) => 
-//         // {console.log("channel:" + channels)})
-//         connection.value.on('channel', (channel) =>{
-//           console.log("-----------------------------------")
-//           chats.value = channel
-//           console.log(":::::" + chats.value)
-//         })
+		onMounted(() =>{
+			console.log(document.cookie.toString())
+			try {
+					connection.value = io('http://:3000/chat',{
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie} },
+					},
+				})
+				console.log("starting connection to websocket")
+			} catch (error) {
+				console.log("the error is:" + error)
+			}
 
 
-// //			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
-//       // TestTest();
-// 			// SendingMessage();
-// 			// JoinChannel();
-// 			// LeaveChannel();
-// 			// BlockUser();
-// 			})
+      connection.value.on("channel", i => {
+          console.log(i)
+          // let it = []
+          for (const key in i) {
+              console.log(key)
+              let d = {}
+              let value = i[key]
+              d.title = value.channelName
+              this.items.push(d)
+          }
+          console.log(this.items)
+          // this.items=it
+        })
+
+
+//			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
+      // TestTest();
+			// SendingMessage();
+			// JoinChannel();
+			// LeaveChannel();
+			// BlockUser();
+			})
       
 //     /*
 //     onBeforeRouteLeave(() => {

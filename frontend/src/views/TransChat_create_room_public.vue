@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name)">
+      <v-form @submit.prevent="submitIt(this.name)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -19,8 +19,12 @@
               New chat room settings
             </div>
           </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <button class="btn btn-primary btn-block" :style="{color: ' #ffffff'}" to="/" >SUBMIT</button>
+          <!-- <v-spacer></v-spacer> -->
+            <v-spacer></v-spacer>
+            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+              OK
+            </v-btn>
+          
         </v-toolbar>
 
 
@@ -51,12 +55,13 @@
               placeholder="name"
               v-model="name"
             ></v-text-field>
+          <button class="button button1">SUBMIT</button>
         </v-col>
 
               
 
 
-    </form>
+    </v-form>
     </v-container>
   </v-app>
 </template>
@@ -77,6 +82,7 @@ export default
       // created: false,
       name: "",
       file: [],
+      items: [],
       // currentUser: useStore().getters.whoAmI,
     };
   },
@@ -97,7 +103,7 @@ export default
   {
       const connection = ref(null)
       onMounted(() =>{
-        console.log(document.cookie.toString())
+        // console.log(document.cookie.toString())
         try {
             connection.value = io('http://localhost:3000/chat',{
             transportOptions: {
@@ -108,6 +114,28 @@ export default
         } catch (error) {
           console.log("the error is:" + error)
         }
+
+        // connection.value.on("channel", chans => {
+        //     console.log(chans)
+        //     for (const key in chans) {
+        //         let value = chans[key];
+        //         // this.items.push(value.channelName)
+        //         console.log(value.channelName)
+        //     }
+        //   })
+        connection.value.on("channel", i => {
+          // console.log(">>>>>>>>>>>>>>>> " + i)
+          let it = []
+          for (const key in i) {
+              // console.log(key)
+              let d = {}
+              let value = i[key];
+              d.name = value.channelName
+              console.log(d)
+              it.push(d)
+          }
+          // console.log(it)
+        })
       })
 
       function submitIt(name)
@@ -164,5 +192,19 @@ export default
 .row>.col {
   flex-basis: auto;
 }
+
+.button {
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.button {background-color: rgb(0,0,255);} /* Blue */
 
 </style>
