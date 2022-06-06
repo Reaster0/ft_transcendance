@@ -133,15 +133,20 @@ export class UsersController {
   @Get('getAvatar/:id')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
-  @ApiOperation({ summary: "Getting avatar by it's avatar id." })
+  @ApiOperation({ summary: "Getting avatar by user's id." })
   @ApiOkResponse({ description: 'Return avatar' })
   @ApiNotFoundResponse({ description: 'User with given username not found.' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
+  async getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
     try {
       this.logger.log("Get('getAvatar/:id') route called.");
-      return this.usersService.getAvatarByAvatarId(id, res);
+      const user = await this.usersService.findUserById('' + id);
+      let avatarId = 0;
+      if (user.avatarId) {
+        avatarId = user.avatarId;
+      }
+      return this.usersService.getAvatarByAvatarId(avatarId, res);
     } catch(e) {
       throw e;
     }
