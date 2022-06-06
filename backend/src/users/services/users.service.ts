@@ -9,7 +9,6 @@ import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { GameHistory } from '../../game/entities/gamehistory.entity';
 import { Avatar } from '../entities/avatar.entity';
 
 @Injectable()
@@ -43,8 +42,8 @@ export class UsersService {
     if (user) {
       return user;
     }
-    user = this.userRepository.create(createUserDto);
-    user.nickname = await this.generateNickname(username);
+    const nickname = await this.generateNickname(username);
+    user = this.userRepository.create({username: username, nickname: nickname});
     // TODO redirect user to modify info page
     return this.userRepository.save(user);
   }
@@ -52,7 +51,7 @@ export class UsersService {
   async generateNickname(nickname: string): Promise<string> {
     let user = undefined;
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    while ((user = await this.userRepository.findOne({ nickname: nickname })) && nickname.length < 4) {
+    while ((user = await this.userRepository.findOne({ nickname: nickname })) || nickname.length < 4) {
       const randomChar = letters[Math.floor(Math.random() * letters.length)];
       if (nickname.length > 15) {
         nickname = randomChar;
@@ -112,13 +111,13 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async addAvatar(user: User, avatarFilename: string, avatarBuffer: Buffer): Promise<Avatar> {
+  async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const oldAvatarId = user.avatarId;
-      const newAvatar = await this.avatarsService.uploadAvatar(avatarFilename, avatarBuffer, queryRunner);
+      const newAvatar = await this.avatarsService.uploadAvatar(avatarBuffer, queryRunner);
       await queryRunner.manager.update(User, user.id, { avatarId: newAvatar.id });
       if (oldAvatarId) {
         await this.avatarsService.deleteAvatarById(oldAvatarId, queryRunner);
