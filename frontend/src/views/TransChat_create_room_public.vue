@@ -101,6 +101,7 @@ export default
 
   setup()
   {
+      var channels = [];
       const connection = ref(null)
       onMounted(() =>{
         // console.log(document.cookie.toString())
@@ -124,18 +125,19 @@ export default
         //         console.log(value.channelName)
         //     }
         //   })
-        connection.value.on("channel", i => {
-          // console.log(">>>>>>>>>>>>>>>> " + i)
-          let it = []
-          for (const key in i) {
-              // console.log(key)
-              let d = {}
-              let value = i[key];
-              d.name = value.channelName
-              console.log(d)
-              it.push(d)
-          }
-          // console.log(it)
+        connection.value.on("channel", function(res) {
+
+          console.log('befor update');
+          console.log(channels);
+          console.log('creating channel');
+
+          // reset channel
+          channels = [];
+          for (const chan of res) 
+              channels.push(chan.channelName);
+
+          console.log('after update');
+          console.log(channels)
         })
       })
 
