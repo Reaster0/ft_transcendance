@@ -2,14 +2,12 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Chan } from '../entities/chan.entity';
-import { ChanUser } from '../entities/chanUser.entity';
-import { SocketConnected } from '../entities/socketConnected';
-import { SocketJoined } from '../entities/socketJoined';
+import { Chan } from '../entities/channel.entity';
+import { ChanUser } from '../entities/channelUser.entity';
+import { SocketJoined } from '../entities/sockets-connected-to-channel';
 import { ChanI } from '../interfaces/channel.interface';
-import { ChanUserI } from '../interfaces/chanUser.interface';
-import { connectedSocketI } from '../interfaces/connectSocket.interface';
-import { JoinedSocketI } from '../interfaces/joinedSocket.interface';
+import { ChanUserI } from '../interfaces/channelUser.interface';
+import { JoinedSocketI } from '../interfaces/sockets-connected-to-channel.interface';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -24,33 +22,34 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChanI, creator: User): Promise<ChanI> {
-    let { chanName, publicChannel, password } = channel;
-    const name = await this.chanRepository.findOne({ channelName: chanName });
+    let { channelName, publicChannel, password } = channel;
+    console.log(channelName);
+    const name = await this.chanRepository.findOne({ channelName: channelName });
 
-    if (name)
-      //channel name already exist
-      return null;
-    if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false)
-      //isalphanum()
-      return null;
+//		if (!name)
+		if (name) //channel name already exist
+			return null;
 
-    channel.users.push(creator);
-    channel.adminUsers = [];
-    channel.owner = creator.id;
+		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
+			return null;
 
-    if (!password) password = null;
+		channel.users.push(creator);
+		channel.adminUsers = [];
+		channel.owner = creator.id;
 
-    //will see
-    if (publicChannel === false) {
-      if (password) {
-        const salt = await bcrypt.genSalt();
-        channel.password = await bcrypt.hash(password, salt);
+  //will see 
+		if (publicChannel === false) {
+			if (password) {
+				const salt = await bcrypt.genSalt();
+				channel.password = await bcrypt.hash(password, salt);
       }
-    }
-    return this.chanRepository.save(channel);
-  }
-  async deleteChannel(channel: ChanI) {
-    /*
+		}
+		//console.log(channel);
+		return this.chanRepository.save(channel);
+	}
+
+	async deleteChannel(channel: ChanI) {
+		/*
  		 if (!channel.id)
 	  		throw new InternalServerErrorException('bad request: deleteChannel');
 	  */
@@ -74,23 +73,44 @@ export class ChanServices {
     }
   }
 
-  async getChannelsFromUser(userID: number): Promise<ChanI[]> {
+  async updateChannel(channel: ChanI, info: any): Promise<Boolean> {
+		const { applyPassword, password, removePassword } = info;
+
+    if (applyPassword && password) {
+      if (/^([a-zA-Z0-9]+)$/.test(password) === false)
+        return false;
+      const salt = await bcrypt.genSalt();
+      channel.password = await bcrypt.hash(password, salt);
+    }
+    if (removePassword)
+      channel.password = '';
+    
+    await this.chanRepository.save(channel);
+    return true;
+  }
+
+  async getChannelsFromUser(id: number): Promise<ChanI[]> {
+
     let query = this.chanRepository
       .createQueryBuilder('chan')
       .where('chan.publicChannel = true');
     const publicChannels: ChanI[] = await query.getMany(); // gater all public channel
+    console.log('---- public  Channel -----');
+    console.log(publicChannels);
 
     query = this.chanRepository
       .createQueryBuilder('chan')
       .leftJoin('chan.users', 'users')
-      .where('users.id = :userID', { userID })
+      .where('users.id = :id', { id })
       .andWhere('chan.publicChannel = false')
-      .leftJoinAndSelect('chan.users', 'all')
-      .leftJoinAndSelect('chan.chanUsers', 'all')
+      .leftJoinAndSelect('chan.users', 'all_user')
+      .leftJoinAndSelect('chan.chanUsers', 'all_chanUser')
       .orderBy('chan.date', 'DESC');
 
+    //console.log(query);
     const privateChannels: ChanI[] = await query.getMany();
-    console.log(privateChannels);
+    console.log('---- private Channel -----');
+    //console.log(privateChannels);
 
     const channels = publicChannels.concat(privateChannels);
 
@@ -101,6 +121,7 @@ export class ChanServices {
       else if (d1 > d2) return -1;
       else return 0;
     });
+
     return channels;
   }
 
@@ -109,9 +130,8 @@ export class ChanServices {
   }
 
   async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
-    return this.chanUserRepository.findOne({
-      where: { chan: channel, userId: userId },
-    });
+    console.log(userId, channel); //this look strange
+    return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
   }
 
   //-------------------------------------------------//
