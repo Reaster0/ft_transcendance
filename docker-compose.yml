@@ -11,13 +11,13 @@ services:
     #volumes:
     #  - /data/postgres:/data/postgres
     
-  front:
-    build: ./frontend
-    image: frontend
-    container_name: front
-    restart: always
-    ports:
-      - "8080:8080"
+  # front:
+  #   build: ./frontend
+  #   image: frontend
+  #   container_name: front
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
 
   # back:
   #   build: ./backend
@@ -27,3 +27,5 @@ services:
   #     - "3030:3030"
   #   depends_on:
   #     - db
+  #   env_file:
+  #     - .env

@@ -1,15 +1,9 @@
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-  OnGatewayInit,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-} from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayInit, OnGatewayConnection,
+  OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
 import { AuthService } from '../auth/auth.service';
-import { Status } from '../common/enums/status.enum';
+import { Status } from '../users/enums/status.enum';
 import { GamesService } from './games.service';
 import { Match, State } from './interfaces/match.interface';
 import { v4 as uuid } from 'uuid';
@@ -19,13 +13,8 @@ const queue: Array<Socket> = []; // Array of clients waiting for opponent
 const matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
 const watchers: Array<Socket> = []; // Array of clients waiting to 
 
-@WebSocketGateway({
-  cors: { origin: '*', credentials: true },
-  credentials: true,
-  namespace: '/game',
-})
-export class GameGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+@WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/game'})
+export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
 {
   constructor(
     private readonly usersService: UsersService,
@@ -43,14 +32,15 @@ export class GameGateway
 
   async handleConnection(client: Socket) {
     try {
-      this.logger.log('connection established');
+      this.logger.log('Connection establishing');
       const user = await this.authService.getUserBySocket(client);
       if (!user) {
+        this.logger.log('User not retrieved');
         return client.disconnect();
       }
       await this.usersService.changeStatus(user, Status.PLAYING);
       client.data.user = user;
-      this.logger.log('user connected: ' + user.nickname);
+      this.logger.log('User connected: ' + user.nickname);
       return client.emit('connectedToGame'); // maybe emit user ?
     } catch {
       return client.disconnect();
@@ -58,8 +48,9 @@ export class GameGateway
   }
 
   async handleDisconnect(client: Socket) {
-    this.logger.log('disconnection');
+    this.logger.log('Disconnection');
     if (client.data.user) {
+      this.logger.log('User leaving: ' + client.data.user.username);
       await this.usersService.changeStatus(client.data.user, Status.OFFLINE);
       if (this.gamesService.isWaiting(client, queue) === true) {
         const index = queue.indexOf(client);
@@ -114,7 +105,8 @@ export class GameGateway
         client.disconnect();
         return;
       }
-      if (this.gamesService.isPlaying(client, matchs) === true) {
+      if (this.gamesService.isPlaying(client, matchs) === true
+        || this.gamesService.isPlaying(opponent, matchs) === true) {
         return;
       }
       if (opponent.data.user.id === client.data.user.id) {

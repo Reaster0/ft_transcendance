@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import NotFound from '../views/NotFound.vue'
 import LoginPage from "../views/LoginPage.vue";
-import UserPage from "../views/UserPage.vue";
+// import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
 import EditUser from "../views/EditUser.vue";
@@ -18,6 +18,7 @@ import ADM from "../views/TransChat_groupchat_adminside.vue";
 import ChangeRoom from "../views/TransChat_change_room.vue";
 import { isLogged, getUserInfo } from "../components/FetchFunctions.js"
 import store from "../store/index.js"
+import UserPagev2 from "../views/UserPagev2.vue";
 
 
 const routes = [
@@ -42,7 +43,8 @@ const routes = [
 	{
 		path: '/user',
 		name: "user",
-		component: UserPage,
+		component: UserPagev2,
+		// component: UserPage,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}

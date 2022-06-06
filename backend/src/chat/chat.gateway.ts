@@ -12,7 +12,6 @@ import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { ChatServices } from './services/chat.service';
-import { Status } from 'src/common/enums/status.enum';
 import { AuthChat } from './Guards/ChatAuth.guard';
 import { ChanI } from './interfaces/channel.interface';
 import { MessageI } from './interfaces/message.interface';
@@ -187,7 +186,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   /****** Emit Service ******/
   async updateUsersStatus() {
-    const connectedUsers: User[] = await this.userServices.getConnectedUser();
+    const connectedUsers: User[] = await this.userServices.getConnectedUsers();
     //return this.server.emit('connectedUsers', connectedUsers); // user or user.id ?
     let connectUsersID: number[] = [];
     for (const user of connectedUsers)

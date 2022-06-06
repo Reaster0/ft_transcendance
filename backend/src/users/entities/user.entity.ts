@@ -1,11 +1,8 @@
-import { IsEmail, IsNumber, IsAlphanumeric } from 'class-validator';
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate,
-  OneToOne, JoinColumn, ManyToMany, OneToMany } from 'typeorm';
+import { IsNumber, IsAlphanumeric } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Status } from '../../common/enums/status.enum';
+import { Status } from '../enums/status.enum';
 import * as crypto from 'crypto';
-import { Avatar } from './avatar.entity';
-import { Exclude } from 'class-transformer';
 import { Chan } from '../../chat/entities/channel.entity';
 import { Message } from '../../chat/entities/message.entity';
 import { GameHistory } from '../../game/entities/gamehistory.entity';
@@ -26,11 +23,6 @@ export class User {
   @ApiProperty({ type: String, description: 'User nickname. Can be modified and must only contains alphabetical characters.' })
   @IsAlphanumeric()
   nickname: string;
-
-  @Column({ type: 'text', unique: true })
-  @ApiProperty({ type: String, description: 'User email. Must be under email format.' })
-  @IsEmail()
-  email: string;
 
   @Column({ type: 'int', nullable: true })
   @ApiProperty({ type: Number, description: "Avatar id (inside avatar table) of user's avatar." })
@@ -76,7 +68,7 @@ export class User {
   //-----------------------
 
   // GAME -----------------
-  @Column({ type: 'int', default: 1000 })
+  @Column({ type: 'int', default: 1500 })
   @ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.' })
   eloScore: number;
 
@@ -89,7 +81,7 @@ export class User {
   gamesLost: GameHistory[];
   // ------------------------
 
-  async encryptSecret() {
+  encryptSecret() {
     if (!this.twoFASecret) {
       return;
     }

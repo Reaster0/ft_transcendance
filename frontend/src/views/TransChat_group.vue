@@ -476,6 +476,7 @@ export default {
 // 					connection.value = io('http://:3000/chat',{
 // 					transportOptions: {
 // 					polling: { extraHeaders: { auth: document.cookie} },
+//          withCredentials:true,
 // 					},
 // 				})
 // 				console.log("starting connection to websocket")
@@ -537,6 +538,7 @@ export default {
 					connection.value = io('http://:3000/chat',{
 					transportOptions: {
 					polling: { extraHeaders: { auth: document.cookie} },
+          withCredentials: true
 					},
 				})
 				console.log("starting connection to websocket")

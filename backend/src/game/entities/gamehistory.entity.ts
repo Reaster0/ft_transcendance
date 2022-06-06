@@ -1,6 +1,3 @@
-// For match history in DB table
-// Need : Match id, winner, looser, score winner, score looser, manytomany relation with users
-
 import { IsNumber } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';

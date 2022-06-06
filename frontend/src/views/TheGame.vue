@@ -63,6 +63,7 @@ export default {
 				gameSocket.value = io('http://:3000/game',{
 				transportOptions: {
 				polling: { extraHeaders: { auth: document.cookie} },
+				withCredentials: true
 				}})
 				console.log("starting connection to websocket")
 			} catch (error) {
@@ -98,7 +99,6 @@ export default {
 				gameData.value.ball.radius = params.ballRad
 				gameData.value.paddle.height = params.padWidth
 				gameData.value.paddle.width = params.padLength
-				console.log("ball radius =" + JSON.stringify(gameData.value.ball.radius) + " paddle width =" + JSON.stringify(gameData.value.paddle.width) + " paddle length =" + JSON.stringify(gameData.value.paddle.height))
 			})
 
 			gameSocket.value.on('countdown', params =>{
