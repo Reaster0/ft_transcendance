@@ -42,8 +42,8 @@ export class UsersService {
     if (user) {
       return user;
     }
-    user = this.userRepository.create(createUserDto);
-    user.nickname = await this.generateNickname(username);
+    const nickname = await this.generateNickname(username);
+    user = this.userRepository.create({username: username, nickname: nickname});
     // TODO redirect user to modify info page
     return this.userRepository.save(user);
   }
@@ -51,7 +51,7 @@ export class UsersService {
   async generateNickname(nickname: string): Promise<string> {
     let user = undefined;
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    while ((user = await this.userRepository.findOne({ nickname: nickname })) && nickname.length < 4) {
+    while ((user = await this.userRepository.findOne({ nickname: nickname })) || nickname.length < 4) {
       const randomChar = letters[Math.floor(Math.random() * letters.length)];
       if (nickname.length > 15) {
         nickname = randomChar;
