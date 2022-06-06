@@ -148,7 +148,7 @@ export class UsersController {
   }
 
   @Get('getHistory/:id')
-  //@UseGuards(AuthGuard('jwt'), AuthUser)
+  @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: "Getting game history as array of GameHistory." })
   @ApiOkResponse({ description: 'Return game history.' })

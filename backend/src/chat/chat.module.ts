@@ -12,6 +12,7 @@ import { ChatServices } from './services/chat.service';
 import { ConnectService } from './services/connect.service';
 import { MessageService } from './services/message.service';
 import { AuthModule } from '../auth/auth.module';
+import { ChatController } from './chat.controller';
 
 @Module({
   imports: [

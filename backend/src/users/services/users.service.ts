@@ -215,44 +215,44 @@ export class UsersService {
   }
 
   async getGameHistory(id: number) {
-    const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost'] });
+    const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
     if (!user) {
       throw new NotFoundException(`User ${id} (id) not found.`); 
     }
-    let nbMatchs = 0;
-    let count = 0;
     let gameHistory = {};
+    let score = [];
+    let opponent = [];
+    let opponentScore = [];
     if (user.gamesWon) {
-      let gamesWon = {};
-      nbMatchs = user.gamesWon.length;
       for (let game of user.gamesWon) {
-        let gameInfo = undefined;
+        score.push(game.winnerScore);
+        opponentScore.push(game.looserScore);
         if (game.looser && game.looser.nickname) {
-          gameInfo = { score: game.winnerScore, opponent: game.looser.nickname, opponentScore: game.looserScore };
+          opponent.push(game.looser.nickname);
         } else {
-          gameInfo = { score: game.winnerScore, opponent: 'deleted user', opponentScore: game.looserScore };
+          opponent.push('deleted user');
         }
-        //gamesWon.push({game: gameInfo});
       }
-      gameHistory = { nb: nbMatchs, info: gamesWon };
+      gameHistory = { 'nb': user.gamesWon.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }};
     } else {
-      gameHistory = { nb: 0, info: {} };
+      gameHistory = { nb: 0, infos: {} };
     }
+    score = [];
+    opponent = [];
+    opponentScore = [];    
     if (user.gamesLost) {
-      let gamesLost = {};
-      nbMatchs = user.gamesLost.length;
       for (let game of user.gamesLost) {
-        let gameInfo = undefined;
-        if (game.looser && game.winner.nickname) {
-          gameInfo = { score: game.looserScore, opponent: game.winner.nickname, opponentScore: game.looserScore };
+        score.push(game.looserScore);
+        opponentScore.push(game.winnerScore);
+        if (game.winner && game.winner.nickname) {
+          opponent.push(game.winner.nickname);
         } else {
-          gameInfo = { score: game.looserScore, opponent: 'deleted user', opponentScore: game.winnerScore };
+          opponent.push('deleted user');
         }
-        gamesLost += JSON.stringify(gameInfo);
       }
-      gameHistory = { won: gameHistory, lost: { nb: nbMatchs, info: gamesLost }};
+      gameHistory = { 'won': gameHistory, 'lost': {'nb': user.gamesLost.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }}};
     } else {
-      gameHistory = { won: gameHistory, lost: { nb: 0, info: {} }};
+      gameHistory = { 'won': gameHistory, 'lost': {nb: 0, infos: {} }};
     }
     return gameHistory;
   }
