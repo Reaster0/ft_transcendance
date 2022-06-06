@@ -30,7 +30,7 @@
 		<v-list>
 			<v-list-item-group v-model="selectedItem" >
 
-				<template v-for="(item, index) in items">
+				<template v-for="(item, index) in thechannels">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
 				<v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
@@ -53,7 +53,7 @@
 					</v-list-item-content>
         </v-list-item>
             <v-divider
-              v-if="index < items.length"
+              v-if="index < thechannels.length"
               :key="index"
             ></v-divider>
 				</template>
@@ -469,6 +469,7 @@ export default {
   },
 	setup()
     {
+    let thechannels = [];
 		const connection = ref(null)
 
 		onMounted(() =>{
@@ -485,21 +486,39 @@ export default {
 			}
 
 
-      connection.value.on("channel", i => {
-          console.log(i)
-          // let it = []
-          for (const key in i) {
-              console.log(key)
+      // connection.value.on("channel", i => {
+      //     console.log(i)
+      //     let it = []
+      //     for (const key in i) {
+      //         console.log(key)
+      //         let d = {}
+      //         let value = i[key]
+      //         d.title = value.channelName
+      //         it.push(d)
+      //     }
+      //     console.log(it.items)
+      //     // this.items=it
+      //   })
+        connection.value.on("channel", function(res) {
+
+          console.log('befor update');
+          console.log(thechannels);
+          console.log('creating channel');
+
+          // reset channel
+          thechannels = [];
+          for (const chan of res){
               let d = {}
-              let value = i[key]
-              d.title = value.channelName
-              this.items.push(d)
+              console.log(">>>>>>>>>> " + res[chan])
+              d.title = res[chan].channelName
+              thechannels.push(d)
           }
-          console.log(this.items)
-          // this.items=it
+
+          console.log('after update')
+          console.log(thechannels)
         })
 
-
+        // thechannels;
 //			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
       // TestTest();
 			// SendingMessage();
@@ -605,7 +624,7 @@ export default {
 // 		// 	},
 // 		// })
 
-		return { sendingMessage}
+		return { sendingMessage, thechannels }
 
 	}
 };
