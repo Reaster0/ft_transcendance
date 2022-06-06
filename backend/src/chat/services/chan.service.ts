@@ -22,13 +22,15 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChanI, creator: User): Promise<ChanI> {
-    let { chanName, publicChannel, password } = channel;
-    const name = await this.chanRepository.findOne({ channelName: chanName });
+    let { channelName, publicChannel, password } = channel;
+    console.log(channelName);
+    const name = await this.chanRepository.findOne({ channelName: channelName });
 
 //		if (!name)
 		if (name) //channel name already exist
 			return null;
-		if (/^([a-zA-Z0-9-]+)$/.test(chanName) === false) //isalphanum()
+
+		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
 			return null;
 
 		channel.users.push(creator);

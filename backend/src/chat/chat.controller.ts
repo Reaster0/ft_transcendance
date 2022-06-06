@@ -25,7 +25,7 @@ export class ChatController {
     @Post('publicroom') //localhost:3000/chat/publicroom
     async publicRoom(@Req() req: RequestUser, param: CreateChannelDto): Promise<Boolean> {
        console.log(req); // jus cheking for test
-       let newChan : ChanI = {chanName: param.channame, publicChannel: true, password: ''}
+       let newChan : ChanI = {channelName: param.channame, publicChannel: true, password: ''}
        try {
         await this.chanService.createChannel(newChan, req.user)
        } catch {

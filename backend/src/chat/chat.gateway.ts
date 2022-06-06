@@ -80,12 +80,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const createChannel: ChanI = await this.chanServices.createChannel(channel, client.data.user);
 
     if (!createChannel) {
-      this.logger.log(`ERROR will creating: ${channel.chanName}`);
+      this.logger.log(`ERROR will creating: ${channel.channelName}`);
       return false;
     }
 
     await this.emitChannels();
-    this.logger.log(`new Channel: ${createChannel.chanName} created`);
+    this.logger.log(`new Channel: ${createChannel.channelName} created`);
     return true;
   }
 
@@ -96,7 +96,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     await this.chanServices.deleteChannel(channel);
     await this.emitChannels();
-    this.logger.log(`delete Channel: ${channel.chanName}`);
+    this.logger.log(`delete Channel: ${channel.channelName}`);
   }
 
   //  @UseGuards(AuthChat)
@@ -149,7 +149,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
     await this.chanServices.addSocket({ socketID: client.id, user: client.data.user, chan: channel })
     this.server.to(client.id).emit('previousMessages', messages);
-    this.logger.log(`${client.data.user.username} join ${channel.chanName}`);
+    this.logger.log(`${client.data.user.username} join ${channel.channelName}`);
   }
 
   /********************* Leave Channel ********************/
