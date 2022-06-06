@@ -68,7 +68,7 @@ export class User {
   //-----------------------
 
   // GAME -----------------
-  @Column({ type: 'int', default: 1000 })
+  @Column({ type: 'int', default: 1500 })
   @ApiProperty({ type: Number, description: 'Elo score, based on Elo chess system and modified after each match.' })
   eloScore: number;
 

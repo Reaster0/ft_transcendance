@@ -148,7 +148,7 @@ export class UsersController {
   }
 
   @Get('getHistory/:id')
-  @UseGuards(AuthGuard('jwt'), AuthUser)
+  //@UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: "Getting game history as array of GameHistory." })
   @ApiOkResponse({ description: 'Return game history.' })
@@ -158,8 +158,7 @@ export class UsersController {
   async getHistory(@Param('id') id: string) {
     try {
       this.logger.log("Get('getHistory/:id') route called.");
-      const user = await this.usersService.findUserById(id);
-      return this.usersService.getGameHistory(user);
+      return this.usersService.getGameHistory(parseInt(id));
     } catch(e) {
       throw (e);
     }
