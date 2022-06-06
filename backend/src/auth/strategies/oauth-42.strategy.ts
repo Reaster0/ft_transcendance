@@ -11,7 +11,6 @@ export class OauthStrategy42 extends PassportStrategy(Strategy, '42') {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
       callbackURL: process.env.CALLBACK_URL,
-      //scope: ['public']
     });
   }
 
@@ -21,9 +20,7 @@ export class OauthStrategy42 extends PassportStrategy(Strategy, '42') {
     profile: Profile,
   ): Promise<User> {
     const user = {
-      nickname: profile['username'],
       username: profile['username'],
-      email: profile['emails'][0]['value'],
     };
     return this.authService.validateUser(user);
   }
