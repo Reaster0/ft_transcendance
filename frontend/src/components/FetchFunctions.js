@@ -53,13 +53,12 @@ export async function getAvatarID(id) {
 	})
 }
 
-export async function updateUser(nick, mail) {
+export async function updateUser(nick) {
 	return await fetch("/api/users/settings", {
 		credentials: "include",
 		method: "PATCH",
 		body: JSON.stringify({
 			nickname: nick,
-			email: mail
 		}),
 		headers: {
 			'Content-type': 'application/json; charset=UTF-8',
@@ -68,8 +67,20 @@ export async function updateUser(nick, mail) {
 	.then(res => {
 		console.log(JSON.stringify({
 			nickname: nick,
-			email: mail
 		}))
 		return res.status == 200? true : false
+	})
+}
+
+export async function uploadAvatar(file) {
+	const formData = new FormData()
+	formData.append('avatar', file.target.files[0])
+	return await fetch("/api/users/uploadAvatar", {
+		credentials: "include",
+		method: "POST",
+		body: formData
+		})
+	.then((res)=>{
+		return res.status == 201? true : false 
 	})
 }
