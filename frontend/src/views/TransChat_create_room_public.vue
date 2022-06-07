@@ -158,7 +158,7 @@ export default
               d.title = chan.channel.channelName;
               d.avatar = chan.img
               // scenario for ava
-              // d.avatar = chan.avatar
+              d.avatar = chan.avatar
               thechannels.push(d)
           }
           */
