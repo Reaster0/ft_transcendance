@@ -127,17 +127,11 @@ export default
         //   })
         connection.value.on("channel", function(res) {
 
-          console.log('befor update');
-          console.log(channels);
-          console.log('creating channel');
-
           // reset channel
           channels = [];
           for (const chan of res) 
               channels.push(chan.channelName);
-
-          console.log('after update');
-          console.log(channels)
+              console.log(channels);
         })
       })
 
@@ -155,7 +149,7 @@ export default
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
 
-      return { submitIt }
+      return { submitIt, channels }
   }
 }
 
