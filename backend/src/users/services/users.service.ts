@@ -36,7 +36,7 @@ export class UsersService {
     return user;
   }
 
-  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
+  async retrieveOrCreateUser(createUserDto: CreateUserDto) {
     const { username } = createUserDto;
     let user = await this.userRepository.findOne({ username: username });
     if (user) {
@@ -45,7 +45,7 @@ export class UsersService {
     const nickname = await this.generateNickname(username);
     user = this.userRepository.create({username: username, nickname: nickname});
     // TODO redirect user to modify info page
-    return this.userRepository.save(user);
+    return { user: this.userRepository.save(user), first: true };
   }
 
   async generateNickname(nickname: string): Promise<string> {

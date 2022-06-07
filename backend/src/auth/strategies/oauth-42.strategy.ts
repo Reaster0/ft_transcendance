@@ -14,11 +14,7 @@ export class OauthStrategy42 extends PassportStrategy(Strategy, '42') {
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-  ): Promise<User> {
+  async validate(accessToken: string, refreshToken: string, profile: Profile) {
     const user = {
       username: profile['username'],
     };

@@ -176,7 +176,7 @@ export class UsersController {
   @ApiCreatedResponse({ description: 'The user has been successfully retrieved or registered.', type: User})
   @ApiBadRequestResponse()
   /** End of swagger **/
-  retrieveOrCreateUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  retrieveOrCreateUser(@Body() createUserDto: CreateUserDto) {
     try {
       this.logger.log("Post('getOrRegister') route called for user " + createUserDto.username + ' (username)');
       return this.usersService.retrieveOrCreateUser(createUserDto);
