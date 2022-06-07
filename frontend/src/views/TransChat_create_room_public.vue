@@ -175,6 +175,8 @@ export default
               let d = {}
               console.log(">>>>>>>>>> " + chan.channelName)
               d.title = chan.channelName
+              // scenario for ava
+              // d.avatar = chan.avatar
               thechannels.push(d)
           }
 
