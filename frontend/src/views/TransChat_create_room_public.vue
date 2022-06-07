@@ -146,7 +146,8 @@ export default
           for (const chan of res){
               let d = {}
               console.log(">>>>>>>>>> " + chan.channelName)
-              d.title = chan.channelName
+              d.title = chan.channelName;
+              d.avatar = chan.avatar;
               // scenario for ava
               // d.avatar = chan.avatar
               thechannels.push(d)
@@ -171,11 +172,7 @@ export default
         console.log("name: " + name)
         // console.log("file: " + file)
         if (name)
-<<<<<<< HEAD
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});   
-=======
-          connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
->>>>>>> dbe7b025cd87c0787a5d792fda610420be2819a4
       }
       // console.log(getChannels)
       return { submitIt }
