@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <v-form @submit.prevent="submitIt(this.name)">
+      <v-form @submit.prevent="submitbutton">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -145,6 +145,7 @@ export default
         // if (this.name != '')
         // connection.value.emit('createChannel', {channame, users: [], password, publ});
         console.log("name: " + name)
+        // console.log("file: " + file)
         if (name != '')
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
