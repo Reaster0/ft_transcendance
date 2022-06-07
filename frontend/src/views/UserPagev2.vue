@@ -17,9 +17,19 @@
 					<v-text-field label="nickname" v-model="nickname"/>
 					<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
 				</div>
+				<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="this.$router.push('/2auth')">Enable Two Factor Auth</div>
+				<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
 				<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 			</v-col>
 		</div>
+		<div v-if="!edit" class="overlay">
+			<v-col align-self="start">
+				<h1>WIN</h1>
+			</v-col>
+			<v-col align-self="start">
+				<h1>LOOSE</h1>
+			</v-col>
+			</div>
 	</div>
 </v-container>
 </template>
@@ -37,8 +47,6 @@ export default {
 		ParticlesBg
 	},
 	setup(){
-		// const inputCode = ref(null)
-		// const codeAccepted = ref(false)
 		const user = ref(null)
 		const avatar = ref(null)
 		const edit = ref(false);
@@ -47,15 +55,11 @@ export default {
 		const img_accepted = ref(true);
 
 		onMounted(async () => {
-			user.value = await useStore().getters.whoAmI;
+			const store = useStore()
+			user.value = await store.getters.whoAmI;
 			nickname.value = user.value.nickname
 			avatar.value = await getAvatarID(user.value.id)
-			console.log(avatar.value)
 		})
-
-		// async function submitCode() {
-		// 	codeAccepted.value = await submit2FaCode(inputCode.value)
-		// }
 
 		function imgUp() {
 			document.getElementById("upload").click()
@@ -70,7 +74,15 @@ export default {
 		watch(nickname, async (newnick) => {
 			name_accepted.value = await updateUser(newnick)
 		})
-		return {user, avatar, edit, nickname, name_accepted, imgUp, imgReceived, img_accepted}
+
+		return {user,
+		avatar,
+		edit,
+		nickname,
+		name_accepted,
+		imgUp,
+		imgReceived,
+		img_accepted}
 	}
 }
 </script>
@@ -125,6 +137,7 @@ h1{
   width: 65%;
 //   padding-bottom: 20%;
   margin: 1em;
+  padding: 1em;
   display: flex;
   align-items: center;
   justify-content: center;

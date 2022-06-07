@@ -17,6 +17,20 @@
 		<v-row v-else justify="center">
 			<div class="button_slick big_button Spotnik">FATAL ERROR PLEASE REFRESH</div>
 		</v-row>
+		<div class="params">
+			<div class="button_slick">
+				<h1 class="Spotnik">Ball Params</h1>
+				<h1>Slow</h1>
+				<h1>Mid</h1>
+				<h1>Speedy</h1>
+			</div>
+			<div class="button_slick">
+				<h1 class="Spotnik">Paddle Params</h1>
+				<h1>Small</h1>
+				<h1>Mid</h1>
+				<h1>Chonke</h1>
+			</div>
+		</div>
 	</div>
 	<div v-show="gameStarted">
 		<canvas id="pongGame"></canvas>
@@ -133,7 +147,7 @@ export default {
 				if (params.winner != gameData.value.opponent)
 					winText = "well done neo keep dreaming"
 				else
-					winText = "wake up neo you're loosing"
+					winText = "wake up neo stop loosing"
 			})
 
 			gameSocket.value.on('requestError', () =>{
@@ -178,6 +192,7 @@ export default {
 
 
 		function Play(){
+			//send in the request the params game
 			gameSocket.value.emit('joinGame')
 			searchingGame.value = true
 			console.log("joinGame")
@@ -203,22 +218,23 @@ export default {
 			ctx.arc(gameData.value.ball.x * canvas.width,gameData.value.ball.y * canvas.height, gameData.value.ball.radius * canvas.height, 0, Math.PI*2, false)
 			ctx.closePath()
 			ctx.fill()
-			ctx.font = "75px Monospace"
+			ctx.font = canvas.width/3 + "%" + " Monospace"
 			ctx.fillText(gameData.value.score.leftScore, 0.4 * canvas.width, 0.1 * canvas.height);
 			ctx.fillText(gameData.value.score.rightScore, 0.6 * canvas.width, 0.1 * canvas.height);
 
 			if (winText)
 			{
-				ctx.font = "50px Spotnik"
-				ctx.fillText(winText, 0.25 * canvas.width, 0.5 * canvas.height);
+				winText = "wake up neo stop loosing"
+				ctx.font = canvas.width/4 + "%" + " Spotnik"
+				ctx.fillText(winText, 0.2 * canvas.width, 0.5 * canvas.height);
 			}
 			if (showInfo){
 				if (gameData.value.pos == "left")
 					ctx.drawImage(document.getElementById('left_arrow') , 0.2 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
 				else
 					ctx.drawImage(document.getElementById('right_arrow') , 0.6 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
-				ctx.font = "50px Spotnik"
-				ctx.fillText("VS " + gameData.value.opponent, 0.42 * canvas.width, 0.9 * canvas.height);
+				ctx.font = canvas.width/4 + "%" + " Spotnik"
+				ctx.fillText("VS " + gameData.value.opponent, 0.35 * canvas.width, 0.9 * canvas.height);
 			}
 		}
 
@@ -246,6 +262,17 @@ export default {
 </script>
 
 <style>
+
+h1 {
+	justify: end;
+}
+
+.params{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
 
 .button_slick {
   color: #FFF;
