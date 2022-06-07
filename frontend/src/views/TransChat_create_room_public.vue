@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <v-form @submit.prevent="submitbutton">
+      <v-form @submit.prevent="submitIt(this.name)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -68,11 +68,13 @@
 
 
 <script>
-// import axios from 'axios'
-import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
-import io from 'socket.io-client';
-// import { useStore } from "vuex";
+  import { onMounted } from "@vue/runtime-core"
+  import { ref } from "vue"
+  import io from 'socket.io-client';
+//import { onBeforeRouteLeave } from "vue-router";
+import { useStore } from "vuex";
+  //import { useKeypress } from "vue3-keypress";
+
 
 export default
 {
@@ -101,12 +103,14 @@ export default
 
   setup()
   {
-      var channels = [];
+      // var channels = [];
+      // const connection = ref(null)
+      let thechannels = [];
       const connection = ref(null)
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
-            connection.value = io('http://localhost:3000/chat',{
+            connection.value = io('http://:3000/chat',{
             transportOptions: {
             polling: { extraHeaders: { auth: document.cookie} },
             withCredentials: true
@@ -125,13 +129,38 @@ export default
         //         console.log(value.channelName)
         //     }
         //   })
+        // connection.value.on("channel", function(res) {
+
+        //   console.log('befor update');
+        //   console.log(channels);
+        //   console.log('creating channel');
+
+        //   // reset channel
+        //   channels = [];
+        //   for (const chan of res) 
+        //       channels.push(chan.channelName);
+
+        //   console.log('after update');
+        //   console.log(channels)
+        // })
         connection.value.on("channel", function(res) {
 
+          console.log('befor update');
+          console.log(thechannels);
+          console.log('creating channel');
+
           // reset channel
-          channels = [];
-          for (const chan of res) 
-              channels.push(chan.channelName);
-              console.log(channels);
+          thechannels = [];
+          for (const chan of res){
+              let d = {}
+              console.log(">>>>>>>>>> " + chan.channelName)
+              d.title = chan.channelName
+              thechannels.push(d)
+          }
+
+          console.log('after update')
+          console.log(thechannels)
+          useStore().commit('setChannels' , thechannels)
         })
       })
 
@@ -146,11 +175,11 @@ export default
         // connection.value.emit('createChannel', {channame, users: [], password, publ});
         console.log("name: " + name)
         // console.log("file: " + file)
-        if (name != '')
+        if (name )
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
 
-      return { submitIt, channels }
+      return { submitIt }
   }
 }
 

@@ -472,9 +472,8 @@ export default {
     {
     var thechannels = [];
 		const connection = ref(null)
-    const store = useStore()
     const getChannels = computed(() => {
-			return store.getters.getChannels;
+			return useStore().getters.getChannels;
 		})
 
 		onMounted(() =>{
