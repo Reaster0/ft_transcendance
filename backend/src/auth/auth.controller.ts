@@ -1,13 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UnauthorizedException,
+  UseGuards, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -26,10 +18,14 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  private logger: Logger = new Logger('AuthController');
+
   @ApiOperation({ summary: 'OAuth login via 42 api' })
   @UseGuards(OauthGard42Guard)
   @Get('login-42')
-  login(): void {}
+  login(): void {
+    this.logger.log('login 42');
+  }
 
   @ApiOperation({ summary: 'callback/Redirection after 42 Authentification' })
   @UseGuards(OauthGard42Guard)
@@ -38,6 +34,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
+    this.logger.log('callback');
     const payload: JwtPayload = {
       username: req.user['username'],
       twoFA: false,
@@ -51,6 +48,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('2FAGenQRC')
   async generate(@Req() req: RequestUser, @Res() res: Response) {
+    this.logger.log('2FAGenQRC');
     const { authUrl } = await this.authService.generateTwoFASecret(req.user);
     return this.authService.pipeQrCodeStream(res, authUrl);
   }
@@ -62,6 +60,7 @@ export class AuthController {
     @Body() { twoFACode }: twoFACodeDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<boolean> {
+    this.logger.log('login-2FA');
     const isCodeValid = this.authService.is2FAValide(twoFACode, req.user);
     if (!isCodeValid) {
       throw new UnauthorizedException('Wrong authentification code');
