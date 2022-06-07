@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <v-form @submit.prevent="submitIt(this.name)">
+      <v-form @submit.prevent="submitIt(this.name, this.file)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -167,7 +167,7 @@ export default
         })
       })
 
-      function submitIt(name)
+      function submitIt(name, file)
       {
         // const channame = this.name;
         const password = "";
@@ -178,8 +178,8 @@ export default
         // connection.value.emit('createChannel', {channame, users: [], password, publ});
         console.log("name: " + name)
         // console.log("file: " + file)
-        if (name )
-          connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
+        if (name)
+          connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});   
       }
       // console.log(getChannels)
       return { submitIt }

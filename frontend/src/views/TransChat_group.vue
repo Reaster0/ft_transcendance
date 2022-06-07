@@ -473,7 +473,7 @@ export default {
     // var thechannels = [];
 		const connection = ref(null)
     const store = useStore();
-    const getChannels = store.getters.getChannels;
+    var getChannels = store.getters.getChannels;
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {

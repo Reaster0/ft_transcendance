@@ -22,8 +22,8 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChanI, creator: User): Promise<ChanI> {
-    let { channelName, publicChannel, password } = channel;
-    console.log(channelName);
+    let { channelName, publicChannel, password, avatar } = channel;
+    //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
 
 //		if (!name)
@@ -45,6 +45,9 @@ export class ChanServices {
       }
 		}
 		//console.log(channel);
+
+    if (!avatar.buffer || avatar.byteLength == 0)
+      console.log('must add default avatar');
 		return this.chanRepository.save(channel);
 	}
 
@@ -96,7 +99,7 @@ export class ChanServices {
       .where('chan.publicChannel = true');
     const publicChannels: ChanI[] = await query.getMany(); // gater all public channel
     console.log('---- public  Channel -----');
-    console.log(publicChannels);
+   // console.log(publicChannels);
 
     query = this.chanRepository
       .createQueryBuilder('chan')

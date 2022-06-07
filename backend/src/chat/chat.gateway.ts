@@ -69,7 +69,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //@UseGuards(AuthChat)
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
-    this.logger.log(channel);
+//    this.logger.log(channel);
 
     if (!client.data.user) {
       console.log('didnt got the time to get the user :(');
