@@ -107,6 +107,7 @@ export default
       // const connection = ref(null)
       let thechannels = [];
       const connection = ref(null)
+      const store = useStore();
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
@@ -158,9 +159,10 @@ export default
               thechannels.push(d)
           }
 
-          console.log('after update')
-          console.log(thechannels)
-          useStore().commit('setChannels' , thechannels)
+          console.log('after update');
+          console.log(thechannels);
+          store.commit('setChannels' , thechannels);
+          console.log(store.getters.getChannels);
         })
       })
 

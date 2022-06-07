@@ -472,10 +472,8 @@ export default {
     {
     var thechannels = [];
 		const connection = ref(null)
-    const getChannels = computed(() => {
-			return useStore().getters.getChannels;
-		})
-
+    const store = useStore();
+    const getChannels = store.getters.getChannels;
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
@@ -610,6 +608,7 @@ export default {
 // 		// 		},
 // 		// 	},
 // 		// })
+    console.log('-------------------------------------------------------------');
     console.log("************", getChannels)
 		return { sendingMessage, getChannels }
 
