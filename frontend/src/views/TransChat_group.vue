@@ -30,7 +30,7 @@
 		<v-list>
 			<v-list-item-group v-model="selectedItem" >
 
-				<template v-for="(item, index) in thechannels">
+				<template v-for="(item, index) in getChannels">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
 				<v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
@@ -53,7 +53,7 @@
 					</v-list-item-content>
         </v-list-item>
             <v-divider
-              v-if="index < thechannels.length"
+              v-if="index < items_.length"
               :key="index"
             ></v-divider>
 				</template>
@@ -333,6 +333,7 @@
   import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
+import { computed } from 'vue'
   //import { useKeypress } from "vue3-keypress";
 
   
@@ -471,6 +472,10 @@ export default {
     {
     let thechannels = [];
 		const connection = ref(null)
+    const store = useStore()
+    const getChannels = computed(() => {
+			return store.getters.getChannels;
+		})
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -484,21 +489,6 @@ export default {
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
-
-
-      // connection.value.on("channel", i => {
-      //     console.log(i)
-      //     let it = []
-      //     for (const key in i) {
-      //         console.log(key)
-      //         let d = {}
-      //         let value = i[key]
-      //         d.title = value.channelName
-      //         it.push(d)
-      //     }
-      //     console.log(it.items)
-      //     // this.items=it
-      //   })
         connection.value.on("channel", function(res) {
 
           console.log('befor update');
@@ -516,7 +506,9 @@ export default {
 
           console.log('after update')
           console.log(thechannels)
+          useStore().commit('setChannels' , thechannels)
         })
+
 
         // thechannels;
 //			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
@@ -623,8 +615,8 @@ export default {
 // 		// 		},
 // 		// 	},
 // 		// })
-
-		return { sendingMessage, thechannels }
+    console.log("************", getChannels)
+		return { sendingMessage, getChannels }
 
 	}
 };

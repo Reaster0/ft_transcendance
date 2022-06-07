@@ -10,6 +10,8 @@ const store = createStore({
 		},
 		connected: false,
 		need2fa: false,
+
+		channels: [],
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -20,6 +22,10 @@ const store = createStore({
 		},
 		need2Fa:(state) => {
 			return state.need2fa;
+		},
+
+		getChannels:(state) => {
+			return state.channels;
 		}
 	},
 	mutations: {
@@ -32,9 +38,15 @@ const store = createStore({
 		},
 		setNeed2FA(state, TwoFA) {
 			state.need2fa = TwoFA;
+		},
+
+		setChannels(state, chanarray) {
+			state.channels = chanarray;
 		}
 	},
 	actions: {},
 })
+
+
 
 export default store
