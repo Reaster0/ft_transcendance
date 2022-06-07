@@ -333,7 +333,7 @@
   import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
-import { computed } from 'vue'
+// import { computed } from 'vue'
   //import { useKeypress } from "vue3-keypress";
 
   
@@ -470,12 +470,10 @@ export default {
   },
 	setup()
     {
-    var thechannels = [];
+    // var thechannels = [];
 		const connection = ref(null)
-    const getChannels = computed(() => {
-			return useStore().getters.getChannels;
-		})
-
+    const store = useStore();
+    const getChannels = store.getters.getChannels;
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
@@ -488,21 +486,21 @@ export default {
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
-        connection.value.on("channel", function(res) {
+        // connection.value.on("channel", function(res) {
 
-          thechannels = [];
-          console.log('in channel show up');
-          for (const chan of res){
-              let d = {}
-              console.log(">>>>>>>>>> " + res[chan].chanName)
-              d.title = res[chan].channelName
-              thechannels.push(d)
-          }
+        //   thechannels = [];
+        //   console.log('in channel show up');
+        //   for (const chan of res){
+        //       let d = {}
+        //       console.log(">>>>>>>>>> " + res[chan].chanName)
+        //       d.title = res[chan].channelName
+        //       thechannels.push(d)
+        //   }
 
-          console.log('after update')
-          console.log(thechannels)
-          useStore().commit('setChannels' , thechannels)
-        })
+        //   console.log('after update')
+        //   console.log(thechannels)
+        //   useStore().commit('setChannels' , thechannels)
+        // })
 
 
         // thechannels;
@@ -610,6 +608,7 @@ export default {
 // 		// 		},
 // 		// 	},
 // 		// })
+    console.log('-------------------------------------------------------------');
     console.log("************", getChannels)
 		return { sendingMessage, getChannels }
 

@@ -73,7 +73,7 @@
   import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
-import { computed } from 'vue'
+// import { computed } from 'vue'
   //import { useKeypress } from "vue3-keypress";
 
 
@@ -108,10 +108,7 @@ export default
       // const connection = ref(null)
       let thechannels = [];
       const connection = ref(null)
-      const getChannels = computed(() => {
-        return useStore().getters.getChannels;
-      })
-
+      const store = useStore();
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
@@ -163,9 +160,10 @@ export default
               thechannels.push(d)
           }
 
-          console.log('after update')
-          console.log(thechannels)
-          useStore().commit('setChannels' , thechannels)
+          console.log('after update');
+          console.log(thechannels);
+          store.commit('setChannels' , thechannels);
+          console.log(store.getters.getChannels);
         })
       })
 
@@ -183,7 +181,7 @@ export default
         if (name )
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
-      console.log(getChannels)
+      // console.log(getChannels)
       return { submitIt }
   }
 }
