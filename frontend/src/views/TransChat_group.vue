@@ -470,11 +470,10 @@ export default {
   },
 	setup()
     {
-    let thechannels = [];
+    var thechannels = [];
 		const connection = ref(null)
-    const store = useStore()
     const getChannels = computed(() => {
-			return store.getters.getChannels;
+			return useStore().getters.getChannels;
 		})
 
 		onMounted(() =>{
@@ -491,15 +490,11 @@ export default {
 			}
         connection.value.on("channel", function(res) {
 
-          console.log('befor update');
-          console.log(thechannels);
-          console.log('creating channel');
-
-          // reset channel
           thechannels = [];
+          console.log('in channel show up');
           for (const chan of res){
               let d = {}
-              console.log(">>>>>>>>>> " + res[chan])
+              console.log(">>>>>>>>>> " + res[chan].chanName)
               d.title = res[chan].channelName
               thechannels.push(d)
           }

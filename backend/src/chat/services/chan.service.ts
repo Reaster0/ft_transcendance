@@ -74,9 +74,9 @@ export class ChanServices {
   }
 
   async updateChannel(channel: ChanI, info: any): Promise<Boolean> {
-		const { applyPassword, password, removePassword } = info;
+		const { addPassword, password, removePassword } = info;
 
-    if (applyPassword && password) {
+    if (addPassword && password) {
       if (/^([a-zA-Z0-9]+)$/.test(password) === false)
         return false;
       const salt = await bcrypt.genSalt();
@@ -132,6 +132,10 @@ export class ChanServices {
   async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
     console.log(userId, channel); //this look strange
     return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
+  }
+
+  async findChannel(channelName: string): Promise<Chan> {
+    return this.chanRepository.findOne({channelName});
   }
 
   //-------------------------------------------------//

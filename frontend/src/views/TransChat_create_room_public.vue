@@ -73,7 +73,6 @@
   import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 // import { useStore } from "vuex";
-// import { computed } from 'vue'
   //import { useKeypress } from "vue3-keypress";
 
 
@@ -108,14 +107,10 @@ export default
       // const connection = ref(null)
       let thechannels = [];
       const connection = ref(null)
-      // const store = useStore()
-      // const getChannels = computed(() => {
-      //   return store.getters.getChannels;
-      // })
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
-            connection.value = io('http://localhost:3000/chat',{
+            connection.value = io('http://:3000/chat',{
             transportOptions: {
             polling: { extraHeaders: { auth: document.cookie} },
             withCredentials: true
@@ -158,8 +153,8 @@ export default
           thechannels = [];
           for (const chan of res){
               let d = {}
-              console.log(">>>>>>>>>> " + res[chan])
-              d.title = res[chan].channelName
+              console.log(">>>>>>>>>> " + chan.channelName)
+              d.title = chan.channelName
               thechannels.push(d)
           }
 
@@ -180,11 +175,11 @@ export default
         // connection.value.emit('createChannel', {channame, users: [], password, publ});
         console.log("name: " + name)
         // console.log("file: " + file)
-        if (name != '')
+        if (name )
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
 
-      return { submitIt}
+      return { submitIt }
   }
 }
 
