@@ -146,7 +146,8 @@ export default
           for (const chan of res){
               let d = {}
               console.log(">>>>>>>>>> " + chan.channelName)
-              d.title = chan.channelName
+              d.title = chan.channelName;
+              d.avatar = chan.avatar;
               // scenario for ava
               d.avatar = chan.avatar
               thechannels.push(d)
