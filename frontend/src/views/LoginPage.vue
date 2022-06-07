@@ -1,27 +1,26 @@
 <template>
-	<v-container v-if="need2fa">
-		<v-col md="4" offset-md="4">
-			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="Input 2FA Code" color="white" counter="6" maxlength="6"></v-text-field>
-			<h1 class="text">need to enter 2fa code</h1>
-		</v-col>
-	</v-container>
-	<div v-else-if="!isLog">
-		<v-container>
-			<v-row justify="center">
-				<v-btn loading rounded elevation="5" outlined width="500" height="500" href="/api/auth/login-42">
-					<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
-					AUTH
-				</v-btn>
-			</v-row>
-		</v-container>
+<v-col align="center">
+	<div class="field_slick">
+		<div v-if="need2fa">
+			<v-text-field @keydown.enter="submitCode" v-model="inputCode" label="Input 2FA Code" color="white" maxlength="6"></v-text-field>
+			<h1 class="Spotnik">Enter Two Factor Code</h1>
+		</div>
+		<div v-else>
+			<h1 class="Spotnik">Click To Connect</h1>
+			<v-btn loading rounded elevation="5" outlined width="60%" height="20%" href="/api/auth/login-42">
+				<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
+				<div class="Spotnik big_text">AUTH</div>
+			</v-btn>
+		</div>
 	</div>
+</v-col>
 </template>
 
 <script>
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { computed } from 'vue'
-import { submit2FaCode, getUserInfo } from "../components/FetchFunctions"
+import { submit2FaCode } from "../components/FetchFunctions"
 import { useRouter } from "vue-router";
 
 export default {
@@ -30,9 +29,7 @@ export default {
 		const router = useRouter()
 		const inputCode = ref(null)
 		const store = useStore()
-		const isLog = computed(() => {
-			return store.getters.isConnected;
-		})
+
 		const need2fa = computed(() => {
 			return store.getters.need2Fa;
 		})
@@ -41,20 +38,36 @@ export default {
 			if(await submit2FaCode(inputCode.value))
 			{
 				store.commit('setNeed2FA', false)
-				store.commit('setUser', await getUserInfo())
+				// store.commit('setUser', await getUserInfo())
 				router.push('/user')
 			}
 		}
 
-		return {isLog, need2fa, inputCode, submitCode}
+		return {need2fa, inputCode, submitCode}
 	},
 }
 </script>
 
 <style scoped>
-.text{
+.big_text{
 	font-size: 3em;
 	font-weight: bold;
-	color: #04BBEC;
+}
+
+.field_slick {
+  color: #FFF;
+  max-width: 50%;
+  border: 2px solid rgb(216, 2, 134);
+  background-color: #162944;
+  border-radius: 0px;
+  padding: 18px 36px;
+  margin: 30px auto 0 auto;
+  font-family: monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  box-shadow: inset 0 0 0 0 #D80286;
+  -webkit-transition: ease-out 0.4s;
+  -moz-transition: ease-out 0.4s;
+  transition: ease-out 0.4s;
 }
 </style>
