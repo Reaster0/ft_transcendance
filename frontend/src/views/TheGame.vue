@@ -2,20 +2,20 @@
 <div>
 	<div v-if="!gameStarted">
 		<v-row justify="center">
-				<div class="button_slick">W ⬆️</div>
-				<div class="button_slick">S ⬇️</div>
+				<div class="button_slick Spotnik">W ⬆️</div>
+				<div class="button_slick Spotnik">S ⬇️</div>
 		</v-row>
 		<div v-if="!fatalError">
 			<v-container>
 				<v-row justify="center">
-					<div v-if="!searchingGame" class="button_slick button_slide big_button" @click="Play">SearchGame</div>
-					<div v-else-if="!matchId" class="button_slick big_button">Searching A Game...</div>
-					<div v-else class="button_slide button_slick big_button" @click="AcceptGame">a game has been found!</div>
+					<div v-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
+					<div v-else-if="!matchId" class="button_slick big_button Spotnik">Searching A Game</div>
+					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found!</div>
 				</v-row>
 			</v-container>
 		</div>
 		<v-row v-else justify="center">
-			<div class="button_slick big_button ">FATAL ERROR PLEASE REFRESH</div>
+			<div class="button_slick big_button Spotnik">FATAL ERROR PLEASE REFRESH</div>
 		</v-row>
 	</div>
 	<div v-show="gameStarted">
@@ -209,7 +209,7 @@ export default {
 
 			if (winText)
 			{
-				ctx.font = "50px Monospace"
+				ctx.font = "50px Spotnik"
 				ctx.fillText(winText, 0.25 * canvas.width, 0.5 * canvas.height);
 			}
 			if (showInfo){
@@ -217,7 +217,7 @@ export default {
 					ctx.drawImage(document.getElementById('left_arrow') , 0.2 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
 				else
 					ctx.drawImage(document.getElementById('right_arrow') , 0.6 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
-				ctx.font = "50px Monospace"
+				ctx.font = "50px Spotnik"
 				ctx.fillText("VS " + gameData.value.opponent, 0.42 * canvas.width, 0.9 * canvas.height);
 			}
 		}
@@ -254,7 +254,7 @@ export default {
   border-radius: 0px;
   padding: 18px 36px;
   display: inline-block;
-  font-family: monospace;
+  /* font-family: monospace; */
   font-size: 14px;
   letter-spacing: 1px;
   box-shadow: inset 0 0 0 0 #D80286;

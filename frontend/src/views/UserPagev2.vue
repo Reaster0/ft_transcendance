@@ -5,19 +5,19 @@
 		<div class="overlay">
 			<v-col v-if="!edit" align="center">
 				<v-img :src="avatar" max-width="300px"/>
-				<h1>{{user.nickname}}</h1>
+				<h1>{{nickname}}</h1>
 				<h1>{{user.eloScore}}📈</h1>
-				<div class="button_slick button_slide" @click="edit = !edit">Edit</div>
+				<div class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
 			</v-col>
 			<v-col v-else align="center">
 				<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
-				<h1 v-if="!img_accepted" class="error_msg">Img Too Big</h1>
+				<h1 v-if="!img_accepted" class="error_msg Spotnik">Img Too Big</h1>
 				<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
 				<div class="field_slick big_button">
 					<v-text-field label="nickname" v-model="nickname"/>
-					<h1 v-if="!name_accepted" class="error_msg">Choose another name</h1>
+					<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
 				</div>
-				<div class="button_slick button_slide big_button" @click="edit = !edit">Go Back</div>
+				<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 			</v-col>
 		</div>
 	</div>
@@ -63,6 +63,8 @@ export default {
 
 		async function imgReceived(e) {
 			img_accepted.value = await uploadAvatar(e)
+			if (img_accepted.value)
+				avatar.value = await getAvatarID(user.value.id)
 		}
 
 		watch(nickname, async (newnick) => {
@@ -102,8 +104,8 @@ export default {
 h1{
 	justify-self: center;
 	font-size: 4em;
- font-weight: bold;
- font-family: 'Rajdhani', sans-serif;
+	font-weight: bold;
+	font-family: 'Rajdhani', sans-serif;
 	color: #04BBEC;
 	// margin-left: 20%;
 }
