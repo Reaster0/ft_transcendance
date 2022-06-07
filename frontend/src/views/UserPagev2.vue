@@ -22,6 +22,14 @@
 				<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 			</v-col>
 		</div>
+		<div v-if="!edit" class="overlay">
+			<v-col align-self="start">
+				<h1>WIN</h1>
+			</v-col>
+			<v-col align-self="start">
+				<h1>LOOSE</h1>
+			</v-col>
+			</div>
 	</div>
 </v-container>
 </template>
@@ -51,7 +59,6 @@ export default {
 			user.value = await store.getters.whoAmI;
 			nickname.value = user.value.nickname
 			avatar.value = await getAvatarID(user.value.id)
-			console.log(user.value)
 		})
 
 		function imgUp() {
@@ -130,6 +137,7 @@ h1{
   width: 65%;
 //   padding-bottom: 20%;
   margin: 1em;
+  padding: 1em;
   display: flex;
   align-items: center;
   justify-content: center;
