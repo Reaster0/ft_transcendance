@@ -171,7 +171,7 @@ export class UsersService {
   }
 
   currentUser(user: User): Partial<User> {
-    const { username, twoFASecret, is2FAEnabled, ...res } = user;
+    const { username, twoFASecret, ...res } = user;
     return res;
   }
 
