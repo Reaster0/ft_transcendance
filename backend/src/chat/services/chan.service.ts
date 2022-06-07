@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,9 @@ import { ChanI } from '../interfaces/channel.interface';
 import { ChanUserI } from '../interfaces/channelUser.interface';
 import { JoinedSocketI } from '../interfaces/sockets-connected-to-channel.interface';
 import * as bcrypt from 'bcrypt';
+import { join } from 'path';
+import { Readable } from 'stream';
+import { createReadStream } from 'fs';
 
 @Injectable()
 export class ChanServices {
@@ -139,6 +142,21 @@ export class ChanServices {
 
   async findChannel(channelName: string): Promise<Chan> {
     return this.chanRepository.findOne({channelName});
+  }
+
+  getImageFromBuffer(channels: ChanI[]): StreamableFile[] {
+    var image: StreamableFile[] = [];
+    const defaultStream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR),);
+
+    for (const chan of channels) {
+      if (!chan.avatar || chan.avatar.byteLength === 0) {
+        image.push(new StreamableFile(defaultStream));
+      } else {
+        const stream = Readable.from(chan.avatar);
+        image.push(new StreamableFile(stream));
+      }
+    }
+    return image;
   }
 
   //-------------------------------------------------//

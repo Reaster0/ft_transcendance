@@ -143,16 +143,25 @@ export default
 
           // reset channel
           thechannels = [];
+          const length= res.channels.length;
+          console.log('lenght: ', length);
+          for (var i = 0; i < length; ++i) {
+            var data = {};
+            data.title = res.channels[i].channelName;
+            data.avatar = res.img[i]
+            thechannels.push(data);
+          }
+          /*
           for (const chan of res){
               let d = {}
-              console.log(">>>>>>>>>> " + chan.channelName)
-              d.title = chan.channelName;
-              d.avatar = chan.avatar;
+              console.log(">>>>>>>>>> " + chan.channel.channelName)
+              d.title = chan.channel.channelName;
+              d.avatar = chan.img
               // scenario for ava
               // d.avatar = chan.avatar
               thechannels.push(d)
           }
-
+          */
           console.log('after update');
           console.log(thechannels);
           store.commit('setChannels' , thechannels);
