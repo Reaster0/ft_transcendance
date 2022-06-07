@@ -59,7 +59,7 @@
               placeholder="name"
               v-model="name"
             ></v-text-field>
-          <button class="button button1">SUBMIT</button>
+          <button class="button">SUBMIT</button>
         
         </v-col>
 
@@ -76,10 +76,7 @@
   import { onMounted } from "@vue/runtime-core"
   import { ref } from "vue"
   import io from 'socket.io-client';
-//import { onBeforeRouteLeave } from "vue-router";
-import { useStore } from "vuex";
-// import { computed } from 'vue'
-  //import { useKeypress } from "vue3-keypress";
+  import { useStore } from "vuex";
 
 
 export default
@@ -122,8 +119,6 @@ export default
 
   setup()
   {
-      // var channels = [];
-      // const connection = ref(null)
       let thechannels = [];
       const connection = ref(null)
       const store = useStore();
@@ -141,30 +136,7 @@ export default
           console.log("the error is:" + error)
         }
 
-        // connection.value.on("channel", chans => {
-        //     console.log(chans)
-        //     for (const key in chans) {
-        //         let value = chans[key];
-        //         // this.items.push(value.channelName)
-        //         console.log(value.channelName)
-        //     }
-        //   })
-        // connection.value.on("channel", function(res) {
-
-        //   console.log('befor update');
-        //   console.log(channels);
-        //   console.log('creating channel');
-
-        //   // reset channel
-        //   channels = [];
-        //   for (const chan of res) 
-        //       channels.push(chan.channelName);
-
-        //   console.log('after update');
-        //   console.log(channels)
-        // })
         connection.value.on("channel", function(res) {
-
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
@@ -253,8 +225,8 @@ export default
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
+  background-color: rgb(0,0,255);
 }
 
-.button {background-color: rgb(0,0,255);} /* Blue */
 
 </style>
