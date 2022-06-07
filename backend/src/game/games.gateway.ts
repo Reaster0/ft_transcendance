@@ -122,7 +122,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       if (!data.ballSize || !data.ballSpeed) {
-        client.emit('MissingFeatures');
+        client.emit('FeaturesIncorrect');
         return;
       }
       const feature = this.gamesService.validFeatures(data.ballSize, data.ballSpeed);
