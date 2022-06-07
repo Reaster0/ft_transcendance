@@ -62,7 +62,7 @@ export default {
 			try {
 				gameSocket.value = io('http://:3000/game',{
 				transportOptions: {
-				polling: { extraHeaders: { auth: document.cookie} },
+				polling: { extraHeaders: { auth: document.cookie }},
 				withCredentials: true
 				}})
 				console.log("starting connection to websocket")

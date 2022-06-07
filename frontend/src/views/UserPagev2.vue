@@ -3,12 +3,23 @@
 	<particles-bg type="cobweb" :bg="true"/>
 	<div class="center">
 		<div class="overlay">
-			<v-col align="center">
+			<v-col v-if="!edit" align="center">
+				<v-img :src="avatar" max-width="300px"/>
 				<h1>{{user.nickname}}</h1>
 				<h1>{{user.eloScore}}📈</h1>
+				<div class="button_slick button_slide" @click="edit = !edit">Edit</div>
+			</v-col>
+			<v-col v-else align="center">
+				<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
+				<h1 v-if="!img_accepted" class="error_msg">Img Too Big</h1>
+				<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
+				<div class="field_slick big_button">
+					<v-text-field label="nickname" v-model="nickname"/>
+					<h1 v-if="!name_accepted" class="error_msg">Choose another name</h1>
+				</div>
+				<div class="button_slick button_slide big_button" @click="edit = !edit">Go Back</div>
 			</v-col>
 		</div>
-
 	</div>
 </v-container>
 </template>
@@ -16,9 +27,10 @@
 <script>
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { getAvatarID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
+import { updateUser, uploadAvatar } from "../components/FetchFunctions"
 
 export default {
 	components: {
@@ -29,25 +41,63 @@ export default {
 		// const codeAccepted = ref(false)
 		const user = ref(null)
 		const avatar = ref(null)
-		const test = "haha"
+		const edit = ref(false);
+		const nickname = ref(null);
+		const name_accepted = ref(true);
+		const img_accepted = ref(true);
 
 		onMounted(async () => {
 			user.value = await useStore().getters.whoAmI;
+			nickname.value = user.value.nickname
 			avatar.value = await getAvatarID(user.value.id)
 			console.log(avatar.value)
 		})
 
-
 		// async function submitCode() {
 		// 	codeAccepted.value = await submit2FaCode(inputCode.value)
 		// }
-		return {user, avatar, test}
+
+		function imgUp() {
+			document.getElementById("upload").click()
+		}
+
+		async function imgReceived(e) {
+			img_accepted.value = await uploadAvatar(e)
+		}
+
+		watch(nickname, async (newnick) => {
+			name_accepted.value = await updateUser(newnick)
+		})
+		return {user, avatar, edit, nickname, name_accepted, imgUp, imgReceived, img_accepted}
 	}
 }
 </script>
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
+
+.width-force {
+	width: 200px;
+}
+
+.big_button {  
+  margin: 20px auto 0 auto;
+}
+
+.field_slick {
+  color: #FFF;
+  border: 2px solid rgb(216, 2, 134);
+  background-color: #162944;
+  border-radius: 0px;
+  padding: 18px 36px;
+  font-family: monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  box-shadow: inset 0 0 0 0 #D80286;
+  -webkit-transition: ease-out 0.4s;
+  -moz-transition: ease-out 0.4s;
+  transition: ease-out 0.4s;
+}
 
 h1{
 	justify-self: center;
@@ -56,6 +106,10 @@ h1{
  font-family: 'Rajdhani', sans-serif;
 	color: #04BBEC;
 	// margin-left: 20%;
+}
+
+.error_msg{
+	color: #D80286;
 }
 
 .center{
@@ -67,7 +121,7 @@ h1{
 
 .overlay {
   width: 65%;
-  padding-bottom: 20%;
+//   padding-bottom: 20%;
   margin: 1em;
   display: flex;
   align-items: center;
