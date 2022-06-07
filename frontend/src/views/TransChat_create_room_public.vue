@@ -148,7 +148,7 @@ export default
               console.log(">>>>>>>>>> " + chan.channelName)
               d.title = chan.channelName
               // scenario for ava
-              // d.avatar = chan.avatar
+              d.avatar = chan.avatar
               thechannels.push(d)
           }
 
