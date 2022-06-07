@@ -40,7 +40,11 @@
             </div>
         <v-col cols="12" sm="6">
           <!-- <input type="file" ref="file" style="display: none"> -->
-          <input type="file" @change="previewFiles" multiple >
+          <!-- <input type="file" @change="getFile"> -->
+          <input type="file" @change="previewFiles">
+          <!-- <div >
+            <img :src="file" />
+          </div> -->
             <!-- <v-btn elevation="2" class="offsetmess" @change="previewFiles" v-model="file">
               Upload avatar
               <v-divider class="mx-2" vertical></v-divider>
@@ -56,6 +60,7 @@
               v-model="name"
             ></v-text-field>
           <button class="button button1">SUBMIT</button>
+        
         </v-col>
 
               
@@ -99,6 +104,19 @@ export default
     previewFiles(event) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
+    },
+    getFile(event) {
+      var files = event.target.files || event.dataTransfer.files;
+      if (!files.length)
+        return;
+      this.createImage(files[0]);
+    },
+    createImage(img) {
+      var reader = new FileReader();
+      reader.onload = (event) => {
+        this.file = event.target.result;
+      };
+      reader.readAsDataURL(img);
     }
   },
 
@@ -178,7 +196,7 @@ export default
         // connection.value.emit('createChannel', {channame, users: [], password, publ});
         console.log("name: " + name)
         // console.log("file: " + file)
-        if (name )
+        if (name)
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
       // console.log(getChannels)
