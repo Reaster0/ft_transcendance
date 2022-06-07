@@ -40,7 +40,11 @@
             </div>
         <v-col cols="12" sm="6">
           <!-- <input type="file" ref="file" style="display: none"> -->
-          <input type="file" @change="previewFiles" multiple >
+          <!-- <input type="file" @change="getFile"> -->
+          <input type="file" @change="previewFiles">
+          <!-- <div >
+            <img :src="file" />
+          </div> -->
             <!-- <v-btn elevation="2" class="offsetmess" @change="previewFiles" v-model="file">
               Upload avatar
               <v-divider class="mx-2" vertical></v-divider>
@@ -55,7 +59,8 @@
               placeholder="name"
               v-model="name"
             ></v-text-field>
-          <button class="button button1">SUBMIT</button>
+          <button class="button">SUBMIT</button>
+        
         </v-col>
 
               
@@ -71,10 +76,7 @@
   import { onMounted } from "@vue/runtime-core"
   import { ref } from "vue"
   import io from 'socket.io-client';
-//import { onBeforeRouteLeave } from "vue-router";
-import { useStore } from "vuex";
-// import { computed } from 'vue'
-  //import { useKeypress } from "vue3-keypress";
+  import { useStore } from "vuex";
 
 
 export default
@@ -99,13 +101,24 @@ export default
     previewFiles(event) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
+    },
+    getFile(event) {
+      var files = event.target.files || event.dataTransfer.files;
+      if (!files.length)
+        return;
+      this.createImage(files[0]);
+    },
+    createImage(img) {
+      var reader = new FileReader();
+      reader.onload = (event) => {
+        this.file = event.target.result;
+      };
+      reader.readAsDataURL(img);
     }
   },
 
   setup()
   {
-      // var channels = [];
-      // const connection = ref(null)
       let thechannels = [];
       const connection = ref(null)
       const store = useStore();
@@ -123,30 +136,7 @@ export default
           console.log("the error is:" + error)
         }
 
-        // connection.value.on("channel", chans => {
-        //     console.log(chans)
-        //     for (const key in chans) {
-        //         let value = chans[key];
-        //         // this.items.push(value.channelName)
-        //         console.log(value.channelName)
-        //     }
-        //   })
-        // connection.value.on("channel", function(res) {
-
-        //   console.log('befor update');
-        //   console.log(channels);
-        //   console.log('creating channel');
-
-        //   // reset channel
-        //   channels = [];
-        //   for (const chan of res) 
-        //       channels.push(chan.channelName);
-
-        //   console.log('after update');
-        //   console.log(channels)
-        // })
         connection.value.on("channel", function(res) {
-
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
@@ -157,6 +147,8 @@ export default
               let d = {}
               console.log(">>>>>>>>>> " + chan.channelName)
               d.title = chan.channelName
+              // scenario for ava
+              // d.avatar = chan.avatar
               thechannels.push(d)
           }
 
@@ -179,7 +171,11 @@ export default
         console.log("name: " + name)
         // console.log("file: " + file)
         if (name)
+<<<<<<< HEAD
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});   
+=======
+          connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
+>>>>>>> dbe7b025cd87c0787a5d792fda610420be2819a4
       }
       // console.log(getChannels)
       return { submitIt }
@@ -233,8 +229,8 @@ export default
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
+  background-color: rgb(0,0,255);
 }
 
-.button {background-color: rgb(0,0,255);} /* Blue */
 
 </style>

@@ -21,7 +21,9 @@
             </div>
           </v-toolbar-title>
           <v-spacer></v-spacer>
-          <button class="btn btn-primary btn-block" :style="{color: ' #ffffff'}">SUBMIT</button>
+            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+              OK
+            </v-btn>
         </v-toolbar>
 
 
@@ -43,6 +45,8 @@
               placeholder="name"
               v-model="name"
             ></v-text-field>
+
+            <button class="button">SUBMIT</button>
         </v-col>
 
 
@@ -55,9 +59,11 @@
 
 
 <script>
-import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
-import io from 'socket.io-client';
+  import { onMounted } from "@vue/runtime-core"
+  import { ref } from "vue"
+  import io from 'socket.io-client';
+  import { useStore } from "vuex";
+
 export default
 {
   name: "NewRoomPrivate",
@@ -84,6 +90,8 @@ export default
   setup()
   {
       const connection = ref(null)
+      let thechannels = [];
+      const store = useStore();
       onMounted(() =>{
         console.log(document.cookie.toString())
         try {
@@ -97,6 +105,28 @@ export default
         } catch (error) {
           console.log("the error is:" + error)
         }
+
+        connection.value.on("channel", function(res) {
+          console.log('befor update');
+          console.log(thechannels);
+          console.log('creating channel');
+
+          // reset channel
+          thechannels = [];
+          for (const chan of res){
+              let d = {}
+              console.log(">>>>>>>>>> " + chan.channelName)
+              d.title = chan.channelName
+              // scenario for ava
+              // d.avatar = chan.avatar
+              thechannels.push(d)
+          }
+
+          console.log('after update');
+          console.log(thechannels);
+          store.commit('setChannels' , thechannels);
+          console.log(store.getters.getChannels);
+        })
       })
 
       function submitIt(name)
@@ -149,6 +179,19 @@ export default
 
 .row>.col {
   flex-basis: auto;
+}
+
+.button {
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  background-color: rgb(0,0,255);
 }
 
 </style>

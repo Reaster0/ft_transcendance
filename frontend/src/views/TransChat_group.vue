@@ -40,13 +40,13 @@
 					v-else
 					:key="item.title"
 				>
-          <!-- <v-btn elevation="0" min-height="50px"  max-width="50px">
+          <v-btn elevation="0" min-height="50px"  max-width="50px">
 					<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
 					<v-list-item-avatar >
-					<v-img :src="item.photo"  min-width="50px" min-height="50px"></v-img>
+					<v-img :src="item.avatar"  min-width="50px" min-height="50px"></v-img>
 					</v-list-item-avatar>
 					</v-badge>
-          </v-btn> -->
+          </v-btn>
 					<v-list-item-content>
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
 					<!-- <v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle> -->
