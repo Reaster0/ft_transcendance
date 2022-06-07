@@ -68,11 +68,14 @@
 
 
 <script>
-// import axios from 'axios'
-import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
-import io from 'socket.io-client';
-// import { useStore } from "vuex";
+  import { onMounted } from "@vue/runtime-core"
+  import { ref } from "vue"
+  import io from 'socket.io-client';
+//import { onBeforeRouteLeave } from "vue-router";
+import { useStore } from "vuex";
+import { computed } from 'vue'
+  //import { useKeypress } from "vue3-keypress";
+
 
 export default
 {
@@ -101,8 +104,14 @@ export default
 
   setup()
   {
-      var channels = [];
+      // var channels = [];
+      // const connection = ref(null)
+      let thechannels = [];
       const connection = ref(null)
+      const store = useStore()
+      const getChannels = computed(() => {
+        return store.getters.getChannels;
+      })
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
@@ -125,19 +134,38 @@ export default
         //         console.log(value.channelName)
         //     }
         //   })
+        // connection.value.on("channel", function(res) {
+
+        //   console.log('befor update');
+        //   console.log(channels);
+        //   console.log('creating channel');
+
+        //   // reset channel
+        //   channels = [];
+        //   for (const chan of res) 
+        //       channels.push(chan.channelName);
+
+        //   console.log('after update');
+        //   console.log(channels)
+        // })
         connection.value.on("channel", function(res) {
 
           console.log('befor update');
-          console.log(channels);
+          console.log(thechannels);
           console.log('creating channel');
 
           // reset channel
-          channels = [];
-          for (const chan of res) 
-              channels.push(chan.channelName);
+          thechannels = [];
+          for (const chan of res){
+              let d = {}
+              console.log(">>>>>>>>>> " + res[chan])
+              d.title = res[chan].channelName
+              thechannels.push(d)
+          }
 
-          console.log('after update');
-          console.log(channels)
+          console.log('after update')
+          console.log(thechannels)
+          useStore().commit('setChannels' , thechannels)
         })
       })
 
@@ -156,7 +184,7 @@ export default
           connection.value.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});   
       }
 
-      return { submitIt }
+      return { submitIt, getChannels }
   }
 }
 
