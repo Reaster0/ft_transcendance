@@ -17,6 +17,20 @@
 		<v-row v-else justify="center">
 			<div class="button_slick big_button Spotnik">FATAL ERROR PLEASE REFRESH</div>
 		</v-row>
+		<div class="params">
+			<div class="button_slick">
+				<h1 class="Spotnik">Ball Params</h1>
+				<h1>Slow</h1>
+				<h1>Mid</h1>
+				<h1>Speedy</h1>
+			</div>
+			<div class="button_slick">
+				<h1 class="Spotnik">Paddle Params</h1>
+				<h1>Small</h1>
+				<h1>Mid</h1>
+				<h1>Chonke</h1>
+			</div>
+		</div>
 	</div>
 	<div v-show="gameStarted">
 		<canvas id="pongGame"></canvas>
@@ -248,6 +262,17 @@ export default {
 </script>
 
 <style>
+
+h1 {
+	justify: end;
+}
+
+.params{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
 
 .button_slick {
   color: #FFF;
