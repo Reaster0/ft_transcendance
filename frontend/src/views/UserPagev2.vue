@@ -1,7 +1,9 @@
 <template>
-<v-container v-if="user">
+<v-container fluid v-if="user">
+	<v-row>
+		
 	<particles-bg type="cobweb" :bg="true"/>
-	<div class="center">
+		<v-col class="center">
 		<div class="overlay">
 			<v-col v-if="!edit" align="center">
 				<v-img :src="avatar" max-width="300px"/>
@@ -22,6 +24,8 @@
 				<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 			</v-col>
 		</div>
+		</v-col>
+		<v-col class="center">
 		<div v-if="!edit" class="overlay">
 			<v-col align-self="start">
 				<h1>WIN</h1>
@@ -30,7 +34,8 @@
 				<h1>LOOSE</h1>
 			</v-col>
 			</div>
-	</div>
+		</v-col>
+</v-row>
 </v-container>
 </template>
 
@@ -134,7 +139,8 @@ h1{
 }
 
 .overlay {
-  width: 65%;
+  width: 500px;
+  height: 700px;
 //   padding-bottom: 20%;
   margin: 1em;
   padding: 1em;
