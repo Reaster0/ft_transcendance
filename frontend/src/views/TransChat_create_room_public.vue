@@ -122,6 +122,11 @@ export default
       let thechannels = [];
       const connection = ref(null)
       const store = useStore();
+      
+
+
+
+
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
@@ -149,7 +154,6 @@ export default
               d.title = chan.channelName;
               d.avatar = chan.avatar;
               // scenario for ava
-              d.avatar = chan.avatar
               thechannels.push(d)
           }
 
