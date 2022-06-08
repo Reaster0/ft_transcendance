@@ -199,7 +199,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const connections: connectedSocketI[] = await this.connectService.findAll();
     for (const connection of connections) {
       const channels: ChanI[] = await this.chanServices.getChannelsFromUser(connection.user.id);
-      this.server.to(connection.socketID).emit('channel', channels);
+      const img = this.chanServices.getImageFromBuffer(channels);
+      this.server.to(connection.socketID).emit('channel', {channels, img});
     }
   }
 }
