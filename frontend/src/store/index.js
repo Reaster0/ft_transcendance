@@ -12,6 +12,7 @@ const store = createStore({
 		need2fa: false,
 
 		channels: [],
+		joinedChannel: false,
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -26,7 +27,10 @@ const store = createStore({
 
 		getChannels:(state) => {
 			return state.channels;
-		}
+		},
+		isChannelJoined:(state) => {
+			return state.joinedChannel;
+		},
 	},
 	mutations: {
 		setUser(state, user) {
@@ -42,7 +46,10 @@ const store = createStore({
 
 		setChannels(state, chanarray) {
 			state.channels = chanarray;
-		}
+		},
+		setChannelJoinedStatus(state, thestatus) {
+			state.joinedChannel = thestatus;
+		},
 	},
 	actions: {},
 })

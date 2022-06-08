@@ -153,7 +153,8 @@ export default
           for (var i = 0; i < length; ++i) {
             var data = {};
             data.title = res.channels[i].channelName;
-            data.avatar = res.img[i]
+            data.avatar = res.channels[i].avatar
+            console.log(data.avatar)
             thechannels.push(data);
           }
           /*
