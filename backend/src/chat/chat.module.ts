@@ -28,7 +28,7 @@ import { UrlGeneratorModule } from 'nestjs-url-generator';
     AuthModule,
     UrlGeneratorModule.forRoot({
       secret: 'thisIsNotASecret',
-      appUrl: process.env.FRONTEND, //or maybe backend.... will see
+      appUrl: 'http://localhost:3000', //or maybe backend.... will see
     })
   ],
   controllers: [ChatController],
