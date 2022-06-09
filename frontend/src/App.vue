@@ -9,7 +9,6 @@
 
 <script>
 import NavDrawer from "./components/NavDrawer.vue"
-
 export default {
 	name: 'App',
 	components: {
@@ -26,7 +25,6 @@ export default {
 		this.$router.go(1);
 	},
   },
-
   setup(){
 	}
 }

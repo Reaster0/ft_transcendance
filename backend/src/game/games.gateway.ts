@@ -77,6 +77,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('joinGame')
   handleJoinGame(client: Socket, data: { ballSize: string, ballSpeed: string }) {
     try {
+      console.log('join');
       if (!client.data.user) {
         return client.disconnect();
       }
