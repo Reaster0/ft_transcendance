@@ -3,10 +3,11 @@ import {createStore} from "vuex"
 const store = createStore({
 	state: {
 		user: {
-			nickname:	"",
-			friends:	[],
+			nickname: "",
+			friends: [],
 			status:	"",
-			eloScore:	0,
+			eloScore: 0,
+			is2FAEnabled: false,
 		},
 		connected: false,
 		need2fa: false,
