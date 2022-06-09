@@ -81,6 +81,10 @@ export class Chan {
 	@Column('boolean', {default: false})
 	privateMessage: boolean;
 
+  @Column({ type: 'bytea', nullable: true })
+  @ApiProperty({ type: Buffer, description: "avatar buffer for chat" })
+  avatar?: Uint8Array;
+
   /*-------------------------------------
         - Relations -
     --------------------------------------*/

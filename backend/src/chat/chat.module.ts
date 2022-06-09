@@ -13,6 +13,7 @@ import { ConnectService } from './services/connect.service';
 import { MessageService } from './services/message.service';
 import { AuthModule } from '../auth/auth.module';
 import { ChatController } from './chat.controller';
+import { UrlGeneratorModule } from 'nestjs-url-generator';
 
 @Module({
   imports: [
@@ -24,7 +25,11 @@ import { ChatController } from './chat.controller';
       SocketJoined,
     ]),
     UsersModule,
-    AuthModule
+    AuthModule,
+    UrlGeneratorModule.forRoot({
+      secret: 'thisIsNotASecret',
+      appUrl: 'http://localhost:3000', //or maybe backend.... will see
+    })
   ],
   controllers: [ChatController],
   providers: [

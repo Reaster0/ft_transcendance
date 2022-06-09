@@ -27,9 +27,10 @@
 	
     <div id="app" class="text-left">
     <v-app id="inspire">
-		<!-- <v-list>
+		<v-list>
 			<v-list-item-group v-model="selectedItem" >
-				<template v-for="(item, index) in items">
+
+				<template v-for="(item, index) in getChannels">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
 				></v-subheader>
 				<v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
@@ -42,22 +43,22 @@
           <v-btn elevation="0" min-height="50px"  max-width="50px">
 					<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
 					<v-list-item-avatar >
-					<v-img :src="item.photo"  min-width="50px" min-height="50px"></v-img>
+					<v-img :src="item.avatar"  min-width="50px" min-height="50px"></v-img>
 					</v-list-item-avatar>
 					</v-badge>
           </v-btn>
-					<v-list-item-content>
+					<!-- <v-list-item-content> -->
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-					<v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle>
-					</v-list-item-content>
+					<!-- <v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle> -->
+					<!-- </v-list-item-content> -->
         </v-list-item>
             <v-divider
-              v-if="index < items.length"
+              v-if="index < items_.length"
               :key="index"
             ></v-divider>
 				</template>
 			</v-list-item-group>
-		</v-list> -->
+		</v-list>
     </v-app>
     </div>
     </v-col>
@@ -223,9 +224,20 @@
 
           <div id="app" class="pt-6">
                       <!-- if clicked "leave" - activate "join". and opposite -->
-          <v-btn elevation="2" width="350px" @click="leaveChannel">
+          <!-- <v-btn elevation="2" width="350px" @click="leaveChannel">
             Leave the chat room
-          </v-btn>
+          </v-btn> -->
+          
+
+				<v-btn v-if="!isChannelJoined" elevation="2" width="350px">
+					Join the chat room
+				</v-btn>
+				<div v-else>
+					<v-btn elevation="2" width="350px">
+						Leave the chat room
+					</v-btn>
+					<v-btn color="red" @click="logOut" to="/">Logout</v-btn>
+				</div>
           </div>
 
       
@@ -327,11 +339,12 @@
 <script>
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-  // import { onMounted } from "@vue/runtime-core"
+  import { onMounted } from "@vue/runtime-core"
   import { ref } from "vue"
   import io from 'socket.io-client';
 //import { onBeforeRouteLeave } from "vue-router";
 import { useStore } from "vuex";
+// import { computed } from 'vue'
   //import { useKeypress } from "vue3-keypress";
 
   
@@ -346,8 +359,9 @@ export default {
       selected: [2],
       currentTab: 0,
       tab: null,
+      items: [],
       items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
-      items: [
+      items_: [
         {
           photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
           subtitle: "My cat stole my keys !",
@@ -467,48 +481,30 @@ export default {
   },
 	setup()
     {
+    // var thechannels = [];
 		const connection = ref(null)
-    // const chats = ref(null)
-
-// 		onMounted(() =>{
-// 			console.log(document.cookie.toString())
-// 			try {
-// 					connection.value = io('http://:3000/chat',{
-// 					transportOptions: {
-// 					polling: { extraHeaders: { auth: document.cookie} },
-//          withCredentials:true,
-// 					},
-// 				})
-// 				console.log("starting connection to websocket")
-// 			} catch (error) {
-// 				console.log("the error is:" + error)
-// 			}
-
-//         // ============= info you can retrive ======
-//         // - channel : get all the chanel the user is connected
-//         // - connectedUsers : get all user.id of user connected..... (but the function feels wrong....)
-//         // - messageSended
-
-//         // : connection.value.on(‘command’, (received) => {})
-
-//         // channel : get all the chanel the user is connected
-//         // connection.value.on('channel', (channels) => 
-//         // {console.log("channel:" + channels)})
-//         connection.value.on('channel', (channel) =>{
-//           console.log("-----------------------------------")
-//           chats.value = channel
-//           console.log(":::::" + chats.value)
-//         })
+    const store = useStore();
+    var getChannels = store.getters.getChannels;
+    var isChannelJoined = store.getters.isChannelJoined;
 
 
-// //			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
-//       // TestTest();
-// 			// SendingMessage();
-// 			// JoinChannel();
-// 			// LeaveChannel();
-// 			// BlockUser();
-// 			})
+		onMounted(() =>{
+			console.log(document.cookie.toString())
+			try {
+					connection.value = io('http://:3000/chat',{
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie} },
+					},
+				})
+				console.log("starting connection to websocket")
+			} catch (error) {
+				console.log("the error is:" + error)
+			}
+      store.commit('setSocketVal' , connection.value);
+			})
       
+
+
 //     /*
 //     onBeforeRouteLeave(() => {
 //         const answer = window.confirm("disconect from chat ?")
@@ -555,12 +551,17 @@ export default {
 
 // 		// for joinning a existing channel
 // 		// - joinChannel { id: string }
-// 		function joinChannel(id)
-// 		{
-// 			console.log("before joinChannel");
-// 			connection.value.emit('joinChannel', id);
-// 			console.log("after joinChannel");
-// 		}
+      // function joinChannel(id)
+      // {
+      //   store.commit('setChannelJoinedStatus' , true);
+      //   connection.value.emit('joinChannel', id);
+      // }
+
+
+
+
+
+
 
 // 		// (or just put a channel in argument
 
@@ -605,8 +606,9 @@ export default {
 // 		// 		},
 // 		// 	},
 // 		// })
-
-		return { sendingMessage}
+    console.log('-------------------------------------------------------------');
+    console.log("************", getChannels)
+		return { sendingMessage, getChannels, isChannelJoined }
 
 	}
 };

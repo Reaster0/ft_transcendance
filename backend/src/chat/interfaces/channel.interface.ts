@@ -9,4 +9,5 @@ export interface ChanI {
   adminUsers?: number[];
   password?: string;
   publicChannel?: boolean;
+  avatar?: Uint8Array;
 }
