@@ -39,7 +39,6 @@ export async function submit2FaCode(inputCode: string) {
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ twoFACode: inputCode })})
 	.then(res => {
-		console.log(res)
 		return res.status == 201? true : false 
 	})
 }
@@ -50,6 +49,13 @@ export async function getAvatarID(id: number) {
 		return res.status != 200? null : res.blob()})
 	.then(blob => {
 		return blob? URL.createObjectURL(blob) : blob
+	})
+}
+
+export async function getHistoryID(id: number) {
+	return await fetch("/api/users/getHistory/" + id, {credentials: "include"})
+	.then(res => {
+		return res.status != 200? null : res.json()
 	})
 }
 
@@ -65,9 +71,6 @@ export async function updateUser(nick: string) {
 		},
 	})
 	.then(res => {
-		console.log(JSON.stringify({
-			nickname: nick,
-		}))
 		return res.status == 200? true : false
 	})
 }

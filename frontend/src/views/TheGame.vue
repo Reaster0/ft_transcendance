@@ -20,15 +20,17 @@
 		<div class="params">
 			<div class="button_slick">
 				<h1 class="Spotnik">Ball Speed</h1>
-				<h1>slow</h1>
-				<h1>normal</h1>
-				<h1>fast</h1>
+				<h1>Slow</h1>
+				<h1>Mid</h1>
+				<h1>Speedy</h1>
 			</div>
 			<div class="button_slick">
 				<h1 class="Spotnik">Ball Size</h1>
-				<h1>small</h1>
-				<h1>normal</h1>
-				<h1>big</h1>
+				<v-radio-group v-model="ballSize">
+					<v-radio>Small</v-radio>
+					<v-radio>Mid</v-radio>
+					<v-radio>Chonke</v-radio>
+				</v-radio-group>
 			</div>
 		</div>
 	</div>
@@ -62,13 +64,15 @@ export default defineComponent ({
 			paddleR: { x: 0, y: 0 },
 			score: { leftScore: 0, rightScore: 0 },
 			winner: "",
-		});
+		})
 		const gameStarted = ref<boolean>(false);
 		let canvas: HTMLCanvasElement | null = null;
 		let ctx: CanvasRenderingContext2D | null = null;
 		let framesId: number | undefined | null = null;
 		let winText: string | null = null;
 		let showInfo: boolean = true;
+		const ballSpeed = ref(null)
+		const ballSize = ref(null)
 
 		onMounted(async() =>{
 
@@ -185,8 +189,10 @@ export default defineComponent ({
 
 		function Play(){
 			//send in the request the params game
-			// TODO modify
-			gameSocket.value.emit('joinGame', {ballSize: 'NORMAL', ballSpeed: 'NORMAL'})
+			gameSocket.value.emit('joinGame', {
+				ballSize: "NORMAL",
+				ballSpeed: "NORMAL",
+			})
 			searchingGame.value = true
 			console.log("joinGame")
 		}
@@ -217,7 +223,6 @@ export default defineComponent ({
 
 			if (winText)
 			{
-				winText = "wake up neo stop loosing"
 				ctx!.font = canvas!.width/4 + "%" + " Spotnik"
 				ctx!.fillText(winText, 0.2 * canvas!.width, 0.5 * canvas!.height);
 			}
@@ -249,7 +254,7 @@ export default defineComponent ({
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame}
+		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame, ballSize, ballSpeed}
 	},
 })
 </script>

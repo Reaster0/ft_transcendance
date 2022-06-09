@@ -5,7 +5,7 @@ import LoginPage from "../views/LoginPage.vue";
 // import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
-import EditUser from "../views/EditUser.vue";
+// import EditUser from "../views/EditUser.vue";
 import Chat from "../views/TransChat_group.vue";
 // import TheChat from "../views/TransChat_connect.vue";
 import ChatPerson from "../views/TransChat_person.vue";
@@ -65,14 +65,14 @@ const routes = [
 			return store.getters.isConnected? true: "/login"
 		}
 	},
-	{
-		path: '/user/edit',
-		name: "editUser",
-		component: EditUser,
-		beforeEnter: () => {
-			return store.getters.isConnected? true: "/login"
-		}
-	},
+	// {
+	// 	path: '/user/edit',
+	// 	name: "editUser",
+	// 	component: EditUser,
+	// 	beforeEnter: () => {
+	// 		return store.getters.isConnected? true: "/login"
+	// 	}
+	// },
 	// {
 	// 	path: '/chat',
 	// 	name: "chat",
