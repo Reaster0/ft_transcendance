@@ -1,17 +1,16 @@
 <template>
-	<v-container>
-		<particles-bg type="cobweb" :bg="true" />
-		<v-img :aspect-ratio="16/9" height="500" src="../assets/42_Logo.svg"/>
-		<h1 align="center">This Site is under heavy construction!</h1>
-		<v-row>
-			<v-col align="center">
-			<h1 class="glitch"  data-text="RUN!">Play the</h1>
-			<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
-				<h1 class="text rainbow">Game</h1>
-				</v-btn>
-			</v-col>
-		</v-row>
-	</v-container>
+  <v-container>
+    <particles-bg type="cobweb" :bg="true" />
+    <v-img :aspect-ratio="16/9" height="500" src="../assets/42_Logo.svg"/>
+    <v-row>
+          <v-col align="center">
+          <h1 class="text">Play the</h1>
+          <v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
+            <h1 class="text rainbow glitch" data-text="Future">Game</h1>
+          </v-btn>
+          </v-col>
+  </v-row>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -34,6 +33,7 @@ export default {
 <style lang="scss" scoped>
 .text{
 	font-size: 4em;
+  font-family: Spotnik;
 	font-weight: bold;
 	color: white;
 	cursor: pointer;
@@ -47,10 +47,10 @@ text-shadow: 0.04em 0.04em #fc0049,
         0.2em 0.2em #3462fe;
 }
 .glitch{
-  color:white;
-  font-size:100px;
+  color: white;
+  font-size:4em;
   position:relative;
-  width:400px;
+  width: 5em;
   margin:0 auto;
 }
 @keyframes noise-anim{
@@ -68,7 +68,7 @@ text-shadow: 0.04em 0.04em #fc0049,
   text-shadow:-1px 0 red;
   top:0;
   color:white;
-  background:black;
+  background: red;
   overflow:hidden;
   clip:rect(0,900px,0,0); 
   animation:noise-anim 2s infinite linear alternate-reverse;

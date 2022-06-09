@@ -18,29 +18,26 @@
 <script lang="ts">
 import { useStore } from "vuex"
 import { onMounted, reactive } from "@vue/runtime-core"
-import { ref } from "vue"
+import { ref, defineComponent, toRefs } from "vue"
 import { updateUser } from "../components/FetchFunctions"
 
-export default {
+export default defineComponent({
 	setup(){
 		const user = ref(null)
-
-		const nickname = reactive({
-			value: ""
-		})
+		const nickname = reactive({ value: "" as string })
 
 		onMounted(async () => {
 		user.value = useStore().getters.whoAmI;
-		nickname.value = user.value.nickname
+		nickname.value = user.value!['nickname']
 		})
 
 		async function sendUpdate(){
 			console.log("result =" + await updateUser(nickname.value))
 		}
 
-		return {user, nickname, sendUpdate}
+		return {user, ...toRefs(nickname), sendUpdate}
 	}
-}
+});
 </script>
 
 <style>

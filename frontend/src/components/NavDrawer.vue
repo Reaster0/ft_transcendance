@@ -23,19 +23,18 @@
 	</v-toolbar>
 </template>
 
-<script lang="ts">
+<script>
 import { useStore } from 'vuex'
 import { computed } from 'vue'
 
 export default {
 	setup() {
 		const store = useStore()
-
 		const isLog = computed(() => {
 			return store.getters.isConnected
 		})
 
-		async function logOut(){
+		async function logOut() {
 			await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
 			.then(store.commit('setConnected', [false, false]))
 		}

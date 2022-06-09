@@ -99,6 +99,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const matchId = uuid();
         const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2), features.splice(0, 2));
         matchs.set(matchId, newMatch);
+        console.log('here');
         this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
       }

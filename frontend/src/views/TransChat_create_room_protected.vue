@@ -59,7 +59,7 @@
 
 
 
-<script lang="ts">
+<script>
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';
