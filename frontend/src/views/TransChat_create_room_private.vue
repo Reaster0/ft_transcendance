@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name)">
+      <form @submit.prevent="submitIt(this.name, this.file)">
 
         <v-toolbar
           dark
@@ -83,7 +83,20 @@ export default
     previewFiles(event) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
-    }
+    },
+    // getFile(event) {
+    //   var files = event.target.files || event.dataTransfer.files;
+    //   if (!files.length)
+    //     return;
+    //   this.createImage(files[0]);
+    // },
+    // createImage(img) {
+    //   var reader = new FileReader();
+    //   reader.onload = (event) => {
+    //     this.file = event.target.result;
+    //   };
+    //   reader.readAsDataURL(img);
+    // }
   },
   setup()
   {
@@ -92,14 +105,20 @@ export default
       const socketVal = store.getters.getSocketVal;
 
       onMounted(() =>{
+        console.log("1 - nonononono------!!!!!!")
         socketVal.on("channel", function(res) {
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
-
+          // console.log(JSON.stringify(res))
+          console.log("1.1 nonononono------!!!!!!")
+          // reset channel
+          thechannels = [];
           const length= res.channels.length;
           console.log('lenght: ', length);
+           console.log("2 - nonononono------!!!!!!")
           for (var i = 0; i < length; ++i) {
+             console.log("3 - nonononono------!!!!!!")
             var data = {};
             data.title = res.channels[i].channelName;
 
@@ -117,13 +136,13 @@ export default
           }
 
           console.log('after update');
-          console.log(thechannels);
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           store.commit('setChannels' , thechannels);
           console.log(store.getters.getChannels);
         })
       })
 
-      function submitIt(name)
+      function submitIt(name, file)
       {
         // const channame = this.name;
         const password = "";
@@ -131,7 +150,7 @@ export default
         // const user = this.currentUser;
         console.log("name: " + name)
         if (name != '')
-          socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});    
+          socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});    
       }
 
       return { submitIt }

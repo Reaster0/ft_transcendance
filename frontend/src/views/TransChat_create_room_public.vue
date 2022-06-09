@@ -102,45 +102,28 @@ export default
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },
-    getFile(event) {
-      var files = event.target.files || event.dataTransfer.files;
-      if (!files.length)
-        return;
-      this.createImage(files[0]);
-    },
-    createImage(img) {
-      var reader = new FileReader();
-      reader.onload = (event) => {
-        this.file = event.target.result;
-      };
-      reader.readAsDataURL(img);
-    }
+    // getFile(event) {
+    //   var files = event.target.files || event.dataTransfer.files;
+    //   if (!files.length)
+    //     return;
+    //   this.createImage(files[0]);
+    // },
+    // createImage(img) {
+    //   var reader = new FileReader();
+    //   reader.onload = (event) => {
+    //     this.file = event.target.result;
+    //   };
+    //   reader.readAsDataURL(img);
+    // }
   },
 
   setup()
   {
       let thechannels = [];
-      // const connection = ref(null)
       const store = useStore();
       const socketVal = store.getters.getSocketVal;
 
-
-
-
       onMounted(() =>{
-        // try {
-        //     connection.value = io('http://:3000/chat',{
-        //     transportOptions: {
-        //     polling: { extraHeaders: { auth: document.cookie} },
-        //     withCredentials: true
-        //     },
-        //   })
-        //   console.log("starting connection to websocket")
-        // } catch (error) {
-        //   console.log("the error is:" + error)
-        // }
-
-        console.log(socketVal)
         socketVal.on("channel", function(res) {
           console.log('befor update');
           console.log(thechannels);
@@ -169,7 +152,7 @@ export default
           }
 
           console.log('after update');
-          console.log(thechannels);
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           store.commit('setChannels' , thechannels);
           console.log(store.getters.getChannels);
         })

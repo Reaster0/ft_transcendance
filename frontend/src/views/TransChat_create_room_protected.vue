@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name, this.password)">
+      <form @submit.prevent="submitIt(this.name, this.password, this.file)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -126,7 +126,7 @@ export default
           for (var i = 0; i < length; ++i) {
             var data = {};
             data.title = res.channels[i].channelName;
-
+            data.password = res.channels[i].password;
             let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
             if(blob.size !== 2)
             {
@@ -141,13 +141,13 @@ export default
           }
 
           console.log('after update');
-          console.log(thechannels);
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           store.commit('setChannels' , thechannels);
           console.log(store.getters.getChannels);
         })
       })
 
-      function submitIt(name, password)
+      function submitIt(name, password, file)
       {
         // const channame = this.name;
         const publ = false;
@@ -155,7 +155,7 @@ export default
         console.log("name: " + name)
         console.log("password: " + password)
         if (name != '')
-          socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ});    
+          socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});    
       }
 
       return { submitIt }
