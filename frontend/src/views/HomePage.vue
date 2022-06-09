@@ -18,7 +18,8 @@ import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/pa
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { isLogged } from "../components/FetchFunctions"
-export default {
+import { defineComponent } from "vue";
+export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
@@ -27,7 +28,7 @@ export default {
 		useStore().commit('setConnected' , await isLogged())
 		})
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>
