@@ -16,8 +16,8 @@ import NewRoomProtected from "../views/TransChat_create_room_protected.vue";
 import MU from "../views/TransChat_manage_users.vue";
 import ADM from "../views/TransChat_groupchat_adminside.vue";
 import ChangeRoom from "../views/TransChat_change_room.vue";
-import { isLogged, getUserInfo } from "../components/FetchFunctions.js"
-import store from "../store/index.js"
+import { isLogged, getUserInfo } from "../components/FetchFunctions"
+import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";
 
 

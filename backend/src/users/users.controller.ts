@@ -1,7 +1,7 @@
 import { UsersService } from './services/users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, UseInterceptors,
   UseGuards, Req, Query, Patch, Res, UploadedFile, Delete, ParseIntPipe, HttpException,
-  HttpStatus, Logger, InternalServerErrorException } from '@nestjs/common';
+  HttpStatus, Logger, StreamableFile } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags, ApiNotFoundResponse,
   ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
@@ -138,7 +138,7 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'User with given username not found.' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  async getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res) {
+  async getAvatar(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res):  Promise<StreamableFile> {
     try {
       this.logger.log("Get('getAvatar/:id') route called.");
       const user = await this.usersService.findUserById('' + id);
@@ -160,7 +160,7 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'User with given id not found.' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  async getHistory(@Param('id') id: string) {
+  async getHistory(@Param('id') id: string): Promise<{}> {
     try {
       this.logger.log("Get('getHistory/:id') route called.");
       return this.usersService.getGameHistory(parseInt(id));
@@ -176,7 +176,7 @@ export class UsersController {
   @ApiCreatedResponse({ description: 'The user has been successfully retrieved or registered.', type: User})
   @ApiBadRequestResponse()
   /** End of swagger **/
-  retrieveOrCreateUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  retrieveOrCreateUser(@Body() createUserDto: CreateUserDto) {
     try {
       this.logger.log("Post('getOrRegister') route called for user " + createUserDto.username + ' (username)');
       return this.usersService.retrieveOrCreateUser(createUserDto);

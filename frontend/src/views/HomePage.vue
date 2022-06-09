@@ -2,46 +2,44 @@
 	<v-container>
 		<particles-bg type="cobweb" :bg="true" />
 		<v-img :aspect-ratio="16/9" height="500" src="../assets/42_Logo.svg"/>
-		<h1 align="center">This Site is under heavy construction!</h1>
 		<v-row>
 			<v-col align="center">
-			<h1 class="glitch"  data-text="RUN!">Play the</h1>
+			<h1 class="text">Play the</h1>
 			<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
-				<h1 class="text rainbow">Game</h1>
+				<h1 class="text rainbow glitch" data-text="Future">Game</h1>
 				</v-btn>
 			</v-col>
 		</v-row>
 	</v-container>
 </template>
 
-<script>
+<script lang="ts">
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
-import { isLogged } from "../components/FetchFunctions.js"
-
-export default {
+import { isLogged } from "../components/FetchFunctions"
+import { defineComponent } from "vue";
+export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
 	setup(){
-
 		onMounted(async() => {
 		useStore().commit('setConnected' , await isLogged())
 		})
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>
 .text{
 	font-size: 4em;
+	font-family: Spotnik;
 	font-weight: bold;
 	color: white;
 	cursor: pointer;
 	transition: text-shadow 1s;
 }
-
 .rainbow:hover {
 text-shadow: 0.04em 0.04em #fc0049,
         0.08em 0.08em #fe8f01,
@@ -49,12 +47,11 @@ text-shadow: 0.04em 0.04em #fc0049,
         0.16em 0.16em #3fdf4b,
         0.2em 0.2em #3462fe;
 }
-
 .glitch{
-  color:white;
-  font-size:100px;
+  color: white;
+  font-size: 4em;
   position:relative;
-  width:400px;
+  width:5em;
   margin:0 auto;
 }
 @keyframes noise-anim{
@@ -65,7 +62,6 @@ text-shadow: 0.04em 0.04em #fc0049,
     }
   }
 }
-
 .glitch:after{
   content:attr(data-text);
   position:absolute;
@@ -73,12 +69,11 @@ text-shadow: 0.04em 0.04em #fc0049,
   text-shadow:-1px 0 red;
   top:0;
   color:white;
-  background:black;
+  background:red;
   overflow:hidden;
   clip:rect(0,900px,0,0); 
   animation:noise-anim 2s infinite linear alternate-reverse;
 }
-
 @keyframes noise-anim-2{
   $steps:20;
   @for $i from 0 through $steps{
@@ -94,7 +89,7 @@ text-shadow: 0.04em 0.04em #fc0049,
   text-shadow:1px 0 blue; 
   top:0;
   color:white;
-  background:black;
+  background:red;
   overflow:hidden;
   clip:rect(0,900px,0,0); 
   animation:noise-anim-2 3s infinite linear alternate-reverse;

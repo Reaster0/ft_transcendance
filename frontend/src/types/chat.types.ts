@@ -2,19 +2,19 @@ export enum UserStatus {
 	OFFLINE = 'Offline',
 	ONLINE = 'Online',
 	INGAME = 'In Game',
-};
+}
 
 export interface UserI {
     id: number,
     nickname: string,
     status: UserStatus,
-};
+}
 
 export class User implements UserI{
     id = 0;
     nickname = '';
     status =  UserStatus.OFFLINE;
-};
+}
 
 export interface ChannelI {
 
@@ -30,7 +30,7 @@ export interface ChannelI {
 	users: User[],
 	chanUsers: JoinnedUserI[],
 	messages: MessageI[],
-};
+}
 
 export class Channel implements ChannelI {
 
@@ -46,21 +46,21 @@ export class Channel implements ChannelI {
 	users = [];
 	chanUsers = [];
 	messages = [];
-};
+}
 
 export interface JoinnedUserI {
 	id: string;
 	socketID: string;
 	user: User;
 	chan: Channel;
-};
+}
 
 export class JoinnedUser implements JoinnedUserI {
 	id = '';
 	socketID = '';
 	user =  new User;
 	chan = new Channel;
-};
+}
 
 export interface MessageI {
 	id: number
@@ -70,7 +70,7 @@ export interface MessageI {
  // relation //
 	user: User;
 	channel: Channel;
-};
+}
 
 export class Message implements MessageI {
 	id = 0;
@@ -80,7 +80,7 @@ export class Message implements MessageI {
 
 	user = new User;
 	channel = new Channel;
-};
+}
 
 export class newChannel {
   name: string = '';
@@ -88,4 +88,4 @@ export class newChannel {
   password: string = '';
   members: User[] = [];
   admin: User[] = [];
-};
+}

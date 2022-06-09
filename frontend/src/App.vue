@@ -7,10 +7,12 @@
 	</v-app>
 </template>
 
-<script>
-import NavDrawer from "./components/NavDrawer.vue"
+<script lang="ts">
 
-export default {
+import { defineComponent } from "vue";
+import NavDrawer from "./components/NavDrawer.vue";
+
+export default defineComponent ({
 	name: 'App',
 	components: {
 		NavDrawer,
@@ -26,10 +28,9 @@ export default {
 		this.$router.go(1);
 	},
   },
-
   setup(){
 	}
-}
+});
 </script>
 
 <style>

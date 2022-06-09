@@ -1,26 +1,41 @@
 <template>
-<v-container v-if="user">
+<v-container fluid v-if="user">
+	<v-row>
+		
 	<particles-bg type="cobweb" :bg="true"/>
-	<div class="center">
+		<v-col class="center">
 		<div class="overlay">
 			<v-col v-if="!edit" align="center">
 				<v-img :src="avatar" max-width="300px"/>
-				<h1>{{user.nickname}}</h1>
+				<h1>{{nickname}}</h1>
 				<h1>{{user.eloScore}}📈</h1>
-				<div class="button_slick button_slide" @click="edit = !edit">Edit</div>
+				<div class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
 			</v-col>
 			<v-col v-else align="center">
 				<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
-				<h1 v-if="!img_accepted" class="error_msg">Img Too Big</h1>
+				<h1 v-if="!img_accepted" class="error_msg Spotnik">Img Too Big</h1>
 				<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
 				<div class="field_slick big_button">
 					<v-text-field label="nickname" v-model="nickname"/>
-					<h1 v-if="!name_accepted" class="error_msg">Choose another name</h1>
+					<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
 				</div>
-				<div class="button_slick button_slide big_button" @click="edit = !edit">Go Back</div>
+				<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="this.$router.push('/2auth')">Enable Two Factor Auth</div>
+				<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
+				<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 			</v-col>
 		</div>
-	</div>
+		</v-col>
+		<v-col class="center">
+		<div v-if="!edit" class="overlay">
+			<v-col align-self="start">
+				<h1>WIN</h1>
+			</v-col>
+			<v-col align-self="start">
+				<h1>LOOSE</h1>
+			</v-col>
+			</div>
+		</v-col>
+</v-row>
 </v-container>
 </template>
 
@@ -37,38 +52,43 @@ export default {
 		ParticlesBg
 	},
 	setup(){
-		// const inputCode = ref(null)
-		// const codeAccepted = ref(false)
-		const user = ref(null)
-		const avatar = ref(null)
+		const user = ref(null);
+		const avatar = ref(null);
 		const edit = ref(false);
 		const nickname = ref(null);
 		const name_accepted = ref(true);
 		const img_accepted = ref(true);
 
 		onMounted(async () => {
-			user.value = await useStore().getters.whoAmI;
+			const store = useStore()
+			user.value = await store.getters.whoAmI;
 			nickname.value = user.value.nickname
 			avatar.value = await getAvatarID(user.value.id)
-			console.log(avatar.value)
 		})
-
-		// async function submitCode() {
-		// 	codeAccepted.value = await submit2FaCode(inputCode.value)
-		// }
 
 		function imgUp() {
 			document.getElementById("upload").click()
 		}
 
+		//TODO check type of e
 		async function imgReceived(e) {
 			img_accepted.value = await uploadAvatar(e)
+			if (img_accepted.value && user && user.value && user.value.id)
+				avatar.value = await getAvatarID(user.value.id)
 		}
 
 		watch(nickname, async (newnick) => {
 			name_accepted.value = await updateUser(newnick)
 		})
-		return {user, avatar, edit, nickname, name_accepted, imgUp, imgReceived, img_accepted}
+
+		return {user,
+		avatar,
+		edit,
+		nickname,
+		name_accepted,
+		imgUp,
+		imgReceived,
+		img_accepted}
 	}
 }
 </script>
@@ -102,8 +122,8 @@ export default {
 h1{
 	justify-self: center;
 	font-size: 4em;
- font-weight: bold;
- font-family: 'Rajdhani', sans-serif;
+	font-weight: bold;
+	font-family: 'Rajdhani', sans-serif;
 	color: #04BBEC;
 	// margin-left: 20%;
 }
@@ -120,9 +140,11 @@ h1{
 }
 
 .overlay {
-  width: 65%;
+  width: 500px;
+  height: 700px;
 //   padding-bottom: 20%;
   margin: 1em;
+  padding: 1em;
   display: flex;
   align-items: center;
   justify-content: center;
