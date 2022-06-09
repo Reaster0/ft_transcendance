@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryRunner } from 'typeorm';
 import { Avatar } from '../entities/avatar.entity';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class AvatarsService {
@@ -10,15 +11,14 @@ export class AvatarsService {
     private AvatarsRepository: Repository<Avatar>,
   ) {}
 
-  async uploadAvatar(
-    avatarFilename: string,
-    avatarBuffer: Buffer,
-    queryRunner: QueryRunner,
-  ) {
-    const newAvatar = await this.AvatarsRepository.create({
-      avatarFilename: avatarFilename,
-      avatarBuffer: avatarBuffer,
-    });
+  async uploadAvatar(avatarBuffer: Buffer, queryRunner: QueryRunner) {
+    let avatarFilename = uuid();
+    let avatar = await this.AvatarsRepository.findOne({ avatarFilename: avatarFilename });
+    while (avatar) {
+      avatarFilename = uuid();
+      avatar = await this.AvatarsRepository.findOne({ avatarFilename: avatarFilename });
+    }
+    const newAvatar = await this.AvatarsRepository.create({ avatarFilename: avatarFilename, avatarBuffer: avatarBuffer });
     await queryRunner.manager.save(Avatar, newAvatar);
     return newAvatar;
   }

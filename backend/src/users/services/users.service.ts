@@ -4,12 +4,11 @@ import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../user.dto';
-import { Status } from '../../common/enums/status.enum';
+import { Status } from '../enums/status.enum';
 import { AvatarsService } from './avatars.service';
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { GameHistory } from '../../game/entities/gamehistory.entity';
 import { Avatar } from '../entities/avatar.entity';
 
 @Injectable()
@@ -38,17 +37,13 @@ export class UsersService {
   }
 
   async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
-    const { username, email } = createUserDto;
+    const { username } = createUserDto;
     let user = await this.userRepository.findOne({ username: username });
     if (user) {
       return user;
     }
-    user = await this.userRepository.findOne({ email: email });
-    if (user) {
-      throw new HttpException('There seems to be something wrong with your 42auth account. Please contact an administrator.', HttpStatus.BAD_REQUEST);
-    }
-    user = this.userRepository.create(createUserDto);
-    user.nickname = await this.generateNickname(username);
+    const nickname = await this.generateNickname(username);
+    user = this.userRepository.create({username: username, nickname: nickname});
     // TODO redirect user to modify info page
     return this.userRepository.save(user);
   }
@@ -56,7 +51,7 @@ export class UsersService {
   async generateNickname(nickname: string): Promise<string> {
     let user = undefined;
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    while ((user = await this.userRepository.findOne({ nickname: nickname })) && nickname.length < 4) {
+    while ((user = await this.userRepository.findOne({ nickname: nickname })) || nickname.length < 4) {
       const randomChar = letters[Math.floor(Math.random() * letters.length)];
       if (nickname.length > 15) {
         nickname = randomChar;
@@ -68,22 +63,13 @@ export class UsersService {
   }
 
   async updateUser(user: User, updateUser: UpdateUserDto) : Promise<User> {
-    const { nickname, email } = updateUser;
+    const { nickname } = updateUser;
     let find = await this.userRepository.findOne({ nickname: nickname });
     if (find && find != user) {
       throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
     }
-    find = await this.userRepository.findOne({ email: email });
-    if (find && find != user) {
-      throw new HttpException('Email already taken.', HttpStatus.BAD_REQUEST);
-    }
-    try {
-      user.nickname = nickname;
-      user.email = email;
-      return this.userRepository.save(user);
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    user.nickname = nickname;
+    return this.userRepository.save(user);
   }
 
   async removeUser(user: User): Promise<void> {
@@ -125,13 +111,13 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async addAvatar(user: User, avatarFilename: string, avatarBuffer: Buffer): Promise<Avatar> {
+  async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const oldAvatarId = user.avatarId;
-      const newAvatar = await this.avatarsService.uploadAvatar(avatarFilename, avatarBuffer, queryRunner);
+      const newAvatar = await this.avatarsService.uploadAvatar(avatarBuffer, queryRunner);
       await queryRunner.manager.update(User, user.id, { avatarId: newAvatar.id });
       if (oldAvatarId) {
         await this.avatarsService.deleteAvatarById(oldAvatarId, queryRunner);
@@ -168,7 +154,7 @@ export class UsersService {
 
   async setTwoFASecret(user: User, secret: string): Promise<void> {
     user.twoFASecret = secret;
-    user.twoFASecret = await user.encryptSecret();
+    user.twoFASecret = user.encryptSecret();
     await this.userRepository.save(user);
   }
 
@@ -176,12 +162,16 @@ export class UsersService {
     await this.userRepository.update(id, { is2FAEnabled: true });
   }
 
+  async disableTwoFA(id: number): Promise<void> {
+    await this.userRepository.update(id, { is2FAEnabled: false, twoFASecret: null });
+  }
+
   getSecret(user: User): string {
     return user.decryptSecret();
   }
 
   currentUser(user: User): Partial<User> {
-    const { username, twoFASecret, ...res } = user;
+    const { username, twoFASecret, is2FAEnabled, ...res } = user;
     return res;
   }
 
@@ -191,17 +181,17 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    const { username, twoFASecret, ...res } = user;
+    const { username, twoFASecret, is2FAEnabled, ...res } = user;
     return res;
   }
 
   async getPartialUserInfo(id: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) return user;
-    return { nickname: user.nickname, eloScore: user.eloScore };
+    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
   }
 
-  async getConnectedUser(): Promise<User[]> {
+  async getConnectedUsers(): Promise<User[]> {
     const connectedUser = this.userRepository.find({
       where: { status: Status.ONLINE },
     });
@@ -213,33 +203,55 @@ export class UsersService {
 
     if (block === true && !userFound) {
       user.blockedUID.push(userToBlock.id);
-      try {
-        await this.userRepository.save(user);
-      } catch (error) {
-        console.log(error);
-        throw new InternalServerErrorException('add blocked user');
-      }
+      await this.userRepository.save(user);
     }
     if (block === false && userFound) {
       const index = user.blockedUID.indexOf(userToBlock.id);
       user.blockedUID.splice(index, 1);
-      try {
-        await this.userRepository.save(user);
-      } catch (error) {
-        console.log(error);
-        throw new InternalServerErrorException('add blocked user');
-      }
+      await this.userRepository.save(user);
     }
     return user;
   }
 
-  getGameHistory(user: User): GameHistory[] {
-    let gameHistory = [];
-    if (user.gamesWon) {
-      gameHistory = gameHistory.concat(user.gamesWon);
+  async getGameHistory(id: number) {
+    const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
+    if (!user) {
+      throw new NotFoundException(`User ${id} (id) not found.`); 
     }
+    let gameHistory = {};
+    let score = [];
+    let opponent = [];
+    let opponentScore = [];
+    if (user.gamesWon) {
+      for (let game of user.gamesWon) {
+        score.push(game.winnerScore);
+        opponentScore.push(game.looserScore);
+        if (game.looser && game.looser.nickname) {
+          opponent.push(game.looser.nickname);
+        } else {
+          opponent.push('deleted user');
+        }
+      }
+      gameHistory = { 'nb': user.gamesWon.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }};
+    } else {
+      gameHistory = { nb: 0, infos: {} };
+    }
+    score = [];
+    opponent = [];
+    opponentScore = [];    
     if (user.gamesLost) {
-      gameHistory = gameHistory.concat(user.gamesLost);
+      for (let game of user.gamesLost) {
+        score.push(game.looserScore);
+        opponentScore.push(game.winnerScore);
+        if (game.winner && game.winner.nickname) {
+          opponent.push(game.winner.nickname);
+        } else {
+          opponent.push('deleted user');
+        }
+      }
+      gameHistory = { 'won': gameHistory, 'lost': {'nb': user.gamesLost.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }}};
+    } else {
+      gameHistory = { 'won': gameHistory, 'lost': {nb: 0, infos: {} }};
     }
     return gameHistory;
   }

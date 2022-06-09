@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Chan } from './chan.entity';
+import { Chan } from './channel.entity';
 
 @Entity()
 export class SocketJoined {

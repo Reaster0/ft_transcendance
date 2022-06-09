@@ -78,10 +78,10 @@ export default {
 		onMounted(async() =>{
 
 			try {
-				gameSocket.value = io('http://82.65.87.54:3000/game',{
-				// gameSocket.value = io('http://localhost:3000/game',{
+				gameSocket.value = io('http://:3000/game',{
 				transportOptions: {
-				polling: { extraHeaders: { auth: document.cookie} },
+				polling: { extraHeaders: { auth: document.cookie }},
+				withCredentials: true
 				}})
 				console.log("starting connection to websocket")
 			} catch (error) {

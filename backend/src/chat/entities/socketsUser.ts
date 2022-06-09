@@ -15,7 +15,7 @@ export class SocketConnected {
   @Column('text')
   socketID: string;
 
-  @ManyToOne(() => User, (user) => user.connections, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  user: User;
+	@ManyToOne(() => User, user => user.connections, {onDelete:'CASCADE'})
+	@JoinColumn()
+	user: User;
 }

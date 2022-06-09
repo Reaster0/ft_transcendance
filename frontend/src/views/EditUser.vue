@@ -5,7 +5,6 @@
 				<v-card>
 					<v-card-text>
 						<v-text-field label="nickname" v-model="nickname.value"></v-text-field>
-						<v-text-field label="email" v-model="email.value"></v-text-field>
 				</v-card-text>
 					<v-row justify="center">
 						<v-btn @click="sendUpdate">Update</v-btn>
@@ -29,21 +28,17 @@ export default {
 		const nickname = reactive({
 			value: ""
 		})
-		const email = reactive({
-			value: ""
-		})
 
 		onMounted(async () => {
 		user.value = useStore().getters.whoAmI;
 		nickname.value = user.value.nickname
-		email.value = user.value.email
 		})
 
 		async function sendUpdate(){
-			console.log("result =" + await updateUser(nickname.value, email.value))
+			console.log("result =" + await updateUser(nickname.value))
 		}
 
-		return {user, nickname, email, sendUpdate}
+		return {user, nickname, sendUpdate}
 	}
 }
 </script>

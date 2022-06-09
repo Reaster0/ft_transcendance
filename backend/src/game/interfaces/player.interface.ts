@@ -5,4 +5,5 @@ export interface Player {
   socket: Socket;
   user: User;
   score: number;
+  lastAction: number,
 }

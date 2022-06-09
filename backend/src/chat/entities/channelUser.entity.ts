@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Chan } from './chan.entity';
+import { Chan } from './channel.entity';
 
 @Entity()
 export class ChanUser {
@@ -25,7 +25,7 @@ export class ChanUser {
                - Relations -
     --------------------------------------*/
 
-  @ManyToOne(() => Chan, (chan) => chan.chanUsers, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  chan: Chan;
+	@ManyToOne(() => Chan, chan => chan.socketJoined, {onDelete:'CASCADE'})
+	@JoinColumn()
+	chan: Chan;
 }
