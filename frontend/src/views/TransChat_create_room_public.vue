@@ -167,16 +167,7 @@ export default
             console.log(data.avatar)
             thechannels.push(data);
           }
-          /*
-          for (const chan of res){
-              let d = {}
-              console.log(">>>>>>>>>> " + chan.channel.channelName)
-              d.title = chan.channel.channelName;
-              d.avatar = chan.img
-              // scenario for ava
-              thechannels.push(d)
-          }
-          */
+
           console.log('after update');
           console.log(thechannels);
           store.commit('setChannels' , thechannels);

@@ -47,10 +47,10 @@
 					</v-list-item-avatar>
 					</v-badge>
           </v-btn>
-					<v-list-item-content>
+					<!-- <v-list-item-content> -->
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
 					<!-- <v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle> -->
-					</v-list-item-content>
+					<!-- </v-list-item-content> -->
         </v-list-item>
             <v-divider
               v-if="index < items_.length"
