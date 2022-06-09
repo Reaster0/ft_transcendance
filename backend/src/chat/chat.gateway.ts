@@ -71,6 +71,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
 //    this.logger.log(channel);
 
+    console.log(channel.avatar);
+    console.log(channel.avatar.byteLength);
     if (!client.data.user) {
       console.log('didnt got the time to get the user :(');
       client.disconnect();
@@ -194,6 +196,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     return this.server.emit('connectedUsers', connectUsersID); // user or user.id ?
   }
 
+  @SubscribeMessage('emitChannels')
   async emitChannels() {
     console.log('we emit all the chan for that user');
     const connections: connectedSocketI[] = await this.connectService.findAll();

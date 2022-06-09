@@ -59,6 +59,7 @@
         "joi": "^17.6.0",
         "jwt-decode": "^3.1.2",
         "nestjs": "^0.0.1",
+        "nestjs-url-generator": "^1.0.1",
         "otplib": "^12.0.1",
         "passport-42": "^1.2.6",
         "passport-jwt": "^4.0.0",
