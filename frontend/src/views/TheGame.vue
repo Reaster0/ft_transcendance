@@ -19,16 +19,18 @@
 		</v-row>
 		<div class="params">
 			<div class="button_slick">
-				<h1 class="Spotnik">Ball Params</h1>
+				<h1 class="Spotnik">Ball Speed</h1>
 				<h1>Slow</h1>
 				<h1>Mid</h1>
 				<h1>Speedy</h1>
 			</div>
 			<div class="button_slick">
-				<h1 class="Spotnik">Paddle Params</h1>
-				<h1>Small</h1>
-				<h1>Mid</h1>
-				<h1>Chonke</h1>
+				<h1 class="Spotnik">Ball Size</h1>
+				<v-radio-group v-model="ballSize">
+					<v-radio>Small</v-radio>
+					<v-radio>Mid</v-radio>
+					<v-radio>Chonke</v-radio>
+				</v-radio-group>
 			</div>
 		</div>
 	</div>
@@ -70,6 +72,8 @@ export default {
 		let framesId = null
 		let winText = null
 		let showInfo = true
+		const ballSpeed = ref(null)
+		const ballSize = ref(null)
 
 		onMounted(async() =>{
 
@@ -193,7 +197,10 @@ export default {
 
 		function Play(){
 			//send in the request the params game
-			gameSocket.value.emit('joinGame')
+			gameSocket.value.emit('joinGame', {
+				ballSize: "NORMAL",
+				ballSpeed: "NORMAL",
+			})
 			searchingGame.value = true
 			console.log("joinGame")
 		}
@@ -224,7 +231,6 @@ export default {
 
 			if (winText)
 			{
-				winText = "wake up neo stop loosing"
 				ctx.font = canvas.width/4 + "%" + " Spotnik"
 				ctx.fillText(winText, 0.2 * canvas.width, 0.5 * canvas.height);
 			}
@@ -256,7 +262,7 @@ export default {
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame}
+		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame, ballSize, ballSpeed}
 	},
 }
 </script>

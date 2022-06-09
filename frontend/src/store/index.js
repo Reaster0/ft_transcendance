@@ -14,6 +14,7 @@ const store = createStore({
 		},
 		connected: false,
 		need2fa: false,
+		socketValue: null,
 	},
 	getters: {
 		whoAmI:(state) => {
