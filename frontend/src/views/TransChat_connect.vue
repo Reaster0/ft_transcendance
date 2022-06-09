@@ -36,7 +36,7 @@ for bloking or unblocking  a user:
 
 - connectedUsers : get all user.id of user connected..... (but the function feels wrong....) -->
 
-<script>
+<script lang="ts">
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';

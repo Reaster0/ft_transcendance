@@ -62,7 +62,7 @@
 </template>
 
 
-<script>
+<script lang="ts">
 // import axios from 'axios'
 import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"

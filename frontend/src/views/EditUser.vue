@@ -15,7 +15,7 @@
 	</v-container>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from "vuex"
 import { onMounted, reactive } from "@vue/runtime-core"
 import { ref } from "vue"

@@ -21,7 +21,7 @@
 	</v-container>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from "vuex"
 import { computed } from "@vue/runtime-core"
 import { ref } from "vue"

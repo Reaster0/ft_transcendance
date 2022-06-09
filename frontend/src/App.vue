@@ -7,9 +7,12 @@
 	</v-app>
 </template>
 
-<script>
-import NavDrawer from "./components/NavDrawer.vue"
-export default {
+<script lang="ts">
+
+import { defineComponent } from "vue";
+import NavDrawer from "./components/NavDrawer.vue";
+
+export default defineComponent ({
 	name: 'App',
 	components: {
 		NavDrawer,
@@ -27,7 +30,7 @@ export default {
   },
   setup(){
 	}
-}
+});
 </script>
 
 <style>

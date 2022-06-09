@@ -19,16 +19,16 @@
 		</v-row>
 		<div class="params">
 			<div class="button_slick">
-				<h1 class="Spotnik">Ball Params</h1>
-				<h1>Slow</h1>
-				<h1>Mid</h1>
-				<h1>Speedy</h1>
+				<h1 class="Spotnik">Ball Speed</h1>
+				<h1>slow</h1>
+				<h1>normal</h1>
+				<h1>fast</h1>
 			</div>
 			<div class="button_slick">
-				<h1 class="Spotnik">Paddle Params</h1>
-				<h1>Small</h1>
-				<h1>Mid</h1>
-				<h1>Chonke</h1>
+				<h1 class="Spotnik">Ball Size</h1>
+				<h1>small</h1>
+				<h1>normal</h1>
+				<h1>big</h1>
 			</div>
 		</div>
 	</div>
@@ -40,7 +40,7 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
 import { onMounted } from "@vue/runtime-core"
 import { ref, watch } from "vue"
 import io from 'socket.io-client';

@@ -39,7 +39,7 @@
 </v-container>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { ref, watch } from "vue"

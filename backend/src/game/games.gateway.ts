@@ -77,7 +77,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('joinGame')
   handleJoinGame(client: Socket, data: { ballSize: string, ballSpeed: string }) {
     try {
-      console.log('join');
       if (!client.data.user) {
         return client.disconnect();
       }
@@ -85,8 +84,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
-      if (!data.ballSize || !data.ballSpeed) {
-        client.emit('MissingFeatures');
+      if (!data || !data.ballSize || !data.ballSpeed) {
+        client.emit('FeaturesIncorrect');
         return;
       }
       const feature = this.gamesService.validFeatures(data.ballSize, data.ballSpeed);

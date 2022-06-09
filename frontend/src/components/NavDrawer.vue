@@ -23,7 +23,7 @@
 	</v-toolbar>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from 'vuex'
 import { computed } from 'vue'
 
