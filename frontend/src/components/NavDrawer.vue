@@ -30,12 +30,11 @@ import { computed } from 'vue'
 export default {
 	setup() {
 		const store = useStore()
-
 		const isLog = computed(() => {
 			return store.getters.isConnected
 		})
 
-		async function logOut(){
+		async function logOut() {
 			await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
 			.then(store.commit('setConnected', [false, false]))
 		}
@@ -66,7 +65,7 @@ export default {
 @keyframes noise-anim{
   $steps:20;
   @for $i from 0 through $steps{
-    #{percentage($i*(1/$steps))}{
+    #{percentage($i* calc(1 / $steps))}{
       clip:rect(random(100)+px,9999px,random(100)+px,0);
     }
   }
@@ -88,7 +87,7 @@ export default {
 @keyframes noise-anim-2{
   $steps:20;
   @for $i from 0 through $steps{
-    #{percentage($i*(1/$steps))}{
+    #{percentage($i* calc(1 / $steps))}{
       clip:rect(random(100)+px,9999px,random(100)+px,0);
     }
   }

@@ -36,16 +36,16 @@ export class UsersService {
     return user;
   }
 
-  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
+  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<Promise<User> | { user: Promise<User>, first: boolean }> {
     const { username } = createUserDto;
     let user = await this.userRepository.findOne({ username: username });
     if (user) {
       return user;
     }
     const nickname = await this.generateNickname(username);
-    user = this.userRepository.create({username: username, nickname: nickname});
+    user = await this.userRepository.create({username: username, nickname: nickname});
     // TODO redirect user to modify info page
-    return this.userRepository.save(user);
+    return { user: this.userRepository.save(user), first: true };
   }
 
   async generateNickname(nickname: string): Promise<string> {
@@ -171,7 +171,7 @@ export class UsersService {
   }
 
   currentUser(user: User): Partial<User> {
-    const { username, twoFASecret, is2FAEnabled, ...res } = user;
+    const { username, twoFASecret, ...res } = user;
     return res;
   }
 

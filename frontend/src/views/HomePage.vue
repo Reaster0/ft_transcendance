@@ -13,23 +13,22 @@
 	</v-container>
 </template>
 
-<script>
+<script lang="ts">
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
-import { isLogged } from "../components/FetchFunctions.js"
-
-export default {
+import { isLogged } from "../components/FetchFunctions"
+import { defineComponent } from "vue";
+export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
 	setup(){
-
 		onMounted(async() => {
 		useStore().commit('setConnected' , await isLogged())
 		})
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -41,7 +40,6 @@ export default {
 	cursor: pointer;
 	transition: text-shadow 1s;
 }
-
 .rainbow:hover {
 text-shadow: 0.04em 0.04em #fc0049,
         0.08em 0.08em #fe8f01,
@@ -49,7 +47,6 @@ text-shadow: 0.04em 0.04em #fc0049,
         0.16em 0.16em #3fdf4b,
         0.2em 0.2em #3462fe;
 }
-
 .glitch{
   color: white;
   font-size: 4em;
@@ -65,7 +62,6 @@ text-shadow: 0.04em 0.04em #fc0049,
     }
   }
 }
-
 .glitch:after{
   content:attr(data-text);
   position:absolute;
@@ -78,7 +74,6 @@ text-shadow: 0.04em 0.04em #fc0049,
   clip:rect(0,900px,0,0); 
   animation:noise-anim 2s infinite linear alternate-reverse;
 }
-
 @keyframes noise-anim-2{
   $steps:20;
   @for $i from 0 through $steps{

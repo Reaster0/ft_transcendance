@@ -5,8 +5,8 @@ import { PosOrVec, Point, Ball, Paddle, Field, Pong } from './interfaces/pong.in
 export class PongService {
   constructor() {}
 
-  initPong(): Pong {
-    const field = this.initField();
+  initPong(sizeFactor: number, velXFactor: number, speedFactor: number): Pong {
+    const field = this.initField(sizeFactor, velXFactor, speedFactor);
     const ball = this.initBall(field);
     const paddleL = this.initPaddle(field, true);
     const paddleR = this.initPaddle(field, false);
@@ -19,11 +19,14 @@ export class PongService {
     return pong;
   }
 
-  initField(): Field {
+  initField(sizeFactor: number, velXFactor: number, speedFactor: number): Field {
     const field: Field = {
       length: 1,
       width: 1,
       offset: 1 / 80,
+      sizeFactor: sizeFactor,
+      velXFactor: velXFactor,
+      speedFactor: speedFactor,
     };
     return field;
   }
@@ -32,8 +35,8 @@ export class PongService {
     const ball: Ball = {
       pos: { x: field.length / 2, y: field.width / 2 },
       vel:  this.initBallVelocity(field, Math.random() > 0.5),
-      speed: field.length / 500,
-      radius: field.length / 60,
+      speed: field.length / field.speedFactor,
+      radius: field.length / field.sizeFactor,
     };
     return ball;
   }
@@ -55,7 +58,7 @@ export class PongService {
     }
     let yValue = Math.random() * (0.00075 + 0.00075) - 0.00075;
     let vel: PosOrVec = {
-      x: dir * (field.length / 1000),
+      x: dir * (field.length / field.velXFactor),
       y : yValue,
     };
     return vel;
@@ -91,7 +94,7 @@ export class PongService {
   resetBall(field: Field, ball: Ball) {
     ball.pos.x = field.length / 2;
     ball.pos.y = field.width / 2;
-    ball.speed = field.length / 500;
+    ball.speed = field.length / field.speedFactor;
     ball.vel = this.initBallVelocity(field, ball.vel.x > 0 ? true : false);
   }
 

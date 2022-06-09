@@ -15,27 +15,26 @@
 </v-col>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script lang="ts">
+import { defineComponent, ref } from 'vue'
 import { useStore } from 'vuex'
 import { computed } from 'vue'
 import { submit2FaCode } from "../components/FetchFunctions"
 import { useRouter } from "vue-router";
 
-export default {
+export default defineComponent ({
 	setup()
 	{
-		const router = useRouter()
-		const inputCode = ref(null)
-		const store = useStore()
+		const router = useRouter();
+		const inputCode = ref<string | null>(null);
+		const store = useStore();
 
 		const need2fa = computed(() => {
 			return store.getters.need2Fa;
 		})
 
 		async function submitCode() {
-			if(await submit2FaCode(inputCode.value))
-			{
+			if(await submit2FaCode(inputCode.value as string))			{
 				store.commit('setNeed2FA', false)
 				// store.commit('setUser', await getUserInfo())
 				router.push('/user')
@@ -44,7 +43,7 @@ export default {
 
 		return {need2fa, inputCode, submitCode}
 	},
-}
+})
 </script>
 
 <style scoped>

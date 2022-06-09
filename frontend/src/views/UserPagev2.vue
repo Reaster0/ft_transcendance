@@ -53,8 +53,8 @@ export default {
 		ParticlesBg
 	},
 	setup(){
-		const user = ref(null)
-		const avatar = ref(null)
+		const user = ref(null);
+		const avatar = ref(null);
 		const edit = ref(false);
 		const nickname = ref(null);
 		const name_accepted = ref(true);
@@ -75,9 +75,10 @@ export default {
 			document.getElementById("upload").click()
 		}
 
+		//TODO check type of e
 		async function imgReceived(e) {
 			img_accepted.value = await uploadAvatar(e)
-			if (img_accepted.value)
+			if (img_accepted.value && user && user.value && user.value.id)
 				avatar.value = await getAvatarID(user.value.id)
 		}
 
