@@ -122,6 +122,11 @@ export default
       let thechannels = [];
       const connection = ref(null)
       const store = useStore();
+      
+
+
+
+
       onMounted(() =>{
         // console.log(document.cookie.toString())
         try {
@@ -148,7 +153,8 @@ export default
           for (var i = 0; i < length; ++i) {
             var data = {};
             data.title = res.channels[i].channelName;
-            data.avatar = res.img[i]
+            data.avatar = res.channels[i].avatar
+            console.log(data.avatar)
             thechannels.push(data);
           }
           /*
@@ -158,7 +164,6 @@ export default
               d.title = chan.channel.channelName;
               d.avatar = chan.img
               // scenario for ava
-              d.avatar = chan.avatar
               thechannels.push(d)
           }
           */

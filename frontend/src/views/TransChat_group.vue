@@ -224,9 +224,20 @@
 
           <div id="app" class="pt-6">
                       <!-- if clicked "leave" - activate "join". and opposite -->
-          <v-btn elevation="2" width="350px" @click="leaveChannel">
+          <!-- <v-btn elevation="2" width="350px" @click="leaveChannel">
             Leave the chat room
-          </v-btn>
+          </v-btn> -->
+          
+
+				<v-btn v-if="!isChannelJoined" elevation="2" width="350px">
+					Join the chat room
+				</v-btn>
+				<div v-else>
+					<v-btn elevation="2" width="350px">
+						Leave the chat room
+					</v-btn>
+					<v-btn color="red" @click="logOut" to="/">Logout</v-btn>
+				</div>
           </div>
 
       
@@ -474,6 +485,9 @@ export default {
 		const connection = ref(null)
     const store = useStore();
     var getChannels = store.getters.getChannels;
+    var isChannelJoined = store.getters.isChannelJoined;
+
+
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
@@ -558,12 +572,17 @@ export default {
 
 // 		// for joinning a existing channel
 // 		// - joinChannel { id: string }
-// 		function joinChannel(id)
-// 		{
-// 			console.log("before joinChannel");
-// 			connection.value.emit('joinChannel', id);
-// 			console.log("after joinChannel");
-// 		}
+      // function joinChannel(id)
+      // {
+      //   store.commit('setChannelJoinedStatus' , true);
+      //   connection.value.emit('joinChannel', id);
+      // }
+
+
+
+
+
+
 
 // 		// (or just put a channel in argument
 
@@ -610,7 +629,7 @@ export default {
 // 		// })
     console.log('-------------------------------------------------------------');
     console.log("************", getChannels)
-		return { sendingMessage, getChannels }
+		return { sendingMessage, getChannels, isChannelJoined }
 
 	}
 };
