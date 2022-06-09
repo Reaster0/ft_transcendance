@@ -500,32 +500,11 @@ export default {
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
-        // connection.value.on("channel", function(res) {
-
-        //   thechannels = [];
-        //   console.log('in channel show up');
-        //   for (const chan of res){
-        //       let d = {}
-        //       console.log(">>>>>>>>>> " + res[chan].chanName)
-        //       d.title = res[chan].channelName
-        //       thechannels.push(d)
-        //   }
-
-        //   console.log('after update')
-        //   console.log(thechannels)
-        //   useStore().commit('setChannels' , thechannels)
-        // })
-
-
-        // thechannels;
-//			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
-      // TestTest();
-			// SendingMessage();
-			// JoinChannel();
-			// LeaveChannel();
-			// BlockUser();
+      store.commit('setSocketVal' , connection.value);
 			})
       
+
+
 //     /*
 //     onBeforeRouteLeave(() => {
 //         const answer = window.confirm("disconect from chat ?")

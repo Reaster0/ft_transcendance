@@ -10,9 +10,10 @@ const store = createStore({
 		},
 		connected: false,
 		need2fa: false,
-
+		// ----chat---- //
 		channels: [],
 		joinedChannel: false,
+		theSocketVal: null,
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -24,12 +25,15 @@ const store = createStore({
 		need2Fa:(state) => {
 			return state.need2fa;
 		},
-
+		// ----chat---- //
 		getChannels:(state) => {
 			return state.channels;
 		},
 		isChannelJoined:(state) => {
 			return state.joinedChannel;
+		},
+		getSocketVal:(state) => {
+			return state.theSocketVal;
 		},
 	},
 	mutations: {
@@ -43,12 +47,15 @@ const store = createStore({
 		setNeed2FA(state, TwoFA) {
 			state.need2fa = TwoFA;
 		},
-
+		// ----chat---- //
 		setChannels(state, chanarray) {
 			state.channels = chanarray;
 		},
 		setChannelJoinedStatus(state, thestatus) {
 			state.joinedChannel = thestatus;
+		},
+		setSocketVal(state, val) {
+			state.theSocketVal = val;
 		},
 	},
 	actions: {},
