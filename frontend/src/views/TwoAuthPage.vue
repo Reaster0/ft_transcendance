@@ -21,34 +21,35 @@
 	</v-container>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from "vuex"
 import { computed } from "@vue/runtime-core"
-import { ref } from "vue"
+import { ref, defineComponent } from "vue"
 import { getInitialQR, submit2FaCode } from "../components/FetchFunctions"
+import router from "../router/index";
 
-export default {
+export default defineComponent ({
 	setup(){
 
-		const imgQR = ref(null)
-		const TwoFACode = ref(null)
-		const codeAccepted = ref(false)
+		const imgQR = ref<null | any>(null); // TODO check type
+		const TwoFACode = ref<null | string>(null);
+		const codeAccepted = ref<boolean>(false);
 
 		const user = computed(() => {
 			return useStore().getters.whoAmI;
 		})
 
 		async function submitCode() {
-			codeAccepted.value = await submit2FaCode(TwoFACode.value)
+			codeAccepted.value = await submit2FaCode(TwoFACode!.value as string)
 			if (codeAccepted.value){
 				// useStore().
-				this.$router.push({path: '/user'})
+				router.push({path: '/user'})
 			}
 		}
 
 		return {user, imgQR, getInitialQR, TwoFACode, codeAccepted, submit2FaCode, submitCode}
 	},
-}
+})
 </script>
 
 <style scoped>

@@ -12,7 +12,7 @@
           placeholder="Search"
           height = "50px"
         ></v-text-field>
-         <v-btn  height="54px" @click="TestTest"><v-icon right dark>mdi-magnify</v-icon></v-btn>
+         <v-btn  height="54px" @click="TestTest"><v-icon right dark>mdi-magnify</v-icon></v-btn> // TODO TestTest not defined ?
     </div>
 			<v-btn v-on:click="create" elevation="2">
 				Create new chat room
@@ -210,7 +210,7 @@
               label="Write a message"
               placeholder="Message"
               @click.prevent="TestTest"
-            ></v-text-field>
+            ></v-text-field> // TODO TestTest not defined ?
             <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="TestTest">
               <div  :style="{color: ' #ffffff'}">
                 send
@@ -270,18 +270,19 @@
 
 
 
-<script>
+<script lang="ts">
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-export default 
-{
+import { defineComponent } from "vue";
+
+export default defineComponent ({
   data: () => 
   ({
-      overlay: false,
-      selected: [2],
-      currentTab: 0,
-      tab: null,
-      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
+      overlay: false as boolean,
+      selected: [2] as number[],
+      currentTab: 0 as number,
+      tab: null as any, // TODO check type
+      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'] as any, //TODO check type
       items: [
         {
           photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -308,12 +309,12 @@ export default
           subtitle: "My cat stole my keys !",
           title: "abaudot",
         },
-      ],
-      model: 1,
+      ] as any, // TODO check type
+      model: 1 as number,
       items2: [
         {tabs: 'Members',},
         {tabs: 'Administrators',}
-      ],
+      ] as any, // TODO check type
       members: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -331,7 +332,7 @@ export default
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ],
+      ] as any, // TODO check type
       admins: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -341,18 +342,18 @@ export default
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ],
-      value: 10,
-      bufferValue: 20,
-      interval: 0,
-      loading: false,
-      dialog: false,
-      notifications: false,
-      sound: true,
-      widgets: false,
+      ] as any, // TODO check type
+      value: 10 as number,
+      bufferValue: 20 as number,
+      interval: 0 as number,
+      loading: false as boolean,
+      dialog: false as boolean,
+      notifications: false as boolean,
+      sound: true as boolean,
+      widgets: false as boolean,
   }),
   methods: {
-    create: function (event) 
+    create: function (event : any) // TODO check event tupe 
     {
       // `this` fait référence à l'instance de Vue à l'intérieur de `methods`
       // alert('Bonjour ' + this.name + ' !')
@@ -379,14 +380,14 @@ export default
   //   },
   // },
   watch: {
-    value (val) {
+    value (val: number) {
       if (val < 100) return
 
       this.value = 0
       this.bufferValue = 10
       this.startBuffer()
     },
-    loading (val) {
+    loading (val: number) {
       if (!val) return
 
       setTimeout(() => (this.loading = false), 5000)
@@ -400,8 +401,7 @@ export default
   beforeUnmount () {
     clearInterval(this.interval)
   },
-};
-
+});
 </script>
 
 
