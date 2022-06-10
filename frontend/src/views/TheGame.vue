@@ -14,22 +14,24 @@
 				</v-row>
 			</v-container>
 		</div>
-		<v-row v-else justify="center">
+		<!-- <v-row v-else justify="center">
 			<div class="button_slick big_button Spotnik">FATAL ERROR PLEASE REFRESH</div>
-		</v-row>
+		</v-row> -->
 		<div class="params">
 			<div class="button_slick">
 				<h1 class="Spotnik">Ball Speed</h1>
-				<h1>Slow</h1>
-				<h1>Mid</h1>
-				<h1>Speedy</h1>
+				<v-radio-group v-model="ballSpeed">
+					<v-radio label="Slow" :value="'SLOW'"></v-radio>
+					<v-radio label="Mid" :value="'NORMAL'"></v-radio>
+					<v-radio label="Speedy" :value="'FAST'"></v-radio>
+				</v-radio-group>
 			</div>
 			<div class="button_slick">
 				<h1 class="Spotnik">Ball Size</h1>
 				<v-radio-group v-model="ballSize">
-					<v-radio>Small</v-radio>
-					<v-radio>Mid</v-radio>
-					<v-radio>Chonke</v-radio>
+					<v-radio label="Smol" :value="'SMALL'"></v-radio>
+					<v-radio label="Mid" :value="'NORMAL'"></v-radio>
+					<v-radio label="Chonke" :value="'BIG'"></v-radio>
 				</v-radio-group>
 			</div>
 		</div>
@@ -55,12 +57,12 @@ export default defineComponent ({
 		const matchId = ref<string | null>(null);
 		const searchingGame = ref<boolean>(false);
 		const fatalError = ref<boolean>(false);
-		const gameData = ref({
-			pos: "",
-			opponent: "",
-			ball: {x: 0, y: 0, radius: 10},
-			paddle:{ width: 5, height: 15 },
-			paddleL: { x: 0, y: 0 },
+		const gameData = ref<any>({
+			pos: "" as string,
+			opponent: "" as string,
+			ball: {x: 0 as number, y: 0 as number, radius: 10 as number},
+			paddle:{ width: 5 as number, height: 15 as number},
+			paddleL: { x: 0 as number, y: 0 as number},
 			paddleR: { x: 0, y: 0 },
 			score: { leftScore: 0, rightScore: 0 },
 			winner: "",
@@ -71,13 +73,12 @@ export default defineComponent ({
 		let framesId: number | undefined | null = null;
 		let winText: string | null = null;
 		let showInfo: boolean = true;
-		const ballSpeed = ref(null)
-		const ballSize = ref(null)
+		const ballSpeed = ref<string>("NORMAL")
+		const ballSize = ref<string>("NORMAL")
 
 		onMounted(async() =>{
-
 			try {
-				gameSocket.value = io('http://localhost:3000/game',{
+				gameSocket.value = io('http://:3000/game',{
 					transportOptions: {
 					polling: { extraHeaders: { auth: document.cookie }},
 					withCredentials: true
@@ -188,10 +189,9 @@ export default defineComponent ({
 
 
 		function Play(){
-			//send in the request the params game
 			gameSocket.value.emit('joinGame', {
-				ballSize: "NORMAL",
-				ballSpeed: "NORMAL",
+				ballSize: ballSize.value,
+				ballSpeed: ballSpeed.value,
 			})
 			searchingGame.value = true
 			console.log("joinGame")
@@ -296,6 +296,7 @@ h1 {
 </style>
 
 <style scoped>
+
 .big_button {  
   margin: 180px auto 0 auto;
 }
