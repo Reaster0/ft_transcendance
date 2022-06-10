@@ -49,7 +49,7 @@ import { onBeforeRouteLeave } from 'vue-router';
 
 export default defineComponent ({
 	setup() {
-		const gameSocket = ref< any | null>(null);
+		const gameSocket = ref< any | null>(null); // TODO check gameSocket type
 		const matchId = ref<string | null>(null);
 		const searchingGame = ref<boolean>(false);
 		const fatalError = ref<boolean>(false);

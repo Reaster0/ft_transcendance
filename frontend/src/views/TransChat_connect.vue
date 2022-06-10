@@ -48,7 +48,7 @@ export default defineComponent ({
     publicChannel: false as boolean,
 
 	setup() {
-		const connection = ref<any | null>(null)
+		const connection = ref<any | null>(null); //TODO check type of connection 
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
@@ -68,6 +68,7 @@ export default defineComponent ({
 				console.log("channel:" + channels)
 			})
 
+			// TODO check how to call following functions if they're needed
 			//NewChannel();
             //TestTest();
 			//SendingMessage();
@@ -87,7 +88,7 @@ export default defineComponent ({
 
 		// for sending message:
 		// -  message {content: string, channel: Chan, ...}
-		function SendingMessage(content: string, channel: any) {
+		function SendingMessage(content: string, channel: any) { //TODO check type of channel
 			console.log("before message");
 			connection.value.emit('message', content, channel);
 			console.log("after message");
@@ -115,7 +116,7 @@ export default defineComponent ({
 
 		// for bloking or unblocking  a user:
 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
-		function BlockUser(user: any, block: boolean)
+		function BlockUser(user: any, block: boolean) // TODO check type of user
 		{
 			console.log("before blockUser");
 			connection.value.emit('blockUser', user, block);

@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <v-form @submit.prevent="submitIt(this.name, this.file)">
+      <v-form @submit.prevent="submitIt(this.name, this.file)"> // TODO this.values may be undefined ?
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -72,22 +72,20 @@
 </template>
 
 
-<script>
-  import { onMounted } from "@vue/runtime-core"
-  // import { ref } from "vue"
-  // import io from 'socket.io-client';
-  import { useStore } from "vuex";
+<script lang="ts">
+import { onMounted } from "@vue/runtime-core"
+import { defineComponent, reactive } from "vue"
+import { useStore, Store } from "vuex";
 
 
-export default
-{
+export default defineComponent({
   name: "NewRoomPublic",
   data() {
     return {
-      // created: false,
-      name: "",
-      file: [],
-      items: [],
+      created: false as boolean,
+      name: "" as string,
+      file: [] as any[], // TODO check type
+      items: [] as any[], // TODO check type
       // currentUser: useStore().getters.whoAmI,
     };
   },
@@ -98,7 +96,7 @@ export default
       console.log(this.file);
       this.created = true;
     },
-    previewFiles(event) {
+    previewFiles(event: any) { //TODO check event type
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },
@@ -119,12 +117,12 @@ export default
 
   setup()
   {
-      let thechannels = [];
-      const store = useStore();
+      let thechannels = reactive([] as any[]); //TODO check thechannels type
+      const store = reactive(useStore() as Store<any>);
       const socketVal = store.getters.getSocketVal;
 
       onMounted(() =>{
-        socketVal.on("channel", function(res) {
+        socketVal.on("channel", function(res: any) { // TODO check res type
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
@@ -135,7 +133,7 @@ export default
           const length= res.channels.length;
           console.log('lenght: ', length);
           for (var i = 0; i < length; ++i) {
-            var data = {};
+            var data = {} as any; //TODO check data type
             data.title = res.channels[i].channelName;
 
             let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
@@ -158,7 +156,7 @@ export default
         })
       })
 
-      function submitIt(name, file)
+      function submitIt(name: string, file: any) // TODO check file type
       {
         // const channame = this.name;
         const password = "";
@@ -175,9 +173,7 @@ export default
       // console.log(getChannels)
       return { submitIt }
   }
-}
-
-
+})
 </script>
 
 

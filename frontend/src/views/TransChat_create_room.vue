@@ -57,31 +57,29 @@
 
 
 
-<script>
+<script lang="ts">
 
-export default
-{
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "NewRoom",
-  methods: 
-  {
-    data(){
-      return{
-        name: '',
-        password: ''
-      }
-    },
-    handleSubmit(){
+  data() {
+    return {
+      name: '' as string,
+      password: '' as string
+    }
+  },
+  methods: {
+    handleSubmit(): void {
       const data = {
         name: this.name,
         password: this.password,
-      };
+      } as {name : string, password : string };
       console.log(data);
       console.log("submitted");
     }
   }
-}
-
-
+})
 </script>
 
 

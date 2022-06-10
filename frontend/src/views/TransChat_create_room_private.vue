@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name, this.file)">
+      <form @submit.prevent="submitIt(this.name, this.file)"> // TODO can be undefined ?
 
         <v-toolbar
           dark
@@ -11,8 +11,7 @@
             to="/chatgroup"
             icon
             dark
-            @click="dialog = false"
-          >
+            @click="dialog = false"> // TODO dialog does not exist ?
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title >
