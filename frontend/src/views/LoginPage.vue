@@ -7,9 +7,8 @@
 		</div>
 		<div v-else>
 			<h1 class="Spotnik">Click To Connect</h1>
-			<v-btn loading rounded elevation="5" outlined width="60%" height="20%" href="/api/auth/login-42">
+			<v-btn loading rounded elevation="5" outlined min-width="50%" height="20%" href="/api/auth/login-42">
 				<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
-				<div class="Spotnik big_text">AUTH</div>
 			</v-btn>
 		</div>
 	</div>

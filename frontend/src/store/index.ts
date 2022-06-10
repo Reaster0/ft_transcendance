@@ -3,17 +3,18 @@ import {createStore} from "vuex"
 const store = createStore({
 	state: {
 		user: {
-			nickname:	"",
-			friends:	[],
-			status:	"",
-			eloScore:	0,
+			nickname: "" as string,
+			friends: [] as number[],
+			status:	"" as string,
+			eloScore: 1500 as number,
+			is2FAEnabled: false as boolean,
 		},
-		connected: false,
-		need2fa: false,
+		connected: false as boolean,
+		need2fa: false as boolean,
 		// ----chat---- //
-		channels: [],
-		joinedChannel: false,
-		theSocketVal: null,
+		channels: [] as any[], // TODO check type
+		joinedChannel: false as boolean,
+		theSocketVal: null as any, // TODO check type
 	},
 	getters: {
 		whoAmI:(state) => {

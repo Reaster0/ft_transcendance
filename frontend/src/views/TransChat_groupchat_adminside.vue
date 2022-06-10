@@ -275,7 +275,7 @@
                         v-bind="attrs"
                         v-on="on"
                         elevation="0"
-                      >
+                      > // TODO attrs and on doesn't exist ?
                         <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
                       </v-btn>
 
@@ -317,7 +317,7 @@
                         v-bind="attrs"
                         v-on="on"
                         elevation="0"
-                      >
+                      > // TODO attrs and on doesn't exist ?
                         <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
                       </v-btn>
                       
@@ -353,22 +353,23 @@
 
 
 
-<script>
+<script lang="ts">
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-export default 
-{
+import { defineComponent } from "vue";
+
+export default defineComponent ({
   data: () => 
   ({
-      fav: true,
-      menu: false,
-      message: false,
-      hints: true,
-      overlay: false,
-      selected: [2],
-      currentTab: 0,
-      tab: null,
-      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
+      fav: true as boolean,
+      menu: false as boolean,
+      message: false as boolean,
+      hints: true as boolean,
+      overlay: false as boolean,
+      selected: [2] as number[],
+      currentTab: 0 as number,
+      tab: null as null | any, // TODO check type
+      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'] as any[], //TODO check type
       items: [
         {
           photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -395,12 +396,12 @@ export default
           subtitle: "My cat stole my keys !",
           title: "abaudot",
         },
-      ],
-      model: 1,
+      ] as any, // TODO check type
+      model: 1 as number,
       items2: [
         {tabs: 'Members',},
         {tabs: 'Administrators',}
-      ],
+      ] as any, // TODO check type
       members: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -418,7 +419,7 @@ export default
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ],
+      ] as any, // TODO check type
       admins: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -428,10 +429,10 @@ export default
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ],
+      ] as any, // TODO check type
   }),
   methods: {
-    create: function (event) 
+    create: function (event: any) // TODO check event type
     {
       // `this` fait référence à l'instance de Vue à l'intérieur de `methods`
       // alert('Bonjour ' + this.name + ' !')
@@ -443,14 +444,13 @@ export default
     }
   },
   watch: {
-    overlay (val) {
+    overlay (val : boolean) {
       val && setTimeout(() => {
         this.overlay = false
       }, 2000)
     },
   },
-};
-
+})
 </script>
 
 
