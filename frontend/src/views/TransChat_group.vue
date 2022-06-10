@@ -2,19 +2,19 @@
   <v-app >
     <v-container fluid >
       <v-row >
-		<!-- list of chat / search. maybe some buttons  -->
+
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
-      <div class="d-flex">
+      <!-- NB! When serach field will work on backen - add onclick option calling method  -->
+      <div class="d-flex textcont">
         <v-text-field
           clearable
           label="Find user / group"
           placeholder="Search"
           height = "50px"
         ></v-text-field>
-         <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn>
     </div>
-      <v-btn to="/newroom" elevation="2">
+      <v-btn to="/newroom" elevation="2" width="100%">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
 				<v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
@@ -47,10 +47,7 @@
 					</v-list-item-avatar>
 					</v-badge>
           </v-btn>
-					<!-- <v-list-item-content> -->
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-					<!-- <v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle> -->
-					<!-- </v-list-item-content> -->
         </v-list-item>
             <v-divider
               v-if="index < items_.length"
@@ -84,7 +81,8 @@
               </v-toolbar>
             </v-card>
 
-            <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
+            <!-- NB! get the real message -->
+            <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
               <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -96,28 +94,7 @@
               <v-list-item >
                 <v-list-item-content>
                   <div class="mb-2">
-                    It's funny
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            </v-toolbar>
-              
-
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    It's funny, to know hows websockets works i've made a testing branch (that i wont merge dont worry)
+                    It's funny, to know hows websockets works
                   </div>
                   <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
                 </v-list-item-content>
@@ -125,7 +102,7 @@
             </v-card >
           </v-toolbar>
 
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
+          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
             <v-spacer></v-spacer>
             <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
               <v-list-item >
@@ -146,64 +123,25 @@
             </v-btn>
           </v-toolbar>
 
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-            <v-spacer></v-spacer>
-            <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)" dark>
-              <v-list-item color = "ffffff" >
-                <v-list-item-content>
-                  <div :style="{color: ' #ffffff'}" class="mb-2">
-                    Use as much ts as possible. Then no pb
-                  </div>
-                  <v-list-item-subtitle :style="{color: ' #ffffff'}"> 19:50 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-              <v-avatar class="mt-n4 " size="32" elevation="2">
-                    <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-              </v-avatar>
-              </v-badge>
-            </v-btn>
-          </v-toolbar>
-
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    Ololo !
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-          </v-toolbar> -->
           
         
           <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
-          <div class="d-flex">
+          <div class="d-flex textcont">
             <v-text-field
               clearable
+              class="messagefield"
+              width="100%"
               label="Write a message"
               placeholder="Message"
-              @click.prevent="log"
+              @keyup.enter="sendingMessage(this.txt, this.currentChannel)"
               v-model="txt"
             ></v-text-field>
-            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)">
+            <!-- <v-btn height="54px" width="20%" color="rgb(0,0,255)" class="spacetop messagefield" @click="sendingMessage(this.txt, this.currentChannel)">
               <div  :style="{color: ' #ffffff'}">
                 send
               </div>
-            </v-btn>
+            </v-btn> -->
           </div>
-          <!-- </v-toolbar> -->
         </v-app>
         </div>
         </v-col>
@@ -212,7 +150,7 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-          <v-card height="22%" class="text-center offsetphoto" shaped >
+          <v-card height="100%" class="text-center offsetphoto" shaped >
              <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
                    <v-avatar class="s" elevation="10" size="60px">
                       <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
@@ -220,27 +158,33 @@
              </v-badge>
                 <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
                 <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
-          </v-card>
-
-          <div id="app" class="pt-6">
-                      <!-- if clicked "leave" - activate "join". and opposite -->
-          <!-- <v-btn elevation="2" width="350px" @click="leaveChannel">
-            Leave the chat room
-          </v-btn> -->
           
 
-				<v-btn v-if="!isChannelJoined" elevation="2" width="350px">
+          <div id="app" class="pt-6">
+          
+            
+        <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
+        <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
+        cause this condition is for PROTECTED (<div v-if="!isChannelJoined" && PROTECTED ID>) -->
+        <modale :revele="revele" :toggleModale="toggleModale"></modale>
+        <!-- <div v-if="!isChannelJoined">
+          <v-btn v-on:click="toggleModale" class="btn btn-success" elevation="2" width="100%">Join the chat room </v-btn>
+        </div> -->
+        <!-- NB! Activate scenario "joinChannel" in "getPassToJoin" on clink for PRIVATE and PUBLIC! 
+        (how to get info about exact channel ? ) -->
+				<v-btn v-if="!isChannelJoined" elevation="2" width="100%" @click="getPassToJoin">
 					Join the chat room
 				</v-btn>
 				<div v-else>
-					<v-btn elevation="2" width="350px">
+					<v-btn elevation="2" width="100%">
 						Leave the chat room
 					</v-btn>
 					<v-btn color="red" @click="logOut" to="/">Logout</v-btn>
 				</div>
-          </div>
 
-      
+        </div>
+
+        
         <!-- TABS  -->
         <div id="app" class="pt-6">
           <v-tabs
@@ -328,6 +272,7 @@
             </v-card>
           </v-tabs-items>
         </div>
+        </v-card>
 
   
         </v-col>
@@ -346,11 +291,17 @@
 import { useStore } from "vuex";
 // import { computed } from 'vue'
   //import { useKeypress } from "vue3-keypress";
-
+import TheModale from "./TransChat_modal_pass.vue";
   
 
 export default {
+  name: "TransChat_group",
+  components: {
+    'modale': TheModale
+  },
   data: () => ({
+      revele: false,
+
       fav: true,
       menu: false,
       message: false,
@@ -469,6 +420,9 @@ export default {
       {
         alert('SUBPAGE OF TRANSCHAT MANAGEMENT WILL BE OPENED')
       }
+    },
+    toggleModale: function() {
+      this.revele = !this.revele;
     }
 //there -----------
   },
@@ -502,7 +456,23 @@ export default {
 			}
       store.commit('setSocketVal' , connection.value);
 			})
+
+      // function joinChannel(id)
+      // {
+      //   store.commit('setChannelJoinedStatus' , true);
+      //   connection.value.emit('joinChannel', id);
+      // }
       
+      function getPassToJoin()
+      {
+        // this function is for protected channels (see the specification)
+        // as a parameter we will reseve info about the channel, our goal is to chack the password
+        // for now it will just open modal window
+
+
+      }
+
+
 
 
 //     /*
@@ -549,13 +519,7 @@ export default {
 			console.log("after message");
 		}
 
-// 		// for joinning a existing channel
-// 		// - joinChannel { id: string }
-      // function joinChannel(id)
-      // {
-      //   store.commit('setChannelJoinedStatus' , true);
-      //   connection.value.emit('joinChannel', id);
-      // }
+
 
 
 
@@ -608,7 +572,7 @@ export default {
 // 		// })
     console.log('-------------------------------------------------------------');
     console.log("************", getChannels)
-		return { sendingMessage, getChannels, isChannelJoined }
+		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin }
 
 	}
 };
@@ -641,6 +605,16 @@ export default {
 
 .row>.col {
   flex-basis: auto;
+}
+
+/* .textcont {
+  height: 100vh;
+} */
+
+.messagefield{
+  width:100%;
+  /* position: absolute; */
+  /* bottom: 0px; */
 }
 
 </style>
