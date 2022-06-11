@@ -568,7 +568,6 @@ export default defineComponent({
 // 		// 		},
 // 		// 	},
 // 		// })
-    console.log('-------------------------------------------------------------');
     console.log("************", getChannels)
 		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin }
 

@@ -10,8 +10,7 @@
           <v-btn
             to="/chatgroup"
             icon
-            dark
-            @click="dialog = false"> // TODO dialog does not exist ?
+            dark>
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title >
@@ -79,20 +78,16 @@ export default defineComponent ({
     const socketVal = reactive(store.getters.getSocketVal as any); // TODO check type
 
     onMounted(() =>{
-      console.log("1 - nonononono------!!!!!!")
       socketVal.on("channel", function(res: { channels: any, img: any }) { // TODO precise type of channels/img
         console.log('befor update');
         console.log(thechannels);
         console.log('creating channel');
         // console.log(JSON.stringify(res))
-        console.log("1.1 nonononono------!!!!!!")
         // reset channel
         thechannels = [];
         const length = res.channels.length;
         console.log('lenght: ', length);
-          console.log("2 - nonononono------!!!!!!")
         for (var i = 0; i < length; ++i) {
-            console.log("3 - nonononono------!!!!!!")
           var data = {} as any; // TODO check type of data
           data.title = res.channels[i].channelName;
 

@@ -10,7 +10,6 @@
             to="/chatgroup"
             icon
             dark
-            @click="dialog = false"
           >
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
