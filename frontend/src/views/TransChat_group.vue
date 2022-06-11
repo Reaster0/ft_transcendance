@@ -458,7 +458,7 @@ export default defineComponent({
       // chat_person is indicator that now user communicate not with a channel, but with another user
       // accordind to this info we change the interface
       // for the moment we change the value manualy, but we should get it from backend
-      chat_person: true as boolean,
+      chat_person: false as boolean,
       revele: false,
       fav: true as boolean,
       menu: false as boolean,
@@ -484,7 +484,7 @@ export default defineComponent({
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
         title: "abaudot",
       },
-      ] as any, // TODO check type
+      ] as any,
       // txt is a variable made to save CURRENT message that user is GOING TO send
       // with this we will emit this data to backend
       txt: '',
