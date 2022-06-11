@@ -1,6 +1,6 @@
 import { User } from 'src/users/entities/user.entity';
 
-export interface ChanI {
+export interface ChannelI {
   id?: string;
   channelName?: string;
   date?: Date;

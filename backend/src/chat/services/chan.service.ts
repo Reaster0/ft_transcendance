@@ -2,29 +2,23 @@ import { Injectable, InternalServerErrorException, StreamableFile } from '@nestj
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Chan } from '../entities/channel.entity';
+import { Channel } from '../entities/channel.entity';
 import { ChanUser } from '../entities/channelUser.entity';
-import { SocketJoined } from '../entities/sockets-connected-to-channel';
-import { ChanI } from '../interfaces/channel.interface';
+import { ChannelI } from '../interfaces/channel.interface';
 import { ChanUserI } from '../interfaces/channelUser.interface';
-import { JoinedSocketI } from '../interfaces/sockets-connected-to-channel.interface';
 import * as bcrypt from 'bcrypt';
-import { join } from 'path';
-import { Readable } from 'stream';
-import { createReadStream } from 'fs';
+import { timeStamp } from 'console';
 
 @Injectable()
 export class ChanServices {
   constructor(
-    @InjectRepository(Chan)
-    private readonly chanRepository: Repository<Chan>,
+    @InjectRepository(Channel)
+    private readonly chanRepository: Repository<Channel>,
     @InjectRepository(ChanUser)
     private readonly chanUserRepository: Repository<ChanUser>,
-    @InjectRepository(SocketJoined)
-    private readonly joinedSocketRepository: Repository<SocketJoined>,
   ) {}
 
-  async createChannel(channel: ChanI, creator: User): Promise<ChanI> {
+  async createChannel(channel: ChannelI, creator: User): Promise<ChannelI> {
     let { channelName, publicChannel, password, avatar } = channel;
     //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
@@ -49,17 +43,15 @@ export class ChanServices {
 		}
 		//console.log(channel);
 
-    if (!avatar.buffer || avatar.byteLength == 0)
-      console.log('must add default avatar');
 		return this.chanRepository.save(channel);
 	}
 
-	async deleteChannel(channel: ChanI) {
+	async deleteChannel(channel: ChannelI) {
 		/*
  		 if (!channel.id)
 	  		throw new InternalServerErrorException('bad request: deleteChannel');
 	  */
-    const channelFound: Chan = await this.chanRepository.findOne(channel.id);
+    const channelFound: Channel = await this.chanRepository.findOne(channel.id);
     if (channelFound) {
       /*
 					 channelFound.users = []; //is this necessary ?
@@ -79,7 +71,24 @@ export class ChanServices {
     }
   }
 
-  async updateChannel(channel: ChanI, info: any): Promise<Boolean> {
+  //try
+  async pushUserToChan(channel: ChannelI, user: User){
+    var update: ChannelI = await this.chanRepository.findOne(channel.id);
+    update.users.push(user);
+    this.chanRepository.update(channel.id, update);
+  }
+
+  //test
+  async removeUserToChan(channel: ChannelI, user: User) {
+    var update: ChannelI = await this.chanRepository.findOne(channel.id);
+    const index = update.users.indexOf(user);
+    if (index != -1) {
+      update.users.splice(index, 1);
+    }
+    this.chanRepository.update(channel.id, update);
+  }
+
+  async updateChannel(channel: ChannelI, info: any): Promise<Boolean> {
 		const { addPassword, password, removePassword } = info;
 
     if (addPassword && password) {
@@ -95,12 +104,12 @@ export class ChanServices {
     return true;
   }
 
-  async getChannelsFromUser(id: number): Promise<ChanI[]> {
+  async getChannelsFromUser(id: number): Promise<ChannelI[]> {
 
     let query = this.chanRepository
       .createQueryBuilder('chan')
       .where('chan.publicChannel = true');
-    const publicChannels: ChanI[] = await query.getMany(); // gater all public channel
+    const publicChannels: ChannelI[] = await query.getMany(); // gater all public channel
     console.log('---- public  Channel -----');
    // console.log(publicChannels);
 
@@ -114,7 +123,7 @@ export class ChanServices {
       .orderBy('chan.date', 'DESC');
 
     //console.log(query);
-    const privateChannels: ChanI[] = await query.getMany();
+    const privateChannels: ChannelI[] = await query.getMany();
     console.log('---- private Channel -----');
     //console.log(privateChannels);
 
@@ -131,20 +140,21 @@ export class ChanServices {
     return channels;
   }
 
-  async getChan(channelID: string): Promise<ChanI> {
+  async getChan(channelID: string): Promise<ChannelI> {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-  async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
-    console.log(userId, channel); //this look strange
-    return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
+  async findUserByChannel(channel: ChannelI, userID: number): Promise<ChanUserI> {
+    console.log(userID, channel); //this look strange
+    return this.chanUserRepository.findOne({ where: { channel: channel, userID: userID } });
   }
 
-  async findChannel(channelName: string): Promise<Chan> {
+  async findChannel(channelName: string): Promise<Channel> {
     return this.chanRepository.findOne({channelName});
   }
 
-  getImageFromBuffer(channels: ChanI[]): StreamableFile[] {
+  /* no need anymore ----------
+  GetImageFromBuffer(channels: ChannelI[]): StreamableFile[] {
     var image: StreamableFile[] = [];
     const defaultStream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR),);
 
@@ -159,19 +169,46 @@ export class ChanServices {
     
     return image;
   }
+  */
+
+
+  async getAllChanUser(channel: ChannelI): Promise<ChanUserI[]> {
+    const channelWhitChanUser: Channel = await this.chanRepository.findOne({
+      where: {id: channel.id},
+      relations: ['chanUsers'],
+    });
+
+    return channelWhitChanUser.chanUsers;
+  }
 
   //-------------------------------------------------//
-  async findSocketByChannel(channel: ChanI): Promise<JoinedSocketI[]> {
+  async findSocketByChannel(channel: ChannelI): Promise<string[]> {
+    
+    const member: ChannelI = await this.chanRepository.findOne({
+      where: {id: channel.id},
+      relations: ['users'],
+    });
+
+
+      var res: string[]
+      for (const user of member.users) {
+        res.push(user.chatSocket);
+      }
+      return (res);
+    /*
     return this.joinedSocketRepository.find({
       where: { channel: channel },
       relations: ['user'],
     });
+    */
   }
 
+  /*
   async addSocket(joinedChannel: JoinedSocketI): Promise<JoinedSocketI> {
     return this.joinedSocketRepository.save(joinedChannel);
   }
   async removeSocket(socketID: string) {
     return this.joinedSocketRepository.delete({ socketID });
   }
+  */
 }

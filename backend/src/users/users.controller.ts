@@ -104,7 +104,7 @@ export class UsersController {
   @ApiOkResponse({ description: 'Partial User Information using id' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  getPartialUserInfo(@Query('userId') userId: string): Promise<Partial<User>> {
+  getPartialUserInfo(@Query('userId') userId: number): Promise<Partial<User>> {
     try {
       this.logger.log("Get('partialInfo') route called for user " + userId + ' (user id)');
       return this.usersService.getPartialUserInfo(userId);

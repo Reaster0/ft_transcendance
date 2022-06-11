@@ -11,24 +11,25 @@ import {
 } from 'typeorm';
 import { ChanUser } from './channelUser.entity';
 import { Message } from './message.entity';
-import { SocketJoined } from './sockets-connected-to-channel';
+//import { SocketJoined } from './sockets-connected-to-channel';
 import { ApiProperty } from '@nestjs/swagger';
 import { type } from 'os';
 import { number, string } from 'joi';
 
 @Entity()
-export class Chan {
+export class Channel {
   @ApiProperty({
     type: String,
     description: 'channel uuid',
   })
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
+  /* -------- */
   @ApiProperty({
     type: String,
     description: 'channel name, should be Unique',
   })
+  /* -------- */
   @Column('text', { default: 'unamed', unique: true}) // how front end deal whit this uniqness ?
   channelName: string;
 
@@ -36,6 +37,7 @@ export class Chan {
     type: Date,
     description: 'channel creation date',
   })
+  /* -------- */
   @CreateDateColumn()
   date: Date;
 
@@ -43,6 +45,7 @@ export class Chan {
     type: Date,
     description: 'channel last update date',
   })
+  /* -------- */
   @UpdateDateColumn()
   update_at: Date;
 
@@ -50,6 +53,7 @@ export class Chan {
     type: Number,
     description: 'channel owner / creator',
   })
+  /* -------- */
   @Column('int', { default: 0 })
   owner: number;
 
@@ -57,6 +61,7 @@ export class Chan {
     type: Boolean,
     description: 'is the channel public ?',
   })
+  /* -------- */
   @Column('boolean', { default: false })
   publicChannel: boolean;
 
@@ -64,6 +69,7 @@ export class Chan {
     type: String,
     description: 'encrypted password',
   })
+  /* -------- */
   @Column('text', { default: '' })
   password: string;
 
@@ -71,8 +77,17 @@ export class Chan {
     type: Number,
     description: 'array of administrator id',
   })
+  /* -------- */
   @Column('simple-array', { default: [] })
   adminUsers: number[];
+
+  @ApiProperty({
+    type: Number,
+    description: 'array of blocked User id',
+  })
+  /* -------- */
+  @Column('simple-array', { default: [] })
+  blockedUsers: number[];
 
   @ApiProperty({
     type: Boolean,
@@ -99,12 +114,11 @@ export class Chan {
 
   @ApiProperty({
     type: ChanUser,
-    description: 'Relation | channels <=> ChannelUser | OneToMany : User that have bein join that channel + there Role',
+    description: 'Relation | channels <=> ChannelUser | OneToMany : User that have bein join that channel + there status',
   })
-  @OneToMany(() => ChanUser, chanUser => chanUser.chan, { cascade: true }) // Users roles
-  chanUsers: ChanUser[]; //rool
+  @OneToMany(() => ChanUser, chanUser => chanUser.channel, { cascade: true }) // Users status
+  chanUsers: ChanUser[];
 
-  
   @ApiProperty({
     type: Message,
     description: 'Relation | OneMany: all message posted on that Channel' 
@@ -112,12 +126,14 @@ export class Chan {
   @OneToMany(() => Message, (message) => message.channel, { cascade: true }) // all message in that channel
   messages: Message[];
 
+  /*
   @ApiProperty({
     type: SocketJoined,
     description: 'Relation | OneToMany: all the socket connected to that Channel'
   })
-  @OneToMany(() => SocketJoined, (socketJoined) => socketJoined.chan, {
+  @OneToMany(() => SocketJoined, (socketJoined) => socketJoined.channel, {
     cascade: true,
   })
   socketJoined: SocketJoined[];
+  */
 }

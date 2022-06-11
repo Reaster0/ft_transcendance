@@ -10,6 +10,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
+import { STATUS_CODES } from 'http';
 
 @Injectable()
 export class UsersService {
@@ -185,7 +186,7 @@ export class UsersService {
     return res;
   }
 
-  async getPartialUserInfo(id: string): Promise<Partial<User>> {
+  async getPartialUserInfo(id: number): Promise<Partial<User>> {
     const user = await this.userRepository.findOne(id);
     if (!user) return user;
     return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
@@ -196,6 +197,14 @@ export class UsersService {
       where: { status: Status.ONLINE },
     });
     return connectedUser;
+  }
+
+  async connectUserToChat(user: User, socketID: string) {
+    this.userRepository.update(user.id, {status: Status.ONLINE, chatSocket: socketID});
+  }
+
+  async disconectUserToChat(user: User) {
+    this.userRepository.update(user.id, {status: Status.OFFLINE, chatSocket: ''});
   }
 
   async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {

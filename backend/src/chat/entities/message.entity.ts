@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Chan } from './channel.entity';
+import { Channel } from './channel.entity';
 
 @Entity()
 export class Message {
@@ -33,9 +33,9 @@ export class Message {
   @JoinColumn()
   user: User;
 
-  @ManyToOne(() => Chan, (channel) => channel.messages, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Channel, (channel) => channel.messages, { onDelete: 'CASCADE' })
   @JoinTable()
-  channel: Chan;
+  channel: Channel;
 
   /*
 	@Column('boolean', {default: false})
