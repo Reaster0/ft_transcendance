@@ -8,8 +8,10 @@ import { GamesService } from './games.service';
 import { Match, State } from './interfaces/match.interface';
 import { v4 as uuid } from 'uuid';
 import { Logger } from '@nestjs/common';
+import { Features } from './interfaces/match.interface';
 
 const queue: Array<Socket> = []; // Array of clients waiting for opponent
+const features: Array<Features> = []; // Array of features for ball size and speed
 const matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
 const watchers: Array<Socket> = []; // Array of clients waiting to 
 
@@ -73,7 +75,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('joinGame')
-  handleJoinGame(client: Socket) {
+  handleJoinGame(client: Socket, data: { ballSize: string, ballSpeed: string }) {
     try {
       if (!client.data.user) {
         return client.disconnect();
@@ -82,11 +84,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           this.gamesService.isPlaying(client, matchs) === true) {
         return;
       }
+      if (!data || !data.ballSize || !data.ballSpeed) {
+        client.emit('FeaturesIncorrect');
+        return;
+      }
+      const feature = this.gamesService.validFeatures(data.ballSize, data.ballSpeed);
+      if (feature === undefined) {
+        client.emit('FeaturesIncorrect');
+        return;
+      }
+      features.push(feature);
       queue.push(client);
       if (queue.length >= 2) {
         const matchId = uuid();
-        const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2));
+        const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2), features.splice(0, 2));
         matchs.set(matchId, newMatch);
+        console.log('here');
         this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
       }
@@ -96,7 +109,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('invitToGame')
-  handleInvitToGame(client: Socket, opponent: Socket) {
+  handleInvitToGame(client: Socket, opponent: Socket, data: { ballSize: string, ballSpeed: string }) {
     try {
       if (!client.data.user || !opponent.data.user) {
         opponent.emit('error');
@@ -109,15 +122,26 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         || this.gamesService.isPlaying(opponent, matchs) === true) {
         return;
       }
+      if (!data.ballSize || !data.ballSpeed) {
+        client.emit('FeaturesIncorrect');
+        return;
+      }
+      const feature = this.gamesService.validFeatures(data.ballSize, data.ballSpeed);
+      if (feature === undefined) {
+        client.emit('FeaturesIncorrect');
+        return;
+      }
       if (opponent.data.user.id === client.data.user.id) {
         client.emit('requestError');
         return client.disconnect();
       }
+      const featureArray = [];
+      featureArray.push(feature);
       const matchId = uuid();
       const users = [];
       users.push(client);
       users.push(opponent);
-      const newMatch = this.gamesService.setMatch(matchId, users);
+      const newMatch = this.gamesService.setMatch(matchId, users, featureArray);
       matchs.set(matchId, newMatch);
       this.gamesService.sendToPlayers(newMatch, 'foundMatch', newMatch.matchId);
       this.gamesService.waitForPlayers(this.server, newMatch, matchs);

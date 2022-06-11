@@ -2,6 +2,11 @@ import { Player } from './player.interface';
 import { User } from '../../users/entities/user.entity';
 import { Pong } from './pong.interface';
 
+export interface Features {
+  ballSize: string,
+  ballSpeed: string,
+}
+
 export enum State {
   SETTING = 'SETTING',
   STARTING = 'STARTING',

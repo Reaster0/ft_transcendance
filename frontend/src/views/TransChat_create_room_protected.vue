@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name, this.password, this.file)">
+      <form @submit.prevent="submitIt(this.name, this.password, this.file)"> // TODO this.values possibly undefined ?
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -63,20 +63,19 @@
 
 
 
-<script>
-  import { onMounted } from "@vue/runtime-core"
-  import { useStore } from "vuex";
+<script lang="ts">
+import { onMounted } from "@vue/runtime-core"
+import { useStore, Store } from "vuex";
+import { reactive, defineComponent } from "vue";
 
-
-export default
-{
+export default defineComponent ({
   name: "NewRoomProtected",
   data() {
     return {
-      // created: false,
-      name: "",
-      password: "",
-      file: [],
+      created: false as boolean,
+      name: "" as string,
+      password: "" as string,
+      file: [] as any[], // TODO check type of file
       // currentUser: useStore().getters.whoAmI,
     };
   },
@@ -88,19 +87,19 @@ export default
       console.log(this.file);
       this.created = true;
     },
-    previewFiles(event) {
+    previewFiles(event : any) { // TODO check type of event
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },
-    getFile(event) {
+    getFile(event: any) { // TODO check type of event
       var files = event.target.files || event.dataTransfer.files;
       if (!files.length)
         return;
       this.createImage(files[0]);
     },
-    createImage(img) {
+    createImage(img: any) { // TODO check type of event
       var reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = (event: any) => { //TODO check event type
         this.file = event.target.result;
       };
       reader.readAsDataURL(img);
@@ -108,13 +107,13 @@ export default
   },
   setup()
   {
-      let thechannels = [];
-      const store = useStore();
-      const socketVal = store.getters.getSocketVal;
+      let thechannels = reactive([] as any[]); // TODO check channel type
+      const store = reactive(useStore() as Store<any>);
+      const socketVal = reactive(store.getters.getSocketVal as any);
 
 
       onMounted(() =>{
-        socketVal.on("channel", function(res) {
+        socketVal.on("channel", function(res: any) { // TODO check res type
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
@@ -124,7 +123,7 @@ export default
           const length= res.channels.length;
           console.log('lenght: ', length);
           for (var i = 0; i < length; ++i) {
-            var data = {};
+            var data = {} as any; // TODO check data type
             data.title = res.channels[i].channelName;
             data.password = res.channels[i].password;
             let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
@@ -147,7 +146,7 @@ export default
         })
       })
 
-      function submitIt(name, password, file)
+      function submitIt(name: string, password: string, file: any) // TODO check file type
       {
         // const channame = this.name;
         const publ = false;
@@ -160,9 +159,7 @@ export default
 
       return { submitIt }
   }
-}
-
-
+})
 </script>
 
 

@@ -13,6 +13,7 @@
           placeholder="Search"
           height = "50px"
         ></v-text-field>
+         <!-- <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn> // TODO proprierty log doesn't exist ? -->
     </div>
       <v-btn to="/newroom" elevation="2" width="100%">
 				Create new chat room
@@ -28,7 +29,9 @@
     <div id="app" class="text-left">
     <v-app id="inspire">
 		<v-list>
-			<v-list-item-group v-model="selectedItem" >
+      <!-- NB! We can create v-model="selectedItem" so when channel is open its color changed
+      (for now we dont do this cause there are more important stuff to finish) -->
+			<v-list-item-group  > 
 
 				<template v-for="(item, index) in getChannels">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -137,6 +140,9 @@
               v-model="txt"
             ></v-text-field>
             <!-- <v-btn height="54px" width="20%" color="rgb(0,0,255)" class="spacetop messagefield" @click="sendingMessage(this.txt, this.currentChannel)">
+            > // TODO property log doesn't exist ?
+            </v-text-field>
+            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)"> // TODO this.values may be undefined ?
               <div  :style="{color: ' #ffffff'}">
                 send
               </div>
@@ -179,7 +185,7 @@
 					<v-btn elevation="2" width="100%">
 						Leave the chat room
 					</v-btn>
-					<v-btn color="red" @click="logOut" to="/">Logout</v-btn>
+					<v-btn color="red" @click="logOut" to="/">Logout</v-btn> // TODO logOut property doesn't exist ?
 				</div>
 
         </div>
@@ -281,37 +287,31 @@
   </v-app>
 </template>
 
-<script>
-// создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
-// https://codesource.io/vue-export-default-vs-vue-new/
-  import { onMounted } from "@vue/runtime-core"
-  import { ref } from "vue"
-  import io from 'socket.io-client';
-//import { onBeforeRouteLeave } from "vue-router";
-import { useStore } from "vuex";
-// import { computed } from 'vue'
-  //import { useKeypress } from "vue3-keypress";
+<script lang="ts">
+import { onMounted } from "@vue/runtime-core"
+import { ref } from "vue"
+import io from 'socket.io-client';
+import { useStore, Store } from "vuex";
+import { defineComponent } from 'vue'
 import TheModale from "./TransChat_modal_pass.vue";
   
 
-export default {
+export default defineComponent({
   name: "TransChat_group",
   components: {
     'modale': TheModale
   },
   data: () => ({
       revele: false,
-
-      fav: true,
-      menu: false,
-      message: false,
-      hints: true,
-      overlay: false,
-      selected: [2],
-      currentTab: 0,
-      tab: null,
-      items: [],
-      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
+      fav: true as boolean,
+      menu: false as boolean,
+      message: false as boolean,
+      hints: true as boolean,
+      overlay: false as boolean,
+      selected: [2] as number[],
+      currentTab: 0 as number,
+      tab: null as null | any, // TODO check type
+      items: [] as any[], // TODO check type
       items_: [
         {
           photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -338,12 +338,12 @@ export default {
           subtitle: "My cat stole my keys !",
           title: "abaudot",
         },
-      ],
-      model: 1,
+      ] as any, //TODO check type
+      model: 1 as number,
       items2: [
         {tabs: 'Members',},
         {tabs: 'Administrators',}
-      ],
+      ] as any,
       members: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -361,7 +361,7 @@ export default {
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ],
+      ] as any,
       admins: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
@@ -371,7 +371,7 @@ export default {
         photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
         title: "alkanaev",
       },
-      ],
+      ] as any, // TODO check type
       txt: '',
       mesasages: [],
       channels: [],
@@ -414,7 +414,7 @@ export default {
   }),
 
   methods: {
-    create: function (event) 
+    create: function (event: any)  // TODO check event type
     {
       if (event) 
       {
@@ -427,28 +427,26 @@ export default {
 //there -----------
   },
   watch: {
-    overlay (val) {
+    overlay (val: boolean) {
       val && setTimeout(() => {
         this.overlay = false
       }, 2000)
     },
   },
-	setup()
-    {
-    // var thechannels = [];
-		const connection = ref(null)
-    const store = useStore();
-    var getChannels = store.getters.getChannels;
-    var isChannelJoined = store.getters.isChannelJoined;
+	setup() {
+		const connection = ref<null | any>(null); //TODO check type
+    const store = useStore() as Store<any>;
+    var getChannels = store.getters.getChannels as any; //TODO check type
+    var isChannelJoined = store.getters.isChannelJoined as any; //TODO check type
 
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
-					connection.value = io('http://:3000/chat',{
-					transportOptions: {
-					polling: { extraHeaders: { auth: document.cookie} },
-					},
+				connection.value = io('http://:3000/chat',{
+          transportOptions: {
+            polling: { extraHeaders: { auth: document.cookie} },
+          },
 				})
 				console.log("starting connection to websocket")
 			} catch (error) {
@@ -497,7 +495,7 @@ export default {
 
 // 		// for sending message:
 // 		// -  message {content: string, channel: Chan, ...}
-		function sendingMessage(content, channel)
+		function sendingMessage(content: string, channel: any) // TODO check type
 		{
       console.log(document.cookie.toString())
 			try {
@@ -575,8 +573,7 @@ export default {
 		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin }
 
 	}
-};
-
+})
 </script>
 
 
