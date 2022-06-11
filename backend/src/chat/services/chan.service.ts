@@ -8,6 +8,7 @@ import { ChannelI } from '../interfaces/channel.interface';
 import { ChanUserI } from '../interfaces/channelUser.interface';
 import * as bcrypt from 'bcrypt';
 import { timeStamp } from 'console';
+import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()
 export class ChanServices {
@@ -16,6 +17,7 @@ export class ChanServices {
     private readonly chanRepository: Repository<Channel>,
     @InjectRepository(ChanUser)
     private readonly chanUserRepository: Repository<ChanUser>,
+    private readonly userServices: UsersService,
   ) {}
 
   async createChannel(channel: ChannelI, creator: User): Promise<ChannelI> {
@@ -100,34 +102,23 @@ export class ChanServices {
       channel.password = '';
     
     await this.chanRepository.save(channel);
-    return true;
+  return true;
   }
 
   async getChannelsFromUser(id: number): Promise<ChannelI[]> {
 
     let query = this.chanRepository
-      .createQueryBuilder('chan')
-      .where('chan.publicChannel = true');
-    const publicChannels: ChannelI[] = await query.getMany(); // gater all public channel
-    console.log('---- public  Channel -----');
-   // console.log(publicChannels);
-
-    query = this.chanRepository
-      .createQueryBuilder('chan')
-      .leftJoin('chan.users', 'users')
+      .createQueryBuilder('channel')
+      .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
-      .andWhere('chan.publicChannel = false')
-      .leftJoinAndSelect('chan.users', 'all_user')
-      .leftJoinAndSelect('chan.chanUsers', 'all_chanUser')
-      .orderBy('chan.date', 'DESC');
+      .orderBy('channel.date', 'DESC');
 
-    //console.log(query);
-    const privateChannels: ChannelI[] = await query.getMany();
-    console.log('---- private Channel -----');
-    //console.log(privateChannels);
+    const channels: ChannelI[] = await query.getMany();
 
-    const channels = publicChannels.concat(privateChannels);
+    //const channels = await this.userServices.getChannels(id);
+    console.log(channels);
 
+    /*
     channels.sort(function (date1, date2) {
       const d1 = new Date(date1.date);
       const d2 = new Date(date2.date);
@@ -135,6 +126,7 @@ export class ChanServices {
       else if (d1 > d2) return -1;
       else return 0;
     });
+    */
 
     return channels;
   }

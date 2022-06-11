@@ -45,7 +45,7 @@ export class User {
 
   // CHAT STUFF --------
   @ApiProperty({ type: [Channel], description: 'Channel the user as joined/created' })
-  @ManyToMany(() => Channel, (channel) => channel.users)
+  @ManyToMany(() => Channel, (channel: Channel) => channel.users)
   channels: Channel[];
 
   @ApiProperty({ type: [Message], description: 'Message list the user as sended' })

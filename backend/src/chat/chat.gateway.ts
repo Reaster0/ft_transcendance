@@ -83,9 +83,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.logger.log(`ERROR will creating: ${channel.channelName}`);
       return false;
     }
+    console.log(createChannel)
 
+    // yes but it break evrything ! why !!!!
     // should add user to chanUserDataBase ?
-    await this.chanUserServices.addAdminToChan(createChannel, client.data.user);
+//    const chanUser = await this.chanUserServices.addAdminToChan(createChannel, client.data.user);
+ //   console.log('--->', chanUser);
+
 
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.channelName} created`);
@@ -212,6 +216,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async emitChannels() {
     console.log('we emit all the chan for that user');
     const connections: User[] = await this.userServices.getConnectedUsers();
+    console.log(connections);
     for (const connection of connections) {
       const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
       this.server.to(connection.chatSocket).emit('channel', channels);

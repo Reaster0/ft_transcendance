@@ -62,7 +62,7 @@ export class Channel {
     description: 'is the channel public ?',
   })
   /* -------- */
-  @Column('boolean', { default: false })
+  @Column('boolean', { default: true })
   publicChannel: boolean;
 
   @ApiProperty({
@@ -108,7 +108,7 @@ export class Channel {
     type: User,
     description: 'Relation | channels <=> Users | ManyToMany: Users that have join the channel <=> Channels that have bein join that channel ',
   })
-  @ManyToMany(() => User, { onDelete: 'CASCADE' }) //All user in that channel
+  @ManyToMany(() => User, (users: User) => users.channels, { onDelete: 'CASCADE' }) //All user in that channel
   @JoinTable()
   users: User[];
 

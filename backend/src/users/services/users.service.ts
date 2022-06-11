@@ -246,6 +246,20 @@ export class UsersService {
     return user;
   }
 
+  /*
+  async getChannels(id: number) {
+    console.log('test for user');
+    const user = await this.userRepository.findOne(
+      id,
+      { relations: ['channels'] }
+    )
+
+    if (!user) { console.log('bad id')};
+    console.log(user);
+    return user.channels;
+  }
+  */
+
   async getGameHistory(id: number): Promise<{}> {
     const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
     if (!user) {

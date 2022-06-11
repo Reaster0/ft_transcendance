@@ -14,15 +14,15 @@ export class ChanUserService {
     private readonly chanUserRepository: Repository<ChanUser>,
   ) {}
 
-  async addUserToChan(channel: ChannelI, user: User) {
-      const newChanUser: ChanUserI = {mute: null, isBan: false, isAdmin: false, user: user, channel: channel};
-      this.chanUserRepository.save(newChanUser);
+  async addUserToChan(channel: ChannelI, user: User): Promise<ChanUser> {
+      const newChanUser = this.chanUserRepository.create({mute: null, isBan: false, isAdmin: false, user: user, channel: channel});
+      return this.chanUserRepository.save(newChanUser);
   }
 
   //maybe add owner field in it...
-  async addAdminToChan(channel: ChannelI, user: User) {
-      const newChanUser: ChanUserI = {mute: null, isBan: false, isAdmin: true, user: user, channel: channel};
-      this.chanUserRepository.save(newChanUser);
+  async addAdminToChan(channel: ChannelI, user: User): Promise<ChanUser> {
+//      const newChanUser: ChanUser = this.chanUserRepository.create({mute: null, isBan: false, isAdmin: true, user: user, channel: channel});
+      return this.chanUserRepository.save({mute:null, isBan: false, isAdmin: true, user, channel});
   }
 
   async findUserOnChannel(channel: ChannelI, user: User): Promise<ChanUserI> {
