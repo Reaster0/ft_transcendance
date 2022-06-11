@@ -13,7 +13,7 @@
           placeholder="Search"
           height = "50px"
         ></v-text-field>
-         <!-- <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn> // TODO proprierty log doesn't exist ? -->
+         <!-- <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn> -->
     </div>
       <v-btn to="/newroom" elevation="2" width="100%">
 				Create new chat room
@@ -64,7 +64,7 @@
 
 
 
-		<!-- open channel -->
+		<!-- open channel / example display -->
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
           <v-app id="inspire">
@@ -125,8 +125,6 @@
             </v-btn>
           </v-toolbar>
 
-          
-        
           <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
           <div class="d-flex">
             <v-text-field
@@ -188,6 +186,8 @@
 				</div>
 
         </div>
+
+      <!-- end of example display-->        
 
         
         <!-- TABS  -->

@@ -20,7 +20,7 @@
           </v-toolbar-title>
           <v-spacer></v-spacer>
             <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
-              OK
+              MAIN PAGE
             </v-btn>
         </v-toolbar>
 
@@ -30,7 +30,7 @@
               Protected chat 
             </p>
             <p>
-              Accesible by the password
+              Accessible by the password
             </p>
             </div>
 
@@ -71,7 +71,6 @@ export default defineComponent ({
   name: "NewRoomProtected",
   data() {
     return {
-      created: false as boolean,
       name: "" as string,
       password: "" as string,
       file: [] as any[],
@@ -79,12 +78,6 @@ export default defineComponent ({
     };
   },
   methods: {
-    submitbutton() {
-      console.log(this.name);
-      console.log(this.password);
-      console.log(this.file);
-      this.created = true;
-    },
     previewFiles(event : any) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
@@ -141,6 +134,7 @@ export default defineComponent ({
         // const channame = this.name;
         const publ = false;
         // const user = this.currentUser;
+        console.log("file: "+ file.name)
         console.log("name: " + name)
         console.log("password: " + password)
         if (name == '' || password == '')

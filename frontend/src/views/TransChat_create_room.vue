@@ -9,7 +9,7 @@
               Public chat 
             </p>
             <p>
-              Visible and accesible for anyone
+              Visible and accessible for anyone
             </p>
           <v-btn color = "rgb(0,0,255)" width="240px" to="/publicroom">
             <div :style="{color: ' #ffffff'}">
@@ -25,7 +25,7 @@
               Private chat 
             </p>
             <p>
-              Accecible for users that has a direct link
+              Accessible for users that has a direct link
             </p>
           <v-btn color = "rgb(0,0,255)" width="240px" to="/privateroom">
             <div :style="{color: ' #ffffff'}">
@@ -41,7 +41,7 @@
               Protected chat 
             </p>
             <p>
-              Accesible by the password
+              Accessible by the password
             </p>
           <v-btn color = "rgb(0,0,255)" width="240px" to="/protectedroom">
             <div :style="{color: ' #ffffff'}">

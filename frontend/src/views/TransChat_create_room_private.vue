@@ -1,7 +1,8 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name, this.file)"> // TODO can be undefined ?
+      <form @submit.prevent="submitIt(this.name, this.file)">
+      <!-- This.value may be undefined ? -->
 
         <v-toolbar
           dark
@@ -20,8 +21,9 @@
           </v-toolbar-title>
           <v-spacer></v-spacer>
             <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
-              OK
+              MAIN PAGE 
             </v-btn>
+            <!-- Maybe delete this and keep only cross to go back-->
         </v-toolbar>
 
 
@@ -30,7 +32,7 @@
               Private chat 
             </p>
             <p>
-              Accecible for users that has a direct link
+              Accessible for users that has a direct link
             </p>
             </div>
         <v-col cols="12" sm="6">
@@ -67,18 +69,17 @@ export default defineComponent ({
     return {
       name: "" as string,
       file: [] as any[],
-      created: false as boolean,
       // currentUser: useStore().getters.whoAmI,
     };
   },
   setup()
   {
-    let thechannels = reactive([] as any[]); // TODO check type
+    let thechannels = reactive([] as any[]); // list of channel dictionnaries
     const store = reactive(useStore() as Store<any>);
-    const socketVal = reactive(store.getters.getSocketVal as any); // TODO check type
+    const socketVal = reactive(store.getters.getSocketVal as any); // socket value obtained with socket.io
 
     onMounted(() =>{
-      socketVal.on("channel", function(res: { channels: any, img: any }) { // TODO precise type of channels/img
+      socketVal.on("channel", function(res: { channels: any, img: any }) { 
         console.log('befor update');
         console.log(thechannels);
         console.log('creating channel');
@@ -130,13 +131,7 @@ export default defineComponent ({
     return { submitIt }
   },
  methods: {
-    submitbutton() {
-      // console.log(this.created);
-      console.log(this.name);
-      console.log(this.file);
-      this.created = true;
-    },
-    previewFiles(event: any) { // TODO check type of event
+    previewFiles(event: any) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },

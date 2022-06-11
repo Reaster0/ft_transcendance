@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <v-form @submit.prevent="submitIt(this.name, this.file)"> // TODO this.values may be undefined ?
+      <v-form @submit.prevent="submitIt(this.name, this.file)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -20,7 +20,7 @@
           </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
-              OK
+              MAIN PAGE
             </v-btn>
           
         </v-toolbar>
@@ -66,18 +66,12 @@ export default defineComponent({
   name: "NewRoomPublic",
   data() {
     return {
-      created: false as boolean,
       name: "" as string,
       file: [] as any[],
       // currentUser: useStore().getters.whoAmI,
     };
   },
   methods: {
-    submitbutton() {
-      console.log(this.name);
-      console.log(this.file);
-      this.created = true;
-    },
     previewFiles(event: any) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
