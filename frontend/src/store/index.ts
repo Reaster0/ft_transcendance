@@ -12,9 +12,9 @@ const store = createStore({
 		connected: false as boolean,
 		need2fa: false as boolean,
 		// ----chat---- //
-		channels: [] as any[], // TODO check type
+		channels: [] as any[],
 		joinedChannel: false as boolean,
-		theSocketVal: null as any, // TODO check type
+		theSocketVal: null as any,
 	},
 	getters: {
 		whoAmI:(state) => {

@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name, this.password, this.file)"> // TODO this.values possibly undefined ?
+      <form @submit.prevent="submitIt(this.name, this.password, this.file)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -74,45 +74,31 @@ export default defineComponent ({
       created: false as boolean,
       name: "" as string,
       password: "" as string,
-      file: [] as any[], // TODO check type of file
+      file: [] as any[],
       // currentUser: useStore().getters.whoAmI,
     };
   },
   methods: {
     submitbutton() {
-      // console.log(this.created);
       console.log(this.name);
       console.log(this.password);
       console.log(this.file);
       this.created = true;
     },
-    previewFiles(event : any) { // TODO check type of event
+    previewFiles(event : any) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },
-    getFile(event: any) { // TODO check type of event
-      var files = event.target.files || event.dataTransfer.files;
-      if (!files.length)
-        return;
-      this.createImage(files[0]);
-    },
-    createImage(img: any) { // TODO check type of event
-      var reader = new FileReader();
-      reader.onload = (event: any) => { //TODO check event type
-        this.file = event.target.result;
-      };
-      reader.readAsDataURL(img);
-    }
   },
   setup()
   {
-      let thechannels = reactive([] as any[]); // TODO check channel type
+      let thechannels = reactive([] as any[]);
       const store = reactive(useStore() as Store<any>);
       const socketVal = reactive(store.getters.getSocketVal as any);
 
 
       onMounted(() =>{
-        socketVal.on("channel", function(res: any) { // TODO check res type
+        socketVal.on("channel", function(res: any) {
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
@@ -122,7 +108,7 @@ export default defineComponent ({
           const length= res.channels.length;
           console.log('lenght: ', length);
           for (var i = 0; i < length; ++i) {
-            var data = {} as any; // TODO check data type
+            var data = {} as any;
             data.title = res.channels[i].channelName;
             data.password = res.channels[i].password;
             let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
@@ -145,14 +131,21 @@ export default defineComponent ({
         })
       })
 
-      function submitIt(name: string, password: string, file: any) // TODO check file type
+      function createError()
+      {
+          alert("YOU DIDN'T SPECIFY NAME OR PASSWORD - NOTHING WILL BE CREATED")
+      }
+
+      function submitIt(name: string, password: string, file: any)
       {
         // const channame = this.name;
         const publ = false;
         // const user = this.currentUser;
         console.log("name: " + name)
         console.log("password: " + password)
-        if (name != '')
+        if (name == '' || password == '')
+          createError()
+        else
           socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});    
       }
 
