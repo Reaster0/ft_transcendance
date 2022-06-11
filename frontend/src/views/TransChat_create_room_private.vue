@@ -66,7 +66,7 @@ export default defineComponent ({
   data() {
     return {
       name: "" as string,
-      file: [] as any[], // TODO please check type of file
+      file: [] as any[],
       created: false as boolean,
       // currentUser: useStore().getters.whoAmI,
     };
@@ -82,13 +82,12 @@ export default defineComponent ({
         console.log('befor update');
         console.log(thechannels);
         console.log('creating channel');
-        // console.log(JSON.stringify(res))
-        // reset channel
+
         thechannels = [];
         const length = res.channels.length;
         console.log('lenght: ', length);
         for (var i = 0; i < length; ++i) {
-          var data = {} as any; // TODO check type of data
+          var data = {} as any;
           data.title = res.channels[i].channelName;
 
           let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
@@ -111,14 +110,20 @@ export default defineComponent ({
       })
     })
 
+    function createError()
+    {
+        alert("YOU DIDN'T SPECIFY NAME - NOTHING WILL BE CREATED")
+    }
+
     function submitIt(name: string, file: any)
     {
-      // const channame = this.name;
       const password = "";
       const publ = false;
       // const user = this.currentUser;
       console.log("name: " + name)
-      if (name != '')
+      if (name == '')
+        createError()
+      else
         socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});    
     }
 
@@ -135,19 +140,6 @@ export default defineComponent ({
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },
-    // getFile(event) {
-    //   var files = event.target.files || event.dataTransfer.files;
-    //   if (!files.length)
-    //     return;
-    //   this.createImage(files[0]);
-    // },
-    // createImage(img) {
-    //   var reader = new FileReader();
-    //   reader.onload = (event) => {
-    //     this.file = event.target.result;
-    //   };
-    //   reader.readAsDataURL(img);
-    // }
   },
 })
 </script>
