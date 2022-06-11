@@ -73,8 +73,8 @@ export default defineComponent ({
 		let framesId: number | undefined | null = null;
 		let winText: string | null = null;
 		let showInfo: boolean = true;
-		const ballSpeed = ref<string>("NORMAL")
-		const ballSize = ref<string>("NORMAL")
+		const ballSpeed = ref<string>("NORMAL");
+		const ballSize = ref<string>("NORMAL");
 
 		onMounted(async() =>{
 			try {
