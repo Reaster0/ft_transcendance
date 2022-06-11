@@ -88,7 +88,6 @@ export default defineComponent ({
 				console.log("the error is:" + error);
 			}
 
-
 			gameSocket.value!.on('joined', (text: string) => {
 				console.log("joined" + text);
 			})
