@@ -18,7 +18,7 @@
 						<v-text-field label="nickname" v-model="nickname"/>
 						<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
 					</div>
-					<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="this.$router.push('/2auth')">Enable Two Factor Auth</div>
+					<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="redirTwoAuth">Enable Two Factor Auth</div>
 					<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
 					<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 				</v-col>
@@ -40,50 +40,55 @@
 </v-container>
 </template>
 
-<script>
-import { useStore } from "vuex"
+<script lang="ts">
+
+import { useStore, Store } from "vuex"
 import { onMounted } from "@vue/runtime-core"
-import { ref, watch } from "vue"
+import { ref, watch, defineComponent } from "vue"
 import { getAvatarID, getHistoryID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { updateUser, uploadAvatar } from "../components/FetchFunctions"
+import router from '../router/index'
 
-export default {
+export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
 	setup(){
-		const user = ref(null);
-		const avatar = ref(null);
-		const edit = ref(false);
-		const nickname = ref(null);
-		const name_accepted = ref(true);
-		const img_accepted = ref(true);
-		const gameHistory = ref(null);
+		const user = ref<null | any>(null); 
+		const avatar = ref<null | any>(null);
+		const edit = ref<boolean>(false);
+		const nickname = ref<string | null>(null);
+		const name_accepted = ref<boolean>(true);
+		const img_accepted = ref<boolean>(true);
+		const gameHistory = ref<null | any>(null);
 
 		onMounted(async () => {
-			const store = useStore()
-			user.value = await store.getters.whoAmI;
-			nickname.value = user.value.nickname
-			avatar.value = await getAvatarID(user.value.id)
-			gameHistory.value = await getHistoryID(user.value.id)
-			// console.log(gameHistory.value)
+			const store = useStore() as Store<any>;
+			user.value = await store.getters.whoAmI as any;
+			nickname.value = user.value.nickname as string;
+			avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
+			gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
 			console.log(gameHistory.value['won'])
 		})
 
 		function imgUp() {
-			document.getElementById("upload").click()
+			document.getElementById("upload")!.click()
+		}
+
+		function redirTwoAuth() {
+			router.push('/2auth')
 		}
 
 		//TODO check type of e
-		async function imgReceived(e) {
+		async function imgReceived(e : any) {
 			img_accepted.value = await uploadAvatar(e)
 			if (img_accepted.value && user && user.value && user.value.id)
 				avatar.value = await getAvatarID(user.value.id)
 		}
 
-		watch(nickname, async (newnick) => {
-			name_accepted.value = await updateUser(newnick)
+		watch(nickname, async (newnick: any) => {
+			name_accepted.value = await updateUser(newnick) as any; //TODO check type
 		})
 
 		return {user,
@@ -92,11 +97,12 @@ export default {
 		nickname,
 		name_accepted,
 		imgUp,
+		redirTwoAuth,
 		imgReceived,
 		img_accepted,
 		gameHistory}
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>

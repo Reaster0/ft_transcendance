@@ -1,37 +1,36 @@
-import { Controller, Post, Req } from "@nestjs/common";
+import { Controller, Get, Post, Req } from "@nestjs/common";
 import { RequestUser } from "src/auth/interfaces/requestUser.interface";
 import { CreateChannelDto } from "./chat.dto";
 import { ChanI } from "./interfaces/channel.interface";
 import { ChanServices } from "./services/chan.service";
+import { UrlGeneratorService } from 'nestjs-url-generator';
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
     constructor(
         private readonly chanService: ChanServices,
-    ){}
+        private readonly urlGeneratorService: UrlGeneratorService,
+    ) { }
 
-    @Post('protectedroom') //localhost:3000/chat/protectedroom
-    protectedRoom(/*arguments*/){
-        //logic
-    }
+    @Get('genJoinUrl')
+    async makeUrl(channel: ChanI): Promise<string> {
+        const params = {
+            id : channel.id,
+        };
+        const query = {
+            k: 'queryTest',
+        }
 
-    @Post('privateroom') //localhost:3000/chat/privateroom
-    privateRoom(/*arguments*/){
-        //logic
-    }
+        return this.urlGeneratorService.generateUrlFromController({
+            controller: ChatController,
+            controllerMethod: ChatController.prototype.joinChannel,
+            query: query,
+            params: params,
+          });
+        }
 
-    @Post('publicroom') //localhost:3000/chat/publicroom
-    async publicRoom(@Req() req: RequestUser, param: CreateChannelDto): Promise<Boolean> {
-       console.log(req); // jus cheking for test
-       let newChan : ChanI = {channelName: param.channame, publicChannel: true, password: ''}
-       try {
-        await this.chanService.createChannel(newChan, req.user)
-       } catch {
-           console.log('error while creating public channel');
-           return false;
-       }
-       return (true);
-    }
-
-
+        @Get('joinChannel')
+        async joinChannel(): Promise<string> {
+        return 'lets join this private channel';
+  }
 }

@@ -69,8 +69,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //@UseGuards(AuthChat)
   @SubscribeMessage('createChannel')
   async onChannelCreation(client: Socket, channel: ChanI): Promise<boolean> {
-    this.logger.log(channel);
+//    this.logger.log(channel);
 
+    console.log(channel.avatar);
+    console.log(channel.avatar.byteLength);
     if (!client.data.user) {
       console.log('didnt got the time to get the user :(');
       client.disconnect();
@@ -194,12 +196,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     return this.server.emit('connectedUsers', connectUsersID); // user or user.id ?
   }
 
+  @SubscribeMessage('emitChannels')
   async emitChannels() {
     console.log('we emit all the chan for that user');
     const connections: connectedSocketI[] = await this.connectService.findAll();
     for (const connection of connections) {
       const channels: ChanI[] = await this.chanServices.getChannelsFromUser(connection.user.id);
-      this.server.to(connection.socketID).emit('channel', channels);
+      const img = this.chanServices.getImageFromBuffer(channels);
+
+      console.log("+++++++++++++++++++++")
+      console.log(img)
+      console.log("+++++++++++++++++++++")
+      this.server.to(connection.socketID).emit('channel', {channels, img});
     }
   }
 }

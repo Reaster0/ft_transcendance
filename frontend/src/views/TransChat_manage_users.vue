@@ -98,18 +98,19 @@
 
 
 
-<script>
+<script lang="ts">
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
-export default 
-{
-  data: () => ({
-    ban: false,
-    mute: false,
-    admin: false,
-  }),
-};
 
+import { defineComponent } from "vue";
+
+export default defineComponent ({
+  data: () => ({
+    ban: false as boolean,
+    mute: false as boolean,
+    admin: false as boolean,
+  }),
+});
 </script>
 
 

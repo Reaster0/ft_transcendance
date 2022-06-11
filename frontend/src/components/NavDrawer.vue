@@ -23,7 +23,7 @@
 	</v-toolbar>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from 'vuex'
 import { computed } from 'vue'
 
@@ -36,7 +36,7 @@ export default {
 
 		async function logOut() {
 			await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
-			.then(store.commit('setConnected', [false, false]))
+			.then(store.commit('setConnected', [false, false]) as any)
 		}
 
 		return {isLog, logOut}
