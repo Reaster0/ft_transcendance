@@ -10,7 +10,6 @@
             to="/chatgroup"
             icon
             dark
-            @click="dialog = false"
           >
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
@@ -134,6 +133,8 @@ export default defineComponent({
           console.log('lenght: ', length);
           for (var i = 0; i < length; ++i) {
             var data = {} as any; //TODO check data type
+            console.log(">>>>>>>>>>>>>>>");
+            console.log(res.channels[i]);
             data.title = res.channels[i].channelName;
 
             let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
@@ -150,7 +151,6 @@ export default defineComponent({
           }
 
           console.log('after update');
-          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           store.commit('setChannels' , thechannels);
           console.log(store.getters.getChannels);
         })
