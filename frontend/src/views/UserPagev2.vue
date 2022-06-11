@@ -1,76 +1,108 @@
 <template>
-<v-container v-if="user">
+<v-container fluid v-if="user">
 	<particles-bg type="cobweb" :bg="true"/>
-	<div class="center">
-		<div class="overlay">
-			<v-col v-if="!edit" align="center">
-				<v-img :src="avatar" max-width="300px"/>
-				<h1>{{user.nickname}}</h1>
-				<h1>{{user.eloScore}}📈</h1>
-				<div class="button_slick button_slide" @click="edit = !edit">Edit</div>
+	<v-row>
+		<v-col class="center">
+			<div class="overlay width-65">
+				<v-col v-if="!edit" align="center">
+					<v-img :src="avatar" max-width="300px"/>
+					<h1 class="overflow-x-auto">{{nickname}}</h1>
+					<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
+					<div class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
+				</v-col>
+				<v-col v-else align="center">
+					<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
+					<h1 v-if="!img_accepted" class="error_msg Spotnik">Img Too Big</h1>
+					<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
+					<div class="field_slick big_button">
+						<v-text-field label="nickname" v-model="nickname"/>
+						<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
+					</div>
+					<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="redirTwoAuth">Enable Two Factor Auth</div>
+					<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
+					<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
+				</v-col>
+			</div>
+		</v-col>
+		<v-col  class="center">
+		<div class="overlay width-85">
+			<v-col class="overflow-y-auto" style="max-height: 500px" v-if="gameHistory" align-self="start">
+				<div class="historyText loseText">LOST</div>
+				<div class="historyText loseText" v-for="(score, index) in gameHistory.lost.infos.score" :key="score">You {{score}} {{gameHistory.lost.infos.opponent[index]}} {{gameHistory.lost.infos.opponentScore[index]}}</div>
 			</v-col>
-			<v-col v-else align="center">
-				<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
-				<h1 v-if="!img_accepted" class="error_msg">Img Too Big</h1>
-				<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
-				<div class="field_slick big_button">
-					<v-text-field label="nickname" v-model="nickname"/>
-					<h1 v-if="!name_accepted" class="error_msg">Choose another name</h1>
-				</div>
-				<div class="button_slick button_slide big_button" @click="edit = !edit">Go Back</div>
+			<v-col class="overflow-y-auto" style="max-height: 450px" v-if="gameHistory" align-self="start">
+				<div class="historyText winText">WIN</div>
+				<div class="historyText winText" v-for="(score, index) in gameHistory.won.infos.score" :key="score">You {{score}} {{gameHistory.won.infos.opponent[index]}} {{gameHistory.won.infos.opponentScore[index]}}</div>
 			</v-col>
-		</div>
-	</div>
+			</div>
+		</v-col>
+</v-row>
 </v-container>
 </template>
 
-<script>
-import { useStore } from "vuex"
+<script lang="ts">
+
+import { useStore, Store } from "vuex"
 import { onMounted } from "@vue/runtime-core"
-import { ref, watch } from "vue"
-import { getAvatarID } from "../components/FetchFunctions"
+import { ref, watch, defineComponent } from "vue"
+import { getAvatarID, getHistoryID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { updateUser, uploadAvatar } from "../components/FetchFunctions"
+import router from '../router/index'
 
-export default {
+export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
 	setup(){
-		// const inputCode = ref(null)
-		// const codeAccepted = ref(false)
-		const user = ref(null)
-		const avatar = ref(null)
-		const edit = ref(false);
-		const nickname = ref(null);
-		const name_accepted = ref(true);
-		const img_accepted = ref(true);
+		const user = ref<null | any>(null); 
+		const avatar = ref<null | any>(null);
+		const edit = ref<boolean>(false);
+		const nickname = ref<string | null>(null);
+		const name_accepted = ref<boolean>(true);
+		const img_accepted = ref<boolean>(true);
+		const gameHistory = ref<null | any>(null);
 
 		onMounted(async () => {
-			user.value = await useStore().getters.whoAmI;
-			nickname.value = user.value.nickname
-			avatar.value = await getAvatarID(user.value.id)
-			console.log(avatar.value)
+			const store = useStore() as Store<any>;
+			user.value = await store.getters.whoAmI as any;
+			nickname.value = user.value.nickname as string;
+			avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
+			gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
+			console.log(gameHistory.value['won'])
 		})
-
-		// async function submitCode() {
-		// 	codeAccepted.value = await submit2FaCode(inputCode.value)
-		// }
 
 		function imgUp() {
-			document.getElementById("upload").click()
+			document.getElementById("upload")!.click()
 		}
 
-		async function imgReceived(e) {
+		function redirTwoAuth() {
+			router.push('/2auth')
+		}
+
+		//TODO check type of e
+		async function imgReceived(e : any) {
 			img_accepted.value = await uploadAvatar(e)
+			if (img_accepted.value && user && user.value && user.value.id)
+				avatar.value = await getAvatarID(user.value.id)
 		}
 
-		watch(nickname, async (newnick) => {
-			name_accepted.value = await updateUser(newnick)
+		watch(nickname, async (newnick: any) => {
+			name_accepted.value = await updateUser(newnick) as any; //TODO check type
 		})
-		return {user, avatar, edit, nickname, name_accepted, imgUp, imgReceived, img_accepted}
+
+		return {user,
+		avatar,
+		edit,
+		nickname,
+		name_accepted,
+		imgUp,
+		redirTwoAuth,
+		imgReceived,
+		img_accepted,
+		gameHistory}
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -99,11 +131,28 @@ export default {
   transition: ease-out 0.4s;
 }
 
+.historyText{
+	font-family: 'Rajdhani', sans-serif;
+	// font-family: 'monospace';
+	font-size: 300%;
+	color: #FFF;
+	text-align: center;
+	margin-top: 20px;
+}
+
+.winText{
+	color: rgb(0, 255, 0);
+}
+
+.loseText{
+	color: rgb(255, 0 ,0);
+}
+
 h1{
 	justify-self: center;
 	font-size: 4em;
- font-weight: bold;
- font-family: 'Rajdhani', sans-serif;
+	font-weight: bold;
+	font-family: 'Rajdhani', sans-serif;
 	color: #04BBEC;
 	// margin-left: 20%;
 }
@@ -119,10 +168,18 @@ h1{
 	height: 100%;
 }
 
+.width-65{
+	width: 65%;
+}
+
+.width-85{
+	width: 100%;
+}
+
 .overlay {
-  width: 65%;
 //   padding-bottom: 20%;
   margin: 1em;
+  padding: 1em;
   display: flex;
   align-items: center;
   justify-content: center;

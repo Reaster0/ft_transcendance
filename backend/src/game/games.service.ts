@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { UsersService } from '../users/services/users.service';
-import { Match, State } from './interfaces/match.interface';
+import { Match, State, Features } from './interfaces/match.interface';
 import { Player } from './interfaces/player.interface';
 import { PongService } from './pong.service';
 import { Point } from './interfaces/pong.interface';
@@ -97,17 +97,18 @@ export class GamesService {
     return player;
   }
 
-  setMatch(matchId: string, clients: Array<Socket>): Match {
+  setMatch(matchId: string, clients: Array<Socket>, features: Array<Features>): Match {
     const matchPlayers: Array<Player> = [];
     for (const client of clients) {
       const newPlayer = this.setPlayer(client);
       matchPlayers.push(newPlayer);
     }
+    const { sizeFactor, velXFactor, speedFactor } = this.equilibrateFeatures(features);
     const match: Match = {
       matchId: matchId,
       players: matchPlayers,
       readyUsers: [],
-      pong: this.pongService.initPong(),
+      pong: this.pongService.initPong(sizeFactor, velXFactor, speedFactor),
       state: State.SETTING,
       winner: undefined,
     };
@@ -341,5 +342,41 @@ export class GamesService {
     server.to(match.matchId).emit('playerAbsent', { nickname: absent.user.nickname });
     match.winner = winner;
     match.state = State.FINISHED;
+  }
+
+  validFeatures(ballSize: string, ballSpeed: string): Features {
+    if (ballSize != 'SMALL' && ballSize != 'NORMAL' && ballSize != 'BIG') {
+      return undefined;
+    } else if (ballSpeed != 'SLOW' && ballSpeed != 'NORMAL' && ballSpeed != 'FAST') {
+      return undefined;
+    }
+    const features: Features = { ballSize: ballSize, ballSpeed: ballSpeed };
+    return features;
+  }
+
+  equilibrateFeatures(features: Array<Features>): { sizeFactor: number, velXFactor: number, speedFactor: number } {
+    let sizeFactor = 0;
+    let velXFactor = 0;
+    let speedFactor = 0;
+    for (let choosenFeat of features) {
+      if (choosenFeat.ballSize === 'SMALL') {
+        sizeFactor += 80;
+      } else if (choosenFeat.ballSize === 'NORMAL') {
+        sizeFactor += 60;
+      } else {
+        sizeFactor += 30;
+      }
+      if (choosenFeat.ballSpeed === 'SLOW') {
+        speedFactor += 1000;
+        velXFactor += 1500;
+      } else if (choosenFeat.ballSpeed === 'NORMAL') {
+        speedFactor += 500;
+        velXFactor += 1000;
+      } else {
+        speedFactor += 250;
+        velXFactor += 500;
+      }
+    }
+    return { sizeFactor: sizeFactor/features.length, velXFactor: velXFactor/features.length, speedFactor: speedFactor/features.length };
   }
 }

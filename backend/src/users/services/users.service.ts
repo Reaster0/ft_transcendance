@@ -37,16 +37,24 @@ export class UsersService {
     return user;
   }
 
-  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<User> {
+  async findUserByNickname(nickname: string): Promise<User> {
+    const user = await this.userRepository.findOne({ nickname: nickname });
+    if (!user) {
+      throw new NotFoundException(`User ${nickname} (nickname) not found.`);
+    }
+    return user;
+  }
+
+  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<Promise<User> | { user: Promise<User>, first: boolean }> {
     const { username } = createUserDto;
     let user = await this.userRepository.findOne({ username: username });
     if (user) {
       return user;
     }
     const nickname = await this.generateNickname(username);
-    user = this.userRepository.create({username: username, nickname: nickname});
+    user = await this.userRepository.create({username: username, nickname: nickname});
     // TODO redirect user to modify info page
-    return this.userRepository.save(user);
+    return { user: this.userRepository.save(user), first: true };
   }
 
   async generateNickname(nickname: string): Promise<string> {
@@ -112,6 +120,22 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
+  async listFriends(user: User): Promise<{}> {
+    if (user.friends.length === 0) {
+      return { 'friends': { 'nb' : 0, 'names': {}, 'status': {} }};
+    }
+    let names = [];
+    let status = [];
+    for (let friendId of user.friends) {
+      let friend = await this.findUserById('' + friendId);
+      if (friend) {
+        names.push(friend.nickname);
+        status.push(friend.status);
+      }
+    }
+    return { 'friends': { 'nb': names.length, 'names': names, 'status': status }};
+  }
+
   async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
@@ -172,7 +196,7 @@ export class UsersService {
   }
 
   currentUser(user: User): Partial<User> {
-    const { username, twoFASecret, is2FAEnabled, ...res } = user;
+    const { username, twoFASecret, ...res } = user;
     return res;
   }
 
@@ -222,7 +246,7 @@ export class UsersService {
     return user;
   }
 
-  async getGameHistory(id: number) {
+  async getGameHistory(id: number): Promise<{}> {
     const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
     if (!user) {
       throw new NotFoundException(`User ${id} (id) not found.`); 

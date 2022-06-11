@@ -31,7 +31,7 @@ export async function getInitialQR() {
 	})
 }
 
-export async function submit2FaCode(inputCode) {
+export async function submit2FaCode(inputCode: string) {
 	console.log("launching submit2FaCode")
 	return await fetch("/api/auth/login-2fa", {
 		credentials: "include",
@@ -39,12 +39,11 @@ export async function submit2FaCode(inputCode) {
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ twoFACode: inputCode })})
 	.then(res => {
-		console.log(res)
 		return res.status == 201? true : false 
 	})
 }
 
-export async function getAvatarID(id) {
+export async function getAvatarID(id: number) {
 	return await fetch("/api/users/getAvatar/" + id, {credentials: "include"})
 	.then(res => {
 		return res.status != 200? null : res.blob()})
@@ -53,7 +52,14 @@ export async function getAvatarID(id) {
 	})
 }
 
-export async function updateUser(nick) {
+export async function getHistoryID(id: number) {
+	return await fetch("/api/users/getHistory/" + id, {credentials: "include"})
+	.then(res => {
+		return res.status != 200? null : res.json()
+	})
+}
+
+export async function updateUser(nick: string) {
 	return await fetch("/api/users/settings", {
 		credentials: "include",
 		method: "PATCH",
@@ -65,14 +71,12 @@ export async function updateUser(nick) {
 		},
 	})
 	.then(res => {
-		console.log(JSON.stringify({
-			nickname: nick,
-		}))
 		return res.status == 200? true : false
 	})
 }
 
-export async function uploadAvatar(file) {
+// TODO please check type of file
+export async function uploadAvatar(file: any) {
 	const formData = new FormData()
 	formData.append('avatar', file.target.files[0])
 	return await fetch("/api/users/uploadAvatar", {
