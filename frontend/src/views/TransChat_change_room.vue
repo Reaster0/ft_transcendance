@@ -21,7 +21,7 @@
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn to="/chatgroup" color = "ffffff" >
+            <v-btn to="/thechat" color = "ffffff" >
               <div :style="{color: ' #ffffff'}">
                 SAVE
               </div>

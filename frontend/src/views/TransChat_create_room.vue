@@ -2,8 +2,6 @@
   <v-app >
     <v-container fluid>
       <h3>Please, choose a type of new chat room</h3>
-      <!-- <v-divider class="mb-6"></v-divider> -->
-
             <div class="spacetopplus">
             <p class="font-weight-black">
               Public chat 

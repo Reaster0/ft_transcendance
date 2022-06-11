@@ -7,7 +7,7 @@
           color="rgb(0,0,255)"
         >
           <v-btn
-            to="/chatgroup"
+            to="/thechat"
             icon
             dark
           >
