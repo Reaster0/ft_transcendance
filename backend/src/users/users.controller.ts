@@ -2,7 +2,7 @@ import { UsersService } from './services/users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, UseInterceptors,
   UseGuards, Req, Query, Patch, Res, UploadedFile, Delete, ParseIntPipe, HttpException,
   HttpStatus, Logger, StreamableFile } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
+import { CreateUserDto, UpdateUserDto, FriendDto } from './user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags, ApiNotFoundResponse,
   ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
@@ -97,17 +97,17 @@ export class UsersController {
     }
   }
 
-  @Get('/partialInfo')
+  @Get('partialInfo')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'Partial User Information' })
   @ApiOkResponse({ description: 'Partial User Information using id' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  getPartialUserInfo(@Query('userId') userId: string): Promise<Partial<User>> {
+  getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
-      this.logger.log("Get('partialInfo') route called for user " + userId + ' (user id)');
-      return this.usersService.getPartialUserInfo(userId);
+      this.logger.log("Get('partialInfo') route called for user " + nickname + ' (nickname)');
+      return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
       throw e;
     }
@@ -165,6 +165,22 @@ export class UsersController {
       this.logger.log("Get('getHistory/:id') route called.");
       return this.usersService.getGameHistory(parseInt(id));
     } catch(e) {
+      throw (e);
+    }
+  }
+
+  @Get('listFriends')
+  @UseGuards(AuthGuard('jwt'), AuthUser)
+  /** Swagger **/
+  @ApiOperation({ summary: "Getting game history as array of GameHistory." })
+  @ApiOkResponse({ description: 'Return game history.' })
+  @ApiNotFoundResponse({ description: 'User with given id not found.' })
+  @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
+  /** End of swagger **/
+  async listFriends(@Req() req: RequestUser): Promise<{}> {
+    try {
+      return this.usersService.listFriends(req.user);
+    } catch (e) {
       throw (e);
     }
   }
@@ -232,21 +248,6 @@ export class UsersController {
     }
   }
 
-  @Patch('login')
-  @UseGuards(AuthGuard('jwt'), AuthUser)
-  /** Swagger **/
-  @ApiOperation({ summary: 'Login an user when joining chat websocket' })
-  @ApiCreatedResponse({ description: 'The user has been successfully login.', type: User})
-  /** End of swagger **/
-  loginUser(@Req() req: RequestUser) {
-    try {
-      this.logger.log("Patch('login') route called by user " + req.user.username + ' (username)');
-      return this.usersService.changeStatus(req.user, Status.ONLINE);
-    } catch (e) {
-      throw (e);
-    }
-  }
-
   @Patch('logout')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
@@ -262,6 +263,44 @@ export class UsersController {
       throw e;
     }
   }
+
+  @Patch('addFriend')
+  @UseGuards(AuthGuard('jwt'), AuthUser)
+  /** Swagger **/
+  @ApiOperation({ summary: 'Add a friend whose nickname is given inside a DTO and returns friends new list.' })
+  @ApiOkResponse({ description: 'Friend found and successfully added. Return a list of friend under JSON format (see friendList request).' })
+  @ApiNotFoundResponse({ description: 'No user found for given nickname.' })
+  @ApiBadRequestResponse({ description: 'User\'s already a friend.' })
+  /** End of swagger **/
+  async addFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
+    try {
+      const { nickname } = friendDto;
+      const friend = await this.usersService.findUserByNickname(nickname);
+      this.usersService.addFriend(req.user, friend.id);
+      return this.usersService.listFriends(req.user);
+    } catch(e) {
+      throw e;
+    }
+  }
+
+  @Patch('removeFriend')
+  @UseGuards(AuthGuard('jwt'), AuthUser)
+  /** Swagger **/
+  @ApiOperation({ summary: 'Remove a friend whose nickname is given inside a DTO and returns friends new list.' })
+  @ApiOkResponse({ description: 'Friend found and successfully removed. Return a list of friend under JSON format (see friendList request).' })
+  @ApiNotFoundResponse({ description: 'No user found for given nickname.' })
+  @ApiBadRequestResponse({ description: 'User\'s not a friend.' })
+  /** End of swagger **/
+  async removeFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
+    try {
+      const { nickname } = friendDto;
+      const friend = await this.usersService.findUserByNickname(nickname);
+      this.usersService.removeFriend(req.user, friend.id);
+      return this.usersService.listFriends(req.user);
+    } catch(e) {
+      throw e;
+    }
+  } 
 
   @Delete('deleteAccount')
   /** Swagger **/
