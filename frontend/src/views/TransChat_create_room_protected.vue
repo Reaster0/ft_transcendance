@@ -7,7 +7,7 @@
           color="rgb(0,0,255)"
         >
           <v-btn
-            to="/chatgroup"
+            to="/thechat"
             icon
             dark
           >
@@ -19,7 +19,7 @@
             </div>
           </v-toolbar-title>
           <v-spacer></v-spacer>
-            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+            <v-btn :style="{color: ' #ffffff'}" to="/thechat">
               OK
             </v-btn>
         </v-toolbar>
