@@ -64,7 +64,7 @@ export class UsersController {
     }
   }
 
-  @Get('/currentUser')
+  @Get('currentUser')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'Get all info of current user' })

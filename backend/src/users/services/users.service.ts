@@ -210,8 +210,7 @@ export class UsersService {
   }
 
   async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
-    const user = await this.userRepository.findOne({ nickname: nickname });
-    if (!user) return user;
+    const user = await this.findUserByNickname(nickname);
     return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
   }
 
