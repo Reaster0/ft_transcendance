@@ -1,5 +1,5 @@
 <template>
-	<v-toolbar app flat dense color="black">
+	<v-toolbar flat dense app color="black">
 		<!-- <v-toolbar-title> -->
 			<router-link to="/" style="text-decoration: none; color: inherit;">
 				<h1 class="glitch Spotnik" data-text="TRANSCENDENCE">TRANSCENDENCE</h1>
