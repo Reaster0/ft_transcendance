@@ -10,6 +10,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
+import { STATUS_CODES } from 'http';
 
 @Injectable()
 export class UsersService {
@@ -209,9 +210,10 @@ export class UsersService {
     return res;
   }
 
-  async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
-    const user = await this.findUserByNickname(nickname);
-    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
+  async getPartialUserInfo(id: number): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne(id);
+    if (!user) return user;
+    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
   }
 
   async getConnectedUsers(): Promise<User[]> {
@@ -219,6 +221,14 @@ export class UsersService {
       where: { status: Status.ONLINE },
     });
     return connectedUser;
+  }
+
+  async connectUserToChat(user: User, socketID: string) {
+    this.userRepository.update(user.id, {status: Status.ONLINE, chatSocket: socketID});
+  }
+
+  async disconectUserToChat(user: User) {
+    this.userRepository.update(user.id, {status: Status.OFFLINE, chatSocket: ''});
   }
 
   async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {
@@ -235,6 +245,20 @@ export class UsersService {
     }
     return user;
   }
+
+  /*
+  async getChannels(id: number) {
+    console.log('test for user');
+    const user = await this.userRepository.findOne(
+      id,
+      { relations: ['channels'] }
+    )
+
+    if (!user) { console.log('bad id')};
+    console.log(user);
+    return user.channels;
+  }
+  */
 
   async getGameHistory(id: number): Promise<{}> {
     const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });

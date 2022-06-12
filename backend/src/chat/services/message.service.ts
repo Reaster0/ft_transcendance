@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Message } from '../entities/message.entity';
-import { ChanI } from '../interfaces/channel.interface';
+import { ChannelI } from '../interfaces/channel.interface';
 import { MessageI } from '../interfaces/message.interface';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class MessageService {
   }
 
   async findMessagesForChannel(
-    channel: ChanI,
+    channel: ChannelI,
     user: User,
   ): Promise<MessageI[]> {
     const query = this.messageRepository
