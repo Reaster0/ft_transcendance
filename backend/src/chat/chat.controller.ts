@@ -6,16 +6,19 @@ import { UrlGeneratorService } from 'nestjs-url-generator';
 import console from "console";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthUser } from "src/users/guards/userAuth.guard";
+import { ChanUserService } from "./services/chanUser.service";
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
     constructor(
         private readonly chanServices: ChanServices,
         private readonly urlGeneratorService: UrlGeneratorService,
+        private readonly chanUserServices: ChanUserService,
     ) { }
 
     @Get('genJoinUrl')
     async makeUrl(@Query() invite: InviteDto): Promise<string> {
+        console.log('generating url');
         console.log(invite);
         const params = {
             chanID: invite.chanID,
@@ -40,12 +43,19 @@ export class ChatController {
         @Get('joinChannel/:id/:nickname')
         @UseGuards(AuthGuard('jwt'), AuthUser) // try
         async joinChannel(@Param('id') id: string, @Req() req: RequestUser): Promise<void> {
+        console.log('try to join channel whit link');
         const channelFound = await this.chanServices.getChan(id);
-        if (!channelFound)
+        if (!channelFound) {
+            console.log('channel whit id: ', id, ' not found' );
             return ;
+        }
         
+        //const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
 
-
+        await this.chanServices.pushUserToChan(channelFound, req.user);
+        await this.chanUserServices.addUserToChan(channelFound, req.user);
+        //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
+        console.log(req.user, ' joined: ', channelFound.channelName);
         //return 'lets join this private channel';
   }
 }
