@@ -87,8 +87,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     // yes but it break evrything ! why !!!!
     // should add user to chanUserDataBase ?
-//    const chanUser = await this.chanUserServices.addAdminToChan(createChannel, client.data.user);
- //   console.log('--->', chanUser);
+    const chanUser = await this.chanUserServices.addAdminToChan(createChannel, client.data.user);
+    console.log('--->', chanUser);
 
 
     await this.emitChannels();
@@ -113,7 +113,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log('sending message');
     console.log(message);
     //1) get the sender role
-    const chanUser: ChanUserI = await this.chanServices.findUserByChannel(message.channel, client.data.user.id);
+    const chanUser: ChanUserI = await this.chanUserServices.findUserOnChannel(message.channel, client.data.user.id);
     console.log(chanUser);
     let date = new Date;
     //2) accordingly to the sender role the sender is unable to send message => return ;
@@ -128,12 +128,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     // get all the socket connete to that channel
 //    const connectedSocket: string[] = this.chanServices.findSocketByChannel(channel);
     
-    const connectedUsers: ChanUserI[] = await this.chanServices.getAllChanUser(channel);
+    const connectedUsers: User[] = await this.chanServices.getAllChanUser(channel);
 
-    for (const chanUser of connectedUsers) {
+    for (const user of connectedUsers) {
       createMessage.content = originalMessage;
       // check if the user associeted whit that soket as blocket the sender
-      const blockedUser: number = chanUser.user.blockedUID.find(element => element === sender.id)
+      const blockedUser: number = user.blockedUID.find(element => element === sender.id)
       if (blockedUser)
         createMessage.content = "... 🛑 ..."; // if it is the case blur the message
       // get the user associeted to the soket (target of the message)
@@ -143,12 +143,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       let date = new Date;
       if (!target || target.ban < date || target.ban === null) //<--------- Not sure
       */
-        this.server.to(chanUser.user.chatSocket).emit('messageSended', createMessage); //send message (show)
+        this.server.to(user.chatSocket).emit('messageSended', createMessage); //send message (show)
     }
   }
 
   afterInit(server: Server) {
-    this.logger.log('Chat is Init');
+    this.logger.log('Chat is Init 🙏');
   }
 
   /************** . Join Channel *************/
@@ -158,6 +158,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const channelFound = await this.chanServices.getChan(channel.id);
     if (! channelFound) return ; // better handel in get chan and catch
     // privacy ------
+    if (channelFound.password) {
+      if (!channel.password)
+        return ;
+      console.log(channel.password)
+      // will be handel soon
+    }
     const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
 
     // mmmhhhh
@@ -205,11 +211,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /****** Emit Service ******/
   async updateUsersStatus() {
     const connectedUsers: User[] = await this.userServices.getConnectedUsers();
-    //return this.server.emit('connectedUsers', connectedUsers); // user or user.id ?
+    return this.server.emit('connectedUsers', connectedUsers); // user or user.id ?
+    /*
     let connectUsersID: number[] = [];
     for (const user of connectedUsers)
       connectUsersID.push(user.id);
     return this.server.emit('connectedUsers', connectUsersID); // user or user.id ?
+    */
   }
 
   @SubscribeMessage('emitChannels')

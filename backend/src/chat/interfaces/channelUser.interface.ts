@@ -7,7 +7,8 @@ export interface ChanUserI {
   mute?: Date;
   isBan?: boolean;
   isAdmin?: boolean;
-  user: User;
+  userID: number;
   channel: ChannelI;
+//  user: User;
 
 }

@@ -32,7 +32,7 @@ export class ChanServices {
 			return null;
 
 		channel.users.push(creator);
-		channel.adminUsers = [];
+		channel.adminUsers = [creator.id]; //Alina asking for this
 		channel.owner = creator.id;
 
   //will see 
@@ -116,7 +116,7 @@ export class ChanServices {
     const channels: ChannelI[] = await query.getMany();
 
     //const channels = await this.userServices.getChannels(id);
-    console.log(channels);
+    //console.log(channels);
 
     /*
     channels.sort(function (date1, date2) {
@@ -135,10 +135,12 @@ export class ChanServices {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
+  /*
   async findUserByChannel(channel: ChannelI, userID: number): Promise<ChanUserI> {
     console.log(userID, channel); //this look strange
     return this.chanUserRepository.findOne({ where: { channel: channel, userID: userID } });
   }
+  */
 
   async findChannel(channelName: string): Promise<Channel> {
     return this.chanRepository.findOne({channelName});
@@ -163,13 +165,12 @@ export class ChanServices {
   */
 
 
-  async getAllChanUser(channel: ChannelI): Promise<ChanUserI[]> {
-    const channelWhitChanUser: Channel = await this.chanRepository.findOne({
-      where: {id: channel.id},
-      relations: ['chanUsers'],
-    });
-
-    return channelWhitChanUser.chanUsers;
+  async getAllChanUser(channel: ChannelI): Promise<User[]> {
+    const channelWhitChanUser: Channel = await this.chanRepository.findOne(
+      channel.id,
+      { relations: ['users'] }
+    );
+    return channelWhitChanUser.users;
   }
 
   //-------------------------------------------------//

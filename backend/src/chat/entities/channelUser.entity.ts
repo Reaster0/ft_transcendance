@@ -15,10 +15,8 @@ export class ChanUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  /*
   @Column('int') // plus simple quune relation lets go
   userID: number;
-  */
 
   @Column({ nullable: true, type: 'timestamptz' })
   mute: Date;
@@ -47,9 +45,11 @@ export class ChanUser {
 	@JoinColumn()
 	channel: Channel;
   */
+  /*
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+  */
 
   @ManyToOne(() => Channel, channel => channel.chanUsers, {onDelete: 'CASCADE'} )
   @JoinColumn()
