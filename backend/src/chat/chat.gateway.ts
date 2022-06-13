@@ -47,7 +47,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
       this.connectService.connectUser(client, user);
-      this.emitMyChannels(user);
       this.updateUsersStatus();
       client.emit('connectedToChat');
     } catch {
@@ -232,8 +231,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage('emitMyChannels')
-  async emitMyChannels(user: User) {
-    const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
-    this.server.to(user.chatSocket).emit('channelList', channels);
+  async emitMyChannels(client: Socket) {
+    const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(client.data.user.id);
+    client.emit('channelList', channels);
   }
 }

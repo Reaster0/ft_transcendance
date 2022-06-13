@@ -591,9 +591,10 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('channelList', function(params: any) { //May be subject to modification
+      connection.value!.on('channelList', function(params: any) {
+        console.log('channel list');
         userChannels = params;
-        console.log('Params :' + params);
+        console.log('Params :' + params.name);
         void userChannels;
       })
 
@@ -626,17 +627,6 @@ export default defineComponent({
       // 			connection.value.emit('blockUser', user, block);
       // 			console.log("after blockUser");
       // 		}
-
-
-      // NB! needed to be done to disconnect from the socket when we completely leave the chat
-      // onBeforeRouteLeave(() => {
-      //     const answer = window.confirm("disconect from chat ?")
-      //     if (answer) {
-      //       connection.value.disconnect();
-      //       return true;
-      //       }
-      //     return false;
-      // })
 
 		function sendingMessage(content: string, channel: any) // TODO check type
 		{

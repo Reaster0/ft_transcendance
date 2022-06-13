@@ -31,8 +31,8 @@ export class ChanServices {
 
 		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
 			return null;
-    let array = [];
-		//channel.users = (array.push(creator));
+
+    channel.users = [creator];
 		channel.adminUsers = [creator.id]; //Alina asking for this
 		channel.owner = creator.id;
 
@@ -107,8 +107,7 @@ export class ChanServices {
   }
 
   async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
-
-    let query = this.chanRepository
+    let query = await this.chanRepository
       .createQueryBuilder('channel')
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })

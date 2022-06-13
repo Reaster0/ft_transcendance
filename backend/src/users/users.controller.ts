@@ -82,7 +82,7 @@ export class UsersController {
   }
 
   @Get('/userInfo')
-  //@UseGuards(AuthGuard('jwt'), AuthUser)
+  @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'User Informations' })
   @ApiOkResponse({ description: 'User Informations' })
