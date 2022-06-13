@@ -6,13 +6,13 @@ import LoginPage from "../views/LoginPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
 // import EditUser from "../views/EditUser.vue";
-import Chat from "../views/TransChat_group.vue";
-import NewRoom from "../views/TransChat_create_room.vue";
-import NewRoomPublic from "../views/TransChat_create_room_public.vue";
-import NewRoomPrivate from "../views/TransChat_create_room_private.vue";
-import NewRoomProtected from "../views/TransChat_create_room_protected.vue";
-import MU from "../views/TransChat_manage_users.vue";
-import ChangeRoom from "../views/TransChat_change_room.vue";
+import Chat from "../views/Chat_main.vue";
+import NewRoom from "../views/Chat_createroom.vue";
+import NewRoomPublic from "../views/Chat_publicroom.vue";
+import NewRoomPrivate from "../views/Chat_privateroom.vue";
+import NewRoomProtected from "../views/Chat_protectedroom.vue";
+import MU from "../views/Chat_manageusers.vue";
+import ChangeRoom from "../views/Chat_roomsettings.vue";
 import { isLogged, getUserInfo } from "../components/FetchFunctions"
 import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";

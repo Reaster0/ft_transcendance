@@ -450,13 +450,13 @@ import { ref } from "vue"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { defineComponent } from 'vue'
-import TheModale from "./TransChat_modal_pass.vue";
+import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
 
 
 export default defineComponent({
-  name: "TransChat_group",
+  name: "ChatMain",
   components: {
     'modale': TheModale
   },
