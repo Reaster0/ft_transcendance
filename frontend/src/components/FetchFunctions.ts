@@ -2,7 +2,7 @@
 
 export async function isLogged() {
 	console.log("check if user is logged")
-	return await fetch(process.env.VUE_APP_BACKEND + "/users/logged", {credentials: "omit"})
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/logged", {credentials: "include"})
 	.then(res => {
 		if (res.status == 200)
 			return [true, false];
