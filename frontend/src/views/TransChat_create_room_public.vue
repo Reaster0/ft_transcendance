@@ -7,10 +7,9 @@
           color="rgb(0,0,255)"
         >
           <v-btn
-            to="/chatgroup"
+            to="/thechat"
             icon
             dark
-            @click="dialog = false"
           >
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
@@ -19,16 +18,15 @@
               New chat room settings
             </div>
           </v-toolbar-title>
-          <!-- <v-spacer></v-spacer> -->
             <v-spacer></v-spacer>
-            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+            <v-btn :style="{color: ' #ffffff'}" to="/thechat">
               OK
             </v-btn>
           
         </v-toolbar>
 
 
-                <v-divider></v-divider>
+        <v-divider></v-divider>
 
             <div class="offsettitle">
             <p class="font-weight-black">
@@ -39,17 +37,7 @@
             </p>
             </div>
         <v-col cols="12" sm="6">
-          <!-- <input type="file" ref="file" style="display: none"> -->
-          <!-- <input type="file" @change="getFile"> -->
           <input type="file" @change="previewFiles">
-          <!-- <div >
-            <img :src="file" />
-          </div> -->
-            <!-- <v-btn elevation="2" class="offsetmess" @change="previewFiles" v-model="file">
-              Upload avatar
-              <v-divider class="mx-2" vertical></v-divider>
-              <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
-            </v-btn> -->
         </v-col>
         <v-col cols="12" sm="6">
             <v-text-field
@@ -62,10 +50,6 @@
           <button class="button">SUBMIT</button>
         
         </v-col>
-
-              
-
-
     </v-form>
     </v-container>
   </v-app>
@@ -84,45 +68,30 @@ export default defineComponent({
     return {
       created: false as boolean,
       name: "" as string,
-      file: [] as any[], // TODO check type
-      items: [] as any[], // TODO check type
+      file: [] as any[],
       // currentUser: useStore().getters.whoAmI,
     };
   },
   methods: {
     submitbutton() {
-      // console.log(this.created);
       console.log(this.name);
       console.log(this.file);
       this.created = true;
     },
-    previewFiles(event: any) { //TODO check event type
+    previewFiles(event: any) {
         this.file = event.target.files[0];
         console.log(event.target.files[0]);
     },
-    // getFile(event) {
-    //   var files = event.target.files || event.dataTransfer.files;
-    //   if (!files.length)
-    //     return;
-    //   this.createImage(files[0]);
-    // },
-    // createImage(img) {
-    //   var reader = new FileReader();
-    //   reader.onload = (event) => {
-    //     this.file = event.target.result;
-    //   };
-    //   reader.readAsDataURL(img);
-    // }
   },
 
   setup()
   {
-      let thechannels = reactive([] as any[]); //TODO check thechannels type
+      let thechannels = reactive([] as any[]);
       const store = reactive(useStore() as Store<any>);
       const socketVal = store.getters.getSocketVal;
 
       onMounted(() =>{
-        socketVal.on("channel", function(res: any) { // TODO check res type
+        socketVal.on("channel", function(res: any) {
           console.log('befor update');
           console.log(thechannels);
           console.log('creating channel');
@@ -130,13 +99,18 @@ export default defineComponent({
 
           // reset channel
           thechannels = [];
-          const length= res.channels.length;
-          console.log('lenght: ', length);
+//          const length= res.channels.length;
+ //         console.log('lenght: ', length);
+          /*
           for (var i = 0; i < length; ++i) {
-            var data = {} as any; //TODO check data type
-            data.title = res.channels[i].channelName;
+            console.log(">>>>>>>>>>>>>>>");
+            console.log(res.channels[i]);
+            */
+           for (const channel of res) {
 
-            let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
+            var data = {} as any; //beark :(
+            data.title = channel.channelName;
+            let blob = new Blob([channel.avatar], {type: 'image/bmp'});
             if(blob.size !== 2)
             {
               let image = new Image();
@@ -150,27 +124,26 @@ export default defineComponent({
           }
 
           console.log('after update');
-          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           store.commit('setChannels' , thechannels);
           console.log(store.getters.getChannels);
         })
       })
 
-      function submitIt(name: string, file: any) // TODO check file type
+      function createError()
       {
-        // const channame = this.name;
+          alert("YOU DIDN'T SPECIFY NAME - NOTHING WILL BE CREATED")
+      }
+
+      function submitIt(name: string, file: any)
+      {
         const password = "";
         const publ = true;
         // const user = this.currentUser;
-        // emit only if this.name isnt empty
-        // if (this.name != '')
-        // connection.value.emit('createChannel', {channame, users: [], password, publ});
-        console.log("name: " + name)
-        // console.log("file: " + file)
-        if (name)
+        if (name == '')
+          createError()
+        else
           socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});   
       }
-      // console.log(getChannels)
       return { submitIt }
   }
 })
