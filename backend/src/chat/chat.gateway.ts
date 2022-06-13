@@ -47,6 +47,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
       this.connectService.connectUser(client, user);
+      this.emitMyChannels(user);
       this.updateUsersStatus();
     } catch {
       this.logger.log('Failed to retrive user from client');
@@ -85,8 +86,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     console.log(createChannel)
 
-    // yes but it break evrything ! why !!!!
-    // should add user to chanUserDataBase ?
     const chanUser = await this.chanUserServices.addAdminToChan(createChannel, client.data.user);
     console.log('--->', chanUser);
 
@@ -203,7 +202,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('blockUser')
   async blockOrDefiUser(client: Socket, data: any): Promise<User> {
     const { user, block } = data;
-    const userUpdate = this.userServices.updateBlockedUser(block, client.data.user, user);
+    const userUpdate = this.userServices.updateBlockedUser(client.data.user, block, user);
     this.logger.log(`${client.data.user} block ${user.username}`);
     return userUpdate;
   }
@@ -229,5 +228,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
       this.server.to(connection.chatSocket).emit('channel', channels);
     }
+  }
+
+  @SubscribeMessage('emitMyChannels')
+  async emitMyChannels(user: User) {
+    const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
+    this.server.to(user.chatSocket).emit('channel', channels);
   }
 }
