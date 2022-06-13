@@ -231,7 +231,7 @@ export class UsersService {
     this.userRepository.update(user.id, {status: Status.OFFLINE, chatSocket: ''});
   }
 
-  async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {
+  async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
     const userFound = user.blockedUID.find((element) => element === userToBlock.id);
 
     if (block === true && !userFound) {

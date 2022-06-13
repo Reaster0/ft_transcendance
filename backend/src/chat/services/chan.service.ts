@@ -9,6 +9,7 @@ import { ChanUserI } from '../interfaces/channelUser.interface';
 import * as bcrypt from 'bcrypt';
 import { timeStamp } from 'console';
 import { UsersService } from 'src/users/services/users.service';
+import { FrontChannelI } from '../interfaces/frontChannel.interface';
 
 @Injectable()
 export class ChanServices {
@@ -105,7 +106,7 @@ export class ChanServices {
   return true;
   }
 
-  async getChannelsFromUser(id: number): Promise<ChannelI[]> {
+  async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
 
     let query = this.chanRepository
       .createQueryBuilder('channel')
@@ -113,7 +114,7 @@ export class ChanServices {
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
 
-    const channels: ChannelI[] = await query.getMany();
+    const channels: FrontChannelI[] = await query.getMany();
 
     //const channels = await this.userServices.getChannels(id);
     //console.log(channels);

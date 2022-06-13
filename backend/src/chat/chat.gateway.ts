@@ -19,6 +19,7 @@ import { ChanServices } from './services/chan.service';
 import { ChanUserI } from './interfaces/channelUser.interface';
 import { MessageService } from './services/message.service';
 import { ChanUserService } from './services/chanUser.service';
+import { FrontChannelI } from './interfaces/frontChannel.interface';
 
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
@@ -225,14 +226,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const connections: User[] = await this.userServices.getConnectedUsers();
     console.log(connections);
     for (const connection of connections) {
-      const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
+      const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
       this.server.to(connection.chatSocket).emit('channel', channels);
     }
   }
 
   @SubscribeMessage('emitMyChannels')
   async emitMyChannels(user: User) {
-    const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
+    const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
     this.server.to(user.chatSocket).emit('channel', channels);
   }
 }
