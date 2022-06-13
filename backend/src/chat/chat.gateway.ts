@@ -11,7 +11,6 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { ChatServices } from './services/chat.service';
 import { ChannelI} from './interfaces/channel.interface';
 import { MessageI } from './interfaces/message.interface';
 import { ConnectService } from './services/connect.service';
@@ -19,12 +18,13 @@ import { ChanServices } from './services/chan.service';
 import { ChanUserI } from './interfaces/channelUser.interface';
 import { MessageService } from './services/message.service';
 import { ChanUserService } from './services/chanUser.service';
+import { FrontChannelI } from './interfaces/frontChannel.interface';
+import { Channel } from './entities/channel.entity';
 
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   constructor(
-    private readonly chatServices: ChatServices,
     private readonly chanUserServices: ChanUserService,
     private readonly chanServices: ChanServices,
     private readonly connectService: ConnectService,
@@ -79,7 +79,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       client.disconnect();
       return false;
     }
-    const createChannel: ChannelI = await this.chanServices.createChannel(channel, client.data.user);
+    const createChannel: Channel = await this.chanServices.createChannel(channel, client.data.user);
 
     if (!createChannel) {
       this.logger.log(`ERROR will creating: ${channel.channelName}`);
@@ -226,14 +226,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const connections: User[] = await this.userServices.getConnectedUsers();
     console.log(connections);
     for (const connection of connections) {
-      const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
-      this.server.to(connection.chatSocket).emit('channelList', { 'channels': channels });
+      const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
+      this.server.to(connection.chatSocket).emit('channelList', channels);
     }
   }
 
   @SubscribeMessage('emitMyChannels')
   async emitMyChannels(user: User) {
-    const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
-    this.server.to(user.chatSocket).emit('channelList', {'channels': channels });
+    const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
+    this.server.to(user.chatSocket).emit('channelList', channels);
   }
 }

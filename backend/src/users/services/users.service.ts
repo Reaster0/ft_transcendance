@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus, StreamableFile, InternalServerErrorException,
-  Res } from '@nestjs/common';
+import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
+  Res, 
+  BadRequestException} from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -10,7 +11,6 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
-import { STATUS_CODES } from 'http';
 
 @Injectable()
 export class UsersService {
@@ -75,7 +75,7 @@ export class UsersService {
     const { nickname } = updateUser;
     let find = await this.userRepository.findOne({ nickname: nickname });
     if (find && find != user) {
-      throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('Nickname already taken');
     }
     user.nickname = nickname;
     return this.userRepository.save(user);
@@ -105,7 +105,7 @@ export class UsersService {
   async addFriend(user: User, friendId: number): Promise <void> {
     const found = await user.friends.find((element) => friendId);
     if (found) {
-      throw new HttpException('User is already a friend', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('User is already a friend');
     }
     user.friends.push(friendId);
     await this.userRepository.save(user);
@@ -114,7 +114,7 @@ export class UsersService {
   async removeFriend(user: User, friendId: number): Promise<void> {
     const found = await user.friends.indexOf(friendId);
     if (found == -1) {
-      throw new HttpException('User is not a friend', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('User is not a friend');
     }
     user.friends.splice(found, 1);
     await this.userRepository.save(user);
@@ -231,7 +231,7 @@ export class UsersService {
     this.userRepository.update(user.id, {status: Status.OFFLINE, chatSocket: ''});
   }
 
-  async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {
+  async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
     const userFound = user.blockedUID.find((element) => element === userToBlock.id);
 
     if (block === true && !userFound) {

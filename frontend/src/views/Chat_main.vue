@@ -27,7 +27,7 @@
               <!-- NB! We can create v-model="selectedItem" so when channel is open its color changed
               (for now we dont do this cause there are more important stuff to finish) -->
                <v-list-item-group  > 
-                <template v-for="(item, index) in getChannels">
+                <template v-for="(item, index) in userChannels">
                   <v-subheader v-if="item.header" :key="item.header"
                   v-text="item.header"></v-subheader>
                   <v-divider v-else-if="item.divider" :key="index"
@@ -591,8 +591,10 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('channelList', function(params: { 'channels': string[] }) { //May be subject to modification
-        userChannels = params.channels;
+      connection.value!.on('channelList', function(params: any) { //May be subject to modification
+        userChannels = params;
+        console.log('Params :' + params);
+        void userChannels;
       })
 
 		})
@@ -651,7 +653,7 @@ export default defineComponent({
       leaveChat(socket, to, next);
     })
 
-		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin, connected }
+		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin, connected, userChannels }
 
 	}
 })

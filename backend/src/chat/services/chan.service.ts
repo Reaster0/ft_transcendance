@@ -9,6 +9,7 @@ import { ChanUserI } from '../interfaces/channelUser.interface';
 import * as bcrypt from 'bcrypt';
 import { timeStamp } from 'console';
 import { UsersService } from 'src/users/services/users.service';
+import { FrontChannelI } from '../interfaces/frontChannel.interface';
 
 @Injectable()
 export class ChanServices {
@@ -20,7 +21,7 @@ export class ChanServices {
     private readonly userServices: UsersService,
   ) {}
 
-  async createChannel(channel: ChannelI, creator: User): Promise<ChannelI> {
+  async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
     let { channelName, publicChannel, password, avatar } = channel;
     //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
@@ -30,8 +31,8 @@ export class ChanServices {
 
 		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
 			return null;
-
-		channel.users.push(creator);
+    let array = [];
+		//channel.users = (array.push(creator));
 		channel.adminUsers = [creator.id]; //Alina asking for this
 		channel.owner = creator.id;
 
@@ -74,14 +75,14 @@ export class ChanServices {
 
   //try
   async pushUserToChan(channel: ChannelI, user: User){
-    var update: ChannelI = await this.chanRepository.findOne(channel.id);
+    let update: Channel = await this.chanRepository.findOne(channel.id);
     update.users.push(user);
     this.chanRepository.update(channel.id, update);
   }
 
   //test
   async removeUserToChan(channel: ChannelI, user: User) {
-    var update: ChannelI = await this.chanRepository.findOne(channel.id);
+    let update: Channel = await this.chanRepository.findOne(channel.id);
     const index = update.users.indexOf(user);
     if (index != -1) {
       update.users.splice(index, 1);
@@ -105,7 +106,7 @@ export class ChanServices {
   return true;
   }
 
-  async getChannelsFromUser(id: number): Promise<ChannelI[]> {
+  async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
 
     let query = this.chanRepository
       .createQueryBuilder('channel')
@@ -113,7 +114,7 @@ export class ChanServices {
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
 
-    const channels: ChannelI[] = await query.getMany();
+    const channels: FrontChannelI[] = await query.getMany();
 
     //const channels = await this.userServices.getChannels(id);
     //console.log(channels);
