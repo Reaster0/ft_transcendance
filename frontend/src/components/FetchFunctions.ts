@@ -88,3 +88,25 @@ export async function uploadAvatar(file: any) {
 		return res.status == 201? true : false 
 	})
 }
+
+export async function getFriendsList() {
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends")
+		.then(res => res.json())
+		.then((data) => {
+			return data.statusCode == 200? data.data : null;})
+}
+
+export async function addFriend(nickName: string) {
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/addFriend", {
+		credentials: "include",
+		method: "PATCH",
+		body: JSON.stringify({ nickname: nickName}),
+		headers: {
+			'Content-type': 'application/json; charset=UTF-8',
+		},
+	})
+	.then(res => {
+		console.log(res)
+		return res.status == 200? true : false
+	})
+}

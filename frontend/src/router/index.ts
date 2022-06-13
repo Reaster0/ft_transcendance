@@ -19,6 +19,7 @@ import ChangeRoom from "../views/TransChat_change_room.vue";
 import { isLogged, getUserInfo } from "../components/FetchFunctions"
 import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";
+import FriendList from "../views/FriendList.vue";
 
 
 const routes = [
@@ -65,14 +66,14 @@ const routes = [
 			return store.getters.isConnected? true: "/login"
 		}
 	},
-	// {
-	// 	path: '/user/edit',
-	// 	name: "editUser",
-	// 	component: EditUser,
-	// 	beforeEnter: () => {
-	// 		return store.getters.isConnected? true: "/login"
-	// 	}
-	// },
+	{
+		path: '/user/friends',
+		name: "friendList",
+		component: FriendList,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
 	// {
 	// 	path: '/chat',
 	// 	name: "chat",
