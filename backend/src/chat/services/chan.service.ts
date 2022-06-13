@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,9 @@ import { ChanI } from '../interfaces/channel.interface';
 import { ChanUserI } from '../interfaces/channelUser.interface';
 import { JoinedSocketI } from '../interfaces/sockets-connected-to-channel.interface';
 import * as bcrypt from 'bcrypt';
+import { join } from 'path';
+import { Readable } from 'stream';
+import { createReadStream } from 'fs';
 
 @Injectable()
 export class ChanServices {
@@ -22,11 +25,10 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChanI, creator: User): Promise<ChanI> {
-    let { channelName, publicChannel, password } = channel;
-    console.log(channelName);
+    let { channelName, publicChannel, password, avatar } = channel;
+    //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
 
-//		if (!name)
 		if (name) //channel name already exist
 			return null;
 
@@ -45,6 +47,9 @@ export class ChanServices {
       }
 		}
 		//console.log(channel);
+
+    if (!avatar.buffer || avatar.byteLength == 0)
+      console.log('must add default avatar');
 		return this.chanRepository.save(channel);
 	}
 
@@ -74,9 +79,9 @@ export class ChanServices {
   }
 
   async updateChannel(channel: ChanI, info: any): Promise<Boolean> {
-		const { applyPassword, password, removePassword } = info;
+		const { addPassword, password, removePassword } = info;
 
-    if (applyPassword && password) {
+    if (addPassword && password) {
       if (/^([a-zA-Z0-9]+)$/.test(password) === false)
         return false;
       const salt = await bcrypt.genSalt();
@@ -96,7 +101,7 @@ export class ChanServices {
       .where('chan.publicChannel = true');
     const publicChannels: ChanI[] = await query.getMany(); // gater all public channel
     console.log('---- public  Channel -----');
-    console.log(publicChannels);
+   // console.log(publicChannels);
 
     query = this.chanRepository
       .createQueryBuilder('chan')
@@ -132,6 +137,26 @@ export class ChanServices {
   async findUserByChannel(channel: ChanI, userId: number): Promise<ChanUserI> {
     console.log(userId, channel); //this look strange
     return this.chanUserRepository.findOne({ where: { chan: channel, userID: userId } });
+  }
+
+  async findChannel(channelName: string): Promise<Chan> {
+    return this.chanRepository.findOne({channelName});
+  }
+
+  getImageFromBuffer(channels: ChanI[]): StreamableFile[] {
+    var image: StreamableFile[] = [];
+    const defaultStream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR),);
+
+    for (const chan of channels) {
+      if (!chan.avatar || chan.avatar.byteLength === 0) {
+        image.push(new StreamableFile(defaultStream));
+      } else {
+        const stream = Readable.from(chan.avatar);
+        image.push(new StreamableFile(stream));
+      }
+    }
+    
+    return image;
   }
 
   //-------------------------------------------------//

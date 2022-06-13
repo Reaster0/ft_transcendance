@@ -23,6 +23,16 @@ export class UpdateUserDto {
   @IsAlphanumeric()
   @MinLength(4)
   @MaxLength(15)
-  @IsOptional()
-  readonly nickname?: string;
+  @IsNotEmpty()
+  readonly nickname: string;
+}
+
+export class FriendDto {
+  @ApiProperty({ type: String, description: 'possible nickname of friend to add/remove'})
+  @IsAlphanumeric()
+  @MinLength(4)
+  @MaxLength(15)
+  @IsNotEmpty()
+  readonly nickname: string;
+
 }
