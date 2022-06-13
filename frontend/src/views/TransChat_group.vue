@@ -505,7 +505,6 @@ export default defineComponent({
         joinChannel: [],
         messages: []
       },
-      */ //aime response: for now not in use...
       // Not used vars that we can need
       // Comment for Aimé: seems like this info is for administrators
       // On what key-word can we get this data from backend ?
@@ -526,6 +525,7 @@ export default defineComponent({
       // Comment for Aimé: this one we realy need, but now we just can know 
       // if the channel is public ot not
       protectByPassword: false,
+      */ //aime response: for now not in use...
       channelSettings: {
         password: '',
         applyPassword: false,
@@ -626,6 +626,7 @@ export default defineComponent({
       if (!content)
         return ;
       connection.value.emit('message', {content, channel});
+
 		}
 
     console.log("************", getChannels)
