@@ -51,6 +51,8 @@ export class ChanUser {
   user: User;
   */
 
+  // en fait c'est peut etre une relation manyToOne que dont jai besoin :O
+
   @ManyToOne(() => Channel, channel => channel.chanUsers, {onDelete: 'CASCADE'} )
   @JoinColumn()
   channel: Channel;
