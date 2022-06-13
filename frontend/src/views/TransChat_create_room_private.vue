@@ -62,6 +62,8 @@
 import { onMounted } from "@vue/runtime-core"
 import { useStore, Store } from "vuex";
 import { defineComponent, reactive } from "vue";
+import { onBeforeRouteLeave } from 'vue-router';
+import leaveChat from "../helper";
 
 export default defineComponent ({
   name: "NewRoomPrivate",
@@ -127,6 +129,12 @@ export default defineComponent ({
       else
         socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});    
     }
+
+    onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next);
+  })
 
     return { submitIt }
   },

@@ -58,6 +58,9 @@
 <script lang="ts">
 
 import { defineComponent } from "vue";
+import { onBeforeRouteLeave } from 'vue-router';
+import { Store, useStore } from 'vuex';
+import leaveChat from '../helper';
 
 export default defineComponent({
   name: "NewRoom",
@@ -76,6 +79,16 @@ export default defineComponent({
       console.log(data);
       console.log("submitted");
     }
+  },
+  setup () {
+
+    let store = useStore() as Store<any>;
+
+    onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next);
+    })
   }
 })
 </script>

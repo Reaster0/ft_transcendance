@@ -1,12 +1,14 @@
 <template>
   <v-app >
-    <v-container fluid >
-      <v-row >
+    <v-container fluid>
+
+      <v-row v-if="connected">
 
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
       <!-- NB! When serach field will work on backen - add onclick option calling method  -->
       <div class="d-flex">
+
         <v-text-field
           clearable
           label="Find user / group"
@@ -15,14 +17,13 @@
         ></v-text-field>
          <!-- <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn> -->
     </div>
-      <v-btn to="/newroom" elevation="2" width="100%">
+
+      <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
 				<v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
 			</v-btn>
 			</v-col>
-
-      
 		
 	
     <div id="app" class="text-left">
@@ -67,6 +68,7 @@
 		<!-- open channel / example display -->
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
+
           <v-app id="inspire">
 
             <!-- NB! get the real message -->
@@ -276,7 +278,7 @@
           </v-btn>
           </div>
           <div id="app">
-          <v-btn to="/roomsettings" elevation="2" width="350px">
+          <v-btn :to="{ name: 'ChangeRoom' }" elevation="2" width="350px">
             Room settings
           </v-btn>
           </div>
@@ -315,10 +317,10 @@
                       v-else
                       :key="item.title"
                     >
-                      <v-btn to="/mu"
+                      <v-btn :to="{ name: 'ManageUsers' }"
                         icon
                         v-bind="attrs"
-                        v-on="on"
+                        v-on="on" 
                         elevation="0"
                       > // TODO attrs and on doesn't exist ?
                         <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
@@ -357,7 +359,7 @@
                       v-else
                       :key="item.title"
                     >
-                      <v-btn to="/mu"
+                      <v-btn :to="{ name: 'ManageUsers' }"
                         icon
                         v-bind="attrs"
                         v-on="on"
@@ -431,8 +433,14 @@
 
   
         </v-col>
+        
       </v-row>
+
     </v-container>
+    <!--<v-container fluid v-else>
+      <h1>Loading...</h1>
+    </v-container>-->
+
   </v-app>
 </template>
 
@@ -443,7 +451,9 @@ import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { defineComponent } from 'vue'
 import TheModale from "./TransChat_modal_pass.vue";
-  
+import { onBeforeRouteLeave } from 'vue-router';
+import leaveChat from '../helper';
+
 
 export default defineComponent({
   name: "TransChat_group",
@@ -560,8 +570,9 @@ export default defineComponent({
 	setup() {
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
-    var getChannels = store.getters.getChannels as any[];
-    var isChannelJoined = store.getters.isChannelJoined as boolean;
+    let getChannels = store.getters.getChannels as any[];
+    let isChannelJoined = store.getters.isChannelJoined as boolean;
+    const connected = ref<boolean>(false);
 
 
 		onMounted(() =>{
@@ -577,6 +588,12 @@ export default defineComponent({
 				console.log("the error is:" + error)
 			}
       store.commit('setSocketVal' , connection.value);
+
+      connection.value!.on('connectedToChat', function() {
+        connected.value = true;
+        console.log('connectedToChat: ' + connected.value);
+      })
+
 			})
 
       // function joinChannel(id)
@@ -627,8 +644,13 @@ export default defineComponent({
       connection.value.emit('message', {content, channel});
 		}
 
-    console.log("************", getChannels)
-		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin }
+		onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next);
+    })
+
+		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin, connected }
 
 	}
 })

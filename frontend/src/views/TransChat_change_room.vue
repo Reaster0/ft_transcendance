@@ -7,7 +7,7 @@
           color="rgb(0,0,255)"
         >
           <v-btn
-            to="/adm"
+            to="/thechat"
             icon
             dark
             @click="dialog = false"
@@ -72,7 +72,7 @@
               Make the chat protected or change the password
             </p>
             <p>
-              Accesible by the password
+              Accessible by the password
             </p>
             </div>
           </template>
@@ -109,16 +109,30 @@
 
 <script lang="ts">
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
+
+import { defineComponent } from "vue";
+import { useStore, Store } from "vuex";
+import { onBeforeRouteLeave } from 'vue-router';
+import leaveChat from '../helper';
+
 // https://codesource.io/vue-export-default-vs-vue-new/
-export default 
-{
+export default defineComponent ({
   data: () => ({
     public: false,
     private: false,
     protected: true,
   }),
-};
+  setup() {
 
+    let store = useStore() as Store<any>;
+
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next);
+    })
+  }
+})
 </script>
 
 

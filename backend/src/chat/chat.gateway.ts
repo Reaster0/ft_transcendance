@@ -48,6 +48,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       client.data.user = user;
       this.connectService.connectUser(client, user);
       this.updateUsersStatus();
+      client.emit('connectedToChat');
     } catch {
       this.logger.log('Failed to retrive user from client');
       return client.disconnect();

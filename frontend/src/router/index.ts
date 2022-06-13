@@ -41,7 +41,6 @@ const routes = [
 		path: '/user',
 		name: "user",
 		component: UserPagev2,
-		// component: UserPage,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}
@@ -62,29 +61,13 @@ const routes = [
 			return store.getters.isConnected? true: "/login"
 		}
 	},
-	// {
-	// 	path: '/user/edit',
-	// 	name: "editUser",
-	// 	component: EditUser,
-	// 	beforeEnter: () => {
-	// 		return store.getters.isConnected? true: "/login"
-	// 	}
-	// },
-	// {
-	// 	path: '/chat',
-	// 	name: "chat",
-	// 	component: TheChat,
-	// 	beforeEnter: () => {
-	// 		return store.getters.isConnected? true: "/login"
-	// 	}
-	// },
 	{
 		path: '/thechat',
-		name: "transchatgroup",
+		name: "Chat",
 		component: Chat,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
-		}
+		},
 	},
 	{
 		path: '/newroom',
@@ -120,7 +103,7 @@ const routes = [
 	},
 	{
 		path: '/roomsettings',
-		name: "changeroom",
+		name: "ChangeRoom",
 		component: ChangeRoom,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
@@ -128,7 +111,7 @@ const routes = [
 	},
 	{
 		path: '/mu',
-		name: "manageusers",
+		name: "ManageUsers",
 		component: MU,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"

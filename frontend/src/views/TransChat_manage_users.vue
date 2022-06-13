@@ -76,13 +76,13 @@
                     <v-spacer></v-spacer>
           
                     <v-btn
-                      to="/adm"
+                      to="/thechat"
                     >
                       Cancel
                     </v-btn>
                     <v-btn
                       color="rgb(0,0,255)"
-                      to="/adm"
+                      to="/thechat"
                     >
                       Save
                     </v-btn>
@@ -103,6 +103,10 @@
 // https://codesource.io/vue-export-default-vs-vue-new/
 
 import { defineComponent } from "vue";
+import { onBeforeRouteLeave } from 'vue-router';
+import leaveChat from "../helper";
+import { Store, useStore } from 'vuex';
+
 
 export default defineComponent ({
   data: () => ({
@@ -110,6 +114,16 @@ export default defineComponent ({
     mute: false as boolean,
     admin: false as boolean,
   }),
+  setup() {
+
+    let store = useStore() as Store<any>;
+
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next);
+    })
+  }
 });
 </script>
 
