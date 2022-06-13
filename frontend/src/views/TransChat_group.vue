@@ -502,6 +502,7 @@ export default defineComponent({
       currentUser: useStore().getters.whoAmI,
       // Not - used vars that we can need
       // Comment for Aimé: we will still use it ? Or we will take info from storage ? Cause now this data is empty.
+      /*
       currentChannel: {
         id: '',
         chanName: '',
@@ -515,6 +516,7 @@ export default defineComponent({
         joinChannel: [],
         messages: []
       },
+      */ //aime response: for now not in use...
       // Not used vars that we can need
       // Comment for Aimé: seems like this info is for administrators
       // On what key-word can we get this data from backend ?

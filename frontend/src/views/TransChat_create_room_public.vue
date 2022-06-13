@@ -94,14 +94,18 @@ export default defineComponent({
 
           // reset channel
           thechannels = [];
-          const length= res.channels.length;
-          console.log('lenght: ', length);
+//          const length= res.channels.length;
+ //         console.log('lenght: ', length);
+          /*
           for (var i = 0; i < length; ++i) {
-            var data = {} as any;
             console.log(">>>>>>>>>>>>>>>");
             console.log(res.channels[i]);
-            data.title = res.channels[i].channelName;
-            let blob = new Blob([res.channels[i].avatar], {type: 'image/bmp'});
+            */
+           for (const channel of res) {
+
+            var data = {} as any; //beark :(
+            data.title = channel.channelName;
+            let blob = new Blob([channel.avatar], {type: 'image/bmp'});
             if(blob.size !== 2)
             {
               let image = new Image();
