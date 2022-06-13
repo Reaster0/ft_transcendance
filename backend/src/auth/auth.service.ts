@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(user: CreateUserDto): Promise<User> {
+  async validateUser(user: CreateUserDto) {
     return this.userService.retrieveOrCreateUser(user);
   }
 

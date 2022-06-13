@@ -2,9 +2,10 @@
   <v-app >
     <v-container fluid >
       <v-row >
-		<!-- list of chat / search. maybe some buttons  -->
+
       <v-col cols="auto" sm="3" class="border">
 			<v-col>
+      <!-- NB! When serach field will work on backen - add onclick option calling method  -->
       <div class="d-flex">
         <v-text-field
           clearable
@@ -12,14 +13,13 @@
           placeholder="Search"
           height = "50px"
         ></v-text-field>
-         <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn>
+         <!-- <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn> // TODO proprierty log doesn't exist ? -->
     </div>
-      <v-btn to="/newroom" elevation="2">
+      <v-btn to="/newroom" elevation="2" width="100%">
 				Create new chat room
 				<v-divider class="mx-2" vertical></v-divider>
 				<v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
 			</v-btn>
-      <v-overlay :value="overlay"></v-overlay>
 			</v-col>
 
       
@@ -28,7 +28,9 @@
     <div id="app" class="text-left">
     <v-app id="inspire">
 		<v-list>
-			<v-list-item-group v-model="selectedItem" >
+      <!-- NB! We can create v-model="selectedItem" so when channel is open its color changed
+      (for now we dont do this cause there are more important stuff to finish) -->
+			<v-list-item-group  > 
 
 				<template v-for="(item, index) in getChannels">
 				<v-subheader v-if="item.header" :key="item.header" v-text="item.header"
@@ -47,13 +49,10 @@
 					</v-list-item-avatar>
 					</v-badge>
           </v-btn>
-					<v-list-item-content>
 					<v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-					<!-- <v-list-item-subtitle class="offsetmess">{{item.subtitle}}</v-list-item-subtitle> -->
-					</v-list-item-content>
         </v-list-item>
             <v-divider
-              v-if="index < items_.length"
+              v-if="index < getChannels.length"
               :key="index"
             ></v-divider>
 				</template>
@@ -69,22 +68,9 @@
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
           <v-app id="inspire">
-            <v-card color="rgba(0,0,0,0)" flat >
-              <v-toolbar dense >
-                <v-btn elevation="0" min-height="50px"  max-width="50px">
-                <v-badge bordered bottom color="green" dot offset-x="4" offset-y="34" class="spacetop" >
-                    <v-avatar class="col" elevation="10" size="40px">
-                      <div id="app">
-                      <img v-bind:src="require('../assets/Screenshot.png')" width="50" height="50">
-                      </div>
-                    </v-avatar>
-                </v-badge>
-                </v-btn>
-                <v-toolbar-title class="offsetmess">Equipe transcendance</v-toolbar-title>
-              </v-toolbar>
-            </v-card>
 
-            <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
+            <!-- NB! get the real message -->
+            <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
               <v-btn elevation="0" min-height="50px"  max-width="50px">
               <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
                 <v-avatar class="mt-n4 " size="32" elevation="2">
@@ -96,28 +82,7 @@
               <v-list-item >
                 <v-list-item-content>
                   <div class="mb-2">
-                    It's funny
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            </v-toolbar>
-              
-
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    It's funny, to know hows websockets works i've made a testing branch (that i wont merge dont worry)
+                    It's funny, to know hows websockets works
                   </div>
                   <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
                 </v-list-item-content>
@@ -125,7 +90,7 @@
             </v-card >
           </v-toolbar>
 
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
+          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
             <v-spacer></v-spacer>
             <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
               <v-list-item >
@@ -146,64 +111,26 @@
             </v-btn>
           </v-toolbar>
 
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-            <v-spacer></v-spacer>
-            <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)" dark>
-              <v-list-item color = "ffffff" >
-                <v-list-item-content>
-                  <div :style="{color: ' #ffffff'}" class="mb-2">
-                    Use as much ts as possible. Then no pb
-                  </div>
-                  <v-list-item-subtitle :style="{color: ' #ffffff'}"> 19:50 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-              <v-avatar class="mt-n4 " size="32" elevation="2">
-                    <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-              </v-avatar>
-              </v-badge>
-            </v-btn>
-          </v-toolbar>
-
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom">
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    Ololo !
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-          </v-toolbar> -->
           
         
           <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
           <div class="d-flex">
             <v-text-field
               clearable
+              class="messagefield"
+              width="100%"
               label="Write a message"
               placeholder="Message"
-              @click.prevent="log"
+              @keyup.enter="sendingMessage(this.txt, this.currentChannel)"
               v-model="txt"
             ></v-text-field>
-            <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)">
+            <!-- button bellow is from old design, I save it just in case -->
+            <!-- <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)"> // TODO this.values may be undefined ?
               <div  :style="{color: ' #ffffff'}">
                 send
               </div>
-            </v-btn>
+            </v-btn> -->
           </div>
-          <!-- </v-toolbar> -->
         </v-app>
         </div>
         </v-col>
@@ -212,35 +139,36 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-          <v-card height="22%" class="text-center offsetphoto" shaped >
-             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
-                   <v-avatar class="s" elevation="10" size="60px">
-                      <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
-                    </v-avatar>
-             </v-badge>
-                <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
-                <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
-          </v-card>
-
-          <div id="app" class="pt-6">
-                      <!-- if clicked "leave" - activate "join". and opposite -->
-          <!-- <v-btn elevation="2" width="350px" @click="leaveChannel">
-            Leave the chat room
-          </v-btn> -->
-          
-
-				<v-btn v-if="!isChannelJoined" elevation="2" width="350px">
+      <div v-if="!chat_channel_isAdmin && !chat_person">
+        <v-card height="100%" class="text-center offsetphoto" shaped >
+            <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
+                  <v-avatar class="s" elevation="10" size="60px">
+                    <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
+                  </v-avatar>
+            </v-badge>
+              <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
+              <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
+        <div id="app" class="pt-6"> 
+        <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
+        <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
+        cause this condition is for PROTECTED (<div v-if="!isChannelJoined" && PROTECTED ID>) -->
+        <modale :revele="revele" :toggleModale="toggleModale"></modale>
+        <!-- <div v-if="!isChannelJoined">
+          <v-btn v-on:click="toggleModale" class="btn btn-success" elevation="2" width="100%">Join the chat room </v-btn>
+        </div> -->
+        <!-- NB! Activate scenario "joinChannel" in "getPassToJoin" on clink for PRIVATE and PUBLIC! 
+        (how to get info about exact channel ? ) -->
+				<v-btn v-if="!isChannelJoined" elevation="2" width="100%" @click="getPassToJoin">
 					Join the chat room
 				</v-btn>
 				<div v-else>
-					<v-btn elevation="2" width="350px">
+					<v-btn elevation="2" width="100%">
 						Leave the chat room
 					</v-btn>
-					<v-btn color="red" @click="logOut" to="/">Logout</v-btn>
+					<v-btn color="red" @click="logOut" to="/">Logout</v-btn> // TODO logOut property doesn't exist ?
 				</div>
-          </div>
+        </div>
 
-      
         <!-- TABS  -->
         <div id="app" class="pt-6">
           <v-tabs
@@ -250,7 +178,7 @@
             <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
             <v-tab
               color="rgb(0,0,255)"
-              v-for="(item, index) in items2"
+              v-for="(item, index) in tabs_manager"
               :class="{active: currentTab === index}"
               @click="currentTab = index"
               :key="item"
@@ -327,7 +255,178 @@
               </div>
             </v-card>
           </v-tabs-items>
+          </div>
+        </v-card>
+      </div>
+      <div v-if="chat_channel_isAdmin && !chat_person">
+        <v-card height="100%" class="text-center offsetphoto" shaped >
+          <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
+                <v-avatar class="s" elevation="10" size="60px">
+                  <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
+                </v-avatar>
+          </v-badge>
+            <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
+            <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
+      
+
+          <div id="app" class="pt-6">
+          <v-btn v-on:click="create" elevation="2" width="350px" color="red">
+            Leave the chat room
+          </v-btn>
+          </div>
+          <div id="app">
+          <v-btn to="/roomsettings" elevation="2" width="350px">
+            Room settings
+          </v-btn>
+          </div>
+
+      
+        <!-- TABS  -->
+        <div id="app" class="pt-6">
+          <v-tabs
+            fixed-tabs
+            v-model="tab"
+          >
+            <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
+            <v-tab
+              color="rgb(0,0,255)"
+              v-for="(item, index) in tabs_manager"
+              :class="{active: currentTab === index}"
+              @click="currentTab = index"
+              :key="item"
+            >
+              {{ item.tabs }}
+            </v-tab>
+          </v-tabs>
+          <v-tabs-items v-model="tab">
+            <v-card flat>            
+              <div v-show="currentTab === 0">
+                <v-list>
+                  <!-- <v-list-item-group v-model="selectedItem" > -->
+                  <v-list-item-group >
+                    <template v-for="(item, index) in members">
+                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
+                    ></v-subheader>
+                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
+                    ></v-divider>
+                
+                    <v-list-item
+                      v-else
+                      :key="item.title"
+                    >
+                      <v-btn to="/mu"
+                        icon
+                        v-bind="attrs"
+                        v-on="on"
+                        elevation="0"
+                      > // TODO attrs and on doesn't exist ?
+                        <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
+                      </v-btn>
+
+                      <v-btn elevation="0" min-height="50px" max-width="50px">
+                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                      <v-list-item-avatar>
+                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
+                      </v-list-item-avatar>
+                      </v-badge>
+                      </v-btn>
+                      <v-list-item-content>
+                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                      <v-divider
+                        v-if="index < members.length"
+                        :key="index"
+                      ></v-divider>
+                    </template>
+                  </v-list-item-group>
+                </v-list>
+              </div>
+              <div v-show="currentTab === 1">
+                <v-list>
+                  <!-- <v-list-item-group v-model="selectedItem" > -->
+                    <v-list-item-group>
+                    <template v-for="(item, index) in admins">
+                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
+                    ></v-subheader>
+                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
+                    ></v-divider>
+                
+                    <v-list-item
+                      v-else
+                      :key="item.title"
+                    >
+                      <v-btn to="/mu"
+                        icon
+                        v-bind="attrs"
+                        v-on="on"
+                        elevation="0"
+                      > // TODO attrs and on doesn't exist ?
+                        <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
+                      </v-btn>
+                      
+                      <v-btn elevation="0" min-height="50px" max-width="50px" >
+                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                      <v-list-item-avatar>
+                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
+                      </v-list-item-avatar>
+                      </v-badge>
+                      </v-btn>
+                      <v-list-item-content>
+                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                      <v-divider
+                        v-if="index < admins.length"
+                        :key="index"
+                      ></v-divider>
+                    </template>
+                  </v-list-item-group>
+                </v-list>
+              </div>
+            </v-card>
+          </v-tabs-items>
         </div>
+        </v-card>
+      </div>
+      <div v-else>
+         <v-card height="100%" class="text-center offsetphoto" shaped >
+             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
+                   <v-avatar class="s" elevation="10" size="60px">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg" width="70" height="70">
+                    </v-avatar>
+             </v-badge>
+                <v-card-title class="layout justify-center">anadege</v-card-title>
+                <v-card-subtitle class="layout justify-center">Teammate</v-card-subtitle>
+          
+      
+      <div id="app">
+        <v-app id="inspire" class="pt-6">
+          <v-btn v-on:click="blockAlert" elevation="2" width="350px">
+            Block this user
+          </v-btn>
+          <v-scale-transition>
+            <div v-if="!loading" class="text-center">
+            <v-btn color="rgb(0,0,255)" @click="loading = true" elevation="2" width="350px">
+              <div  :style="{color: ' #ffffff'}">
+                Invite to play together
+              </div>
+            </v-btn>
+            </div>
+          </v-scale-transition>
+          <v-toolbar dense  color="rgba(0,0,0,0)">
+            <v-progress-linear
+              :active="loading"
+              :indeterminate="loading"
+              absolute
+              bottom
+              color="rgb(0,0,255)"
+            ></v-progress-linear>
+          </v-toolbar>
+        </v-app>
+      </div>
+      </v-card>
+      </div>
 
   
         </v-col>
@@ -336,96 +435,62 @@
   </v-app>
 </template>
 
-<script>
-// создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
-// https://codesource.io/vue-export-default-vs-vue-new/
-  import { onMounted } from "@vue/runtime-core"
-  import { ref } from "vue"
-  import io from 'socket.io-client';
-//import { onBeforeRouteLeave } from "vue-router";
-import { useStore } from "vuex";
-// import { computed } from 'vue'
-  //import { useKeypress } from "vue3-keypress";
-
+<script lang="ts">
+import { onMounted } from "@vue/runtime-core"
+import { ref } from "vue"
+import io from 'socket.io-client';
+import { useStore, Store } from "vuex";
+import { defineComponent } from 'vue'
+import TheModale from "./TransChat_modal_pass.vue";
   
 
-export default {
+export default defineComponent({
+  name: "TransChat_group",
+  components: {
+    'modale': TheModale
+  },
   data: () => ({
-      fav: true,
-      menu: false,
-      message: false,
-      hints: true,
-      overlay: false,
-      selected: [2],
-      currentTab: 0,
-      tab: null,
-      items: [],
-      items0: ['tab0', 'tab1', 'tab2', 'tab3', 'tab4'],
-      items_: [
-        {
-          photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-          subtitle: "My cat stole my keys !",
-          title: "abaudot",
-        },
-        {
-          photo: "https://smlycdn.akamaized.net/products/270x270-fill/d10a95bb3e/12439acabfc74705974471cc301653097c37adc4.jpg",
-          subtitle: "Yeah, a lot of syntaxic sugar.  My cat stole my keys !",
-          title: "Equipe transcendence",
-        },
-        {
-          photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-          subtitle: "My cat stole my keys !",
-          title: "abaudot",
-        },
-        {
-          photo: "https://smlycdn.akamaized.net/products/270x270-fill/d10a95bb3e/12439acabfc74705974471cc301653097c37adc4.jpg",
-          subtitle: "Yeah, a lot of syntaxic sugar",
-          title: "Equipe transcendence",
-        },
-        {
-          photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-          subtitle: "My cat stole my keys !",
-          title: "abaudot",
-        },
-      ],
-      model: 1,
-      items2: [
+      // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
+      // accordind to this info we change the interface
+      // for the moment we change the value manualy, but we should get it from backend
+      chat_channel_isAdmin: true as boolean,
+      // chat_person is indicator that now user communicate not with a channel, but with another user
+      // accordind to this info we change the interface
+      // for the moment we change the value manualy, but we should get it from backend
+      chat_person: false as boolean,
+      revele: false,
+      fav: true as boolean,
+      menu: false as boolean,
+      currentTab: 0 as number,
+      loading: false as boolean,
+      tab: null as null | any,
+
+      tabs_manager: [
         {tabs: 'Members',},
         {tabs: 'Administrators',}
-      ],
+      ] as any,
+      // members and admins are here only as an example of the design:
+      // they dont content the read data. The real data we will receive
+      // from backend ib the dame format (list of dictionaries (each channel has its dictionary))
       members: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
         title: "abaudot",
       },
-      {   
-        photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg",
-        title: "anadege",
-      },
-      {   
-        photo: "https://interacnetwork.com/the-content/cream/wp-content/uploads/2021/11/image8.jpg",
-        title: "earnaud",
-      },
-      {   
-        photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
-        title: "alkanaev",
-      },
-      ],
+      ] as any,
       admins: [
       {   
         photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
         title: "abaudot",
       },
-      {   
-        photo: "https://nationaltoday.com/wp-content/uploads/2020/10/World-Animal-640x514.jpg",
-        title: "alkanaev",
-      },
-      ],
+      ] as any,
+      // txt is a variable made to save CURRENT message that user is GOING TO send
+      // with this we will emit this data to backend
       txt: '',
-      mesasages: [],
-      channels: [],
+      // Comment for Aimé: Remind me why do you need it, pls ? :)
       currentUser: useStore().getters.whoAmI,
-
+      // Not - used vars that we can need
+      // Comment for Aimé: we will still use it ? Or we will take info from storage ? Cause now this data is empty.
       currentChannel: {
         id: '',
         chanName: '',
@@ -439,12 +504,15 @@ export default {
         joinChannel: [],
         messages: []
       },
-
+      // Not used vars that we can need
+      // Comment for Aimé: seems like this info is for administrators
+      // On what key-word can we get this data from backend ?
       userBanned: false,
       userMuted: false,
       banDate: new Date,
       muteDate: new Date,
-
+      // Not - used vars that we can need
+      // Comment for Aimé: what was the idea ?
       newChannel: {
         name:'',
         public: true,
@@ -452,9 +520,10 @@ export default {
         members: [],
         admins: [],
         },
-
+      // Not - used vars that we can need
+      // Comment for Aimé: this one we realy need, but now we just can know 
+      // if the channel is public ot not
       protectByPassword: false,
-
       channelSettings: {
         password: '',
         applyPassword: false,
@@ -463,177 +532,105 @@ export default {
   }),
 
   methods: {
-    create: function (event) 
+    toggleModale: function() {
+      this.revele = !this.revele;
+    },
+    // blockAlert activated after pushing button "Block this user"
+    // its, of course, temporary solution cause we need to clock for real
+    // when user block another user - he cant see the messages anymore
+    blockAlert: function (event : any) // TODO check event tupe 
     {
       if (event) 
       {
-        alert('SUBPAGE OF TRANSCHAT MANAGEMENT WILL BE OPENED')
+        alert("WE NEED TO BLOCK THIS USER")
       }
-    }
-//there -----------
-  },
-  watch: {
-    overlay (val) {
-      val && setTimeout(() => {
-        this.overlay = false
-      }, 2000)
     },
   },
-	setup()
-    {
-    // var thechannels = [];
-		const connection = ref(null)
-    const store = useStore();
-    var getChannels = store.getters.getChannels;
-    var isChannelJoined = store.getters.isChannelJoined;
+
+  // this is needed to limit (3000 ms) loading process after pushing bitton "Invite to play togetrer"
+  // made show on template the animation "while waiting"
+  watch: {
+    loading (val: number) {
+      if (!val) return
+      setTimeout(() => (this.loading = false), 3000)
+    },
+  },
+
+	setup() {
+		const connection = ref<null | any>(null);
+    const store = useStore() as Store<any>;
+    var getChannels = store.getters.getChannels as any[];
+    var isChannelJoined = store.getters.isChannelJoined as boolean;
 
 
 		onMounted(() =>{
 			console.log(document.cookie.toString())
 			try {
-					connection.value = io('http://:3000/chat',{
-					transportOptions: {
-					polling: { extraHeaders: { auth: document.cookie} },
-					},
+				connection.value = io('http://:3000/chat',{
+          transportOptions: {
+            polling: { extraHeaders: { auth: document.cookie} },
+          },
 				})
 				console.log("starting connection to websocket")
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
-        // connection.value.on("channel", function(res) {
-
-        //   thechannels = [];
-        //   console.log('in channel show up');
-        //   for (const chan of res){
-        //       let d = {}
-        //       console.log(">>>>>>>>>> " + res[chan].chanName)
-        //       d.title = res[chan].channelName
-        //       thechannels.push(d)
-        //   }
-
-        //   console.log('after update')
-        //   console.log(thechannels)
-        //   useStore().commit('setChannels' , thechannels)
-        // })
-
-
-        // thechannels;
-//			NewChannel(); <---- THIS METHOT BREAK EVRYTHING
-      // TestTest();
-			// SendingMessage();
-			// JoinChannel();
-			// LeaveChannel();
-			// BlockUser();
+      store.commit('setSocketVal' , connection.value);
 			})
-      
-//     /*
-//     onBeforeRouteLeave(() => {
-//         const answer = window.confirm("disconect from chat ?")
-//         if (answer) {
-//           connection.value.disconnect();
-//           return true;
-//           }
-//         return false;
-// 		})      */
-//         // берет аргс и создает новый канал
-//         // for creating a new channel/room: 
-// 		// - createChannel { chanName: string, password:string, publicChannel: boolean }
-//   /* dont know how to handel the fact that this is done in a other file */
-// 		function createChannel(chanName, password, publicChannel)
-// 		{
-// 			console.log("before createChannel");
-// 			connection.value.emit('createChannel', {chanName, users: [], password, publicChannel});
-// 			console.log("after createChannel");
-// 		}
 
-// 		// for sending message:
-// 		// -  message {content: string, channel: Chan, ...}
-		function sendingMessage(content, channel)
-		{
-      console.log(document.cookie.toString())
-			try {
-					connection.value = io('http://:3000/chat',{
-					transportOptions: {
-					polling: { extraHeaders: { auth: document.cookie} },
-          withCredentials: true
-					},
-				})
-				console.log("starting connection to websocket")
-			} catch (error) {
-				console.log("the error is:" + error)
-			}
-      console.log(content, channel);
-      if (!content)
-        return ;
-      connection.value.emit('message', {content, channel});
-      //console.log(this.txt, this.currentChannel); <- this way will be better but function must be defined in a other place to get acces to this value
-			console.log("after message");
-		}
-
-// 		// for joinning a existing channel
-// 		// - joinChannel { id: string }
       // function joinChannel(id)
       // {
       //   store.commit('setChannelJoinedStatus' , true);
       //   connection.value.emit('joinChannel', id);
       // }
 
+      // function leaveChannel(id)
+      // {
+      //   store.commit('setChannelJoinedStatus' , false);
+      //   connection.value.emit('leaveChannel', id);
+      // }
+        
+      function getPassToJoin()
+      {
+        // this function is for protected channels (see the specification)
+        // as a parameter we will reseve info about the channel, our goal is to chack the password
+        // for now it will just open modal window
+      }
+
+      // 		// for bloking or unblocking  a user:
+      // 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
+      // 		function blockUser(user, block)
+      // 		{
+      // 			console.log("before blockUser");
+      // 			connection.value.emit('blockUser', user, block);
+      // 			console.log("after blockUser");
+      // 		}
 
 
+      // NB! needed to be done to disconnect from the socket when we completely leave the chat
+      // onBeforeRouteLeave(() => {
+      //     const answer = window.confirm("disconect from chat ?")
+      //     if (answer) {
+      //       connection.value.disconnect();
+      //       return true;
+      //       }
+      //     return false;
+      // })
 
+		function sendingMessage(content: string, channel: any) // TODO check type
+		{
+      // NB! Need to be done
+      console.log(content, channel);
+      if (!content)
+        return ;
+      connection.value.emit('message', {content, channel});
+		}
 
-
-
-// 		// (or just put a channel in argument
-
-// 		// for leaving channel:
-// 		// - leaveChannel { channel or id: string}
-// 		function leaveChannel(channel)
-// 		{
-// 			console.log("before leaveChannel");
-// 			connection.value.emit('leaveChannel', channel);
-// 			console.log("after leaveChannel");
-// 		}
-
-
-// 		// for bloking or unblocking  a user:
-// 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
-// 		function blockUser(user, block)
-// 		{
-// 			console.log("before blockUser");
-// 			connection.value.emit('blockUser', user, block);
-// 			console.log("after blockUser");
-// 		}
-
-//     const disconnect = () =>{
-// 			connection.value.disconnect()
-// 			console.log("disconnect")
-// 		}
-
-//     const log = () => {
-//       console.log('something happenned');
-//     }
-
-
-// 		/// проверка открытах чатов по базе. автоматически подписать юзера на "основной чат"
-
-//     // useKeypress({
-// 		// keyEvent: "keydown",
-// 		// keyBinds:
-// 		// 	{
-// 		// 		keyCode: 13,
-// 		// 		success: () => {
-// 		// 			gameSocket.value.emit('sendMessage', {matchId: matchId.value, input: "Enter"})
-// 		// 		},
-// 		// 	},
-// 		// })
-    console.log('-------------------------------------------------------------');
     console.log("************", getChannels)
-		return { sendingMessage, getChannels, isChannelJoined }
+		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin }
 
 	}
-};
-
+})
 </script>
 
 
@@ -662,6 +659,12 @@ export default {
 
 .row>.col {
   flex-basis: auto;
+}
+
+.messagefield{
+  width:100%;
+  /* position: absolute; */
+  /* bottom: 0px; */
 }
 
 </style>

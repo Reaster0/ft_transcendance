@@ -23,7 +23,6 @@ export class ChanServices {
     //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
 
-//		if (!name)
 		if (name) //channel name already exist
 			return null;
 

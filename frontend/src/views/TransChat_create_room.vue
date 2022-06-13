@@ -2,8 +2,6 @@
   <v-app >
     <v-container fluid>
       <h3>Please, choose a type of new chat room</h3>
-      <!-- <v-divider class="mb-6"></v-divider> -->
-
             <div class="spacetopplus">
             <p class="font-weight-black">
               Public chat 
@@ -57,31 +55,29 @@
 
 
 
-<script>
+<script lang="ts">
 
-export default
-{
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "NewRoom",
-  methods: 
-  {
-    data(){
-      return{
-        name: '',
-        password: ''
-      }
-    },
-    handleSubmit(){
+  data() {
+    return {
+      name: '' as string,
+      password: '' as string
+    }
+  },
+  methods: {
+    handleSubmit(): void {
       const data = {
         name: this.name,
         password: this.password,
-      };
+      } as {name : string, password : string };
       console.log(data);
       console.log("submitted");
     }
   }
-}
-
-
+})
 </script>
 
 

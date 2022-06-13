@@ -21,7 +21,7 @@
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn to="/chatgroup" color = "ffffff" >
+            <v-btn to="/thechat" color = "ffffff" >
               <div :style="{color: ' #ffffff'}">
                 SAVE
               </div>
@@ -107,7 +107,7 @@
 
 
 
-<script>
+<script lang="ts">
 // создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 // https://codesource.io/vue-export-default-vs-vue-new/
 export default 

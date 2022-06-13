@@ -26,6 +26,9 @@ export interface Field {
   length: number;
   width: number;
   offset: number;
+  velXFactor: number;
+  sizeFactor: number;
+  speedFactor: number;
 }
 
 export interface Pong {

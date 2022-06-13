@@ -2,21 +2,39 @@
 <div>
 	<div v-if="!gameStarted">
 		<v-row justify="center">
-				<div class="button_slick">W ⬆️</div>
-				<div class="button_slick">S ⬇️</div>
+				<div class="button_slick Spotnik">W ⬆️</div>
+				<div class="button_slick Spotnik">S ⬇️</div>
 		</v-row>
 		<div v-if="!fatalError">
 			<v-container>
 				<v-row justify="center">
-					<div v-if="!searchingGame" class="button_slick button_slide big_button" @click="Play">SearchGame</div>
-					<div v-else-if="!matchId" class="button_slick big_button">Searching A Game...</div>
-					<div v-else class="button_slide button_slick big_button" @click="AcceptGame">a game has been found!</div>
+					<div v-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
+					<div v-else-if="!matchId" class="button_slick big_button Spotnik">Searching A Game</div>
+					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found!</div>
 				</v-row>
 			</v-container>
 		</div>
-		<v-row v-else justify="center">
-			<div class="button_slick big_button ">FATAL ERROR PLEASE REFRESH</div>
-		</v-row>
+		<!-- <v-row v-else justify="center">
+			<div class="button_slick big_button Spotnik">FATAL ERROR PLEASE REFRESH</div>
+		</v-row> -->
+		<div class="params">
+			<div class="button_slick">
+				<h1 class="Spotnik">Ball Speed</h1>
+				<v-radio-group v-model="ballSpeed">
+					<v-radio label="Slow" :value="'SLOW'"></v-radio>
+					<v-radio label="Mid" :value="'NORMAL'"></v-radio>
+					<v-radio label="Speedy" :value="'FAST'"></v-radio>
+				</v-radio-group>
+			</div>
+			<div class="button_slick">
+				<h1 class="Spotnik">Ball Size</h1>
+				<v-radio-group v-model="ballSize">
+					<v-radio label="Smol" :value="'SMALL'"></v-radio>
+					<v-radio label="Mid" :value="'NORMAL'"></v-radio>
+					<v-radio label="Chonke" :value="'BIG'"></v-radio>
+				</v-radio-group>
+			</div>
+		</div>
 	</div>
 	<div v-show="gameStarted">
 		<canvas id="pongGame"></canvas>
@@ -26,137 +44,130 @@
 </div>
 </template>
 
-<script>
-import { onMounted } from "@vue/runtime-core"
-import { ref, watch } from "vue"
-import io from 'socket.io-client';
+<script lang="ts">
+import { onMounted } from "@vue/runtime-core";
+import { defineComponent, ref, watch } from "vue";
+import { io } from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
-// import image from "../assets/arrow-left.png"
 
-export default {
-	setup(){
-		const gameSocket = ref(null)
-		const matchId = ref(null)
-		const searchingGame = ref(false)
-		const fatalError = ref(false)
-		const gameData = ref({
-			pos: "",
-			opponent: "",
-			ball: {x: 0, y: 0, radius: 10},
-			paddle:{ width: 5, height: 15 },
-			paddleL: { x: 0, y: 0 },
+export default defineComponent ({
+	setup() {
+		const gameSocket = ref< any | null>(null);
+		const matchId = ref<string | null>(null);
+		const searchingGame = ref<boolean>(false);
+		const fatalError = ref<boolean>(false);
+		const gameData = ref<any>({
+			pos: "" as string,
+			opponent: "" as string,
+			ball: {x: 0 as number, y: 0 as number, radius: 10 as number},
+			paddle:{ width: 5 as number, height: 15 as number},
+			paddleL: { x: 0 as number, y: 0 as number},
 			paddleR: { x: 0, y: 0 },
 			score: { leftScore: 0, rightScore: 0 },
 			winner: "",
 		})
-		const gameStarted = ref(false)
-		let canvas = null
-		let ctx = null
-		let framesId = null
-		let winText = null
-		let showInfo = true
+		const gameStarted = ref<boolean>(false);
+		let canvas: HTMLCanvasElement | null = null;
+		let ctx: CanvasRenderingContext2D | null = null;
+		let framesId: number | undefined | null = null;
+		let winText: string | null = null;
+		let showInfo: boolean = true;
+		const ballSpeed = ref<string>("NORMAL");
+		const ballSize = ref<string>("NORMAL");
 
 		onMounted(async() =>{
-
 			try {
 				gameSocket.value = io('http://:3000/game',{
-				transportOptions: {
-				polling: { extraHeaders: { auth: document.cookie }},
-				withCredentials: true
-				}})
-				console.log("starting connection to websocket")
+					transportOptions: {
+					polling: { extraHeaders: { auth: document.cookie }},
+					withCredentials: true
+				}});
+				console.log("starting connection to websocket");
 			} catch (error) {
-				console.log("the error is:" + error)
+				console.log("the error is:" + error);
 			}
 
-			gameSocket.value.on('joined', text => {
-				console.log("joined" + text)
+			gameSocket.value!.on('joined', (text: string) => {
+				console.log("joined" + text);
 			})
 
-			gameSocket.value.on('foundMatch', res =>{
-				matchId.value = res
-				console.log("found match:" + JSON.stringify(res))
+			gameSocket.value!.on('foundMatch', (res: string) =>{
+				matchId.value = res;
+				console.log("found match:" + JSON.stringify(res));
 				if (!res)
-					gameStarted.value = false
+					gameStarted.value = false;
 			})
 
-			gameSocket.value.on('beReady', params =>{
-				console.log("beReady:")
-				gameData.value.pos = params.pos
-				gameData.value.opponent = params.opponent
-
-				canvas = document.getElementById('pongGame');
-				canvas.width = window.innerWidth
-				canvas.height = window.innerHeight
+			gameSocket.value!.on('beReady', (params: { pos: string, opponent: string }) => {
+				console.log("beReady:");
+				gameData.value!.pos = params.pos;
+				gameData.value!.opponent = params.opponent;
+				canvas = document.getElementById('pongGame') as HTMLCanvasElement;
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
 				ctx = canvas.getContext('2d');
-				gameStarted.value = true
-				console.log("max-width:" + canvas.width + " max-height:" + canvas.height)
+				gameStarted.value = true;
+				console.log("max-width:" + canvas.width + " max-height:" + canvas.height);
 			})
 
-			gameSocket.value.on('dimensions', params =>{
-				console.log("dimensions:")
-				gameData.value.ball.radius = params.ballRad
-				gameData.value.paddle.height = params.padWidth
-				gameData.value.paddle.width = params.padLength
+			gameSocket.value!.on('dimensions', (params: { ballRad: number, padLength: number, padWidth: number }) =>{
+				console.log("dimensions:");
+				gameData.value.ball.radius = params.ballRad;
+				gameData.value.paddle.height = params.padWidth;
+				gameData.value.paddle.width = params.padLength;
 			})
 
-			gameSocket.value.on('countdown', params =>{
-				console.log("countdown:" + params.countdown)
+			gameSocket.value!.on('countdown', (params: { countdown: number }) =>{
+				console.log("countdown:" + params.countdown);
 			})
 
-			gameSocket.value.on('gameStarting', () =>{
-				console.log("gameStarting:")
-				showInfo = false
+			gameSocket.value!.on('gameStarting', () =>{
+				console.log("gameStarting:");
+				showInfo = false;
 			})
 
-			gameSocket.value.on('gameUpdate', params =>{
-
-				gameData.value.ball.x = params.ball.x
-				gameData.value.ball.y = params.ball.y
-				gameData.value.paddleL = params.paddle.L
-				gameData.value.paddleR = params.paddle.R
-
-				// console.log("ball position x:" +gameData.value.ball.x + " y:" +gameData.value.ball.y + " ball radus:" +
-				// gameData.value.ball.radius + " \npaddleL x:" + gameData.value.paddleL.x + " y:" + gameData.value.paddleR.y +
-				// " \npaddleR x:" + gameData.value.paddleR.x + " y:" + gameData.value.paddleL.y +
-				// "\npaddle width:" + gameData.value.paddle.width + " paddle length:" + gameData.value.paddle.height)
+			gameSocket.value!.on('gameUpdate', (params: { ball: { x: number, y: number }, paddle: { L: { x: number, y: number }, R: { x : number, y: number }}} ) =>{
+				gameData.value.ball.x = params.ball.x;
+				gameData.value.ball.y = params.ball.y;
+				gameData.value.paddleL = params.paddle.L;
+				gameData.value.paddleR = params.paddle.R;
 			})
 
-			gameSocket.value.on('score', params =>{
-				gameData.value.score = params
+			gameSocket.value!.on('score', (params: { leftScore: number, rightScore: number }) =>{
+				gameData.value.score = params;
 			})
 
-			gameSocket.value.on('endGame', params =>{
-				console.log("endGame:" + JSON.stringify(params))
-				gameData.value.winner = params.winner
+			gameSocket.value!.on('endGame', (params: { winner: string }) =>{
+				console.log("endGame:" + JSON.stringify(params));
+				gameData.value.winner = params.winner;
 				if (params.winner != gameData.value.opponent)
-					winText = "well done neo keep dreaming"
+					winText = "well done neo keep dreaming";
 				else
-					winText = "wake up neo you're loosing"
+					winText = "wake up neo stop loosing";
 			})
 
-			gameSocket.value.on('requestError', () =>{
+			gameSocket.value!.on('requestError', () =>{
 				console.log("requestError")
 			})
 
-			gameSocket.value.onopen = (event) => {
+			gameSocket.value!.onopen = (event: Event) => {
 				console.log(event)
 				console.log("connected to the server")
 			}
 
-			gameSocket.value.onclose = (event) => {
+			gameSocket.value!.onclose = (event: Event) => {
 				console.log(event)
 				fatalError.value = true
 			}
-			})
+		})
 
 		watch(gameStarted, (gameChange) =>{
 			if (gameChange)
 			{
 				if (!canvas)
 				{
-					canvas = document.getElementById('pongGame');
+					canvas = document.getElementById('pongGame') as HTMLCanvasElement;
 					canvas.width = window.innerWidth
 					canvas.height = window.innerHeight
 					ctx = canvas.getContext('2d');
@@ -164,7 +175,7 @@ export default {
 				framesId = window.setInterval(renderFrame, 16)
 			}
 			else
-				window.clearInterval(framesId)
+				window.clearInterval(framesId!)
 		})
 
 		onBeforeRouteLeave(() => {
@@ -178,7 +189,10 @@ export default {
 
 
 		function Play(){
-			gameSocket.value.emit('joinGame')
+			gameSocket.value.emit('joinGame', {
+				ballSize: ballSize.value,
+				ballSpeed: ballSpeed.value,
+			})
 			searchingGame.value = true
 			console.log("joinGame")
 		}
@@ -194,31 +208,31 @@ export default {
 		}
 
 		function renderFrame() {
-			ctx.fillStyle = '#000';
-			ctx.fillRect(0, 0, canvas.width, canvas.height)
-			ctx.fillStyle = '#00ff00'
-			ctx.fillRect(gameData.value.paddleL.x * canvas.width, gameData.value.paddleL.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
-			ctx.fillRect(gameData.value.paddleR.x * canvas.width, gameData.value.paddleR.y * canvas.height, gameData.value.paddle.width * canvas.width, gameData.value.paddle.height * canvas.height)
-			ctx.beginPath()
-			ctx.arc(gameData.value.ball.x * canvas.width,gameData.value.ball.y * canvas.height, gameData.value.ball.radius * canvas.height, 0, Math.PI*2, false)
-			ctx.closePath()
-			ctx.fill()
-			ctx.font = "75px Monospace"
-			ctx.fillText(gameData.value.score.leftScore, 0.4 * canvas.width, 0.1 * canvas.height);
-			ctx.fillText(gameData.value.score.rightScore, 0.6 * canvas.width, 0.1 * canvas.height);
+			ctx!.fillStyle = '#000';
+			ctx!.fillRect(0, 0, canvas!.width, canvas!.height)
+			ctx!.fillStyle = '#00ff00'
+			ctx!.fillRect(gameData.value.paddleL.x * canvas!.width, gameData.value.paddleL.y * canvas!.height, gameData.value.paddle.width * canvas!.width, gameData.value.paddle.height * canvas!.height)
+			ctx!.fillRect(gameData.value.paddleR.x * canvas!.width, gameData.value.paddleR.y * canvas!.height, gameData.value.paddle.width * canvas!.width, gameData.value.paddle.height * canvas!.height)
+			ctx!.beginPath()
+			ctx!.arc(gameData.value.ball.x * canvas!.width,gameData.value.ball.y * canvas!.height, gameData.value.ball.radius * canvas!.height, 0, Math.PI*2, false)
+			ctx!.closePath()
+			ctx!.fill()
+			ctx!.font = canvas!.width/3 + "%" + " Monospace"
+			ctx!.fillText(gameData.value.score.leftScore.toString(), 0.4 * canvas!.width, 0.1 * canvas!.height);
+			ctx!.fillText(gameData.value.score.rightScore.toString(), 0.6 * canvas!.width, 0.1 * canvas!.height);
 
 			if (winText)
 			{
-				ctx.font = "50px Monospace"
-				ctx.fillText(winText, 0.25 * canvas.width, 0.5 * canvas.height);
+				ctx!.font = canvas!.width/4 + "%" + " Spotnik"
+				ctx!.fillText(winText, 0.2 * canvas!.width, 0.5 * canvas!.height);
 			}
 			if (showInfo){
 				if (gameData.value.pos == "left")
-					ctx.drawImage(document.getElementById('left_arrow') , 0.2 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
+					ctx!.drawImage(document.getElementById('left_arrow') as HTMLCanvasElement, 0.2 * canvas!.width, 0.35 * canvas!.height, 0.15 * canvas!.width, 0.25 * canvas!.height)
 				else
-					ctx.drawImage(document.getElementById('right_arrow') , 0.6 * canvas.width, 0.35 * canvas.height, 0.15 * canvas.width, 0.25 * canvas.height)
-				ctx.font = "50px Monospace"
-				ctx.fillText("VS " + gameData.value.opponent, 0.42 * canvas.width, 0.9 * canvas.height);
+					ctx!.drawImage(document.getElementById('right_arrow') as HTMLCanvasElement, 0.6 * canvas!.width, 0.35 * canvas!.height, 0.15 * canvas!.width, 0.25 * canvas!.height)
+				ctx!.font = canvas!.width/4 + "%" + " Spotnik"
+				ctx!.fillText("VS " + gameData.value.opponent, 0.35 * canvas!.width, 0.9 * canvas!.height);
 			}
 		}
 
@@ -240,12 +254,23 @@ export default {
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame}
+		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame, ballSize, ballSpeed}
 	},
-}
+})
 </script>
 
 <style>
+
+h1 {
+	justify: end;
+}
+
+.params{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
 
 .button_slick {
   color: #FFF;
@@ -254,7 +279,7 @@ export default {
   border-radius: 0px;
   padding: 18px 36px;
   display: inline-block;
-  font-family: monospace;
+  /* font-family: monospace; */
   font-size: 14px;
   letter-spacing: 1px;
   box-shadow: inset 0 0 0 0 #D80286;
@@ -271,6 +296,7 @@ export default {
 </style>
 
 <style scoped>
+
 .big_button {  
   margin: 180px auto 0 auto;
 }
