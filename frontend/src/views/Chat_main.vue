@@ -568,6 +568,7 @@ export default defineComponent({
     let getChannels = store.getters.getChannels as any[];
     let isChannelJoined = store.getters.isChannelJoined as boolean;
     const connected = ref<boolean>(false);
+    let userChannels = [] as any[];
 
 
 		onMounted(() =>{
@@ -590,8 +591,8 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('channelList', function() { //May be subject to modification
-
+      connection.value!.on('channelList', function(params: { 'channels': string[] }) { //May be subject to modification
+        userChannels = params.channels;
       })
 
 		})

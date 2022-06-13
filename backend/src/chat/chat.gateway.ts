@@ -227,13 +227,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     console.log(connections);
     for (const connection of connections) {
       const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
-      this.server.to(connection.chatSocket).emit('channel', channels);
+      this.server.to(connection.chatSocket).emit('channelList', { 'channels': channels });
     }
   }
 
   @SubscribeMessage('emitMyChannels')
   async emitMyChannels(user: User) {
     const channels: ChannelI[] = await this.chanServices.getChannelsFromUser(user.id);
-    this.server.to(user.chatSocket).emit('channel', channels);
+    this.server.to(user.chatSocket).emit('channelList', {'channels': channels });
   }
 }
