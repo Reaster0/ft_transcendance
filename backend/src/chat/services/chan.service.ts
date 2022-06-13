@@ -32,7 +32,8 @@ export class ChanServices {
 		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
 			return null;
 
-		channel.users.push(creator);
+//		channel.users.push(creator);
+    channel.users = [creator];
 		channel.adminUsers = [creator.id]; //Alina asking for this
 		channel.owner = creator.id;
 
