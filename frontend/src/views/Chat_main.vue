@@ -33,7 +33,7 @@
                   <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px" @click="displayChannel(item)">
-                      <!--<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >-->
+                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34">
                         <v-list-item-avatar v-if="item.avatar != null">
                           <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>
                         </v-list-item-avatar>
@@ -42,7 +42,7 @@
                             <v-icon color="white">mdi-duck</v-icon>
                           </v-avatar>
                         </v-list-item-avatar>
-                      <!--</v-badge>-->
+                      </v-badge>
                     </v-btn>
                     <v-list-item-title class="offsetmess">{{ item.channelName }}</v-list-item-title>
                   </v-list-item>
@@ -60,7 +60,7 @@
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
 
-          <v-app id="inspire" v-if="update.messages">
+          <v-app id="inspire" v-if="!update.messages"> <!-- Modify to inverse-->
 
             <!-- NB! get the real message -->
             <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
@@ -587,6 +587,8 @@ export default defineComponent({
           })
           store.commit('setSocketVal' , connection.value);
           console.log("starting connection to websocket")
+        } else {
+          update.connected = true;
         }
 			} catch (error) {
 				console.log("the error is:" + error)

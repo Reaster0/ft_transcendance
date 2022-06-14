@@ -276,8 +276,8 @@ export class UsersController {
     try {
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
-      this.usersService.addFriend(req.user, friend.id);
-      return this.usersService.listFriends(req.user);
+      await this.usersService.addFriend(req.user, friend.id);
+      return await this.usersService.listFriends(req.user);
     } catch(e) {
       throw e;
     }
@@ -295,8 +295,8 @@ export class UsersController {
     try {
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
-      this.usersService.removeFriend(req.user, friend.id);
-      return this.usersService.listFriends(req.user);
+      await this.usersService.removeFriend(req.user, friend.id);
+      return await this.usersService.listFriends(req.user);
     } catch(e) {
       throw e;
     }

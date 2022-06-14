@@ -45,9 +45,6 @@ import { join } from 'path';
         synchronize: true, // Synch DB with entities each time we load the app TODO disable when production
       }),
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
-    }),
     UsersModule,
     AuthModule,
     GamesModule,

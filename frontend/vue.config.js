@@ -9,15 +9,15 @@ module.exports = defineConfig({
 	},
 	devServer: {
 		allowedHosts: 'all',
-		proxy: {
-			'/api' : {
-				//target: 'http://82.65.87.54:3000',
-				target: 'http://localhost:3000',
-				changeOrigin: true,
-				pathRewrite: {
-					"^/api": ""
-				}
-			},
-		},
+		// proxy: {
+		// 	'/api' : {
+		// 		target: 'http://:3000',
+		// 		// target: 'http://localhost:3000',
+		// 		changeOrigin: true,
+		// 		pathRewrite: {
+		// 			"^/api": ""
+		// 		}
+		// 	},
+		// },
 	}
 })

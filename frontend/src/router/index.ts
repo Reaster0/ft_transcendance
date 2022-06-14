@@ -16,6 +16,7 @@ import ChangeRoom from "../views/Chat_roomsettings.vue";
 import { isLogged, getUserInfo } from "../components/FetchFunctions"
 import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";
+import FriendList from "../views/FriendList.vue";
 
 
 const routes = [
@@ -57,6 +58,14 @@ const routes = [
 		path: '/game',
 		name: "TheGame",
 		component: TheGame,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/user/friends',
+		name: "friendList",
+		component: FriendList,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}

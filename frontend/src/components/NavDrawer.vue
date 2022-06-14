@@ -35,7 +35,7 @@ export default {
 		})
 
 		async function logOut() {
-			await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
+			await fetch(process.env.VUE_APP_BACKEND + "/users/logout", {credentials: "include", method: "PATCH"})
 			.then(store.commit('setConnected', [false, false]) as any)
 		}
 
