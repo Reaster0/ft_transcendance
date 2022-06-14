@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus, StreamableFile, InternalServerErrorException,
-  Res } from '@nestjs/common';
+  Res, BadRequestException} from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -104,7 +104,7 @@ export class UsersService {
   async addFriend(user: User, friendId: number): Promise <void> {
     const found = await user.friends.find((element) => friendId);
     if (found) {
-      throw new HttpException('User is already a friend', HttpStatus.BAD_REQUEST);
+		throw new BadRequestException('User is already a friend');
     }
     user.friends.push(friendId);
     await this.userRepository.save(user);
@@ -113,7 +113,7 @@ export class UsersService {
   async removeFriend(user: User, friendId: number): Promise<void> {
     const found = await user.friends.indexOf(friendId);
     if (found == -1) {
-      throw new HttpException('User is not a friend', HttpStatus.BAD_REQUEST);
+	  throw new BadRequestException('User is not a friend');
     }
     user.friends.splice(found, 1);
     await this.userRepository.save(user);
