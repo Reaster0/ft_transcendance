@@ -1,56 +1,57 @@
 <template>
   <v-app >
-    <v-container fluid v-if="connected">
+    <v-container fluid v-if="update">
       <v-row>
 
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
           <v-col>
-          <!-- NB! When serach field will work on backen - add onclick option calling method  -->
-            <!-- SEARCH CHANNEL/USER -->
+
+            <!-- SEARCH PANNEL -->
+            <!-- NB! When serach field will work on backen - add onclick option calling method  -->
             <div class="d-flex">
               <v-text-field clearable label="Find user / group"
               placeholder="Search" height = "50px"></v-text-field>
-              <!-- <v-btn  height="54px" @click="log"><v-icon right dark>mdi-magnify</v-icon></v-btn> -->
             </div>
+
             <!-- CREATE NEW ROOM BUTTON -->
             <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
               Create chat room
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
             </v-btn>
+
           </v-col>
+
           <!-- LIST OF CHANNELS JOINED -->
           <div id="app" class="text-left">
             <v-app id="inspire">
               <v-list>
-              <!-- NB! We can create v-model="selectedItem" so when channel is open its color changed
-              (for now we dont do this cause there are more important stuff to finish) -->
-               <v-list-item-group  > 
-                <template v-for="(item, index) in userChannels">
-                  <v-subheader v-if="item.header" :key="item.header"
-                  v-text="item.header"></v-subheader>
-                  <v-divider v-else-if="item.divider" :key="index"
-                  :inset="item.inset"></v-divider>
+               <v-list-item-group> 
+                <template v-for="(item, index) in userChannels.channels">
+                  <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
+                  <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
-                  <v-btn elevation="0" min-height="50px"  max-width="50px">
-                    <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar >
-                       <v-img :src="item.avatar"  min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                    </v-badge>
-                  </v-btn>
-              <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-            </v-list-item>
-                <v-divider
-                  v-if="index < getChannels.length"
-                  :key="index"
-                ></v-divider>
-            </template>
-          </v-list-item-group>
-        </v-list>
-        </v-app>
-        </div>
+                    <v-btn elevation="0" min-height="50px"  max-width="50px">
+                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                        <v-list-item-avatar v-if="item.avatar != null">
+                          <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>
+                        </v-list-item-avatar>
+                        <v-list-item-avatar v-else>
+                          <v-avatar color="blue" min-width="50px" min-height="50px">
+                            <v-icon color="white">mdi-duck</v-icon>
+                          </v-avatar>
+                        </v-list-item-avatar>
+                      </v-badge>
+                    </v-btn>
+                    <v-list-item-title class="offsetmess">{{ item.channelName }}</v-list-item-title>
+                  </v-list-item>
+                  <v-divider v-if="index < userChannels.channels.length" :key="index"></v-divider>
+                </template>
+                </v-list-item-group>
+              </v-list>
+            </v-app>
+          </div>
         </v-col>
 
 
@@ -442,7 +443,7 @@ import { onMounted } from "@vue/runtime-core"
 import { ref } from "vue"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
-import { defineComponent } from 'vue'
+import { defineComponent, reactive } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
@@ -565,10 +566,9 @@ export default defineComponent({
 	setup() {
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
-    let getChannels = store.getters.getChannels as any[];
     let isChannelJoined = store.getters.isChannelJoined as boolean;
-    const connected = ref<boolean>(false);
-    let userChannels = [] as any[];
+    let userChannels = reactive({ channels: [] as any[] });
+    let update = reactive({ connected: false as boolean });
 
 
 		onMounted(() =>{
@@ -586,16 +586,15 @@ export default defineComponent({
 			}
 
       connection.value!.on('connectedToChat', function() {
-        connected.value = true;
-        console.log('connectedToChat: ' + connected.value);
+        update.connected = true;
+        console.log('connectedToChat: ' + update.connected);
         connection.value!.emit('emitMyChannels');
       })
 
       connection.value!.on('channelList', function(params: any) {
         console.log('channel list');
-        userChannels = params;
-        console.log('Params :' + params.name);
-        void userChannels;
+        userChannels.channels = params;
+        console.log(params);
       })
 
 		})
@@ -643,7 +642,7 @@ export default defineComponent({
       leaveChat(socket, to, next);
     })
 
-		return { sendingMessage, getChannels, isChannelJoined, getPassToJoin, connected, userChannels }
+		return { sendingMessage, isChannelJoined, getPassToJoin, update, userChannels }
 
 	}
 })

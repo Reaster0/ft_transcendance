@@ -113,21 +113,7 @@ export class ChanServices {
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
 
-    const channels: FrontChannelI[] = await query.getMany();
-
-    //const channels = await this.userServices.getChannels(id);
-    //console.log(channels);
-
-    /*
-    channels.sort(function (date1, date2) {
-      const d1 = new Date(date1.date);
-      const d2 = new Date(date2.date);
-      if (d1 < d2) return 1;
-      else if (d1 > d2) return -1;
-      else return 0;
-    });
-    */
-
+    let channels = await query.getMany() as FrontChannelI[];
     return channels;
   }
 
