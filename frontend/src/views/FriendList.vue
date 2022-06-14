@@ -1,33 +1,36 @@
 <template>
   <div>
-	<div class="overlay">
-		<v-row>
 			<div class="button_slick">
 				<v-text-field label="add Friend" v-model="friendName"></v-text-field>
 				<div class="button_slick button_slide" @click="addFriend(friendName)">Add Friend</div>
 			</div>
-		</v-row>
+		<v-col v-if="listFriends">
+				<div class="overlay" v-for="(user, index) in listFriends.friends.names" :key="user.names">
+					<h1 class="text">{{user}}</h1>
+					<h1 class="text">{{listFriends.friends.status[index]}}</h1>
+				</div>
+		</v-col>
 	</div>
-  </div>
 </template>
 
 <script lang="ts">
 import { onMounted } from "@vue/runtime-core"
-import { getFriendsList, addFriend } from "../components/FetchFunctions"
+import { getFriendsList, addFriend, getUserInfos } from "../components/FetchFunctions"
 import { ref, defineComponent } from "vue"
 
 export default defineComponent ({
 	setup(){
-		const friendName = ref<string>('')
-		// const listFriends = ref<null | any>(null);
+		const listFriends = ref<null | any>(null);
+		const friendName = ref<string>("");
 
 		onMounted(async () =>{
 			console.log('getting friend list')
-			const friendsList = await getFriendsList()
-			console.log(friendsList)
+			listFriends.value = await getFriendsList()
+			console.log(JSON.stringify(listFriends.value))
+			console.log(JSON.stringify(await getUserInfos("afeuerst")))
 			})
 
-		return {friendName, addFriend}
+		return {listFriends, addFriend, friendName}
 	}
 })
 </script>
@@ -48,4 +51,15 @@ export default defineComponent ({
   box-shadow: 0 0 0 8px rgba(#FF82F4, 0.2);
   filter:  drop-shadow(0px 20px 10px rgba(0, 0, 0, 0.50));
 }
+
+.text{
+	// justify-self: center;
+	font-size: 4em;
+	font-weight: bold;
+	font-family: 'Rajdhani', sans-serif;
+	color: #04BBEC;
+	margin: 5%;
+	// margin-left: 20%;
+}
+
 </style>

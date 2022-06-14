@@ -20,6 +20,7 @@ import { isLogged, getUserInfo } from "../components/FetchFunctions"
 import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";
 import FriendList from "../views/FriendList.vue";
+import UserInfo from "../views/UserInfo.vue";
 
 
 const routes = [
@@ -70,6 +71,14 @@ const routes = [
 		path: '/user/friends',
 		name: "friendList",
 		component: FriendList,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/user/:id',
+		name: 'userInfo',
+		component: UserInfo,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}

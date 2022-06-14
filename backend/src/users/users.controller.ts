@@ -97,7 +97,7 @@ export class UsersController {
     }
   }
 
-  @Get('partialInfo')
+  @Post('partialInfo')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'Partial User Information' })
@@ -169,7 +169,7 @@ export class UsersController {
     }
   }
 
-  @Get('listFriends')
+  @Post('listFriends')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: "Getting game history as array of GameHistory." })
