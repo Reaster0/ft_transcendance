@@ -32,7 +32,17 @@
                   <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
                   <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
-                    <v-btn elevation="0" min-height="50px"  max-width="50px" @click="displayChannel(item)">
+                    <v-btn elevation="0" min-height="50px"  max-width="50px" @click="displayChannel(item)" v-if="item.id != currentChannel.id">
+                        <v-list-item-avatar v-if="item.avatar != null">
+                          <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>
+                        </v-list-item-avatar>
+                        <v-list-item-avatar v-else>
+                          <v-avatar color="blue" min-width="50px" min-height="50px">
+                            <v-icon color="white">mdi-duck</v-icon>
+                          </v-avatar>
+                        </v-list-item-avatar>
+                    </v-btn>
+                    <v-btn elevation="0" min-height="50px"  max-width="50px" v-else>
                       <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34">
                         <v-list-item-avatar v-if="item.avatar != null">
                           <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>

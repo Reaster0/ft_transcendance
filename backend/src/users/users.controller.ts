@@ -179,7 +179,7 @@ export class UsersController {
   /** End of swagger **/
   async listFriends(@Req() req: RequestUser): Promise<{}> {
     try {
-      return this.usersService.listFriends(req.user);
+      return await this.usersService.listFriends(req.user);
     } catch (e) {
       throw (e);
     }
