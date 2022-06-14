@@ -7,6 +7,8 @@ import console from "console";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthUser } from "src/users/guards/userAuth.guard";
 import { ChanUserService } from "./services/chanUser.service";
+import { UsersService } from "../users/services/users.service";
+import { ChannelI } from './interfaces/channel.interface';
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
@@ -14,6 +16,7 @@ export class ChatController {
         private readonly chanServices: ChanServices,
         private readonly urlGeneratorService: UrlGeneratorService,
         private readonly chanUserServices: ChanUserService,
+        private readonly userService: UsersService,
     ) { }
 
     @Get('genJoinUrl')
@@ -57,5 +60,22 @@ export class ChatController {
         //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
         console.log(req.user, ' joined: ', channelFound.channelName);
         //return 'lets join this private channel';
+  }
+
+  @Get('/channeltest')
+  async createChannelTest() {
+    const creator = await this.userService.findUserById('1');
+    const chan: ChannelI = {
+        channelName: "channeltest2",
+        owner: 1, //owner id
+        password: '',
+        publicChannel: true,
+    };
+    return await this.chanServices.createChannel(chan, creator);
+  }
+
+  @Get('/msgtest')
+  async createMsgTest() {
+      
   }
 }

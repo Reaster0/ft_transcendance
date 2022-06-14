@@ -41,7 +41,7 @@ export class AuthController {
     };
     const jwtToken: string = await this.jwtService.sign(payload);
     res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie
-    res.redirect(process.env.FRONTEND); //back to frontend
+    res.redirect(process.env.FRONTEND);
   }
 
   @ApiOperation({ summary: 'Code authentication - Secret' })

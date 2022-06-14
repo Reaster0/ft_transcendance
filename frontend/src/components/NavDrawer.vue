@@ -6,7 +6,7 @@
 			</router-link>
 		<!-- </v-toolbar-title> -->
 			<v-spacer></v-spacer>
-				<v-btn class="Spotnik" to="/thechat" flat color="grey" align-end="true">
+				<v-btn class="Spotnik" :to="{ name: 'Chat' }" flat color="grey" align-end="true">
 					Chat
 				</v-btn>
 				<v-btn class="Spotnik" v-if="!isLog" to="/login" flat color="grey" align-end="true">
@@ -35,7 +35,7 @@ export default {
 		})
 
 		async function logOut() {
-			await fetch("/api/users/logout", {credentials: "include", method: "PATCH"})
+			await fetch(process.env.VUE_APP_BACKEND + "/users/logout", {credentials: "include", method: "PATCH"})
 			.then(store.commit('setConnected', [false, false]) as any)
 		}
 

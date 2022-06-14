@@ -21,7 +21,7 @@ export class ChanServices {
     private readonly userServices: UsersService,
   ) {}
 
-  async createChannel(channel: ChannelI, creator: User): Promise<ChannelI> {
+  async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
     let { channelName, publicChannel, password, avatar } = channel;
     //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
@@ -32,7 +32,6 @@ export class ChanServices {
 		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
 			return null;
 
-//		channel.users.push(creator);
     channel.users = [creator];
 		channel.adminUsers = [creator.id]; //Alina asking for this
 		channel.owner = creator.id;
@@ -76,14 +75,14 @@ export class ChanServices {
 
   //try
   async pushUserToChan(channel: ChannelI, user: User){
-    var update: ChannelI = await this.chanRepository.findOne(channel.id);
+    let update: Channel = await this.chanRepository.findOne(channel.id);
     update.users.push(user);
     this.chanRepository.update(channel.id, update);
   }
 
   //test
   async removeUserToChan(channel: ChannelI, user: User) {
-    var update: ChannelI = await this.chanRepository.findOne(channel.id);
+    let update: Channel = await this.chanRepository.findOne(channel.id);
     const index = update.users.indexOf(user);
     if (index != -1) {
       update.users.splice(index, 1);
@@ -108,28 +107,13 @@ export class ChanServices {
   }
 
   async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
-
-    let query = this.chanRepository
+    let query = await this.chanRepository
       .createQueryBuilder('channel')
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
 
-    const channels: FrontChannelI[] = await query.getMany();
-
-    //const channels = await this.userServices.getChannels(id);
-    //console.log(channels);
-
-    /*
-    channels.sort(function (date1, date2) {
-      const d1 = new Date(date1.date);
-      const d2 = new Date(date2.date);
-      if (d1 < d2) return 1;
-      else if (d1 > d2) return -1;
-      else return 0;
-    });
-    */
-
+    let channels = await query.getMany() as FrontChannelI[];
     return channels;
   }
 

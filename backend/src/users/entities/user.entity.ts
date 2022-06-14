@@ -52,7 +52,7 @@ export class User {
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
 
-  @Column({type: 'text', default: ''})
+  @Column({type: 'text', default: '', nullable: true})
   chatSocket: string;
 
   @Column({ type: 'int', array: true, default: {} })

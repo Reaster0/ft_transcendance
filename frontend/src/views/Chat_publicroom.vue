@@ -1,8 +1,7 @@
 <template>
   <v-app >
     <v-container fluid>
-      <form @submit.prevent="submitIt(this.name, this.file)"> // TODO can be undefined ?
-
+      <v-form @submit.prevent="submitIt(this.name, this.file)">
         <v-toolbar
           dark
           color="rgb(0,0,255)"
@@ -10,7 +9,8 @@
           <v-btn
             to="/thechat"
             icon
-            dark>
+            dark
+          >
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title >
@@ -18,70 +18,79 @@
               New chat room settings
             </div>
           </v-toolbar-title>
-          <v-spacer></v-spacer>
-            <v-btn :style="{color: ' #ffffff'}" to="/thechat">
-              OK
+            <v-spacer></v-spacer>
+            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+              MAIN PAGE
             </v-btn>
+          
         </v-toolbar>
 
 
+        <v-divider></v-divider>
+
             <div class="offsettitle">
             <p class="font-weight-black">
-              Private chat 
+              Public chat 
             </p>
             <p>
-              Accecible for users that has a direct link
+              Visible and accesible for anyone
             </p>
             </div>
         <v-col cols="12" sm="6">
-          <input type="file" @change="previewFiles" multiple >
+          <input type="file" @change="previewFiles">
         </v-col>
         <v-col cols="12" sm="6">
             <v-text-field
+              class="spacetoponly"
               clearable
               label="Name of the room"
               placeholder="name"
               v-model="name"
             ></v-text-field>
-
-            <button class="button">SUBMIT</button>
+          <button class="button">SUBMIT</button>
+        
         </v-col>
-
-
-    </form>
+    </v-form>
     </v-container>
   </v-app>
 </template>
 
 
-
-
 <script lang="ts">
-import { onMounted } from "@vue/runtime-core"
-import { useStore, Store } from "vuex";
+import { onMounted } from "@vue/runtime-core";
 import { defineComponent, reactive } from "vue";
+import { useStore, Store } from "vuex";
+import { onBeforeRouteLeave } from "vue-router";
+import leaveChat from '../helper';
 
-export default defineComponent ({
-  name: "NewRoomPrivate",
+export default defineComponent({
+  name: "NewRoomPublic",
   data() {
     return {
       name: "" as string,
       file: [] as any[],
-      created: false as boolean,
       // currentUser: useStore().getters.whoAmI,
     };
   },
+  methods: {
+    previewFiles(event: any) {
+        this.file = event.target.files[0];
+        console.log(event.target.files[0]);
+    },
+  },
+
   setup()
   {
-    let thechannels = reactive([] as any[]); // TODO check type
-    const store = reactive(useStore() as Store<any>);
-    const socketVal = reactive(store.getters.getSocketVal as any); // TODO check type
+      let thechannels = reactive([] as any[]);
+      const store = reactive(useStore() as Store<any>);
+      const socketVal = store.getters.getSocketVal;
 
-    onMounted(() =>{
-      socketVal.on("channel", function(res: any) { // TODO precise type of channels/img
-        console.log('befor update');
-        console.log(thechannels);
-        console.log('creating channel');
+      onMounted(() =>{
+        socketVal.on("channel", function(res: any) {
+          console.log('befor update');
+          console.log(thechannels);
+          console.log('creating channel');
+          // console.log(JSON.stringify(res))
 
           // reset channel
           thechannels = [];
@@ -101,44 +110,37 @@ export default defineComponent ({
 //            console.log(data.avatar)
             thechannels.push(data);
           }
-        console.log('after update');
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        store.commit('setChannels' , thechannels);
-        console.log(store.getters.getChannels);
+
+          console.log('after update');
+          store.commit('setChannels' , thechannels);
+          console.log(store.getters.getChannels);
+        })
       })
+
+      function createError()
+      {
+          alert("YOU DIDN'T SPECIFY NAME - NOTHING WILL BE CREATED")
+      }
+
+      function submitIt(name: string, file: any)
+      {
+        const password = "";
+        const publ = true;
+        // const user = this.currentUser;
+        if (name == '')
+          createError()
+        else
+          socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});   
+      }
+
+    onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next, store);
     })
 
-    function createError()
-    {
-        alert("YOU DIDN'T SPECIFY NAME - NOTHING WILL BE CREATED")
-    }
-
-    function submitIt(name: string, file: any)
-    {
-      const password = "";
-      const publ = false;
-      // const user = this.currentUser;
-      console.log("name: " + name)
-      if (name == '')
-        createError()
-      else
-        socketVal.emit('createChannel', {channelName: name, users: [], password, publicChannel: publ, avatar: file});    
-    }
-
-    return { submitIt }
-  },
- methods: {
-    submitbutton() {
-      // console.log(this.created);
-      console.log(this.name);
-      console.log(this.file);
-      this.created = true;
-    },
-    previewFiles(event: any) { // TODO check type of event
-        this.file = event.target.files[0];
-        console.log(event.target.files[0]);
-    },
-  },
+      return { submitIt }
+  }
 })
 </script>
 
@@ -188,5 +190,6 @@ export default defineComponent ({
   cursor: pointer;
   background-color: rgb(0,0,255);
 }
+
 
 </style>

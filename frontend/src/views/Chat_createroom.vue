@@ -7,7 +7,7 @@
               Public chat 
             </p>
             <p>
-              Visible and accesible for anyone
+              Visible and accessible for anyone
             </p>
           <v-btn color = "rgb(0,0,255)" width="240px" to="/publicroom">
             <div :style="{color: ' #ffffff'}">
@@ -23,7 +23,7 @@
               Private chat 
             </p>
             <p>
-              Accecible for users that has a direct link
+              Accessible for users that has a direct link
             </p>
           <v-btn color = "rgb(0,0,255)" width="240px" to="/privateroom">
             <div :style="{color: ' #ffffff'}">
@@ -39,7 +39,7 @@
               Protected chat 
             </p>
             <p>
-              Accesible by the password
+              Accessible by the password
             </p>
           <v-btn color = "rgb(0,0,255)" width="240px" to="/protectedroom">
             <div :style="{color: ' #ffffff'}">
@@ -58,6 +58,9 @@
 <script lang="ts">
 
 import { defineComponent } from "vue";
+import { onBeforeRouteLeave } from 'vue-router';
+import { Store, useStore } from 'vuex';
+import leaveChat from '../helper';
 
 export default defineComponent({
   name: "NewRoom",
@@ -76,6 +79,16 @@ export default defineComponent({
       console.log(data);
       console.log("submitted");
     }
+  },
+  setup () {
+
+    let store = useStore() as Store<any>;
+
+    onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next, store);
+    })
   }
 })
 </script>
