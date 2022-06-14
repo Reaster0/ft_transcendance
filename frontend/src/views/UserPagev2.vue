@@ -30,7 +30,7 @@
 				<div class="historyText loseText">LOST</div>
 				<div class="historyText loseText" v-for="(score, index) in gameHistory.lost.infos.score" :key="score">You {{score}} {{gameHistory.lost.infos.opponent[index]}} {{gameHistory.lost.infos.opponentScore[index]}}</div>
 			</v-col>
-			<v-col class="overflow-y-auto" style="max-height: 450px" v-if="gameHistory" align-self="start">
+			<v-col class="overflow-y-auto" style="max-height: 500px" v-if="gameHistory" align-self="start">
 				<div class="historyText winText">WIN</div>
 				<div class="historyText winText" v-for="(score, index) in gameHistory.won.infos.score" :key="score">You {{score}} {{gameHistory.won.infos.opponent[index]}} {{gameHistory.won.infos.opponentScore[index]}}</div>
 			</v-col>

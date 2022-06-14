@@ -25,3 +25,8 @@ ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
 For avatar :
 DEFAULT_AVATAR: Avatar set by default, please be careful to add a supplementary
 '../' before your path as it'll be called from inside backend folder.
+
+
+For the Frontend :
+.env file inside the frontend dir :
+VUE_APP_BACKEND: ip:port of the backend

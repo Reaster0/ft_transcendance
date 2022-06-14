@@ -7,7 +7,7 @@
 		</div>
 		<div v-else>
 			<h1 class="Spotnik">Click To Connect</h1>
-			<v-btn loading rounded elevation="5" outlined min-width="50%" height="20%" href="/api/auth/login-42">
+			<v-btn loading rounded elevation="5" outlined min-width="50%" height="20%" @click="gotToAuth">
 				<img width="100" src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg" alt="42 Logo"/>
 			</v-btn>
 		</div>
@@ -32,6 +32,11 @@ export default defineComponent ({
 		const need2fa = computed(() => {
 			return store.getters.need2Fa;
 		})
+		
+		function gotToAuth()
+		{
+			document.location = process.env.VUE_APP_BACKEND + "/auth/login-42"
+		}
 
 		async function submitCode() {
 			if(await submit2FaCode(inputCode.value as string))			{
@@ -41,7 +46,7 @@ export default defineComponent ({
 			}
 		}
 
-		return {need2fa, inputCode, submitCode}
+		return {need2fa, inputCode, submitCode, gotToAuth}
 	},
 })
 </script>

@@ -1,5 +1,6 @@
 <template>
 <div>
+	<particles-bg type="cobweb" :bg="true" />
 	<div v-if="!gameStarted">
 		<v-row justify="center">
 				<div class="button_slick Spotnik">W ⬆️</div>
@@ -50,8 +51,12 @@ import { defineComponent, ref, watch } from "vue";
 import { io } from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
+import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 
 export default defineComponent ({
+	components: {
+		ParticlesBg
+	},
 	setup() {
 		const gameSocket = ref< any | null>(null);
 		const matchId = ref<string | null>(null);
