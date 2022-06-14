@@ -90,8 +90,12 @@ export async function uploadAvatar(file: any) {
 }
 
 export async function getFriendsList() {
-	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends")
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends", { credentials: "include" })
 		.then(res => res.json())
+		.then(res => {
+			console.log(res)
+			return res
+		})
 		.then((data) => {
 			return data.statusCode == 200? data.data : null;})
 }

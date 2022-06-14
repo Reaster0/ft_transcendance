@@ -179,7 +179,7 @@ export class UsersController {
   /** End of swagger **/
   async listFriends(@Req() req: RequestUser): Promise<{}> {
     try {
-      return this.usersService.listFriends(req.user);
+      return await this.usersService.listFriends(req.user);
     } catch (e) {
       throw (e);
     }
@@ -277,7 +277,7 @@ export class UsersController {
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.addFriend(req.user, friend.id);
-      return this.usersService.listFriends(req.user);
+      return await this.usersService.listFriends(req.user);
     } catch(e) {
       throw e;
     }
@@ -296,7 +296,7 @@ export class UsersController {
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.removeFriend(req.user, friend.id);
-      return this.usersService.listFriends(req.user);
+      return await this.usersService.listFriends(req.user);
     } catch(e) {
       throw e;
     }
