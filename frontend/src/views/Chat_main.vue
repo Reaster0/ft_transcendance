@@ -578,15 +578,16 @@ export default defineComponent({
 		onMounted(() =>{
 			console.log(document.cookie.toString());
 			try {
-        if (store.getters.getSocketVal === null) {
+        connection.value = store.getters.getSocketVal;
+        if (connection.value === null) {
           connection.value = io('http://:3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
           store.commit('setSocketVal' , connection.value);
+          console.log("starting connection to websocket")
         }
-				console.log("starting connection to websocket")
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
