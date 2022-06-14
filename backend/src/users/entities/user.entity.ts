@@ -3,11 +3,9 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany } from 't
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '../enums/status.enum';
 import * as crypto from 'crypto';
-import { Chan } from '../../chat/entities/channel.entity';
+import { Channel } from '../../chat/entities/channel.entity';
 import { Message } from '../../chat/entities/message.entity';
 import { GameHistory } from '../../game/entities/gamehistory.entity';
-import { SocketConnected } from '../../chat/entities/socketsUser';
-import { SocketJoined } from '../../chat/entities/sockets-connected-to-channel';
 
 @Entity('users') // sql table will be name 'users'
 export class User {
@@ -46,21 +44,16 @@ export class User {
   status: Status;
 
   // CHAT STUFF --------
-  @ApiProperty({ type: [Chan], description: 'Channel the user as joined/created' })
-  @ManyToMany(() => Chan, (channel) => channel.users)
-  channels: Chan[];
+  @ApiProperty({ type: [Channel], description: 'Channel the user as joined/created' })
+  @ManyToMany(() => Channel, (channel: Channel) => channel.users)
+  channels: Channel[];
 
   @ApiProperty({ type: [Message], description: 'Message list the user as sended' })
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
 
-  @ApiProperty({ type: [SocketConnected], description: 'Socket list for all chat service' })
-  @OneToMany(() => SocketConnected, (connection) => connection.user)
-  connections: SocketConnected[];
-
-  @ApiProperty({ type: [SocketJoined], description: 'Socket list for every channel the user is connected.' })
-  @OneToMany(() => SocketJoined, (joinedChannel) => joinedChannel.chan)
-  joinedChannels: SocketJoined[];
+  @Column({type: 'text', default: '', nullable: true})
+  chatSocket: string;
 
   @Column({ type: 'int', array: true, default: {} })
   @ApiProperty({ type: [Number], description: 'Blocked user identified by id.' })

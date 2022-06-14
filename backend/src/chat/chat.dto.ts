@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsAlphanumeric} from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsAlphanumeric, isString, isNotEmpty} from "class-validator";
 
 export class CreateChannelDto {
     @IsString()
@@ -8,4 +8,14 @@ export class CreateChannelDto {
     @IsAlphanumeric()
     @IsOptional()
     readonly password: string
+}
+
+export class InviteDto {
+    @IsString()
+    @IsNotEmpty()
+    readonly chanID: string
+
+    @IsString()
+    @IsNotEmpty()
+    readonly invitedUser: string
 }
