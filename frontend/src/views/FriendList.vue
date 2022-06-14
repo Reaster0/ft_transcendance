@@ -25,7 +25,7 @@ export default defineComponent ({
 			console.log('getting friend list')
 			const friendsList = await getFriendsList()
 			console.log(friendsList)
-			})
+		})
 
 		return {friendName, addFriend}
 	}

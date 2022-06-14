@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res, 
-  BadRequestException} from '@nestjs/common';
+  Res, BadRequestException} from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -122,7 +121,7 @@ export class UsersService {
 
   async listFriends(user: User): Promise<{}> {
     if (user.friends.length === 0) {
-      return { 'friends': { 'nb' : 0, 'names': {}, 'status': {} }};
+      return { 'friends': { 'names': {}, 'status': {} }};
     }
     let names = [];
     let status = [];
@@ -133,7 +132,7 @@ export class UsersService {
         status.push(friend.status);
       }
     }
-    return { 'friends': { 'nb': names.length, 'names': names, 'status': status }};
+    return { 'friends': { 'names': names, 'status': status }};
   }
 
   async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
