@@ -73,4 +73,9 @@ export class ChatController {
     };
     return await this.chanServices.createChannel(chan, creator);
   }
+
+  @Get('/msgtest')
+  async createMsgTest() {
+      
+  }
 }

@@ -33,11 +33,9 @@
                   <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px" @click="displayChannel(item)" v-if="item.id != currentChannel.id">
-                        <v-list-item-avatar v-if="item.avatar != null">
-                          <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>
-                        </v-list-item-avatar>
-                        <v-list-item-avatar v-else>
-                          <v-avatar color="blue" min-width="50px" min-height="50px">
+                        <v-list-item-avatar>
+                          <v-img v-if="item.avatar != null" src="item.avatar" min-width="50px" min-height="50px"></v-img>
+                          <v-avatar v-else color="blue" min-width="50px" min-height="50px">
                             <v-icon color="white">mdi-duck</v-icon>
                           </v-avatar>
                         </v-list-item-avatar>
@@ -64,13 +62,10 @@
           </div>
         </v-col>
 
-
-
-		<!-- open channel / example display -->
+        <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
         <v-col cols="auto" sm="6" class="border">
-        <div id="app">
-
-          <v-app id="inspire" v-if="!update.messages"> <!-- Modify to inverse-->
+          <div id="app">
+            <v-app id="inspire" v-if="!update.messages"> <!-- Modify to inverse-->
 
             <!-- NB! get the real message -->
             <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
@@ -666,7 +661,7 @@ export default defineComponent({
 		onBeforeRouteLeave( function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next);
+      leaveChat(socket, to, next, store);
     })
 
     function displayChannel(channel: any) {

@@ -129,7 +129,7 @@ export default defineComponent ({
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next);
+      leaveChat(socket, to, next, store);
     })
   }
 })
