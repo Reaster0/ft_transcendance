@@ -90,11 +90,7 @@ export async function uploadAvatar(file: any) {
 }
 
 export async function getFriendsList() {
-<<<<<<< HEAD
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends", { credentials: "include", method: "POST"})
-=======
-	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends", { credentials: "include", method: "POST" })
->>>>>>> 4bfc5d88c3f9b3e16e2ffb4e2cf05a9b14447ff6
 		.then(res => res.json())
 		.then(res => {
 			return res
