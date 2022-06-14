@@ -1,6 +1,6 @@
 <template>
   <v-app >
-    <v-container fluid v-if="update">
+    <v-container fluid v-if="update.connected">
       <v-row>
 
         <!-- ELEMENTS ON LEFT OF SCREEN -->
@@ -10,7 +10,7 @@
             <!-- SEARCH PANNEL -->
             <!-- NB! When serach field will work on backen - add onclick option calling method  -->
             <div class="d-flex">
-              <v-text-field clearable label="Find user / group"
+              <v-text-field clearable label="Find user or group to chat"
               placeholder="Search" height = "50px"></v-text-field>
             </div>
 
@@ -32,8 +32,8 @@
                   <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
                   <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
-                    <v-btn elevation="0" min-height="50px"  max-width="50px">
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                    <v-btn elevation="0" min-height="50px"  max-width="50px" @click="displayChannel(item)">
+                      <!--<v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >-->
                         <v-list-item-avatar v-if="item.avatar != null">
                           <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>
                         </v-list-item-avatar>
@@ -42,7 +42,7 @@
                             <v-icon color="white">mdi-duck</v-icon>
                           </v-avatar>
                         </v-list-item-avatar>
-                      </v-badge>
+                      <!--</v-badge>-->
                     </v-btn>
                     <v-list-item-title class="offsetmess">{{ item.channelName }}</v-list-item-title>
                   </v-list-item>
@@ -60,7 +60,7 @@
         <v-col cols="auto" sm="6" class="border">
         <div id="app">
 
-          <v-app id="inspire">
+          <v-app id="inspire" v-if="update.messages">
 
             <!-- NB! get the real message -->
             <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
@@ -112,7 +112,7 @@
               width="100%"
               label="Write a message"
               placeholder="Message"
-              @keyup.enter="sendingMessage(this.txt, this.currentChannel)"
+              @keyup.enter="sendingMessage(txt, this.currentChannel)"
               v-model="txt"
             ></v-text-field>
             <!-- button bellow is from old design, I save it just in case -->
@@ -122,6 +122,9 @@
               </div>
             </v-btn> -->
           </div>
+        </v-app>
+        <v-app v-else>
+          <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
         </v-app>
         </div>
         </v-col>
@@ -568,19 +571,22 @@ export default defineComponent({
     const store = useStore() as Store<any>;
     let isChannelJoined = store.getters.isChannelJoined as boolean;
     let userChannels = reactive({ channels: [] as any[] });
-    let update = reactive({ connected: false as boolean });
+    let update = reactive({ connected: false as boolean, messages: false as boolean });
+    let currentChannel = reactive({ name: '' as string, id: '' as string, messages: [] as any [] });
 
 
 		onMounted(() =>{
 			console.log(document.cookie.toString());
 			try {
-				connection.value = io('http://:3000/chat',{
-          transportOptions: {
-            polling: { extraHeaders: { auth: document.cookie} },
-          },
-				})
+        if (store.getters.getSocketVal === null) {
+          connection.value = io('http://:3000/chat',{
+            transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          store.commit('setSocketVal' , connection.value);
+        }
 				console.log("starting connection to websocket")
-        store.commit('setSocketVal' , connection.value);
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
@@ -592,9 +598,17 @@ export default defineComponent({
       })
 
       connection.value!.on('channelList', function(params: any) {
-        console.log('channel list');
+        console.log('list of joined channels received');
         userChannels.channels = params;
-        console.log(params);
+      })
+
+      connection.value!.on('retrieveMessages', function(params: { channelId: string, messages: any[] }) {
+        if (params.channelId != currentChannel.id) {
+          console.log('Error of channel correspondance');
+        }
+        console.log('message of channel received');
+        currentChannel.messages = params.messages;
+        update.messages = false;
       })
 
 		})
@@ -642,7 +656,15 @@ export default defineComponent({
       leaveChat(socket, to, next);
     })
 
-		return { sendingMessage, isChannelJoined, getPassToJoin, update, userChannels }
+    function displayChannel(channel: any) {
+      console.log('ask for ' + channel.channelName + ' messages');
+      update.messages = false;
+      currentChannel.name = channel.name;
+      currentChannel.id = channel.id;
+      connection.value.emit('retrieveMessages', { id: channel.id });
+    }
+
+		return { sendingMessage, isChannelJoined, getPassToJoin, update, userChannels, displayChannel, currentChannel }
 
 	}
 })

@@ -1,3 +1,5 @@
+import { Store, useStore } from 'vuex';
+
 function leaveChat(socket: any, to: any, next: any) {
 	if (to.name === 'Chat' || to.name === 'NewRoom' || to.name === 'PublicRoom'
 		|| to.name === 'PrivateRoom' || to.name === 'ProtectedRoom'
@@ -6,9 +8,11 @@ function leaveChat(socket: any, to: any, next: any) {
 			return;
 	}
 	const answer = window.confirm("Are you sure you want to leave the chat ?")
+	const store = useStore() as Store<any>;
 	if (answer) {
 			console.log('disconnection from chat');
-		socket.disconnect()
+		socket.disconnect();
+		store.commit('setSocketVal' , null);
 		next(true);
 		return;
 	}
