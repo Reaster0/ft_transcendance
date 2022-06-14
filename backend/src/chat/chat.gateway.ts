@@ -4,6 +4,7 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -234,5 +235,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async emitMyChannels(client: Socket) {
     const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(client.data.user.id);
     client.emit('channelList', channels);
+  }
+
+  // ------------ TEST --------------------------------
+
+  @SubscribeMessage('getJoinnableChannels')
+  async getJoinnableChannels(client: Socket, name: string) {
+    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
+    client.emit('joinnableChannel', channels);
   }
 }
