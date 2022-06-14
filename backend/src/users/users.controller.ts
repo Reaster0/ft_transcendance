@@ -104,10 +104,10 @@ export class UsersController {
   @ApiOkResponse({ description: 'Partial User Information using id' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
+  getPartialUserInfo(@Query('userId') userId: number): Promise<Partial<User>> {
     try {
-      this.logger.log("Get('partialInfo') route called for user " + nickname + ' (nickname)');
-      return this.usersService.getPartialUserInfo(nickname);
+      this.logger.log("Get('partialInfo') route called for user " + userId + ' (nickname)');
+      return this.usersService.getPartialUserInfo(userId);
     } catch (e) {
       throw e;
     }
@@ -179,6 +179,7 @@ export class UsersController {
   /** End of swagger **/
   async listFriends(@Req() req: RequestUser): Promise<{}> {
     try {
+      this.logger.log("Post('listFriends') route called by user " + req.user.username);
       return await this.usersService.listFriends(req.user);
     } catch (e) {
       throw (e);
@@ -274,6 +275,7 @@ export class UsersController {
   /** End of swagger **/
   async addFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
     try {
+      this.logger.log("Patch('addFriend')route called by " + req.user.username);
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.addFriend(req.user, friend.id);
@@ -293,6 +295,7 @@ export class UsersController {
   /** End of swagger **/
   async removeFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
     try {
+      this.logger.log("Patch ('removeFriend') route called by " + req.user.username);
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.removeFriend(req.user, friend.id);

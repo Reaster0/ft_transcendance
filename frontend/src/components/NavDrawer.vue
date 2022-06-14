@@ -6,7 +6,7 @@
 			</router-link>
 		<!-- </v-toolbar-title> -->
 			<v-spacer></v-spacer>
-				<v-btn class="Spotnik" to="/chatgroup" flat color="grey" align-end="true">
+				<v-btn class="Spotnik" :to="{ name: 'Chat' }" flat color="grey" align-end="true">
 					Chat
 				</v-btn>
 				<v-btn class="Spotnik" v-if="!isLog" to="/login" flat color="grey" align-end="true">

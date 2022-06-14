@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus, StreamableFile, InternalServerErrorException,
+import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
   Res, BadRequestException} from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -74,7 +74,7 @@ export class UsersService {
     const { nickname } = updateUser;
     let find = await this.userRepository.findOne({ nickname: nickname });
     if (find && find != user) {
-      throw new HttpException('Nickname already taken.', HttpStatus.BAD_REQUEST);
+      throw new BadRequestException('Nickname already taken');
     }
     user.nickname = nickname;
     return this.userRepository.save(user);
@@ -104,7 +104,7 @@ export class UsersService {
   async addFriend(user: User, friendId: number): Promise <void> {
     const found = await user.friends.find((element) => friendId);
     if (found) {
-		throw new BadRequestException('User is already a friend');
+      throw new BadRequestException('User is already a friend');
     }
     user.friends.push(friendId);
     await this.userRepository.save(user);
@@ -113,7 +113,7 @@ export class UsersService {
   async removeFriend(user: User, friendId: number): Promise<void> {
     const found = await user.friends.indexOf(friendId);
     if (found == -1) {
-	  throw new BadRequestException('User is not a friend');
+      throw new BadRequestException('User is not a friend');
     }
     user.friends.splice(found, 1);
     await this.userRepository.save(user);
@@ -121,7 +121,7 @@ export class UsersService {
 
   async listFriends(user: User): Promise<{}> {
     if (user.friends.length === 0) {
-      return { 'friends': { 'nb' : 0, 'names': {}, 'status': {} }};
+      return { 'friends': { 'names': {}, 'status': {} }};
     }
     let names = [];
     let status = [];
@@ -132,7 +132,7 @@ export class UsersService {
         status.push(friend.status);
       }
     }
-    return { 'friends': { 'nb': names.length, 'names': names, 'status': status }};
+    return { 'friends': { 'names': names, 'status': status }};
   }
 
   async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
@@ -209,9 +209,10 @@ export class UsersService {
     return res;
   }
 
-  async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
-    const user = await this.findUserByNickname(nickname);
-    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
+  async getPartialUserInfo(id: number): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne(id);
+    if (!user) return user;
+    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
   }
 
   async getConnectedUsers(): Promise<User[]> {
@@ -221,7 +222,15 @@ export class UsersService {
     return connectedUser;
   }
 
-  async updateBlockedUser(block: boolean, user: User, userToBlock: User,): Promise<User> {
+  async connectUserToChat(user: User, socketID: string) {
+    this.userRepository.update(user.id, {status: Status.ONLINE, chatSocket: socketID});
+  }
+
+  async disconectUserToChat(user: User) {
+    this.userRepository.update(user.id, {status: Status.OFFLINE, chatSocket: ''});
+  }
+
+  async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
     const userFound = user.blockedUID.find((element) => element === userToBlock.id);
 
     if (block === true && !userFound) {
@@ -235,6 +244,20 @@ export class UsersService {
     }
     return user;
   }
+
+  /*
+  async getChannels(id: number) {
+    console.log('test for user');
+    const user = await this.userRepository.findOne(
+      id,
+      { relations: ['channels'] }
+    )
+
+    if (!user) { console.log('bad id')};
+    console.log(user);
+    return user.channels;
+  }
+  */
 
   async getGameHistory(id: number): Promise<{}> {
     const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });

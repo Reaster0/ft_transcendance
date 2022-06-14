@@ -1,9 +1,14 @@
-import { ChanI } from './channel.interface';
+import { User } from 'src/users/entities/user.entity';
+import { ChannelI } from './channel.interface';
 
 export interface ChanUserI {
   id?: string;
-  userID: number;
-  ban?: Date;
+//////////////////  userID: number;
   mute?: Date;
-  chan: ChanI;
+  isBan?: boolean;
+  isAdmin?: boolean;
+  userID: number;
+  channel: ChannelI;
+//  user: User;
+
 }

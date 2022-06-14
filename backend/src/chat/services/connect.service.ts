@@ -5,29 +5,22 @@ import { Status } from '../../users/enums/status.enum';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Repository } from 'typeorm';
-import { SocketConnected } from '../entities/socketsUser';
-import { connectedSocketI } from '../interfaces/socketUser.interface';
 
 @Injectable()
 export class ConnectService {
   constructor(
     private readonly userService: UsersService,
-    @InjectRepository(SocketConnected)
-    private readonly connectedRepository: Repository<SocketConnected>,
-    private readonly userServices: UsersService,
   ) {}
 
     async connectUser(client: Socket, user: User) {
-        await this.userService.changeStatus(user, Status.ONLINE); // maybe useless;
-        await this.connectedRepository.save({socketID: client.id, user: user});
+        await this.userService.connectUserToChat(user, client.id);
     }
 
-    async disconnectUser(socketID: string, user: User) {
-        if (user)
-          await this.userService.changeStatus(user, Status.OFFLINE); // maybe useless;
-        await this.connectedRepository.delete({socketID});
+    async disconnectUser(user: User) {
+          await this.userService.disconectUserToChat(user)
     }
 
+  /*
   async findAll(): Promise<connectedSocketI[]> {
     console.log('try');
     //const connections = await this.connectedUserRepository.find({ relations: ["user"] });
@@ -40,6 +33,7 @@ export class ConnectService {
       return undefined;
     }
   }
+  */
 
 
 }
