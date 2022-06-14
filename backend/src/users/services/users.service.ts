@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res, 
-  BadRequestException} from '@nestjs/common';
+import {
+  Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
+  Res,
+  BadRequestException
+} from '@nestjs/common';
 import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -19,7 +21,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     private readonly avatarsService: AvatarsService,
     private connection: Connection,
-  ) {}
+  ) { }
 
   async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id);
@@ -52,7 +54,7 @@ export class UsersService {
       return user;
     }
     const nickname = await this.generateNickname(username);
-    user = await this.userRepository.create({username: username, nickname: nickname});
+    user = await this.userRepository.create({ username: username, nickname: nickname });
     // TODO redirect user to modify info page
     return { user: this.userRepository.save(user), first: true };
   }
@@ -68,10 +70,10 @@ export class UsersService {
         nickname += randomChar;
       }
     }
-    return nickname;    
+    return nickname;
   }
 
-  async updateUser(user: User, updateUser: UpdateUserDto) : Promise<User> {
+  async updateUser(user: User, updateUser: UpdateUserDto): Promise<User> {
     const { nickname } = updateUser;
     let find = await this.userRepository.findOne({ nickname: nickname });
     if (find && find != user) {
@@ -102,7 +104,7 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async addFriend(user: User, friendId: number): Promise <void> {
+  async addFriend(user: User, friendId: number): Promise<void> {
     const found = await user.friends.find((element) => friendId);
     if (found) {
       throw new BadRequestException('User is already a friend');
@@ -112,7 +114,7 @@ export class UsersService {
   }
 
   async removeFriend(user: User, friendId: number): Promise<void> {
-    const found = await user.friends.indexOf(friendId);
+    const found = user.friends.indexOf(friendId);
     if (found == -1) {
       throw new BadRequestException('User is not a friend');
     }
@@ -122,7 +124,7 @@ export class UsersService {
 
   async listFriends(user: User): Promise<{}> {
     if (user.friends.length === 0) {
-      return { 'friends': { 'nb' : 0, 'names': {}, 'status': {} }};
+      return { 'friends': { 'nb': 0, 'names': {}, 'status': {} } };
     }
     let names = [];
     let status = [];
@@ -133,7 +135,7 @@ export class UsersService {
         status.push(friend.status);
       }
     }
-    return { 'friends': { 'nb': names.length, 'names': names, 'status': status }};
+    return { 'friends': { 'nb': names.length, 'names': names, 'status': status } };
   }
 
   async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
@@ -217,28 +219,32 @@ export class UsersService {
   }
 
   async getConnectedUsers(): Promise<User[]> {
-    const connectedUser = this.userRepository.find({
-      where: { status: Status.ONLINE },
+    const connectedUser = await this.userRepository.find({
+      select: ['id', 'nickname', 'avatarId', 'status'],
+      where: [{ status: Status.ONLINE }],
     });
     return connectedUser;
   }
 
   async connectUserToChat(user: User, socketID: string) {
-    this.userRepository.update(user.id, {status: Status.ONLINE, chatSocket: socketID});
+    this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
   }
 
   async disconectUserToChat(user: User) {
-    this.userRepository.update(user.id, {status: Status.OFFLINE, chatSocket: ''});
+    this.userRepository.update(user.id, { status: Status.OFFLINE, chatSocket: '' });
   }
 
+
+  //maybe us id insted of userToBlock
   async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
     const userFound = user.blockedUID.find((element) => element === userToBlock.id);
+    // userFound only if already in blocket list
 
     if (block === true && !userFound) {
-      user.blockedUID.push(userToBlock.id);
+      user.blockedUID.push(userToBlock.id); // add it
       await this.userRepository.save(user);
     }
-    if (block === false && userFound) {
+    if (block === false && userFound) { // unblock
       const index = user.blockedUID.indexOf(userToBlock.id);
       user.blockedUID.splice(index, 1);
       await this.userRepository.save(user);
@@ -261,9 +267,9 @@ export class UsersService {
   */
 
   async getGameHistory(id: number): Promise<{}> {
-    const user = await this.userRepository.findOne (id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
+    const user = await this.userRepository.findOne(id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
     if (!user) {
-      throw new NotFoundException(`User ${id} (id) not found.`); 
+      throw new NotFoundException(`User ${id} (id) not found.`);
     }
     let gameHistory = {};
     let score = [];
@@ -280,13 +286,13 @@ export class UsersService {
         }
       }
 
-      gameHistory = { 'nb': user.gamesWon.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }};
+      gameHistory = { 'nb': user.gamesWon.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore } };
     } else {
       gameHistory = { nb: 0, infos: {} };
     }
     score = [];
     opponent = [];
-    opponentScore = [];    
+    opponentScore = [];
     if (user.gamesLost) {
       for (let game of user.gamesLost) {
         score.push(game.looserScore);
@@ -297,9 +303,9 @@ export class UsersService {
           opponent.push('deleted user');
         }
       }
-      gameHistory = { 'won': gameHistory, 'lost': {'nb': user.gamesLost.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }}};
+      gameHistory = { 'won': gameHistory, 'lost': { 'nb': user.gamesLost.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore } } };
     } else {
-      gameHistory = { 'won': gameHistory, 'lost': {nb: 0, infos: {} }};
+      gameHistory = { 'won': gameHistory, 'lost': { nb: 0, infos: {} } };
     }
     return gameHistory;
   }
@@ -309,9 +315,9 @@ export class UsersService {
     return this.userRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      order: {nickname: "DESC"},
+      order: { nickname: "DESC" },
       select: ['id', 'nickname', 'eloScore', 'avatarId'],
-      where: [ { nickname: Like(`%${name}%`) } ]
+      where: [{ nickname: Like(`%${name}%`) }]
     })
   }
 
