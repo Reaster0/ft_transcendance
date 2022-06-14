@@ -8,7 +8,8 @@
           <v-col>
 
             <!-- SEARCH PANNEL -->
-            <!-- NB! When serach field will work on backen - add onclick option calling method  -->
+            <!-- NB! When serach field will work on backen -
+            add onclick option calling method  -->
             <div class="d-flex">
               <v-text-field clearable label="Find user or group to chat"
               placeholder="Search" height = "50px"></v-text-field>
@@ -29,32 +30,44 @@
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
-                  <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
-                  <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
+                  <v-subheader v-if="item.header" :key="item.header"
+                    v-text="item.header"></v-subheader>
+                  <v-divider v-else-if="item.divider" :key="index"
+                    :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
-                    <v-btn elevation="0" min-height="50px"  max-width="50px" @click="displayChannel(item)" v-if="item.id != currentChannel.id">
+                    <v-btn elevation="0" min-height="50px"  max-width="50px"
+                      @click="displayChannel(item)"
+                      v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
-                          <v-img v-if="item.avatar != null" src="item.avatar" min-width="50px" min-height="50px"></v-img>
-                          <v-avatar v-else color="blue" min-width="50px" min-height="50px">
+                          <v-img v-if="item.avatar != null" src="item.avatar"
+                            min-width="50px" min-height="50px"></v-img>
+                          <v-avatar v-else color="blue" min-width="50px"
+                            min-height="50px">
                             <v-icon color="white">mdi-duck</v-icon>
                           </v-avatar>
                         </v-list-item-avatar>
                     </v-btn>
-                    <v-btn elevation="0" min-height="50px"  max-width="50px" v-else>
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34">
+                    <v-btn elevation="0" min-height="50px"  max-width="50px"
+                      v-else>
+                      <v-badge bordered bottom color="green" dot offset-x="6"
+                        offset-y="34">
                         <v-list-item-avatar v-if="item.avatar != null">
-                          <v-img src="item.avatar" min-width="50px" min-height="50px"></v-img>
+                          <v-img src="item.avatar" min-width="50px"
+                            min-height="50px"></v-img>
                         </v-list-item-avatar>
                         <v-list-item-avatar v-else>
-                          <v-avatar color="blue" min-width="50px" min-height="50px">
+                          <v-avatar color="blue" min-width="50px"
+                            min-height="50px">
                             <v-icon color="white">mdi-duck</v-icon>
                           </v-avatar>
                         </v-list-item-avatar>
                       </v-badge>
                     </v-btn>
-                    <v-list-item-title class="offsetmess">{{ item.channelName }}</v-list-item-title>
+                    <v-list-item-title class="offsetmess">{{ item.channelName }}
+                    </v-list-item-title>
                   </v-list-item>
-                  <v-divider v-if="index < userChannels.channels.length" :key="index"></v-divider>
+                  <v-divider v-if="index < userChannels.channels.length"
+                    :key="index"></v-divider>
                 </template>
                 </v-list-item-group>
               </v-list>
@@ -65,30 +78,34 @@
         <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
         <v-col cols="auto" sm="6" class="border">
           <div id="app">
-            <v-app id="inspire" v-if="!update.messages"> <!-- Modify to inverse-->
+            <v-app id="inspire" v-if="update.messages && currentChannel.name != ''"> <!-- Modify to inverse-->
+              <template v-for="(msg, index) in currentChannel.messages">
+                <v-spacer v-if="msg.user === currentUser.id" :key="index"></v-spacer>
+                <v-toolbar dense  color="rgba(0,0,0,0)"
+                  class="spacebottom messagefield" v-if="msg" :key="index">
+                  <v-btn elevation="0" min-height="50px"
+                    max-width="50px">
+                    <v-badge bordered bottom color="green" dot offset-x="4"
+                      offset-y="10">
+                      <v-avatar class="mt-n4 " size="32"
+                        elevation="2">
+                        <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
+                      </v-avatar>
+                    </v-badge>
+                  </v-btn>
+                  <v-card class="mt-2 ml-2" max-width="450px">
+                    <v-list-item >
+                      <v-list-item-content>
+                        <div class="mb-2"> {{ msg.content }} </div>
+                        <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-card >
+                </v-toolbar>
+              </template>
+              
 
-            <!-- NB! get the real message -->
-            <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
-              <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-                <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                </v-avatar>
-              </v-badge>
-              </v-btn>
-            <v-card class="mt-2 ml-2" max-width="450px">
-              <v-list-item >
-                <v-list-item-content>
-                  <div class="mb-2">
-                    It's funny, to know hows websockets works
-                  </div>
-                  <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-          </v-toolbar>
-
-          <v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
+          <!--<v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
             <v-spacer></v-spacer>
             <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
               <v-list-item >
@@ -107,8 +124,7 @@
               </v-avatar>
               </v-badge>
             </v-btn>
-          </v-toolbar>
-
+          </v-toolbar>-->
           <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
           <div class="d-flex">
             <v-text-field
@@ -127,9 +143,13 @@
               </div>
             </v-btn> -->
           </div>
+
+        </v-app>
+        <v-app v-else-if="updatemessage">
+          <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
         </v-app>
         <v-app v-else>
-          <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
+          <h1 class="Spotnik text-center" data-text="Select">Select channel to display</h1>
         </v-app>
         </div>
         </v-col>
@@ -501,7 +521,6 @@ export default defineComponent({
       // with this we will emit this data to backend
       txt: '',
       // Comment for Aimé: Remind me why do you need it, pls ? :)
-      currentUser: useStore().getters.whoAmI,
       // Not - used vars that we can need
       // Comment for Aimé: we will still use it ? Or we will take info from storage ? Cause now this data is empty.
       /*
@@ -574,10 +593,13 @@ export default defineComponent({
 	setup() {
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
+    const currentUser = useStore().getters.whoAmI as any;
     let isChannelJoined = store.getters.isChannelJoined as boolean;
     let userChannels = reactive({ channels: [] as any[] });
-    let update = reactive({ connected: false as boolean, messages: false as boolean });
-    let currentChannel = reactive({ name: '' as string, id: '' as string, messages: [] as any [] });
+    let update = reactive({ connected: false as boolean, users: false as boolean,
+      messages: false as boolean });
+    let currentChannel = reactive({ name: '' as string, id: '' as string,
+      messages: [] as any[], users: [] as any[] });
 
 
 		onMounted(() =>{
@@ -591,9 +613,10 @@ export default defineComponent({
             },
           })
           store.commit('setSocketVal' , connection.value);
-          console.log("starting connection to websocket")
+          console.log("starting connection to websocket");
         } else {
           update.connected = true;
+          connection.value!.emit('emitMyChannels');
         }
 			} catch (error) {
 				console.log("the error is:" + error)
@@ -610,13 +633,23 @@ export default defineComponent({
         userChannels.channels = params;
       })
 
-      connection.value!.on('retrieveMessages', function(params: { channelId: string, messages: any[] }) {
-        if (params.channelId != currentChannel.id) {
-          console.log('Error of channel correspondance');
+      connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
+        if (params.id != currentChannel.id) {
+          console.log('Error of channel correspondance inside channelsUsers');
         }
-        console.log('message of channel received');
-        currentChannel.messages = params.messages;
-        update.messages = false;
+        console.log('receive users from channel ' + currentChannel.name);
+        //currentChannel.users = params.users;
+        currentChannel.users = [{ id: 1, nickname: 'User1', role: 'admin'}, { id: 2, nickname: 'User2', role: ''}]
+      })
+
+      connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
+        if (params.id != currentChannel.id) {
+          console.log('Error of channel correspondance inside channelMessages');
+        }
+        console.log('receive messages from channel ' + currentChannel.name);
+        //currentChannel.messages = params.messages;
+        currentChannel.messages = [{ content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'}];
+        update.messages = true;
       })
 
 		})
@@ -665,14 +698,16 @@ export default defineComponent({
     })
 
     function displayChannel(channel: any) {
-      console.log('ask for ' + channel.channelName + ' messages');
+      console.log('ask for ' + channel.channelName + ' users and messages');
       update.messages = false;
-      currentChannel.name = channel.name;
+      currentChannel.name = channel.channelName;
       currentChannel.id = channel.id;
+      connection.value.emit('retrieveUsers', { id: channel.id });
       connection.value.emit('retrieveMessages', { id: channel.id });
     }
 
-		return { sendingMessage, isChannelJoined, getPassToJoin, update, userChannels, displayChannel, currentChannel }
+		return { sendingMessage, isChannelJoined, getPassToJoin, update, 
+      userChannels, displayChannel, currentChannel, currentUser }
 
 	}
 })

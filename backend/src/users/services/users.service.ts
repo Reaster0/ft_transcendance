@@ -199,20 +199,12 @@ export class UsersService {
     return res;
   }
 
-  async userInfo(userName: string): Promise<Partial<User>> {
-    let user: User = undefined;
-    user = await this.userRepository.findOne({ username: userName });
+  async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    const { username, twoFASecret, is2FAEnabled, ...res } = user;
-    return res;
-  }
-
-  async getPartialUserInfo(id: number): Promise<Partial<User>> {
-    const user = await this.userRepository.findOne(id);
-    if (!user) return user;
-    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
+    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
   }
 
   async getConnectedUsers(): Promise<User[]> {

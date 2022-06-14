@@ -81,33 +81,17 @@ export class UsersController {
     }
   }
 
-  @Get('/userInfo')
-  @UseGuards(AuthGuard('jwt'), AuthUser)
-  /** Swagger **/
-  @ApiOperation({ summary: 'User Informations' })
-  @ApiOkResponse({ description: 'User Informations' })
-  @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
-  /** End of swagger **/
-  userInfo(@Query('username') username: string): Promise<Partial<User>> {
-    try {
-      this.logger.log("Get('userInfo') route called for user " + username + ' (username)');
-      return this.usersService.userInfo(username);
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  @Get('partialInfo')
+  @Post('partialInfo')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'Partial User Information' })
   @ApiOkResponse({ description: 'Partial User Information using id' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  getPartialUserInfo(@Query('userId') userId: number): Promise<Partial<User>> {
+  getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
-      this.logger.log("Get('partialInfo') route called for user " + userId + ' (nickname)');
-      return this.usersService.getPartialUserInfo(userId);
+      this.logger.log("Post('partialInfo') route called for user " + userId + ' (nickname)');
+      return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
       throw e;
     }
