@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { ChanUser } from '../entities/channelUser.entity';
 import { ChannelI } from '../interfaces/channel.interface';
@@ -157,6 +157,17 @@ export class ChanServices {
       { relations: ['users'] }
     );
     return channelWhitChanUser.users;
+  }
+
+  async filterUserByChanName(name: string): Promise<Channel[]> {
+
+    return this.chanRepository.find({ //or findAndCount
+      skip: 0,
+      take: 10,
+      order: {channelName: "DESC"},
+      select: ['id', 'channelName', 'avatar'],
+      where: [ { channelName: Like(`%${name}%`) } ]
+    })
   }
 
   //-------------------------------------------------//

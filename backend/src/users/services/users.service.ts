@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
   Res, 
   BadRequestException} from '@nestjs/common';
-import { Repository, Connection } from 'typeorm';
+import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../user.dto';
@@ -279,6 +279,7 @@ export class UsersService {
           opponent.push('deleted user');
         }
       }
+
       gameHistory = { 'nb': user.gamesWon.length, 'infos': { 'score': score, 'opponent': opponent, 'opponentScore': opponentScore }};
     } else {
       gameHistory = { nb: 0, infos: {} };
@@ -301,6 +302,17 @@ export class UsersService {
       gameHistory = { 'won': gameHistory, 'lost': {nb: 0, infos: {} }};
     }
     return gameHistory;
+  }
+
+  async filterUserByName(name: string): Promise<User[]> {
+
+    return this.userRepository.find({ //or findAndCount
+      skip: 0,
+      take: 10,
+      order: {nickname: "DESC"},
+      select: ['id', 'nickname', 'eloScore', 'avatarId'],
+      where: [ { nickname: Like(`%${name}%`) } ]
+    })
   }
 
 }
