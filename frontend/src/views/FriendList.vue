@@ -4,9 +4,14 @@
 				<v-text-field label="add Friend" v-model="friendName"></v-text-field>
 				<div class="button_slick button_slide" @click="addFriend(friendName)">Add Friend</div>
 			</div>
-		<v-col v-if="listFriends">
+			<div class="button_slick">
+				<v-text-field label="remove Friend" v-model="friendName"></v-text-field>
+				<div class="button_slick button_slide" @click="removeFriend(friendName)">Remove Friend</div>
+			</div>
+		<v-col v-if="listFriends && userInfo">
 				<div class="overlay" v-for="(user, index) in listFriends.friends.names" :key="user.names">
 					<h1 class="text">{{user}}</h1>
+					<h1 class="text">{{userInfo[user].eloScore}}</h1>
 					<h1 class="text">{{listFriends.friends.status[index]}}</h1>
 				</div>
 		</v-col>
@@ -15,22 +20,36 @@
 
 <script lang="ts">
 import { onMounted } from "@vue/runtime-core"
-import { getFriendsList, addFriend, getUserInfos } from "../components/FetchFunctions"
+import { getFriendsList, addFriend, getUserInfos, removeFriend } from "../components/FetchFunctions"
 import { ref, defineComponent } from "vue"
 
 export default defineComponent ({
 	setup(){
 		const listFriends = ref<null | any>(null);
 		const friendName = ref<string>("");
+		const userInfo = ref<any | null>(null);
 
 		onMounted(async () =>{
 			console.log('getting friend list')
 			listFriends.value = await getFriendsList()
-			console.log(JSON.stringify(listFriends.value))
-			console.log(JSON.stringify(await getUserInfos("afeuerst")))
+			console.log("listfriend:::" + JSON.stringify(listFriends.value))
+			if (listFriends.value.friends.names[0]){
+				for(let nickname of listFriends.value.friends.names){
+					const Info = await getUserInfos(nickname)
+					console.log("INFOS:::" + JSON.stringify(Info))
+					userInfo.value = {
+					...userInfo.value,
+					[Info.nickname]: {
+						eloScore: Info.eloScore,
+						id: Info.id,
+					}
+				}
+				}
+			}
+			console.log("userInfo:::" + JSON.stringify(userInfo.value))
 			})
 
-		return {listFriends, addFriend, friendName}
+		return {listFriends, addFriend, friendName, userInfo, removeFriend}
 	}
 })
 </script>
