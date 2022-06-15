@@ -1,8 +1,5 @@
-import {
-  Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res,
-  BadRequestException
-} from '@nestjs/common';
+import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
+  Res, BadRequestException} from '@nestjs/common';
 import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -125,7 +122,7 @@ export class UsersService {
 
   async listFriends(user: User): Promise<{}> {
     if (user.friends.length === 0) {
-      return { 'friends': { 'nb': 0, 'names': {}, 'status': {} } };
+      return { 'friends': { 'names': {}, 'status': {} }};
     }
     let names = [];
     let status = [];
@@ -136,7 +133,7 @@ export class UsersService {
         status.push(friend.status);
       }
     }
-    return { 'friends': { 'nb': names.length, 'names': names, 'status': status } };
+    return { 'friends': { 'names': names, 'status': status }};
   }
 
   async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
@@ -203,20 +200,12 @@ export class UsersService {
     return res;
   }
 
-  async userInfo(userName: string): Promise<Partial<User>> {
-    let user: User = undefined;
-    user = await this.userRepository.findOne({ username: userName });
+  async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    const { username, twoFASecret, is2FAEnabled, ...res } = user;
-    return res;
-  }
-
-  async getPartialUserInfo(id: number): Promise<Partial<User>> {
-    const user = await this.userRepository.findOne(id);
-    if (!user) return user;
-    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
+    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
   }
 
   async getConnectedUsers(): Promise<User[]> {

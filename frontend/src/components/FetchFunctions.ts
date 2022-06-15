@@ -90,10 +90,11 @@ export async function uploadAvatar(file: any) {
 }
 
 export async function getFriendsList() {
-	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends")
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/listFriends", { credentials: "include", method: "POST"})
 		.then(res => res.json())
-		.then((data) => {
-			return data.statusCode == 200? data.data : null;})
+		.then(res => {
+			return res
+		})
 }
 
 export async function addFriend(nickName: string) {
@@ -108,5 +109,15 @@ export async function addFriend(nickName: string) {
 	.then(res => {
 		console.log(res)
 		return res.status == 200? true : false
+	})
+}
+
+export async function getUserInfos(nickName: string) {
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/partialInfo?" + new URLSearchParams({username: nickName})
+	, {method: 'POST', credentials: "include"})
+	.then(res => res.json())
+	.then(res => {
+		console.log(res)
+		return res
 	})
 }
