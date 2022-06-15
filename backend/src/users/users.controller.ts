@@ -276,6 +276,8 @@ export class UsersController {
     try {
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
+      console.log(friend.nickname);
+      console.log(friend.id);
       await this.usersService.addFriend(req.user, friend.id);
       return await this.usersService.listFriends(req.user);
     } catch(e) {

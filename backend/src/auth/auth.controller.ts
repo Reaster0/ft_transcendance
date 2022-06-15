@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, UnauthorizedException,
-  UseGuards, Logger } from '@nestjs/common';
+  UseGuards, Logger, ConsoleLogger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RequestUser } from './interfaces/requestUser.interface';
 import { twoFACodeDto } from './dto/twoFACode.dto';
+import { userInfo } from 'os';
 
 @ApiTags('Authentification Process Controller')
 @Controller('auth')
@@ -35,12 +36,23 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     this.logger.log('callback');
+
+    /*
+    console.log(req);
+    console.log(req.user);
+
+    const user = await req.user;
+    console.log(user);
+    const username = await user['username'];
+    console.log(username);
+    */
+
     const payload: JwtPayload = {
-      username: req.user['username'],
+      username: await req.user['username'],
       twoFA: false,
     };
-    const jwtToken: string = await this.jwtService.sign(payload);
-    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' }); //secure: process.env.MODE !== 'dev'}); //set cookie
+    const jwtToken: string = this.jwtService.sign(payload);
+    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict'}); //secure: process.env.MODE !== 'dev'}); //set cookie
     res.redirect(process.env.FRONTEND);
   }
 

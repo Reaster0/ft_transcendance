@@ -18,6 +18,7 @@ export class OauthStrategy42 extends PassportStrategy(Strategy, '42') {
     const user = {
       username: profile['username'],
     };
+    console.log('in vvalidate: ', user);
     return this.authService.validateUser(user);
   }
 }
