@@ -102,14 +102,8 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-<<<<<<< HEAD
-      //const blockedUser: number = user.blockedUID.find(element => element === sender.id)
-  async addFriend(user: User, friendId: number): Promise<void> {
-    const found = user.friends.find( (element) => element === friendId);
-=======
   async addFriend(user: User, friendId: number): Promise <void> {
     const found = await user.friends.find((element) => element === friendId);
->>>>>>> c53e9055bcafba4cc82145a4168b64edb4f08105
     if (found) {
       throw new BadRequestException('User is already a friend');
     }
