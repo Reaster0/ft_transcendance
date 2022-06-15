@@ -81,33 +81,17 @@ export class UsersController {
     }
   }
 
-  @Get('/userInfo')
-  @UseGuards(AuthGuard('jwt'), AuthUser)
-  /** Swagger **/
-  @ApiOperation({ summary: 'User Informations' })
-  @ApiOkResponse({ description: 'User Informations' })
-  @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
-  /** End of swagger **/
-  userInfo(@Query('username') username: string): Promise<Partial<User>> {
-    try {
-      this.logger.log("Get('userInfo') route called for user " + username + ' (username)');
-      return this.usersService.userInfo(username);
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  @Get('partialInfo')
+  @Post('partialInfo')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: 'Partial User Information' })
   @ApiOkResponse({ description: 'Partial User Information using id' })
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
-  getPartialUserInfo(@Query('userId') userId: number): Promise<Partial<User>> {
+  getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
-      this.logger.log("Get('partialInfo') route called for user " + userId + ' (nickname)');
-      return this.usersService.getPartialUserInfo(userId);
+      this.logger.log("Post('partialInfo') route called for user " + nickname);
+      return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
       throw e;
     }
@@ -169,7 +153,7 @@ export class UsersController {
     }
   }
 
-  @Get('listFriends')
+  @Post('listFriends')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   /** Swagger **/
   @ApiOperation({ summary: "Getting game history as array of GameHistory." })
@@ -179,6 +163,7 @@ export class UsersController {
   /** End of swagger **/
   async listFriends(@Req() req: RequestUser): Promise<{}> {
     try {
+      this.logger.log("Post('listFriends') route called by user " + req.user.username);
       return await this.usersService.listFriends(req.user);
     } catch (e) {
       throw (e);
@@ -274,6 +259,7 @@ export class UsersController {
   /** End of swagger **/
   async addFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
     try {
+      this.logger.log("Patch('addFriend')route called by " + req.user.username);
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.addFriend(req.user, friend.id);
@@ -293,6 +279,7 @@ export class UsersController {
   /** End of swagger **/
   async removeFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
     try {
+      this.logger.log("Patch ('removeFriend') route called by " + req.user.username);
       const { nickname } = friendDto;
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.removeFriend(req.user, friend.id);

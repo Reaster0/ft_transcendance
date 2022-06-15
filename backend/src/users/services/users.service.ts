@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res, 
-  BadRequestException} from '@nestjs/common';
+  Res, BadRequestException} from '@nestjs/common';
 import { Repository, Connection } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -103,7 +102,7 @@ export class UsersService {
   }
 
   async addFriend(user: User, friendId: number): Promise <void> {
-    const found = await user.friends.find((element) => friendId);
+    const found = await user.friends.find((element) => element === friendId);
     if (found) {
       throw new BadRequestException('User is already a friend');
     }
@@ -122,7 +121,7 @@ export class UsersService {
 
   async listFriends(user: User): Promise<{}> {
     if (user.friends.length === 0) {
-      return { 'friends': { 'nb' : 0, 'names': {}, 'status': {} }};
+      return { 'friends': { 'names': {}, 'status': {} }};
     }
     let names = [];
     let status = [];
@@ -133,7 +132,7 @@ export class UsersService {
         status.push(friend.status);
       }
     }
-    return { 'friends': { 'nb': names.length, 'names': names, 'status': status }};
+    return { 'friends': { 'names': names, 'status': status }};
   }
 
   async addAvatar(user: User, avatarBuffer: Buffer): Promise<Avatar> {
@@ -200,20 +199,12 @@ export class UsersService {
     return res;
   }
 
-  async userInfo(userName: string): Promise<Partial<User>> {
-    let user: User = undefined;
-    user = await this.userRepository.findOne({ username: userName });
+  async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    const { username, twoFASecret, is2FAEnabled, ...res } = user;
-    return res;
-  }
-
-  async getPartialUserInfo(id: number): Promise<Partial<User>> {
-    const user = await this.userRepository.findOne(id);
-    if (!user) return user;
-    return { nickname: user.nickname, eloScore: user.eloScore, avatarId: user.avatarId };
+    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
   }
 
   async getConnectedUsers(): Promise<User[]> {
