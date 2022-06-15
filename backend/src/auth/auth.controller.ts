@@ -35,25 +35,21 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    this.logger.log('callback');
 
-    /*
-    console.log(req);
-    console.log(req.user);
-
-    const user = await req.user;
-    console.log(user);
-    const username = await user['username'];
-    console.log(username);
-    */
+    const first = req.user['first'];
+    const user = req.user['user'];
 
     const payload: JwtPayload = {
-      username: await req.user['username'],
+      username: user['username'],
       twoFA: false,
     };
+
     const jwtToken: string = this.jwtService.sign(payload);
     res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict'}); //secure: process.env.MODE !== 'dev'}); //set cookie
-    res.redirect(process.env.FRONTEND);
+    if (!first)
+      res.redirect(process.env.FRONTEND);
+    else
+      res.redirect(process.env.FRONTEND + '/user?first=true');
   }
 
   @ApiOperation({ summary: 'Code authentication - Secret' })

@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Req } from '@nestjs/common';
 import { Response } from 'express';
 import { authenticator } from 'otplib';
 import { CreateUserDto } from 'src/users/user.dto';
@@ -72,4 +72,14 @@ export class AuthService {
     }
     return user;
   }
+
+
+  /// ----------------------------------------------------------------
+  async getUserNameFromRequest(res: any) {
+    console.log(res)
+    const result = await res.username;
+    return result;
+    //return res.user.username;
+  }
+
 }

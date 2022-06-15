@@ -10,6 +10,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
+import { tmpdir } from 'os';
 
 @Injectable()
 export class UsersService {
@@ -44,16 +45,16 @@ export class UsersService {
     return user;
   }
 
-  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<Promise<User> | { user: Promise<User>, first: boolean }> {
+  async retrieveOrCreateUser(createUserDto: CreateUserDto): Promise<{ user: User, first: boolean }> {
     const { username } = createUserDto;
     let user = await this.userRepository.findOne({ username: username });
-    if (user) {
-      return user;
-    }
+    if (user)
+      return {user, first: false};
+
     const nickname = await this.generateNickname(username);
-    user = await this.userRepository.create({ username: username, nickname: nickname });
-    // TODO redirect user to modify info page
-    return { user: this.userRepository.save(user), first: true };
+    user = this.userRepository.create({ username: username, nickname: nickname });
+
+    return { user: await this.userRepository.save(user), first: true };
   }
 
   async generateNickname(nickname: string): Promise<string> {
@@ -103,7 +104,7 @@ export class UsersService {
 
       //const blockedUser: number = user.blockedUID.find(element => element === sender.id)
   async addFriend(user: User, friendId: number): Promise<void> {
-    const found = user.friends.find( element => element === friendId);
+    const found = user.friends.find( (element) => element === friendId);
     if (found) {
       throw new BadRequestException('User is already a friend');
     }
