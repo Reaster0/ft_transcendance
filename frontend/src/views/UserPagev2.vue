@@ -9,6 +9,7 @@
 					<h1 class="overflow-x-auto">{{nickname}}</h1>
 					<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
 					<div class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
+					<div class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
 				</v-col>
 				<v-col v-else align="center">
 					<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
@@ -80,6 +81,10 @@ export default defineComponent ({
 			router.push('/2auth')
 		}
 
+		function redirFriends(){
+			router.push('/user/friends')
+		}
+
 		//TODO check type of e
 		async function imgReceived(e : any) {
 			img_accepted.value = await uploadAvatar(e)
@@ -100,7 +105,8 @@ export default defineComponent ({
 		redirTwoAuth,
 		imgReceived,
 		img_accepted,
-		gameHistory}
+		gameHistory,
+		redirFriends}
 	}
 })
 </script>
