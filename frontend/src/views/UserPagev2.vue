@@ -16,8 +16,10 @@
 							<v-img :src="avatar" max-width="300px"/>
 							<h1 class="overflow-x-auto">{{nickname}}</h1>
 							<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
-							<div v-if="!route.query.user" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
-							<div v-if="!route.query.user" class="button_slick button_slide Spotnik" @click="redirFriends">FriendList</div>
+							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
+							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
+							<div v-if="route.params.username && !isFriend" class="button_slick button_slide Spotnik" @click="addMyFriend(nickname)">Add Friend</div>
+							<div v-if="route.params.username && isFriend" class="button_slick Spotnik">Added as friend</div>
 						</v-col>
 						<v-col v-else align="center">
 							<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
@@ -64,7 +66,7 @@ import { onMounted } from "@vue/runtime-core"
 import { ref, watch, defineComponent } from "vue"
 import { getAvatarID, getHistoryID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
-import { updateUser, uploadAvatar, getUserInfos } from "../components/FetchFunctions"
+import { updateUser, uploadAvatar, getUserInfos, isMyFriend, addFriend } from "../components/FetchFunctions"
 import router from '../router/index'
 
 export default defineComponent ({
@@ -81,30 +83,28 @@ export default defineComponent ({
 		const gameHistory = ref<null | any>(null);
 		const route = ref<null | any>(useRoute());
 		const userSearch = ref<string>("");
+		const store = useStore() as Store<any>;
+		const isFriend = ref<boolean>(false);
 
 		onMounted(async () => {
-			await refreshPage()
-		})
-
-		async function refreshPage(){
-			if (route.value.query.user){
-				console.log(route.value.query.user)
-				user.value = await getUserInfos(route.value.query.user as string) as any;
+			if (route.value.params.username){
+				console.log(route.value.params.username)
+				user.value = await getUserInfos(route.value.params.username as string) as any;
 				if (user.value.statusCode == 404)
 					return
 				avatar.value = await getAvatarID(user.value.id) as any;
 				nickname.value = user.value.nickname as string;
 				gameHistory.value = await getHistoryID(user.value.id) as any;
+				isFriend.value = await isMyFriend(user.value.id)
 			}
 			else{
-				const store = useStore() as Store<any>;
 				user.value = await store.getters.whoAmI as any;
 				console.log(user.value)
 				nickname.value = user.value.nickname as string;
 				avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
 				gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
 			}
-		}
+		})
 
 		function imgUp() {
 			document.getElementById("upload")!.click()
@@ -118,8 +118,13 @@ export default defineComponent ({
 			router.push('/user/friends')
 		}
 
-		function goSearchUser(userName: string) {
-			router.push('/user?' + new URLSearchParams({user: userName}))
+		async function goSearchUser(username: string) {
+			router.push('/redirect?' + new URLSearchParams({url: ("/user/" + username)}))
+		}
+
+		async function addMyFriend(nickname: string) {
+			await addFriend(nickname)
+			isFriend.value = true
 		}
 
 		//TODO check type of e
@@ -130,7 +135,8 @@ export default defineComponent ({
 		}
 
 		watch(nickname, async (newnick: any) => {
-			name_accepted.value = await updateUser(newnick) as boolean
+			if (!route.value.params.username)
+				name_accepted.value = await updateUser(newnick) as boolean
 		})
 
 		return {user,
@@ -146,7 +152,9 @@ export default defineComponent ({
 		redirFriends,
 		route,
 		userSearch,
-		goSearchUser}
+		goSearchUser,
+		isFriend,
+		addMyFriend}
 	}
 })
 </script>

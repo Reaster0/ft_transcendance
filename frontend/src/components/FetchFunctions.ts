@@ -107,7 +107,6 @@ export async function addFriend(nickName: string) {
 		},
 	})
 	.then(res => {
-		console.log(res)
 		return res.status
 	})
 }
@@ -122,7 +121,6 @@ export async function removeFriend(nickName: string) {
 		},
 	})
 	.then(res => {
-		console.log(res)
 		return res.status
 	})
 }
@@ -131,8 +129,9 @@ export async function getUserInfos(nickName: string) {
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/partialInfo?" + new URLSearchParams({nickname: nickName})
 	, {method: 'POST', credentials: "include"})
 	.then(res => res.json())
-	.then(res => {
-		console.log(res)
-		return res
-	})
+}
+
+export async function isMyFriend(id : number) {
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/isMyFriend/" + id, {credentials: "include"})
+	.then(res => res.json())
 }
