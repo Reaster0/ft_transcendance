@@ -199,11 +199,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage('getChannelUsers')
-  async getChanneUsers(client: Socket, channelId: string): Promise<FrontUserI> {
+  async getChanneUsers(client: Socket, channelId: string): Promise<any> {
     this.logger.log('Get channel users');
     const channel = await this.chanServices.findChannelWithUsersAndMuted(channelId);
     let isMember = false;
-    let res = [] as FrontUserI[];
+    let res = [] as any[];
     for (let user of channel.users) {
       let role = '' as string;
       if (user.id === client.data.user.id) {
@@ -214,7 +214,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       } else if (channel.admins.includes(user.id)) {
         role = 'admin';
       } // TODO else if check for muted user (may be a little more complicated)
-      res.push({ 'id': user.id, 'name': user.nickname, 'status': user.status, 'role': role })
+      res.push({ 'id': user.id, 'role': role })
     }
     if (isMember === false) {
       this.logger.log('Access Refused');
