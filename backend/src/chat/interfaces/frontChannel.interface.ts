@@ -21,3 +21,5 @@ export class FrontMessageI {
     userId: number;
     date: Date;  
 }
+
+//export class FrontId

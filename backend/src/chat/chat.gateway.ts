@@ -255,9 +255,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
     if (!connectedUsers)  return;
 
-    var result: {userId: number, role: ChanUserI}[];
+    let result: ChanUserI[];
     for (const user of connectedUsers) {
-      result.push({userId: user.id, role: await this.chanUserServices.findUserOnChannel(channelId, user)});
+      const role: ChanUserI = await this.chanUserServices.findUserOnChannel(channelId, user);
+      result.push(role);
     }
     client.emit('channelUser', result);
   }
