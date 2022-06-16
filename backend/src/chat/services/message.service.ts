@@ -17,14 +17,11 @@ export class MessageService {
     return this.messageRepository.save(this.messageRepository.create(message));
   }
 
-  async findMessagesForChannel(
-    channel: ChannelI,
-    user: User,
-  ): Promise<MessageI[]> {
+  async findMessagesForChannel(channelId: string, user: User): Promise<MessageI[]> {
     const query = this.messageRepository
       .createQueryBuilder('message')
       .leftJoin('message.channel', 'channel')
-      .where('channel.id = :channelID', { channelID: channel.id })
+      .where('channel.id = :channelID', { channelID: channelId })
       .leftJoinAndSelect('message.user', 'user')
       .orderBy('message.date', 'ASC');
     const messagesFound: MessageI[] = await query.getMany();
