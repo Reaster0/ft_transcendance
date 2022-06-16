@@ -322,4 +322,11 @@ export class UsersService {
     })
   }
 
+
+  isMyFriend(user: User, friendId: number): boolean {
+
+    const friend = user.friends.find(element => element === friendId);
+
+    return (friend !== undefined);
+  }
 }
