@@ -223,7 +223,7 @@ export class UsersService {
     this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
   }
 
-  async disconectUserToChat(user: User) {
+  async disconnectUserToChat(user: User) {
     this.userRepository.update(user.id, { status: Status.OFFLINE, chatSocket: '' });
   }
 

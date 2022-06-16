@@ -595,6 +595,7 @@ export default defineComponent({
 
       connection.value!.on('usersList', function(params: any) {
         console.log('receive new users list');
+        console.log(params);
         store.commit('setUsersList', params);
         if (!update.connected) {
           connection.value!.emit('emitMyChannels');
@@ -604,7 +605,6 @@ export default defineComponent({
       connection.value!.on('channelList', function(params: any) {
         console.log('list of joined channels received');
         userChannels.channels = params;
-        console.log(params);
         update.connected = true;
       })
 

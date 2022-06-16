@@ -13,7 +13,6 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { ChannelI} from './interfaces/channel.interface';
 import { MessageI } from './interfaces/message.interface';
-import { ConnectService } from './services/connect.service';
 import { ChanServices } from './services/chan.service';
 import { ChanUserI } from './interfaces/channelUser.interface';
 import { MessageService } from './services/message.service';
@@ -27,7 +26,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   constructor(
     private readonly chanUserServices: ChanUserService,
     private readonly chanServices: ChanServices,
-    private readonly connectService: ConnectService,
     private readonly messageServices: MessageService,
     @Inject(forwardRef(() => AuthService))
     private readonly authServices: AuthService,
@@ -48,13 +46,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     try {
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
-      this.connectService.connectUser(client, user);
-      this.updateUsersStatus();
+      await this.userServices.connectUserToChat(user, client.id);
     } catch {
       this.logger.log('Failed to retrive user from client');
       return client.disconnect();
     }
-    this.logger.log(`Client connecited: ${client.id}`);
+    this.logger.log(`Client connected: ${client.id}`);
   }
 
   /******* Disconection ********/
@@ -63,7 +60,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     if (!client.data.user) {
       return client.disconnect();
     }
-    await this.connectService.disconnectUser(client.data.user);
+    await this.userServices.disconnectUserToChat(client.data.user)
     client.disconnect();
     this.updateUsersStatus();
     this.logger.log(`Client disconnected: ${client}`);
@@ -209,6 +206,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /****** Emit Service ******/
   async updateUsersStatus() {
     const connectedUsers: User[] = await this.userServices.getConnectedUsers();
+    console.log(connectedUsers);
     return this.server.emit('usersList', connectedUsers); // user or user.id ?
   }
 

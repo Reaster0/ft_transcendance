@@ -5,7 +5,6 @@ import { ChatGateway } from './chat.gateway';
 import { ChanUser } from './entities/channelUser.entity';
 import { Message } from './entities/message.entity';
 import { ChanServices } from './services/chan.service';
-import { ConnectService } from './services/connect.service';
 import { MessageService } from './services/message.service';
 import { AuthModule } from '../auth/auth.module';
 import { ChatController } from './chat.controller';
@@ -32,9 +31,8 @@ import { ChanUserService } from './services/chanUser.service';
     ChatGateway,
     ChanServices,
     ChanUserService,
-    ConnectService,
     MessageService,
   ],
-  exports: [ChatGateway, ChanUserService, ChanServices, ChanUserService, ConnectService, MessageService],
+  exports: [ChatGateway, ChanUserService, ChanServices, ChanUserService, MessageService],
 })
 export class ChatModule {}
