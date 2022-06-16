@@ -7,5 +7,5 @@ export interface MessageI {
   user: User;
   channel: ChannelI;
   date: Date;
-  update_at: Date;
+  //update_at: Date;
 }

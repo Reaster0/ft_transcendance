@@ -1,3 +1,4 @@
+import { User } from "src/users/entities/user.entity";
 import { Status } from "src/users/enums/status.enum";
 import { ChanUserI } from "./channelUser.interface";
 
@@ -13,4 +14,10 @@ export class FrontUserI {
     avatarId: number;
     status: Status;
     role: ChanUserI
+}
+
+export class FrontMessageI {
+    content: string;
+    userId: number;
+    date: Date;  
 }
