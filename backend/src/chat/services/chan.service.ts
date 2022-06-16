@@ -122,42 +122,16 @@ export class ChanServices {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-  /*
-  async findUserByChannel(channel: ChannelI, userID: number): Promise<ChanUserI> {
-    console.log(userID, channel); //this look strange
-    return this.chanUserRepository.findOne({ where: { channel: channel, userID: userID } });
-  }
-  */
-
   async findChannel(channelName: string): Promise<Channel> {
     return this.chanRepository.findOne({channelName});
   }
 
-  /* no need anymore ----------
-  GetImageFromBuffer(channels: ChannelI[]): StreamableFile[] {
-    var image: StreamableFile[] = [];
-    const defaultStream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR),);
-
-    for (const chan of channels) {
-      if (!chan.avatar || chan.avatar.byteLength === 0) {
-        image.push(new StreamableFile(defaultStream));
-      } else {
-        const stream = Readable.from(chan.avatar);
-        image.push(new StreamableFile(stream));
-      }
-    }
-    
-    return image;
-  }
-  */
-
-
-  async getAllChanUser(channel: ChannelI): Promise<User[]> {
-    const channelWhitChanUser: Channel = await this.chanRepository.findOne(
-      channel.id,
+  async getAllChanUser(channelId: string): Promise<User[]> {
+    const currentChanUsers: Channel = await this.chanRepository.findOne(
+      channelId,
       { relations: ['users'] }
     );
-    return channelWhitChanUser.users;
+    return currentChanUsers.users;
   }
 
   async filterJoinableChannel(name: string): Promise<Channel[]> {
@@ -169,6 +143,15 @@ export class ChanServices {
       select: ['id', 'channelName', 'avatar'],
       where: [ { channelName: Like(`%${name}%`), publicChannel: true} ]
     })
+  }
+
+  async userIsInChannel(user: User, channelId: string): Promise<boolean> {
+
+    const currentChanUsers = await this.getAllChanUser(channelId);
+    const me: User = currentChanUsers.find( (element) => element.id === user.id);
+    if (user)
+      return true;
+    return false;
   }
 
   //-------------------------------------------------//

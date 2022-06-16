@@ -67,7 +67,7 @@ export class ChatController {
   async createChannelTest() {
     const creator = await this.userService.findUserById('1');
     const chan: ChannelI = {
-        channelName: "channeltest2",
+        channelName: "channeltest3",
         owner: 1, //owner id
         password: '',
         publicChannel: true,

@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
-import { tmpdir } from 'os';
+import { ChatGateway } from '../../chat/chat.gateway';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +19,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     private readonly avatarsService: AvatarsService,
     private connection: Connection,
+    private readonly chatGateway: ChatGateway,
   ) { }
 
   async findUserById(id: string): Promise<User> {
@@ -93,6 +94,7 @@ export class UsersService {
 
   async changeStatus(user: User, newStatus: Status): Promise<void> {
     await this.userRepository.update(user.id, { status: newStatus });
+    this.chatGateway.server.emit('changeUserStatus', { id: user.id, status: newStatus});
   }
 
   async modifyElo(user: User, opponentElo: number, userWon: boolean): Promise<void> {
@@ -200,6 +202,7 @@ export class UsersService {
     return res;
   }
 
+  //why by nickname and not by id ?
   async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
@@ -216,6 +219,7 @@ export class UsersService {
     return connectedUser;
   }
 
+  // for chat
   async getUsers(): Promise<User[]> {
     const users: User[] = await this.userRepository.find({
       select: ['id', 'nickname', 'avatarId', 'status']
