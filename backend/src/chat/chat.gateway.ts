@@ -36,9 +36,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('ChatGateway');
 
-  @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: string): void {
-    this.server.emit('msgToClient', payload);
+  afterInit(server: Server) {
+    this.logger.log('Chat is Init 🙏');
   }
 
   /******* Connection ********/
@@ -47,11 +46,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
       await this.userServices.connectUserToChat(user, client.id);
+      this.sendUsersList();
+      this.logger.log(`Client connected: ${client.id}`);
     } catch {
-      this.logger.log('Failed to retrive user from client');
+      this.logger.log('Failed to retrieve user from client');
       return client.disconnect();
     }
-    this.logger.log(`Client connected: ${client.id}`);
   }
 
   /******* Disconection ********/
@@ -62,7 +62,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     await this.userServices.disconnectUserToChat(client.data.user)
     client.disconnect();
-    this.updateUsersStatus();
+    this.sendUsersList();
     this.logger.log(`Client disconnected: ${client}`);
   }
 
@@ -97,7 +97,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   // @UseGuards(AuthChat)
   @SubscribeMessage('deleteChannel')
   async onDeleteChannel(client: Socket, channel: ChannelI) {
-
     await this.chanServices.deleteChannel(channel);
     await this.emitChannels();
     this.logger.log(`delete Channel: ${channel.channelName}`);
@@ -106,7 +105,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //  @UseGuards(AuthChat)
   @SubscribeMessage('message')
   async onSendMessage(client: Socket, params: { channelId: string, message: MessageI }) {
-
     this.logger.log('sending message');
     console.log(params.message);
     //1) get the sender role
@@ -144,10 +142,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
   }
 
-  afterInit(server: Server) {
-    this.logger.log('Chat is Init 🙏');
-  }
-
   /************** . Join Channel *************/
   //  @UseGuards(AuthChat)
   @SubscribeMessage('joinChannel')
@@ -164,7 +158,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     // mmmhhhh
     await this.chanServices.pushUserToChan(channel, client.data.user);
     await this.chanUserServices.addUserToChan(channel, client.data.user);
-    //this.server.to(client.id).emit('previousMessages', messages);
+    //this.server.to(client.id).emit('previousMessages', messages); //ok but could reduce socket trafic
     this.logger.log(`${client.data.user.username} joinned ${channel.channelName}`);
   }
 
@@ -186,7 +180,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const channelFound = await this.chanServices.getChan(channel.id);
 
       const ret: Boolean = await this.chanServices.updateChannel(channelFound, input.info)
-      if (ret === true){
+      if (ret === true) {
           await this.emitChannels();
           return true;
       }
@@ -204,17 +198,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /****** Emit Service ******/
-  async updateUsersStatus() {
-    const connectedUsers: User[] = await this.userServices.getConnectedUsers();
-    console.log(connectedUsers);
-    return this.server.emit('usersList', connectedUsers); // user or user.id ?
+  async sendUsersList() {
+    const users = await this.userServices.getUsers();
+    this.server.emit('usersList', users);
   }
 
   @SubscribeMessage('emitChannels')
   async emitChannels() {
-    console.log('we emit all the chan for that user');
     const connections: User[] = await this.userServices.getConnectedUsers();
-    console.log(connections);
     for (const connection of connections) {
       const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(connection.id);
       this.server.to(connection.chatSocket).emit('channelList', channels);
@@ -223,34 +214,47 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('emitMyChannels')
   async emitMyChannels(client: Socket) {
+    this.logger.log('Get channels joined by user');
     const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(client.data.user.id);
     client.emit('channelList', channels);
   }
 
-  @SubscribeMessage('getChannelMessages')
-  async messageFromChannel(client: Socket, params: { id: string }) {
-    const messages = await this.messageServices.findMessagesForChannel(params.id, client.data.user);
-    this.server.to(client.id).emit('channelMessages', {id: params.id, messages: messages});
-  }
-
   @SubscribeMessage('getChannelUsers')
-  async getChannelUsers(client: Socket, channelId: string) {
+  async getChanneUsers(client: Socket, channelId: string) {
+    // this check is expensive !!!!! maybe is not needed
+    this.logger.log('Get channel users');
+    if (! await this.chanServices.userIsInChannel(client.data.user, channelId)) {
+      return;
+    }
     const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
-    var result: FrontUserI[];
+    if (!connectedUsers) {
+      return;
+    }
+    var result: {userId: number, role: string}[];
     for (const user of connectedUsers) {
-      var info: FrontUserI;
-      info.id = user.id;
-      info.nickname = user.nickname;
-      info.avatarId = user.avatarId;
-      info.role = await this.chanUserServices.findUserOnChannel(channelId, user)
-      result.push(info);
+      let role = 'admin';//await this.chanUserServices.findUserOnChannel(channelId, user);
+      //result.push({userId: user.id, role: role});
     }
     client.emit('channelUser', result);
+  }
+
+  @SubscribeMessage('getChannelMessages')
+  async getChannelMessage(client: Socket, channelId: string) {
+    this.logger.log('Get channel messages');
+    if (!await this.chanServices.userIsInChannel(client.data.user, channelId))
+      return;
+    const message = await this.messageServices.findMessagesForChannel(channelId, client.data.user);
+    client.emit('channelMessages', message);
   }
 
   @SubscribeMessage('getJoinnableChannels')
   async getJoinnableChannels(client: Socket, name: string) {
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
     client.emit('joinnableChannel', channels); // only for client
+  }
+
+  @SubscribeMessage('retrieveUsers')
+  async retrieveUsersTest(client: Socket, param: { id: string }) {
+    client.emit('channelUsers', { id: param.id, users: [] });
   }
 }

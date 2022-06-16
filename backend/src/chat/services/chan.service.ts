@@ -129,7 +129,7 @@ export class ChanServices {
 
   async getAllChanUser(channelId: string): Promise<User[]> {
     const currentChanUsers: Channel = await this.chanRepository.findOne(
-      { id: channelId } ,
+      channelId,
       { relations: ['users'] }
     );
     return currentChanUsers.users;
@@ -144,6 +144,15 @@ export class ChanServices {
       select: ['id', 'channelName', 'avatar'],
       where: [ { channelName: Like(`%${name}%`), publicChannel: true} ]
     })
+  }
+
+  async userIsInChannel(user: User, channelId: string): Promise<boolean> {
+
+    const currentChanUsers = await this.getAllChanUser(channelId);
+    const me: User = currentChanUsers.find( (element) => element.id === user.id);
+    if (user)
+      return true;
+    return false;
   }
 
   //-------------------------------------------------//

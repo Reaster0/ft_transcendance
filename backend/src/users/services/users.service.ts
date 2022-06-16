@@ -95,7 +95,7 @@ export class UsersService {
 
   async changeStatus(user: User, newStatus: Status): Promise<void> {
     await this.userRepository.update(user.id, { status: newStatus });
-    this.chatGateway.updateUsersStatus();
+    this.chatGateway.sendUsersList();
   }
 
   async modifyElo(user: User, opponentElo: number, userWon: boolean): Promise<void> {
@@ -203,6 +203,7 @@ export class UsersService {
     return res;
   }
 
+  //why by nickname and not by id ?
   async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
@@ -217,6 +218,14 @@ export class UsersService {
       where: [{ status: Status.ONLINE }],
     });
     return connectedUser;
+  }
+
+  // for chat
+  async getUsers(): Promise<User[]> {
+    const users: User[] = await this.userRepository.find({
+      select: ['id', 'nickname', 'avatarId', 'status']
+    })
+    return users;
   }
 
   async connectUserToChat(user: User, socketID: string) {
@@ -314,4 +323,11 @@ export class UsersService {
     })
   }
 
+
+  isMyFriend(user: User, friendId: number): boolean {
+
+    const friend = user.friends.find(element => element === friendId);
+
+    return (friend !== undefined);
+  }
 }

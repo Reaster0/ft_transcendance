@@ -103,7 +103,7 @@
                   <v-badge bordered bottom :color="getUserColor(msg.creatorId)" dot offset-x="4"
                     offset-y="10">
                     <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img :src="getUserAvatar(msg.creatorId)" />
+                      <img :src="'/users/getAvatarByAvatarId' + msg.creatorId.avatar" />
                     </v-avatar>
                   </v-badge>
                 </v-btn>
@@ -574,7 +574,6 @@ export default defineComponent({
     //let txt = ref<string>('');
 
 		onMounted(async() => {
-			console.log(document.cookie.toString());
 			try {
         connection.value = store.getters.getSocketVal;
         if (connection.value === null) {
@@ -648,7 +647,7 @@ export default defineComponent({
       update.messages = false;
       update.users = false;
       connection.value.emit('getChannelUsers', { id: channel.id });
-      connection.value.emit('getChannelMessages', { id: channel.id });
+      //connection.value.emit('getChannelMessages', { id: channel.id });
     }
 
     function getUserName(userId: number) {
