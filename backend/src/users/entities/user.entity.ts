@@ -57,7 +57,7 @@ export class User {
 
   @Column({ type: 'int', array: true, default: {} })
   @ApiProperty({ type: [Number], description: 'Blocked user identified by id.' })
-  blockedUID: number[];
+  blockedIds: number[];
   //-----------------------
 
   // GAME -----------------

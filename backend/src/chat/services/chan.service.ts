@@ -3,68 +3,43 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
-import { ChanUser } from '../entities/channelUser.entity';
-import { ChannelI } from '../interfaces/channel.interface';
-import { ChanUserI } from '../interfaces/channelUser.interface';
+import { Muted } from '../entities/muted.entity';
+import { ChannelI } from '../interfaces/back.interface';
 import * as bcrypt from 'bcrypt';
-import { timeStamp } from 'console';
 import { UsersService } from 'src/users/services/users.service';
-import { FrontChannelI } from '../interfaces/frontChannel.interface';
+import { FrontChannelI } from '../interfaces/front.interface';
 
 @Injectable()
 export class ChanServices {
   constructor(
     @InjectRepository(Channel)
     private readonly chanRepository: Repository<Channel>,
-    @InjectRepository(ChanUser)
-    private readonly chanUserRepository: Repository<ChanUser>,
+    @InjectRepository(Muted)
+    private readonly mutedRepository: Repository<Muted>,
     @Inject(forwardRef(() => UsersService))
     private readonly userServices: UsersService,
   ) {}
 
   async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
-    let { channelName, publicChannel, password } = channel;
-    //console.log(channelName);
+    let { channelName, type, password } = channel;
     const name = await this.chanRepository.findOne({ channelName: channelName });
-
 		if (name) //channel name already exist
 			return null;
-
 		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
 			return null;
-
     channel.users = [creator];
-		channel.adminUsers = [creator.id]; //Alina asking for this
+		channel.admins = [creator.id]; //Alina asking for this
 		channel.owner = creator.id;
-
-  //will see 
-		if (publicChannel === false) {
-			if (password) {
-				const salt = await bcrypt.genSalt();
-				channel.password = await bcrypt.hash(password, salt);
-      }
+		if (type === 'protected') {
+			const salt = await bcrypt.genSalt();
+			channel.password = await bcrypt.hash(password, salt);
 		}
-		//console.log(channel);
-
 		return this.chanRepository.save(channel);
 	}
 
 	async deleteChannel(channel: ChannelI) {
-		/*
- 		 if (!channel.id)
-	  		throw new InternalServerErrorException('bad request: deleteChannel');
-	  */
     const channelFound: Channel = await this.chanRepository.findOne(channel.id);
     if (channelFound) {
-      /*
-					 channelFound.users = []; //is this necessary ?
-						 try {
-							 await this.chanRepository.save(channelFound);
-						 } catch (error) {
-							 console.log(error);
-							 throw new InternalServerErrorException('failed to empty user list');
-						 }
-			 */
       try {
         await this.chanRepository.delete(channelFound.id);
       } catch (error) {
@@ -74,15 +49,13 @@ export class ChanServices {
     }
   }
 
-  //try
   async pushUserToChan(channel: ChannelI, user: User){
     let update: Channel = await this.chanRepository.findOne(channel.id);
     update.users.push(user);
     this.chanRepository.update(channel.id, update);
   }
 
-  //test
-  async removeUserToChan(channel: ChannelI, user: User) {
+  async removeUserFromChan(channel: ChannelI, user: User) {
     let update: Channel = await this.chanRepository.findOne(channel.id);
     const index = update.users.indexOf(user);
     if (index != -1) {
@@ -119,7 +92,11 @@ export class ChanServices {
     return channels;
   }
 
-  async getChan(channelID: string): Promise<ChannelI> {
+  async findChannelWithUsersAndMuted(channelID: string): Promise<Channel> {
+    return this.chanRepository.findOne(channelID, { relations: ['users', 'muted'] });
+  }
+
+  async findChannelWithUsers(channelID: string): Promise<ChannelI> {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
@@ -147,7 +124,7 @@ export class ChanServices {
   }
 
   async userIsInChannel(user: User, channelId: string): Promise<boolean> {
-
+    console.log(await this.chanRepository.findOne(channelId));
     const currentChanUsers = await this.getAllChanUser(channelId);
     const me: User = currentChanUsers.find( (element) => element.id === user.id);
     if (user)
@@ -155,34 +132,32 @@ export class ChanServices {
     return false;
   }
 
-  //-------------------------------------------------//
   async findSocketByChannel(channel: ChannelI): Promise<string[]> {
-    
     const member: ChannelI = await this.chanRepository.findOne({
       where: {id: channel.id},
       relations: ['users'],
     });
-
-
-      var res: string[]
-      for (const user of member.users) {
-        res.push(user.chatSocket);
-      }
-      return (res);
-    /*
-    return this.joinedSocketRepository.find({
-      where: { channel: channel },
-      relations: ['user'],
-    });
-    */
+    let res: string[]
+    for (const user of member.users) {
+      res.push(user.chatSocket);
+    }
+    return (res);
   }
 
-  /*
-  async addSocket(joinedChannel: JoinedSocketI): Promise<JoinedSocketI> {
-    return this.joinedSocketRepository.save(joinedChannel);
+  async muteUser(channel: Channel, userId: number): Promise<Muted> {
+    const now = Date.now();
+    const newChanUser = await this.mutedRepository.create({ userId: userId, date: now, channel: channel });
+    return this.mutedRepository.save(newChanUser);
+}
+
+  async getMutedUsers(channelId: string): Promise<Channel> {
+    const muted = await this.chanRepository.findOne(channelId, { relations: ['muted', 'muted.userId', 'muted.date'] });
+    // TODO maybe get special output ?
+    return muted;
   }
-  async removeSocket(socketID: string) {
-    return this.joinedSocketRepository.delete({ socketID });
+
+  async unmuteUser(channel: Channel, user: User) {
+    const chanUser: Muted = await this.mutedRepository.findOne({ where: { channel: channel, user: user} });
+    return this.mutedRepository.remove(chanUser);
   }
-  */
 }

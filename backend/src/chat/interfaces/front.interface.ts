@@ -1,6 +1,4 @@
-import { User } from "src/users/entities/user.entity";
-import { Status } from "src/users/enums/status.enum";
-import { ChanUserI } from "./channelUser.interface";
+import { Status } from "../../users/enums/status.enum";
 
 export class FrontChannelI {
     id: string;
@@ -10,10 +8,9 @@ export class FrontChannelI {
 
 export class FrontUserI {
     id: number;
-    nickname: string;
-    avatarId: number;
+    name: string;
     status: Status;
-    role: ChanUserI
+    role: string;
 }
 
 export class FrontMessageI {

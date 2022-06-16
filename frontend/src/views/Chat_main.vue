@@ -103,7 +103,7 @@
                   <v-badge bordered bottom :color="getUserColor(msg.creatorId)" dot offset-x="4"
                     offset-y="10">
                     <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img :src="'/users/getAvatarByAvatarId' + msg.creatorId.avatar" />
+                      <img :src="'/users/getAvatarByAvatarId' + msg.creatorId" />
                     </v-avatar>
                   </v-badge>
                 </v-btn>
@@ -595,7 +595,6 @@ export default defineComponent({
 
       connection.value!.on('usersList', function(params: any) {
         console.log('receive new users list');
-        console.log(params);
         store.commit('setUsersList', params);
         if (!update.connected) {
           connection.value!.emit('emitMyChannels');
