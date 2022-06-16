@@ -5,8 +5,9 @@ export interface ChanUserI {
   id?: string;
 //////////////////  userID: number;
   mute?: Date;
-  isBan?: boolean;
+  //isBan?: boolean;
   isAdmin?: boolean;
+  isOwner?: boolean;
   userID: number;
   channel: ChannelI;
 //  user: User;

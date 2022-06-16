@@ -62,11 +62,12 @@ export class ChatController {
         //return 'lets join this private channel';
   }
 
+  // test ----------------------------------------------------------------
   @Get('/channeltest')
   async createChannelTest() {
     const creator = await this.userService.findUserById('1');
     const chan: ChannelI = {
-        channelName: "channeltest2",
+        channelName: "channeltest3",
         owner: 1, //owner id
         password: '',
         publicChannel: true,
@@ -76,6 +77,10 @@ export class ChatController {
 
   @Get('/msgtest')
   async createMsgTest() {
-      
+  }
+
+  @Get('joinnableChannel')
+  async joinnableChannel(@Query() chanName: string): Promise<ChannelI[]> {
+    return await this.chanServices.filterJoinableChannel(chanName);
   }
 }

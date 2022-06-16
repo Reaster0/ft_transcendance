@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { measureMemory } from 'vm';
 import { Message } from '../entities/message.entity';
 import { ChannelI } from '../interfaces/channel.interface';
+import { FrontMessageI } from '../interfaces/frontChannel.interface';
 import { MessageI } from '../interfaces/message.interface';
 
 @Injectable()
@@ -18,24 +20,32 @@ export class MessageService {
   }
 
   async findMessagesForChannel(
-    channel: ChannelI,
+    channelId: string,
     user: User,
-  ): Promise<MessageI[]> {
+  ): Promise<FrontMessageI[]> {
     const query = this.messageRepository
       .createQueryBuilder('message')
       .leftJoin('message.channel', 'channel')
-      .where('channel.id = :channelID', { channelID: channel.id })
-      .leftJoinAndSelect('message.user', 'user')
+      .where('channel.id = :channelID', { channelID: channelId })
+      .leftJoinAndSelect('message.user', 'user') // mmmhhh
       .orderBy('message.date', 'ASC');
+
     const messagesFound: MessageI[] = await query.getMany();
 
-    const updateMessageFound: MessageI[] = [];
-    for (const message of messagesFound) {
+    const updateMessageFound: FrontMessageI[] = [];
+
+    for (var message of messagesFound) {
       const blocked: number = user.blockedUID.find(
         (element) => element === message.user.id,
       );
       if (blocked) message.content = '... 🛑 ...';
-      updateMessageFound.push(message);
+
+      var frontMessage: FrontMessageI;
+      frontMessage.content = message.content;
+      frontMessage.date = message.date;
+      frontMessage.userId = message.user.id;
+
+      updateMessageFound.push(frontMessage);
     }
     return updateMessageFound;
   }
