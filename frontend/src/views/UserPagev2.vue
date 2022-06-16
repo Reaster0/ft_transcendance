@@ -1,54 +1,70 @@
 <template>
-<v-container fluid v-if="user">
-	<particles-bg type="cobweb" :bg="true"/>
-	<v-row>
-		<v-col class="center">
-			<div class="overlay width-65">
-				<v-col v-if="!edit" align="center">
-					<v-img :src="avatar" max-width="300px"/>
-					<h1 class="overflow-x-auto">{{nickname}}</h1>
-					<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
-					<div class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
-					<div class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
-				</v-col>
-				<v-col v-else align="center">
-					<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
-					<h1 v-if="!img_accepted" class="error_msg Spotnik">Img Too Big</h1>
-					<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
-					<div class="field_slick big_button">
-						<v-text-field label="nickname" v-model="nickname"/>
-						<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
+<div>
+	<v-row justify="end">
+		<v-col class="button_slick search_field" cols="5">
+			<v-text-field label="UserName" v-model="userSearch"></v-text-field>
+			<div class="button_slick button_slide Spotnik" @click="goSearchUser(userSearch)">Search</div>
+		</v-col>
+	</v-row>
+	<v-container fluid>
+		<div v-if="user && user.statusCode != 404">
+			<particles-bg type="cobweb" :bg="true"/>
+			<v-row>
+				<v-col class="center">
+					<div class="overlay width-65">
+						<v-col v-if="!edit" align="center">
+							<v-img :src="avatar" max-width="300px"/>
+							<h1 class="overflow-x-auto">{{nickname}}</h1>
+							<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
+							<div v-if="!route.query.user" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
+							<div v-if="!route.query.user" class="button_slick button_slide Spotnik" @click="redirFriends">FriendList</div>
+						</v-col>
+						<v-col v-else align="center">
+							<v-btn color="#0D3F7C" icon="mdi-cloud-upload" min-height="215px" width="215px" @click="imgUp"></v-btn>
+							<h1 v-if="!img_accepted" class="error_msg Spotnik">Img Too Big</h1>
+							<input v-show="0" type="file" accept="image/*" id="upload" @change="imgReceived"/>
+							<div class="field_slick big_button">
+								<v-text-field label="nickname" v-model="nickname"/>
+								<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
+							</div>
+							<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="redirTwoAuth">Enable Two Factor Auth</div>
+							<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
+							<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
+						</v-col>
 					</div>
-					<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="redirTwoAuth">Enable Two Factor Auth</div>
-					<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
-					<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 				</v-col>
-			</div>
-		</v-col>
-		<v-col  class="center">
-		<div class="overlay width-85">
-			<v-col class="overflow-y-auto" style="max-height: 500px" v-if="gameHistory" align-self="start">
-				<div class="historyText loseText">LOST</div>
-				<div class="historyText loseText" v-for="(score, index) in gameHistory.lost.infos.score" :key="score">You {{score}} {{gameHistory.lost.infos.opponent[index]}} {{gameHistory.lost.infos.opponentScore[index]}}</div>
-			</v-col>
-			<v-col class="overflow-y-auto" style="max-height: 500px" v-if="gameHistory" align-self="start">
-				<div class="historyText winText">WIN</div>
-				<div class="historyText winText" v-for="(score, index) in gameHistory.won.infos.score" :key="score">You {{score}} {{gameHistory.won.infos.opponent[index]}} {{gameHistory.won.infos.opponentScore[index]}}</div>
-			</v-col>
-			</div>
-		</v-col>
-</v-row>
-</v-container>
+				<v-col  class="center">
+				<div class="overlay width-85">
+					<v-col class="overflow-y-auto" style="max-height: 500px" v-if="gameHistory" align-self="start">
+						<div class="historyText loseText">LOST</div>
+						<div class="historyText loseText" v-for="(score, index) in gameHistory.lost.infos.score" :key="score">You {{score}} {{gameHistory.lost.infos.opponent[index]}} {{gameHistory.lost.infos.opponentScore[index]}}</div>
+					</v-col>
+					<v-col class="overflow-y-auto" style="max-height: 500px" v-if="gameHistory" align-self="start">
+						<div class="historyText winText">WIN</div>
+						<div class="historyText winText" v-for="(score, index) in gameHistory.won.infos.score" :key="score">You {{score}} {{gameHistory.won.infos.opponent[index]}} {{gameHistory.won.infos.opponentScore[index]}}</div>
+					</v-col>
+					</div>
+				</v-col>
+		</v-row>
+		</div>
+		<div v-else>
+			<v-row justify="center">
+				<h1 class="field_slick big_button">User not found</h1>
+			</v-row>
+		</div>
+	</v-container>
+</div>
 </template>
 
 <script lang="ts">
 
+import { useRoute } from "vue-router"
 import { useStore, Store } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { ref, watch, defineComponent } from "vue"
 import { getAvatarID, getHistoryID } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
-import { updateUser, uploadAvatar } from "../components/FetchFunctions"
+import { updateUser, uploadAvatar, getUserInfos } from "../components/FetchFunctions"
 import router from '../router/index'
 
 export default defineComponent ({
@@ -63,15 +79,32 @@ export default defineComponent ({
 		const name_accepted = ref<boolean>(true);
 		const img_accepted = ref<boolean>(true);
 		const gameHistory = ref<null | any>(null);
+		const route = ref<null | any>(useRoute());
+		const userSearch = ref<string>("");
 
 		onMounted(async () => {
-			const store = useStore() as Store<any>;
-			user.value = await store.getters.whoAmI as any;
-			nickname.value = user.value.nickname as string;
-			avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
-			gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
-			console.log(gameHistory.value['won'])
+			await refreshPage()
 		})
+
+		async function refreshPage(){
+			if (route.value.query.user){
+				console.log(route.value.query.user)
+				user.value = await getUserInfos(route.value.query.user as string) as any;
+				if (user.value.statusCode == 404)
+					return
+				avatar.value = await getAvatarID(user.value.id) as any;
+				nickname.value = user.value.nickname as string;
+				gameHistory.value = await getHistoryID(user.value.id) as any;
+			}
+			else{
+				const store = useStore() as Store<any>;
+				user.value = await store.getters.whoAmI as any;
+				console.log(user.value)
+				nickname.value = user.value.nickname as string;
+				avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
+				gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
+			}
+		}
 
 		function imgUp() {
 			document.getElementById("upload")!.click()
@@ -85,15 +118,19 @@ export default defineComponent ({
 			router.push('/user/friends')
 		}
 
+		function goSearchUser(userName: string) {
+			router.push('/user?' + new URLSearchParams({user: userName}))
+		}
+
 		//TODO check type of e
 		async function imgReceived(e : any) {
 			img_accepted.value = await uploadAvatar(e)
 			if (img_accepted.value && user && user.value && user.value.id)
-				avatar.value = await getAvatarID(user.value.id)
+				avatar.value = await getAvatarID(user.value.id) as any
 		}
 
 		watch(nickname, async (newnick: any) => {
-			name_accepted.value = await updateUser(newnick) as any; //TODO check type
+			name_accepted.value = await updateUser(newnick) as boolean
 		})
 
 		return {user,
@@ -106,7 +143,10 @@ export default defineComponent ({
 		imgReceived,
 		img_accepted,
 		gameHistory,
-		redirFriends}
+		redirFriends,
+		route,
+		userSearch,
+		goSearchUser}
 	}
 })
 </script>
@@ -120,6 +160,11 @@ export default defineComponent ({
 
 .big_button {  
   margin: 20px auto 0 auto;
+}
+
+.search_field{
+	display: flex;
+	max-height: 98px;
 }
 
 .field_slick {

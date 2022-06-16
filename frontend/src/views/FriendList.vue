@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<v-row justify="end">
-				<v-col class="button_slick search_field" cols="4">
+				<v-col class="button_slick search_field" cols="5">
 					<v-text-field :error-messages="errorField" label="Add Friend" v-model="friendName"></v-text-field>
 					<div class="button_slick button_slide Spotnik" @click="addAFriend(friendName)">Add</div>
 				</v-col>
