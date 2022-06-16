@@ -20,7 +20,7 @@ import { ChanUserService } from './services/chanUser.service';
       Message,
     ]),
     forwardRef(() => UsersModule),
-    forwardRef(() => AuthModule),
+    AuthModule,
     UrlGeneratorModule.forRoot({
       secret: 'thisIsNotASecret',
       appUrl: 'http://localhost:3000', //or maybe backend.... will see

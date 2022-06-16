@@ -27,7 +27,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     private readonly chanUserServices: ChanUserService,
     private readonly chanServices: ChanServices,
     private readonly messageServices: MessageService,
-    @Inject(forwardRef(() => AuthService))
     private readonly authServices: AuthService,
     @Inject(forwardRef(() => UsersService))
     private readonly userServices: UsersService,
@@ -53,6 +52,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       return client.disconnect();
     }
   }
+
+  
 
   /******* Disconection ********/
   @SubscribeMessage('disconnect')
@@ -230,10 +231,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     if (!connectedUsers) {
       return;
     }
-    var result: {userId: number, role: string}[];
+    let result: ChanUserI[];
     for (const user of connectedUsers) {
-      let role = 'admin';//await this.chanUserServices.findUserOnChannel(channelId, user);
-      //result.push({userId: user.id, role: role});
+      const role: ChanUserI = await this.chanUserServices.findUserOnChannel(channelId, user);
+      result.push(role);
     }
     client.emit('channelUser', result);
   }

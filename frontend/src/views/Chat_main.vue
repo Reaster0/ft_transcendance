@@ -574,10 +574,11 @@ export default defineComponent({
     //let txt = ref<string>('');
 
 		onMounted(async() => {
+      console.log('render');
 			try {
         connection.value = store.getters.getSocketVal;
         if (connection.value === null) {
-          connection.value = io('http://:3000/chat',{
+          connection.value = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },

@@ -1,7 +1,7 @@
 <template>
 	<v-app>
 		<NavDrawer/>
-		<v-parallax height="100vh" src="./assets/blurredy.jpg">
+		<v-parallax height="calc(100vh - 56px)" src="./assets/blurredy.jpg">
 		<router-view/>
 		</v-parallax>
 	</v-app>

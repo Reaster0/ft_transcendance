@@ -27,7 +27,7 @@ export class ChanUserService {
 
   async findUserOnChannel(channelId: string, user: User): Promise<ChanUserI> {
     return this.chanUserRepository.findOne({ 
-      select: ['mute', 'isAdmin', 'isOwner'],
+      select: ['userID', 'mute', 'isAdmin', 'isOwner'],
       where: { channel: channelId, user: user} });
   }
 

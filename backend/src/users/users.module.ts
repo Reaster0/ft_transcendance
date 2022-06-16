@@ -15,11 +15,11 @@ import { ChatGateway } from '../chat/chat.gateway';
   imports: [
     TypeOrmModule.forFeature([User, Avatar]),
     ConfigModule,
-    forwardRef(() => AuthModule),
-    forwardRef(() => ChatModule),    
+    AuthModule,
+    ChatModule,    
   ],
   controllers: [UsersController],
-  providers: [UsersService, AvatarsService, ChatGateway],
+  providers: [UsersService, AvatarsService],
   exports: [UsersService],
 })
 export class UsersModule {}
