@@ -25,10 +25,10 @@ export class ChanUserService {
       return this.chanUserRepository.save({mute:null, isAdmin: true, isOwner: true, userID: user.id, channel});
   }
 
-  async findUserOnChannel(channel: ChannelI, user: User): Promise<ChanUserI> {
+  async findUserOnChannel(channelId: string, user: User): Promise<ChanUserI> {
     return this.chanUserRepository.findOne({ 
       select: ['mute', 'isAdmin', 'isOwner'],
-      where: { channel: channel, user: user} });
+      where: { channel: channelId, user: user} });
   }
 
   async deletChanUser(channel: ChannelI, user: User) {

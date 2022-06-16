@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { ChatGateway } from './chat.gateway';
@@ -20,7 +20,7 @@ import { ChanUserService } from './services/chanUser.service';
       ChanUser,
       Message,
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     AuthModule,
     UrlGeneratorModule.forRoot({
       secret: 'thisIsNotASecret',
