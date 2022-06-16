@@ -216,6 +216,13 @@ export class UsersService {
     return connectedUser;
   }
 
+  async getUsers(): Promise<User[]> {
+    const users: User[] = await this.userRepository.find({
+      select: ['id', 'nickname', 'avatarId', 'status']
+    })
+    return users;
+  }
+
   async connectUserToChat(user: User, socketID: string) {
     this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
   }
