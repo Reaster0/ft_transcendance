@@ -15,18 +15,20 @@ export class ChanUserService {
   ) {}
 
   async addUserToChan(channel: ChannelI, user: User): Promise<ChanUser> {
-      const newChanUser = this.chanUserRepository.create({mute: null, isBan: false, isAdmin: false, userID: user.id, channel: channel});
+      const newChanUser = this.chanUserRepository.create({mute: null, isAdmin: false, isOwner: false, userID: user.id, channel: channel});
       return this.chanUserRepository.save(newChanUser);
   }
 
   //maybe add owner field in it...
-  async addAdminToChan(channel: ChannelI, user: User): Promise<ChanUser> {
+  async addOwnerToChan(channel: ChannelI, user: User): Promise<ChanUser> {
 //      const newChanUser: ChanUser = this.chanUserRepository.create({mute: null, isBan: false, isAdmin: true, user: user, channel: channel});
-      return this.chanUserRepository.save({mute:null, isBan: false, isAdmin: true, userID: user.id, channel});
+      return this.chanUserRepository.save({mute:null, isAdmin: true, isOwner: true, userID: user.id, channel});
   }
 
   async findUserOnChannel(channel: ChannelI, user: User): Promise<ChanUserI> {
-    return this.chanUserRepository.findOne({ where: { channel: channel, user: user} });
+    return this.chanUserRepository.findOne({ 
+      select: ['mute', 'isAdmin', 'isOwner'],
+      where: { channel: channel, user: user} });
   }
 
   async deletChanUser(channel: ChannelI, user: User) {

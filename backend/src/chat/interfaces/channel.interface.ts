@@ -5,7 +5,7 @@ export interface ChannelI {
   channelName?: string;
   owner?: number; //owner id
   users?: User[];
-  adminUsers?: number[];
+  adminUsers?: number[]; //not sure
   password?: string;
   publicChannel?: boolean;
   avatar?: Uint8Array;

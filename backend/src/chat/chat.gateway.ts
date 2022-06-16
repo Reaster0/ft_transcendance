@@ -18,8 +18,9 @@ import { ChanServices } from './services/chan.service';
 import { ChanUserI } from './interfaces/channelUser.interface';
 import { MessageService } from './services/message.service';
 import { ChanUserService } from './services/chanUser.service';
-import { FrontChannelI } from './interfaces/frontChannel.interface';
+import { FrontChannelI, FrontUserI } from './interfaces/frontChannel.interface';
 import { Channel } from './entities/channel.entity';
+import { resourceLimits } from 'worker_threads';
 
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
@@ -86,7 +87,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     console.log(createChannel)
 
-    const chanUser = await this.chanUserServices.addAdminToChan(createChannel, client.data.user);
+    const chanUser = await this.chanUserServices.addOwnerToChan(createChannel, client.data.user);
     console.log('--->', chanUser);
 
 
@@ -116,7 +117,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     console.log(chanUser);
     let date = new Date;
     //2) accordingly to the sender role the sender is unable to send message => return ;
-    if (chanUser && (chanUser.mute >= date || chanUser.isBan)) // User cannot send message !
+    if (chanUser && (chanUser.mute >= date )) // User cannot send message !
       return;
     // greate a new message (save it on the message repo)
     const createMessage: MessageI = await this.messageServices.create({ ...message, user: client.data.user });
@@ -246,7 +247,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('getChanneUsers')
   async getChanneUsers(client: Socket, channel: ChannelI) {
     const connectedUsers: User[] = await this.chanServices.getAllChanUser(channel);
-    client.to(client.id).emit('channelUser', connectedUsers);
+    var result: FrontUserI[];
+    for (const user of connectedUsers) {
+      var info: FrontUserI;
+      info.id = user.id;
+      info.nickname = user.nickname;
+      info.avatarId = user.avatarId;
+      info.role = await this.chanUserServices.findUserOnChannel(channel, user)
+      result.push(info);
+    }
+
+    client.to(client.id).emit('channelUser', result);
   }
   // ------------ TEST --------------------------------
 
