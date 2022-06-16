@@ -1,5 +1,5 @@
 <template>
-  <v-app >
+  <v-app>
     <v-container fluid v-if="update.connected">
       <v-row>
 
@@ -25,8 +25,8 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div id="app" class="text-left">
-            <v-app id="inspire">
+          <div class="text-left">
+            <v-app>
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -77,82 +77,66 @@
 
         <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
         <v-col cols="auto" sm="6" class="border">
-          <div id="app">
-            <v-app id="inspire" v-if="update.messages && currentChannel.name != ''"> <!-- Modify to inverse-->
-              <template v-for="(msg, index) in currentChannel.messages">
-                <v-spacer v-if="msg.user === currentUser.id" :key="index"></v-spacer>
-                <v-toolbar dense  color="rgba(0,0,0,0)"
-                  class="spacebottom messagefield" v-if="msg" :key="index">
-                  <v-btn elevation="0" min-height="50px"
-                    max-width="50px">
-                    <v-badge bordered bottom color="green" dot offset-x="4"
-                      offset-y="10">
-                      <v-avatar class="mt-n4 " size="32"
-                        elevation="2">
-                        <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                      </v-avatar>
-                    </v-badge>
-                  </v-btn>
-                  <v-card class="mt-2 ml-2" max-width="450px">
-                    <v-list-item >
-                      <v-list-item-content>
-                        <div class="mb-2"> {{ msg.content }} </div>
-                        <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-card >
-                </v-toolbar>
-              </template>
-              
+          <v-app id="chatdisplay" v-if="update.messages
+            && currentChannel.name != ''" style="max-height: 600px;">
 
-          <!--<v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
-            <v-spacer></v-spacer>
-            <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
-              <v-list-item >
-                <v-list-item-content>
-                  <div  :style="{color: ' #ffffff'}" class="mb-2">
-                    Yeah, a lot of syntaxic sugar
-                  </div>
-                  <v-list-item-subtitle :style="{color: ' #ffffff'}"> 19:46 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-              <v-avatar class="mt-n4 " size="32" elevation="2">
-                    <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-              </v-avatar>
-              </v-badge>
-            </v-btn>
-          </v-toolbar>-->
-          <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
-          <div class="d-flex">
-            <v-text-field
-              clearable
-              class="messagefield"
-              width="100%"
-              label="Write a message"
-              placeholder="Message"
-              @keyup.enter="sendingMessage(txt, this.currentChannel)"
-              v-model="txt"
-            ></v-text-field>
-            <!-- button bellow is from old design, I save it just in case -->
-            <!-- <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)"> // TODO this.values may be undefined ?
-              <div  :style="{color: ' #ffffff'}">
-                send
+            <!-- MESSAGES DISPLAY -->
+            <!--<div id="chatdisplay">-->
+            <div class="specialscroll">
+              <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
+                :class="['d-flex flex-row align-center my-2',
+                msg.user == currentUser.id ? 'justify-end': null]">
+                <v-card class="d-flex-column" max-width="450px"
+                  v-if="msg.user === currentUser.id" :key="index"
+                  color="rgb(0,0,255)" dark>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <div class="mb-2" :style="{color: ' #ffffff'}">
+                        {{ msg.content }} </div>
+                      <v-list-item-subtitle :style="{color: ' #ffffff'}">
+                        {{ msg.date }} </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-card>
+                <v-btn elevation="0" min-height="50px"
+                  max-width="50px">
+                  <v-badge bordered bottom color="green" dot offset-x="4"
+                    offset-y="10">
+                    <v-avatar class="mt-n4 " size="32" elevation="2">
+                      <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" />
+                    </v-avatar>
+                  </v-badge>
+                </v-btn>
+                <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.user != currentUser.id" :key="index">   
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title :style="{color: 'grey'}">Name</v-list-item-title> <!-- TODO put user name-->
+                      <div class="mb-2"> {{ msg.content }} </div>
+                      <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-card >
               </div>
-            </v-btn> -->
-          </div>
+            </div>
 
-        </v-app>
-        <v-app v-else-if="updatemessage">
-          <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
-        </v-app>
-        <v-app v-else>
-          <h1 class="Spotnik text-center" data-text="Select">Select channel to display</h1>
-        </v-app>
-        </div>
+                      <!-- SEND MESSAGE -->
+            <div class="d-flex" overflow-hidden>
+              <v-text-field clearable class="messagefield" width="100%" 
+                label="Write a message" placeholder="Message"
+                @keyup.enter="sendingMessage(txt, currentChannel)" v-model="txt">
+              </v-text-field>
+            </div>
+
+          <!-- LOADING / NON SELECTED MESSAGES -->
+          </v-app>
+          <v-app v-else-if="currentChannel.name != ''">
+            <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
+          </v-app>
+          <v-app v-else>
+            <h1 class="Spotnik text-center" data-text="Select">Select channel to display</h1>
+          </v-app>
         </v-col>
+
 
 
 
@@ -467,15 +451,16 @@
 </template>
 
 <script lang="ts">
+/*
+document.getElementByClass(dans une div, tous la meme classe/ nom de classe).scrollTo(0, document.getElementByClass()) = 
+*/
 import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
-import { defineComponent, reactive } from 'vue'
+import { ref, defineComponent, reactive, nextTick } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
-
 
 export default defineComponent({
   name: "ChatMain",
@@ -564,7 +549,6 @@ export default defineComponent({
         members: [],
       },
   }),
-
   methods: {
     toggleModale: function() {
       this.revele = !this.revele;
@@ -579,6 +563,26 @@ export default defineComponent({
         alert("WE NEED TO BLOCK THIS USER")
       }
     },
+    scrollFromBottom: function() {
+      console.log('inside scroll')
+      const element = document.getElementById('chatdisplay') as any;
+      if (element) {
+        console.log('element not null');
+        element.scrollTo(0, element.offsetHeight);
+        console.log(element.offsetHeight);
+      }
+    },
+    getUserName: function(currentChannel: any{}, id: string) {
+      if (!currentChannel || !currentChannel.users) {
+        console.log('Error when retrieving user name');
+        return;
+      }
+      for (let user in currentChannel.users) {
+        if (user.id === id) {
+          return user.name;
+        }
+      }
+    }
   },
 
   // this is needed to limit (3000 ms) loading process after pushing bitton "Invite to play togetrer"
@@ -588,8 +592,13 @@ export default defineComponent({
       if (!val) return
       setTimeout(() => (this.loading = false), 3000)
     },
+    demo () {
+      console.log('demo');
+    }
   },
-
+  updated() {
+    nextTick(() => this.scrollFromBottom())
+  },
 	setup() {
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
@@ -635,7 +644,7 @@ export default defineComponent({
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
         if (params.id != currentChannel.id) {
-          console.log('Error of channel correspondance inside channelsUsers');
+          console.log('error of channel correspondance inside channelsUsers');
         }
         console.log('receive users from channel ' + currentChannel.name);
         //currentChannel.users = params.users;
@@ -648,10 +657,12 @@ export default defineComponent({
         }
         console.log('receive messages from channel ' + currentChannel.name);
         //currentChannel.messages = params.messages;
-        currentChannel.messages = [{ content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'}];
+        currentChannel.messages = [{ content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'},
+        { content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'},
+        { content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'},
+        { content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'}];
         update.messages = true;
       })
-
 		})
 
       // function joinChannel(id)
@@ -745,6 +756,12 @@ export default defineComponent({
   width:100%;
   /* position: absolute; */
   /* bottom: 0px; */
+}
+
+.specialscroll {
+  overflow: auto;
+  display: flex;
+  flex-direction:column-reverse;
 }
 
 </style>

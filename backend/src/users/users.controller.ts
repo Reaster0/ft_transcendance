@@ -90,7 +90,7 @@ export class UsersController {
   /** End of swagger **/
   getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
-      this.logger.log("Post('partialInfo') route called for user " + userId + ' (nickname)');
+      this.logger.log("Post('partialInfo') route called");
       return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
       throw e;
