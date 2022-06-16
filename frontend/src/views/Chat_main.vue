@@ -100,7 +100,7 @@
                 </v-card>
                 <v-btn elevation="0" min-height="50px"
                   max-width="50px">
-                  <v-badge bordered bottom :color="getUserStatus(msg.creatorId)" dot offset-x="4"
+                  <v-badge bordered bottom :color="getUserColor(msg.creatorId)" dot offset-x="4"
                     offset-y="10">
                     <v-avatar class="mt-n4 " size="32" elevation="2">
                       <img :src="getUserAvatar(msg.creatorId)" />
@@ -594,15 +594,22 @@ export default defineComponent({
 			}
 
       connection.value!.on('connectedToChat', function() {
-        update.connected = true;
         console.log('connectedToChat: ' + update.connected);
-        connection.value!.emit('emitMyChannels');
+      })
+
+      connection.value!.on('usersList', function(params: any) {
+        console.log('receive new users list');
+        store.commit('setUsersList', params);
+        if (!update.connected) {
+          connection.value!.emit('emitMyChannels');
+        }
       })
 
       connection.value!.on('channelList', function(params: any) {
         console.log('list of joined channels received');
         userChannels.channels = params;
         console.log(params);
+        update.connected = true;
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
@@ -638,6 +645,72 @@ export default defineComponent({
       leaveChat(socket, to, next, store);
     })
 
+    function displayChannel(channel: any) {
+      currentChannel.name = channel.channelName;
+      currentChannel.id = channel.id;
+      console.log('ask for ' + channel.channelName + ' users and messages');
+      update.messages = false;
+      update.users = false;
+      connection.value.emit('getChannelUsers', { id: channel.id });
+      connection.value.emit('getChannelMessages', { id: channel.id });
+    }
+
+    function getUserName(userId: number) {
+      if (!store.getters.getUsersList) {
+        console.log('Error when retrieving users');
+        return;
+      }
+      for (let user of store.getters.getUsersList) {
+        if (user.id === userId) {
+          return user.name;
+        }
+      }
+      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.name);
+    }
+
+    function getUserAvatar(userId: number) {
+      if (!store.getters.getUsersList) {
+        console.log('Error when retrieving users');
+        return;
+      }
+      for (let user of store.getters.getUsersList) {
+        if (user.id === userId) {
+          return user.avatar;
+        }
+      }
+      console.log('Something went wrong: User id ' + userId + ' not found');
+    }
+    
+    function getUserStatus(userId: number) {
+      if (!store.getters.getUsersList) {
+        console.log('Error when retrieving user avatar');
+        return;
+      }
+      for (let user of store.getters.getUsersList) {
+        if (user.id === userId) {
+          return user.status;
+        }
+      }
+      console.log('Something went wrong: User id ' + userId + ' not found');
+    }
+
+    function getUserColor(userId: number) {
+      const status = getUserStatus(userId);
+      if (status === 'online')
+        return "green";
+      else if (status === 'playing')
+        return "yellow";
+      return "grey";
+    }
+
+		function sendingMessage(content: string, channel: any) {
+      // NB! Need to be done
+      console.log(content, channel);
+      if (!content)
+        return ;
+      connection.value.emit('message', {content, channel});
+		} 
+
       // function joinChannel(id)
       // {
       //   store.commit('setChannelJoinedStatus' , true);
@@ -665,67 +738,9 @@ export default defineComponent({
       // 			console.log("after blockUser");
       // 		}
 
-		function sendingMessage(content: string, channel: any) {
-      // NB! Need to be done
-      console.log(content, channel);
-      if (!content)
-        return ;
-      connection.value.emit('message', {content, channel});
-		}
-
-    function displayChannel(channel: any) {
-      currentChannel.name = channel.channelName;
-      currentChannel.id = channel.id;
-      console.log('ask for ' + channel.channelName + ' users and messages');
-      update.messages = false;
-      update.users = false;
-      connection.value.emit('getChannelUsers', { id: channel.id });
-      connection.value.emit('getChannelMessages', { id: channel.id });
-    }
-
-    function getUserName(userId: number) {
-      if (!currentChannel || !currentChannel.users) {
-        console.log('Error when retrieving user name');
-        return;
-      }
-      for (let user of currentChannel.users) {
-        if (user.id === userId) {
-          return user.name;
-        }
-      }
-      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.name);
-    }
-
-    function getUserAvatar(userId: number) {
-      if (!currentChannel || !currentChannel.users) {
-        console.log('Error when retrieving user avatar');
-        return;
-      }
-      for (let user of currentChannel.users) {
-        if (user.id === userId) {
-          return user.avatar;
-        }
-      }
-      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.name);
-    }
-    
-    function getUserStatus(userId: number) {
-      if (!currentChannel || !currentChannel.users) {
-        console.log('Error when retrieving user avatar');
-        return;
-      }
-      for (let user of currentChannel.users) {
-        if (user.id === userId) {
-          return user.status;
-        }
-      }
-      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.name);
-    }
-    
-
 		return { sendingMessage, isChannelJoined, update, 
       userChannels, displayChannel, currentChannel, currentUser, getUserName,
-      getUserAvatar, getUserStatus }
+      getUserAvatar, getUserStatus, getUserColor }
 
 	},
 })

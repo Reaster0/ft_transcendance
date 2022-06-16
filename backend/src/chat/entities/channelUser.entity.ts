@@ -21,10 +21,14 @@ export class ChanUser {
   @Column({ nullable: true, type: 'timestamptz' })
   mute: Date;
 
+  @Column('boolean')
+  isOwner: boolean;
+
   /* no sure the followings are needed */
+/*
   @Column('boolean')
   isBan: boolean;
-
+*/
   @Column('boolean')
   isAdmin: boolean; // redondant
 

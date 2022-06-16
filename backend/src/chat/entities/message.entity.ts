@@ -22,8 +22,10 @@ export class Message {
   @CreateDateColumn()
   date: Date;
 
+  /*
   @UpdateDateColumn()
   update_at: Date;
+*/
 
   /*-------------------------------------
         - Relations -

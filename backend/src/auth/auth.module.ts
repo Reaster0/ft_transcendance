@@ -23,7 +23,8 @@ import { PassportModule } from '@nestjs/passport';
       },
       inject: [ConfigService],
     }),
-   forwardRef(() => UsersModule)
+   forwardRef(() => UsersModule),
+   JwtService
   ],
   providers: [AuthService, OauthStrategy42, JwtStrategy],
   exports: [AuthService],

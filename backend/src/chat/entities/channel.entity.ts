@@ -78,6 +78,7 @@ export class Channel {
     description: 'array of administrator id',
   })
   /* -------- */
+  /* will see */
   @Column('simple-array', { default: [] })
   adminUsers: number[];
 

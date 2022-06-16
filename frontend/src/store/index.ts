@@ -15,6 +15,7 @@ const store = createStore({
 		channels: [] as any[],
 		joinedChannel: false as boolean,
 		theSocketVal: null as any,
+		usersList: [] as any[],
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -36,6 +37,9 @@ const store = createStore({
 		getSocketVal:(state) => {
 			return state.theSocketVal;
 		},
+		getUsersList:(state) => {
+			return state.usersList;
+		}
 	},
 	mutations: {
 		setUser(state, user) {
@@ -57,6 +61,9 @@ const store = createStore({
 		},
 		setSocketVal(state, val) {
 			state.theSocketVal = val;
+		},
+		setUsersList(state, val) {
+			state.usersList = val;
 		},
 	},
 	actions: {},
