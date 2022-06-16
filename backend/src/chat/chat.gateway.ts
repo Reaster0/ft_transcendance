@@ -173,6 +173,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log(`${client.data.user.username} joinned ${channel.channelName}`);
   }
 
+  @SubscribeMessage('getChannelMessages')
+  async messageFromChannel(client: Socket, channel: ChannelI) {
+    const messages = await this.messageServices.findMessagesForChannel(channel, client.data.user);
+    this.server.to(client.id).emit('channelMessages', {channelID: channel.id, messages: messages});
+  }
+
+
   /********************* Leave Channel ********************/
   // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
@@ -233,7 +240,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('emitMyChannels')
   async emitMyChannels(client: Socket) {
     const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(client.data.user.id);
-    client.emit('channelList', channels);
+    client.to(client.id).emit('channelList', channels);
+  }
+
+  @SubscribeMessage('getChanneUsers')
+  async getChanneUsers(client: Socket, channel: ChannelI) {
+    const connectedUsers: User[] = await this.chanServices.getAllChanUser(channel);
+    client.to(client.id).emit('channelUser', connectedUsers);
+  }
+  // ------------ TEST --------------------------------
+
+  @SubscribeMessage('getJoinnableChannels')
+  async getJoinnableChannels(client: Socket, name: string) {
+    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
+    client.to(client.id).emit('joinnableChannel', channels); // only for client
   }
 
   @SubscribeMessage('retrieveUsers')

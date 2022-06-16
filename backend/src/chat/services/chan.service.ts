@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { ChanUser } from '../entities/channelUser.entity';
 import { ChannelI } from '../interfaces/channel.interface';
@@ -22,7 +22,7 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
-    let { channelName, publicChannel, password, avatar } = channel;
+    let { channelName, publicChannel, password } = channel;
     //console.log(channelName);
     const name = await this.chanRepository.findOne({ channelName: channelName });
 
@@ -109,6 +109,7 @@ export class ChanServices {
   async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
     let query = await this.chanRepository
       .createQueryBuilder('channel')
+      .select(['channel.id', 'channel.channelName', 'channel.avatar']) //Test
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
@@ -157,6 +158,17 @@ export class ChanServices {
       { relations: ['users'] }
     );
     return channelWhitChanUser.users;
+  }
+
+  async filterJoinableChannel(name: string): Promise<Channel[]> {
+
+    return this.chanRepository.find({ //or findAndCount
+      skip: 0,
+      take: 10,
+      order: {channelName: "DESC"},
+      select: ['id', 'channelName', 'avatar'],
+      where: [ { channelName: Like(`%${name}%`), publicChannel: true} ]
+    })
   }
 
   //-------------------------------------------------//
