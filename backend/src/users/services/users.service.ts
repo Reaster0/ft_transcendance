@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res, BadRequestException} from '@nestjs/common';
+  Res, BadRequestException, Inject, forwardRef} from '@nestjs/common';
 import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
-//import { ChatGateway } from '../../chat/chat.gateway';
+import { ChatGateway } from '../../chat/chat.gateway';
 
 @Injectable()
 export class UsersService {
@@ -18,9 +18,10 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly avatarsService: AvatarsService,
-    private connection: Connection,
-    //private readonly chatGateway: ChatGateway,
-  ) { }
+    private readonly connection: Connection,
+    @Inject(forwardRef(() => ChatGateway))
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id);
@@ -94,7 +95,7 @@ export class UsersService {
 
   async changeStatus(user: User, newStatus: Status): Promise<void> {
     await this.userRepository.update(user.id, { status: newStatus });
-    //this.chatGateway.server.emit('changeUserStatus', { id: user.id, status: newStatus});
+    this.chatGateway.updateUsersStatus();
   }
 
   async modifyElo(user: User, opponentElo: number, userWon: boolean): Promise<void> {

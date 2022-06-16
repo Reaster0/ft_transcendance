@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger, forwardRef } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -29,7 +29,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     private readonly chanServices: ChanServices,
     private readonly connectService: ConnectService,
     private readonly messageServices: MessageService,
+    @Inject(forwardRef(() => AuthService))
     private readonly authServices: AuthService,
+    @Inject(forwardRef(() => UsersService))
     private readonly userServices: UsersService,
   ) {}
 
@@ -48,12 +50,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       client.data.user = user;
       this.connectService.connectUser(client, user);
       this.updateUsersStatus();
-      client.emit('connectedToChat');
     } catch {
       this.logger.log('Failed to retrive user from client');
       return client.disconnect();
     }
-    this.logger.log(`Client connected: ${client.id}`);
+    this.logger.log(`Client connecited: ${client.id}`);
   }
 
   /******* Disconection ********/
@@ -63,8 +64,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       return client.disconnect();
     }
     await this.connectService.disconnectUser(client.data.user);
-    this.updateUsersStatus();
     client.disconnect();
+    this.updateUsersStatus();
     this.logger.log(`Client disconnected: ${client}`);
   }
 
@@ -208,13 +209,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /****** Emit Service ******/
   async updateUsersStatus() {
     const connectedUsers: User[] = await this.userServices.getConnectedUsers();
-    return this.server.emit('connectedUsers', connectedUsers); // user or user.id ?
-    /*
-    let connectUsersID: number[] = [];
-    for (const user of connectedUsers)
-      connectUsersID.push(user.id);
-    return this.server.emit('connectedUsers', connectUsersID); // user or user.id ?
-    */
+    return this.server.emit('usersList', connectedUsers); // user or user.id ?
   }
 
   @SubscribeMessage('emitChannels')

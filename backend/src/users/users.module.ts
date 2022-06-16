@@ -8,17 +8,18 @@ import { AvatarsService } from 'src/users/services/avatars.service';
 import { Avatar } from './entities/avatar.entity';
 import { AuthModule } from '../auth/auth.module';
 import { ChatModule } from '../chat/chat.module';
+import { ChatGateway } from '../chat/chat.gateway';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Avatar]),
     ConfigModule,
-    AuthModule,
-    ChatModule,    
+    forwardRef(() => AuthModule),
+    forwardRef(() => ChatModule),    
   ],
   controllers: [UsersController],
-  providers: [UsersService, AvatarsService],
+  providers: [UsersService, AvatarsService, ChatGateway],
   exports: [UsersService],
 })
 export class UsersModule {}

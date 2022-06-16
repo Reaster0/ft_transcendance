@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import { Status } from '../../users/enums/status.enum';
@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class ConnectService {
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
   ) {}
 

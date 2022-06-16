@@ -21,7 +21,7 @@ import { ChanUserService } from './services/chanUser.service';
       Message,
     ]),
     forwardRef(() => UsersModule),
-    AuthModule,
+    forwardRef(() => AuthModule),
     UrlGeneratorModule.forRoot({
       secret: 'thisIsNotASecret',
       appUrl: 'http://localhost:3000', //or maybe backend.... will see
@@ -35,6 +35,6 @@ import { ChanUserService } from './services/chanUser.service';
     ConnectService,
     MessageService,
   ],
-  exports: [ChatGateway],
+  exports: [ChatGateway, ChanUserService, ChanServices, ChanUserService, ConnectService, MessageService],
 })
 export class ChatModule {}

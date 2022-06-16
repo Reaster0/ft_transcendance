@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
+import { Inject, forwardRef, Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Like, Repository } from 'typeorm';
@@ -18,6 +18,7 @@ export class ChanServices {
     private readonly chanRepository: Repository<Channel>,
     @InjectRepository(ChanUser)
     private readonly chanUserRepository: Repository<ChanUser>,
+    @Inject(forwardRef(() => UsersService))
     private readonly userServices: UsersService,
   ) {}
 

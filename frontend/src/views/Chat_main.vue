@@ -593,10 +593,6 @@ export default defineComponent({
 				console.log("the error is:" + error)
 			}
 
-      connection.value!.on('connectedToChat', function() {
-        console.log('connectedToChat: ' + update.connected);
-      })
-
       connection.value!.on('usersList', function(params: any) {
         console.log('receive new users list');
         store.commit('setUsersList', params);
