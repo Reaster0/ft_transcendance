@@ -24,7 +24,7 @@ export class ChanServices {
     private readonly userServices: UsersService,
   ) {}
 
-  async createChannel(channel: ChannelI, creator: User): Promise<{channel: Channel, error: string}> {
+  async createChannel(channel: ChannelI, creator: User): Promise<{channel: string, error: string}> {
     let { name, type, password } = channel;
     if (!name) return {channel:null, error: 'Channel name must not be empty'};
 
@@ -43,7 +43,7 @@ export class ChanServices {
     const user: RolesI = {userId: creator.id, role: ERoles.OWNER, muteDate: null, channel: newChannel}
     this.roleRepository.save(user);
 
-    return {channel: newChannel, error: ''};
+    return {channel: newChannel.name, error: ''};
 	}
 
 	async deleteChannel(channel: ChannelI) {
