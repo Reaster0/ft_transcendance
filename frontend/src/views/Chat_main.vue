@@ -122,9 +122,9 @@
 
                       <!-- SEND MESSAGE -->
             <div class="d-flex" overflow-hidden>
-              <v-text-field clearable class="messagefield" width="100%" 
-                label="Write a message" placeholder="Message"
-                @keyup.enter="sendingMessage(txt, currentChannel)" v-model="txt">
+              <v-text-field clearable class="messagefield" width="100%"
+                type="text" label="Write a message" v-model="txt"
+                @keyup.enter="sendingMessage(currentChannel.id)">
               </v-text-field>
             </div>
 
@@ -452,13 +452,10 @@
 </template>
 
 <script lang="ts">
-/*
-document.getElementByClass(dans une div, tous la meme classe/ nom de classe).scrollTo(0, document.getElementByClass()) = 
-*/
 import { onMounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
-import { ref, defineComponent, reactive } from 'vue'
+import { ref, defineComponent } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
@@ -470,7 +467,9 @@ export default defineComponent({
   components: {
     'modale': TheModale
   },
-  data: () => ({
+  //data() {
+  //  return {
+  //    txt: '',
       // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
       // accordind to this info we change the interface
       // for the moment we change the value manualy, but we should get it from backend
@@ -481,11 +480,11 @@ export default defineComponent({
       // for the moment we change the value manualy, but we should get it from backend
 
       //chat_person: false as boolean,
-      revele: false,
+      //revele: false,
       //fav: true as boolean,
       //menu: false as boolean,
       //currentTab: 0 as number,
-      loading: false as boolean,
+      //loading: false as boolean,
       //tab: null as null | any,
 
       //tabs_manager: [
@@ -512,7 +511,6 @@ export default defineComponent({
       // txt is a variable made to save CURRENT message that user is GOING TO send
       // with this we will emit this data to backend
 
-      //txt: '',
       //userBanned: false,
       //userMuted: false,
       //banDate: new Date,
@@ -538,7 +536,8 @@ export default defineComponent({
       //  applyPassword: false,
       //  members: [],
       //},
-  }),
+  //  }
+  //},
   //methods: {
   //  toggleModale: function() {
   //    this.revele = !this.revele;
@@ -546,7 +545,7 @@ export default defineComponent({
   //  // blockAlert activated after pushing button "Block this user"
   //  // its, of course, temporary solution cause we need to clock for real
   //  // when user block another user - he cant see the messages anymore
-  //  blockAlert: function (event : any) // TODO check event tupe 
+  //  blockAlert: function (event : any)
   //  {
   //    if (event) 
   //    {
@@ -567,12 +566,12 @@ export default defineComponent({
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
     let isChannelJoined = store.getters.isChannelJoined as boolean;
-    let userChannels = reactive({ channels: [] as any[] });
-    let update = reactive({ connected: false as boolean, users: false as boolean,
+    let userChannels = ref({ channels: [] as any[] });
+    let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
-    let currentChannel = reactive({ name: '' as string, id: '' as string,
+    let currentChannel = ref({ name: '' as string, id: '' as string,
       messages: [] as Message[], users: [] as UserChannel[] });
-    //let txt = ref<string>('');
+    let txt = ref<string>('');
 
 		onMounted(async() => {
       console.log('render');
@@ -587,7 +586,7 @@ export default defineComponent({
           store.commit('setSocketVal' , connection.value);
           console.log("starting connection to websocket");
         } else {
-          update.connected = true;
+          update.value.connected = true;
           connection.value!.emit('emitMyChannels');
         }
 			} catch (error) {
@@ -600,37 +599,35 @@ export default defineComponent({
           user.avatar = await getAvatarID(user.id) as any; 
         }
         store.commit('setUsersList', params);
-        if (!update.connected) {
+        if (!update.value.connected) {
           connection.value!.emit('emitMyChannels');
         }
       })
 
       connection.value!.on('channelList', function(params: any) {
         console.log('list of joined channels received');
-        userChannels.channels = params;
-        update.connected = true;
+        userChannels.value.channels = params;
+        update.value.connected = true;
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
-        if (!currentChannel || params.id != currentChannel.id) {
-          console.log(currentChannel);
-          console.log(params);
+        if (!currentChannel.value || params.id != currentChannel.value.id) {
           console.log('error of channel correspondance inside channelUsers');
           return;
         }
-        console.log('receive users from channel ' + currentChannel.name);
-        currentChannel.users = params.users;
-        update.users = true;
+        console.log('receive users from channel ' + currentChannel.value.name);
+        currentChannel.value.users = params.users;
+        update.value.users = true;
       })
 
       connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
-        if (params.id != currentChannel.id) {
+        if (params.id != currentChannel.value.id) {
           console.log('Error of channel correspondance inside channelMessages');
+          return;
         }
-        console.log('receive messages from channel ' + currentChannel.name);
-        currentChannel.messages = params.messages;
-        console.log(params);
-        update.messages = true;
+        console.log('receive messages from channel ' + currentChannel.value.name);
+        currentChannel.value.messages = params.messages;
+        update.value.messages = true;
       })
 		})
 
@@ -641,11 +638,11 @@ export default defineComponent({
     })
 
     function displayChannel(channel: any) {
-      currentChannel.name = channel.name;
-      currentChannel.id = channel.id;
+      currentChannel.value.name = channel.name;
+      currentChannel.value.id = channel.id;
       console.log('ask for ' + channel.name + ' users and messages');
-      update.messages = false;
-      update.users = false;
+      update.value.messages = false;
+      update.value.users = false;
       connection.value.emit('getChannelUsers', { id: channel.id });
       connection.value.emit('getChannelMessages', { id: channel.id });
     }
@@ -660,7 +657,7 @@ export default defineComponent({
           return user.name;
         }
       }
-      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.name);
+      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.value.name);
     }
 
     function getUserAvatar(userId: number) {
@@ -698,13 +695,12 @@ export default defineComponent({
       return "grey";
     }
 
-		function sendingMessage(content: string, channel: any) {
-      // NB! Need to be done
-      console.log(content, channel);
-      if (!content)
+		function sendingMessage(channelId: string) {
+      if (!txt.value || txt.value === '')
         return ;
-      connection.value.emit('message', {content, channel});
-		} 
+      connection.value.emit('message', {'channelId': channelId, 'content': txt.value });
+      txt.value = '';
+    } 
 
       // function joinChannel(id)
       // {
@@ -733,10 +729,9 @@ export default defineComponent({
       // 			console.log("after blockUser");
       // 		}
 
-		return { sendingMessage, isChannelJoined, update, 
+		return { isChannelJoined, update, txt,
       userChannels, displayChannel, currentChannel, currentUser, getUserName,
-      getUserAvatar, getUserStatus, getUserColor }
-
+      getUserAvatar, getUserStatus, getUserColor, sendingMessage }
 	},
 })
 </script>

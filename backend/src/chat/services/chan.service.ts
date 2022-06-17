@@ -151,7 +151,7 @@ export class ChanServices {
 }
 
   async getMutedUsers(channelId: string): Promise<Channel> {
-    const muted = await this.chanRepository.findOne(channelId, { relations: ['muted', 'muted.userId', 'muted.date'] });
+    const muted = await this.chanRepository.findOne(channelId, { relations: ['muted'] });
     // TODO maybe get special output ?
     return muted;
   }
