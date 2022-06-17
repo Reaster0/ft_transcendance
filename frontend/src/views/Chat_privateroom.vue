@@ -28,6 +28,7 @@
               Accessible for users that has a direct link
             </p>
           </div>
+
           <v-col cols="12" sm="6">
             <input type="file" @change="previewFiles" multiple >
           </v-col>
@@ -37,8 +38,8 @@
             </v-text-field>
             <button class="button">SUBMIT</button>
           </v-col>
-        </form>
 
+        </v-form>
       </div>
 
       <div v-else>
@@ -109,7 +110,6 @@ export default defineComponent ({
     function creationError() {
         alert("Your channel name can't be empty")
     }
-
 
     function submitIt(name: string, file: any) {
       if (name == '') {

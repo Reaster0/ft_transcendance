@@ -100,8 +100,8 @@ export default defineComponent({
         created.value = true;
       })
 
-      socketVal.on("errorChannelCreation", function(params: any) {
-        alert("Channel creation failed: " + params.reason);
+      socketVal.on("errorChannelCreation", function(reason: string) {
+        alert("Channel creation failed: " + reason);
       })
     })
 
