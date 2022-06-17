@@ -67,8 +67,8 @@ export default defineComponent ({
 			const store = useStore() as Store<any>;
 			user.value = await store.getters.whoAmI as any;
 			nickname.value = user.value.nickname as string;
-			avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
-			gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
+			avatar.value = await getAvatarID(user.value.id) as any; 
+			gameHistory.value = await getHistoryID(user.value.id) as any; 
 			console.log(gameHistory.value['won'])
 		})
 

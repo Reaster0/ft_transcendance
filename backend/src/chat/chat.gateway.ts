@@ -11,7 +11,7 @@ import { MessageI } from './interfaces/back.interface';
 import { ChanServices } from './services/chan.service';
 import { MutedI } from './interfaces/back.interface';
 import { MessageService } from './services/message.service';
-import { FrontChannelI, FrontUserI } from './interfaces/front.interface';
+import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import { Channel } from './entities/channel.entity';
 
 
@@ -70,11 +70,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     const createChannel: Channel = await this.chanServices.createChannel(channel, client.data.user);
     if (!createChannel) {
-      this.logger.log(`ERROR will creating: ${channel.channelName}`);
+      this.logger.log(`ERROR will creating: ${channel.name}`);
       return false;
     }
     await this.emitChannels();
-    this.logger.log(`new Channel: ${createChannel.channelName} created`);
+    this.logger.log(`new Channel: ${createChannel.name} created`);
     return true;
   }
 
@@ -84,7 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async onDeleteChannel(client: Socket, channel: ChannelI) {
     await this.chanServices.deleteChannel(channel);
     await this.emitChannels();
-    this.logger.log(`delete Channel: ${channel.channelName}`);
+    this.logger.log(`delete Channel: ${channel.name}`);
   }
 
   //  @UseGuards(AuthChat)
@@ -138,7 +138,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         return ;
     }
     await this.chanServices.pushUserToChan(channel, client.data.user);
-    this.logger.log(`${client.data.user.username} joinned ${channel.channelName}`);
+    this.logger.log(`${client.data.user.username} joinned ${channel.name}`);
   }
 
 
@@ -221,7 +221,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       client.emit('AccessRefused');
       return;
     }
-    console.log(res);
     client.emit('channelUsers', res);
   }
 

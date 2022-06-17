@@ -223,8 +223,8 @@ export class UsersService {
   // for chat
   async getUsers(): Promise<User[]> {
     const users: User[] = await this.userRepository.find({
-      select: ['id', 'nickname', 'avatarId', 'status']
-    })
+      select: ['id', 'nickname', 'status']
+    });
     return users;
   }
 

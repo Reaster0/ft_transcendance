@@ -63,7 +63,7 @@
                         </v-list-item-avatar>
                       </v-badge>
                     </v-btn>
-                    <v-list-item-title class="offsetmess">{{ item.channelName }}
+                    <v-list-item-title class="offsetmess">{{ item.name }}
                     </v-list-item-title>
                   </v-list-item>
                   <v-divider v-if="index < userChannels.channels.length"
@@ -85,9 +85,9 @@
             <div class="specialscroll">
               <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
                 :class="['d-flex flex-row align-center my-2',
-                msg.creatorId == currentUser.id ? 'justify-end': null]">
+                msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
-                  v-if="msg.creatorId === currentUser.id" :key="index"
+                  v-if="msg.userId === currentUser.id" :key="index"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
                     <v-list-item-content>
@@ -100,18 +100,18 @@
                 </v-card>
                 <v-btn elevation="0" min-height="50px"
                   max-width="50px">
-                  <v-badge bordered bottom :color="getUserColor(msg.creatorId)" dot offset-x="4"
+                  <v-badge bordered bottom :color="getUserColor(msg.userId)" dot offset-x="4"
                     offset-y="10">
                     <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img :src="'/users/getAvatarByAvatarId' + msg.creatorId" />
+                      <img :src="'/users/getAvatarByAvatarId' + msg.userId" />
                     </v-avatar>
                   </v-badge>
                 </v-btn>
-                <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.creatorId
+                <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
                   != currentUser.id" :key="index">   
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-title :style="{color: 'grey'}">{{ getUserName(msg.creatorId) }}</v-list-item-title>
+                      <v-list-item-title :style="{color: 'grey'}">{{ getUserName(msg.userId) }}</v-list-item-title>
                       <div class="mb-2"> {{ msg.content }} </div>
                       <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
                     </v-list-item-content>
@@ -462,7 +462,8 @@ import { ref, defineComponent, reactive } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
-import { Message, User } from '../types/chat.types';
+import { Message, UserChannel } from '../types/chat.types';
+import { getAvatarID } from '../components/FetchFunctions';
 
 export default defineComponent({
   name: "ChatMain",
@@ -570,7 +571,7 @@ export default defineComponent({
     let update = reactive({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
     let currentChannel = reactive({ name: '' as string, id: '' as string,
-      messages: [] as Message[], users: [] as User[] });
+      messages: [] as Message[], users: [] as UserChannel[] });
     //let txt = ref<string>('');
 
 		onMounted(async() => {
@@ -595,6 +596,9 @@ export default defineComponent({
 
       connection.value!.on('usersList', function(params: any) {
         console.log('receive new users list');
+        for (let user of params) {
+          user.avatar = getAvatarID(user.id) as any; 
+        }
         store.commit('setUsersList', params);
         if (!update.connected) {
           connection.value!.emit('emitMyChannels');
@@ -613,10 +617,7 @@ export default defineComponent({
         }
         console.log('receive users from channel ' + currentChannel.name);
         currentChannel.users = params.users;
-        currentChannel.users = [{ id: 1, name: 'User1', role: 'admin', status:'ONLINE', avatar:'http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg'},
-        { id: 2, name: 'User2', role: '', status:'OFFLINE', avatar:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg'}];
         update.users = true;
-        //console.log(params.users);
       })
 
       connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
@@ -625,10 +626,10 @@ export default defineComponent({
         }
         console.log('receive messages from channel ' + currentChannel.name);
         //currentChannel.messages = params.messages;
-        currentChannel.messages = [{ content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'},
-        { content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'},
-        { content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'},
-        { content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'}];
+        currentChannel.messages = [{ content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
+        { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
+        { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
+        { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'}];
         update.messages = true;
         //console.log(params.messages);
       })
@@ -641,9 +642,9 @@ export default defineComponent({
     })
 
     function displayChannel(channel: any) {
-      currentChannel.name = channel.channelName;
+      currentChannel.name = channel.name;
       currentChannel.id = channel.id;
-      console.log('ask for ' + channel.channelName + ' users and messages');
+      console.log('ask for ' + channel.name + ' users and messages');
       update.messages = false;
       update.users = false;
       connection.value.emit('getChannelUsers', { id: channel.id });

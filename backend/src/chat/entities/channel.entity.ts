@@ -13,7 +13,7 @@ export class Channel {
 
   @ApiProperty({ type: String, description: 'channel name, should be unique' })
   @Column('text', { default: 'unamed', unique: true})
-  channelName: string;
+  name: string;
 
   @ApiProperty({ type: Date, description: 'channel creation date' })
   @CreateDateColumn()

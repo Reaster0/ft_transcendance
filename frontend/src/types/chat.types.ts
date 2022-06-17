@@ -4,18 +4,6 @@ export enum Status {
 	PLAYING = 'In Game',
 }
 
-//export interface UserI {
-//    id: number,
-//    nickname: string,
-//    status: UserStatus,
-//}
-
-//export class User implements UserI{
-//    id = 0;
-//    nickname = '';
-//    status =  UserStatus.OFFLINE;
-//}
-
 //export interface ChannelI {
 
 //	id: string,
@@ -48,40 +36,6 @@ export enum Status {
 //	messages = [];
 //}
 
-export interface JoinnedUserI {
-	id: string;
-	socketID: string;
-	user: User;
-	chan: Channel;
-}
-
-//export class JoinnedUser implements JoinnedUserI {
-//	id = '';
-//	socketID = '';
-//	user =  new User;
-//	chan = new Channel;
-//}
-
-//export interface MessageI {
-//	id: number
-//	content: string;
-//	date: Date;
-//	update_at: Date;
-// // relation //
-//	user: User;
-//	channel: Channel;
-//}
-
-//export class Message implements MessageI {
-//	id = 0;
-//	content = '';
-//	date = new Date;
-//	update_at = new Date;
-
-//	user = new User;
-//	channel = new Channel;
-//}
-
 //export class newChannel {
 //  name: string = '';
 //  public: boolean = true;
@@ -90,23 +44,26 @@ export interface JoinnedUserI {
 //  admin: User[] = []; 
 //}
 
-export interface User {
+export interface Channel {
+    id: string;
+    channelName: string;
+	type: string;
+    avatar?: Uint8Array;
+}
+
+export interface UserGlobal {
+    id: number;
+    name: string;
+	avatar: Blob;
+	status: Status;
+}
+
+export interface UserChannel {
 	id : number;
-	name: string;
-	avatar: any;
-	status: string;
 	role: string;
 }
 
 export interface Message {
-	content: string;
-	date: string;
-	creatorId: number;
-}
-
-export interface Channel {
-	id: number;
-	name: string;
-	users: User[];
-	messages: Message[];
-}
+    content: string;
+    userId: number;
+    date: any;

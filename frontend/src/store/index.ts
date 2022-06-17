@@ -1,4 +1,5 @@
-import {createStore} from "vuex"
+import { createStore } from 'vuex';
+import { UserGlobal } from '../types/chat.types';
 
 const store = createStore({
 	state: {
@@ -15,7 +16,7 @@ const store = createStore({
 		channels: [] as any[],
 		joinedChannel: false as boolean,
 		theSocketVal: null as any,
-		usersList: [] as any[],
+		usersList: [] as UserGlobal[],
 	},
 	getters: {
 		whoAmI:(state) => {

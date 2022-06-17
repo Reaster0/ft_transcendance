@@ -21,11 +21,11 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
-    let { channelName, type, password } = channel;
-    const name = await this.chanRepository.findOne({ channelName: channelName });
-		if (name) //channel name already exist
+    let { name, type, password } = channel;
+    const sameName = await this.chanRepository.findOne({ name: name });
+		if (sameName) //channel name already exist
 			return null;
-		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
+		if (/^([a-zA-Z0-9-]+)$/.test(name) === false) //isalphanum()
 			return null;
     channel.users = [creator];
 		channel.admins = [creator.id]; //Alina asking for this
@@ -100,8 +100,8 @@ export class ChanServices {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-  async findChannel(channelName: string): Promise<Channel> {
-    return this.chanRepository.findOne({channelName});
+  async findChannel(name: string): Promise<Channel> {
+    return this.chanRepository.findOne({name});
   }
 
   async getAllChanUser(channelId: string): Promise<User[]> {
@@ -117,9 +117,9 @@ export class ChanServices {
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      order: {channelName: "DESC"},
-      select: ['id', 'channelName', 'avatar'],
-      where: [ { channelName: Like(`%${name}%`), publicChannel: true} ]
+      order: {name: "DESC"},
+      select: ['id', 'name', 'avatar'],
+      where: [ { name: Like(`%${name}%`), publicChannel: true} ]
     })
   }
 

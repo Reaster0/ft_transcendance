@@ -55,7 +55,7 @@ export class ChatController {
 
         await this.chanServices.pushUserToChan(channelFound, req.user);
         //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
-        console.log(req.user, ' joined: ', channelFound.channelName);
+        console.log(req.user, ' joined: ', channelFound.name);
         //return 'lets join this private channel';
   }
 
@@ -64,7 +64,7 @@ export class ChatController {
   async createChannelTest() {
     const creator = await this.userService.findUserById('1');
     const chan: ChannelI = {
-        channelName: "channeltest3",
+        name: "channeltest3",
         owner: 1, //owner id
         password: '',
         type: 'public',
