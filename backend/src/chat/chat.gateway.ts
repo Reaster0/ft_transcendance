@@ -73,6 +73,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.logger.log(`ERROR will creating: ${channel.name}`);
       return false;
     }
+    // add owner to chanUser ?
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.name} created`);
     return true;
