@@ -46,8 +46,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
   }
 
-  
-
   /******* Disconection ********/
   @SubscribeMessage('disconnect')
   async handleDisconnect(client: Socket) {
@@ -213,7 +211,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         role = 'owner';
       } else if (channel.admins.includes(user.id)) {
         role = 'admin';
-      } // TODO else if check for muted user (may be a little more complicated)
+      }
       res.push({ 'id': user.id, 'role': role })
     }
     if (isMember === false) {

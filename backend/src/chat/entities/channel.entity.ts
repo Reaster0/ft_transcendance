@@ -32,11 +32,11 @@ export class Channel {
   password: string;
 
   @ApiProperty({ type: Number, description: 'array of administrator id' })
-  @Column('simple-array', { default: [] })
+  @Column({ type: 'int', array: true, default: {} })
   admins: number[];
 
   @ApiProperty({ type: Number, description: 'array of blocked User id' })
-  @Column('simple-array', { default: [] })
+  @Column({ type: 'int', array: true, default: {} })
   blocked: number[];
 
   @Column({ type: 'bytea', nullable: true })
