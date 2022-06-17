@@ -3,19 +3,19 @@ import { Status } from "../../users/enums/status.enum";
 export class FrontChannelI {
     id: string;
     name: string;
-    type: string;
+    type: number;
     avatar?: Uint8Array;
 }
 
 export class FrontUserGlobalI {
     id: number;
     name: string;
-    role: string;
+    role: number;
 }
 
 export class FrontUserChannelI {
     id: number;
-    role: string;
+    role: number;
 }
 
 export class FrontMessageI {

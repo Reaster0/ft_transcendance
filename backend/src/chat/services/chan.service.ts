@@ -33,12 +33,12 @@ export class ChanServices {
 		if (/^([a-zA-Z0-9-]+)$/.test(name) === false) //isalphanum()
 			return null;
     channel.users = [creator];
-		if (type === ChannelType.protected || password) {
+		if (type === ChannelType.PROTECTED || password) {
 			const salt = await bcrypt.genSalt();
 			channel.password = await bcrypt.hash(password, salt);
 		}
 		const newChannel = await this.chanRepository.save(channel);
-    const user: RolesI = {userId: creator.id, role: ERoles.owner, muteDate: null, channel: newChannel}
+    const user: RolesI = {userId: creator.id, role: ERoles.OWNER, muteDate: null, channel: newChannel}
     this.roleRepository.save(user);
     return newChannel;
 	}
@@ -59,7 +59,7 @@ export class ChanServices {
     let update: Channel = await this.chanRepository.findOne(channel.id);
     update.users.push(user);
     this.chanRepository.update(channel.id, update);
-    const newUser: RolesI = {userId: user.id, role: ERoles.user, muteDate: null, channel: update}
+    const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel: update}
     this.roleRepository.save(newUser);
   }
 

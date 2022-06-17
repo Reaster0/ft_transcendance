@@ -21,7 +21,7 @@ export class Channel {
   date: Date;
 
   // todo change this to number if front is ok
-  @Column({ type: 'text', default: ChannelType.public })
+  @Column({ type: 'int', default: ChannelType.PUBLIC})
   @ApiProperty({ enum: ChannelType, type: String, description: 'channel type, either public/private/protected/pm.' })
   type: ChannelType;
 

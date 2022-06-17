@@ -12,7 +12,7 @@ export class Roles {
   userId: number;
 
   //change this to number is front end is ok
-  @Column({ type: 'text', default: ERoles.user })
+  @Column({ type: 'int' , default: ERoles.USER })
   @ApiProperty({ enum: ERoles, type: String, description: 'channel user roles, either owner/admin/user.' })
   role: ERoles;
 

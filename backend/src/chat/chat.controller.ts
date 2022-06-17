@@ -66,7 +66,7 @@ export class ChatController {
     const chan: ChannelI = {
         name: "channeltest3",
         password: '',
-        type: ChannelType.public
+        type: ChannelType.PUBLIC
     };
     return await this.chanServices.createChannel(chan, creator);
   }
