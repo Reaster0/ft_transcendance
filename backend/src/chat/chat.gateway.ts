@@ -89,40 +89,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('message')
   async onSendMessage(client: Socket, params: { channelId: string, message: MessageI }) {
     this.logger.log('sending message');
-//    console.log(params.message);
-//    //1) get the sender role
-//    const User: ChanUserI = await this.chanUserServices.findUserOnChannel(params.channelId, client.data.user.id);
-//    console.log(chanUser);
-//    let date = new Date;
-//    //2) accordingly to the sender role the sender is unable to send message => return ;
-//    if (chanUser && (chanUser.mute >= date )) // User cannot send message !
-//      return;
-//    // greate a new message (save it on the message repo)
-//    const createMessage: MessageI = await this.messageServices.create({ ...params.message, user: client.data.user });
-//    const originalMessage = createMessage.content;
-//    const sender = createMessage.user;
-//    // retrive channel from channel.id
-//    const channel: ChannelI = await this.chanServices.getChan(createMessage.channel.id);
-//    // get all the socket connete to that channel
-////    const connectedSocket: string[] = this.chanServices.findSocketByChannel(channel);
-    
-//    const connectedUsers: User[] = await this.chanServices.getAllChanUser(channel.id);
+    const channel = await this.chanServices.getChannelFromId(params.channelId); // maybe useless
+    const user: RolesI = await this.chanServices.getUserOnChannel(channel, client.data.user.id);
 
-//    for (const user of connectedUsers) {
-//      createMessage.content = originalMessage;
-//      // check if the user associeted whit that soket as blocket the sender
-//      const blockedUser: number = user.blockedId.find(element => element === sender.id)
-//      if (blockedUser)
-//        createMessage.content = "... 🛑 ..."; // if it is the case blur the message
-//      // get the user associeted to the soket (target of the message)
-////      const target = await this.chanServices.findUserByChannel(message.channel, socket.user.id);
-//      /*
-//      const target = await this.chanUserServices.findUserOnChannel(message.channel, chanUser.user)
-//      let date = new Date;
-//      if (!target || target.ban < date || target.ban === null) //<--------- Not sure
-//      */
-//        this.server.to(user.chatSocket).emit('messageSended', createMessage); //send message (show)
-//    }
+    if (!user) return;
+    let date = new Date;
+    if (user.muteDate >= date) return;
+
+    const createMessage: MessageI = await this.messageServices.create({ channel, date, content: params.message.content, user: client.data.user });
+    const originalMessage = createMessage.content;
+    const sender = createMessage.user;
+
+    const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
+    for (const user of connectedUsers) {
+      const blockedUser: number = user.blockedIds.find(element => element === sender.id)
+      if (blockedUser)
+        createMessage.content = "... 🛑 ..."; // if it is the case blur the message
+      else
+        createMessage.content = originalMessage;
+      this.server.to(user.chatSocket).emit('messageSended', createMessage); //send message (show)
+    }
   }
 
   /************** . Join Channel *************/
@@ -130,7 +116,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChannelI) {
     const channelFound = await this.chanServices.getChannelFromId(channel.id);
-    if (! channelFound) return false; // better handel in get chan and catch
+    if (!channelFound) return false; // better handel in get chan and catch
 
     if (channelFound.password) {
       if (!channel.password)
@@ -153,19 +139,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log(`${client.data.user.username} leave a channel`);
   }
 
-  
+
   /* Owner can edit the channel */
   @SubscribeMessage('editChannel')
   async updateChannel(client: Socket, input: any): Promise<boolean> {
-      const { channel } = input;
-      const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
+    const { channel } = input;
+    const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
 
-      const ret: Boolean = await this.chanServices.updateChannel(channelFound, input.info)
-      if (ret === true) {
-          await this.emitChannels();
-          return true;
-      }
-      return false;
+    const ret: Boolean = await this.chanServices.updateChannel(channelFound, input.info)
+    if (ret === true) {
+      await this.emitChannels();
+      return true;
+    }
+    return false;
   }
 
   /********************* Block user *********************/
@@ -211,7 +197,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       if (user.userId === client.data.user.id) {
         isMember = true;
       }
-      res.push({ 'id': user.userId, 'role': user.role}) //better changeThis
+      res.push({ 'id': user.userId, 'role': user.role }) //better changeThis
     }
     if (isMember === false) {
       this.logger.log('Access Refused');

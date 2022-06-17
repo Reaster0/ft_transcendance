@@ -11,6 +11,7 @@ import { FrontChannelI } from '../interfaces/front.interface';
 import { ChannelType } from 'src/users/enums/channelType.enum';
 import { ERoles } from 'src/users/enums/roles.enum';
 import { relative } from 'path';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChanServices {
@@ -116,11 +117,12 @@ export class ChanServices {
   async getChannelFromId(channelID: string): Promise<Channel> {
     return this.chanRepository.findOne(channelID);
   }
+
   async findChannelWithUsers(channelID: string): Promise<ChannelI> {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-  async findChannel(name: string): Promise<Channel> {
+  async findChannelByName(name: string): Promise<Channel> {
     return this.chanRepository.findOne({name});
   }
 
@@ -178,5 +180,13 @@ export class ChanServices {
     const chanUser: Roles = await this.roleRepository.findOne({ where: { channel, userId} });
     chanUser.muteDate = null;
     return this.roleRepository.save(chanUser);
+  }
+
+  /*
+    I belive that the request to channelRepository is not necessary, it should be able to retrive the User only whit the channelId
+    remember to test that !
+  */
+  async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
+    return this.roleRepository.findOne({channel, userId});
   }
 }
