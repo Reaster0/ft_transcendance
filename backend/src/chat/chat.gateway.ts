@@ -227,8 +227,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log('Get channel messages');
     if (!await this.chanServices.userIsInChannel(client.data.user, params.id))
       return;
-    const message = await this.messageServices.findMessagesForChannel(params.id, client.data.user);
-    client.emit('channelMessages', message);
+    const messages = await this.messageServices.findMessagesForChannel(params.id, client.data.user);
+    client.emit('channelMessages', { id: params.id, messages: messages });
   }
 
   @SubscribeMessage('getJoinnableChannels')
