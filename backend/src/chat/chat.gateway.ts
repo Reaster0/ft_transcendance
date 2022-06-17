@@ -87,7 +87,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   //  @UseGuards(AuthChat)
   @SubscribeMessage('message')
-  async onSendMessage(client: Socket, params: { channelId: string, message: MessageI }) {
+  async onSendMessage(client: Socket, params: { channelId: string, content: string}) {
     this.logger.log('sending message');
     const channel = await this.chanServices.getChannelFromId(params.channelId); // maybe useless
     const user: RolesI = await this.chanServices.getUserOnChannel(channel, client.data.user.id);
@@ -96,7 +96,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     let date = new Date;
     if (user.muteDate >= date) return;
 
-    const createMessage: MessageI = await this.messageServices.create({ channel, date, content: params.message.content, user: client.data.user });
+    const createMessage: MessageI = await this.messageServices.create({ channel, date, content: params.content, user: client.data.user });
     const originalMessage = createMessage.content;
     const sender = createMessage.user;
 
