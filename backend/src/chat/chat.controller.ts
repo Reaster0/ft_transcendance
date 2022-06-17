@@ -8,6 +8,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { AuthUser } from "src/users/guards/userAuth.guard";
 import { UsersService } from "../users/services/users.service";
 import { ChannelI } from './interfaces/back.interface';
+import { ChannelType } from "src/users/enums/channelType.enum";
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
@@ -65,9 +66,8 @@ export class ChatController {
     const creator = await this.userService.findUserById('1');
     const chan: ChannelI = {
         name: "channeltest3",
-        owner: 1, //owner id
         password: '',
-        type: 'public',
+        type: ChannelType.public
     };
     return await this.chanServices.createChannel(chan, creator);
   }

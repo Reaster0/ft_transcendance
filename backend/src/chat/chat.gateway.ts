@@ -6,14 +6,13 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { ChannelI} from './interfaces/back.interface';
+import { ChannelI, RolesI} from './interfaces/back.interface';
 import { MessageI } from './interfaces/back.interface';
 import { ChanServices } from './services/chan.service';
-import { MutedI } from './interfaces/back.interface';
 import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import { Channel } from './entities/channel.entity';
-
+import * as bcrypt from 'bcrypt';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -71,6 +70,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.logger.log(`ERROR will creating: ${channel.name}`);
       return false;
     }
+    // add owner to chanUser ?
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.name} created`);
     return true;
@@ -129,14 +129,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //  @UseGuards(AuthChat)
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChannelI) {
-    const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
-    if (! channelFound) return ; // better handel in get chan and catch
+    const channelFound = await this.chanServices.getChannelFromId(channel.id);
+    if (! channelFound) return false; // better handel in get chan and catch
+
     if (channelFound.password) {
       if (!channel.password)
-        return ;
+        return false;
+      if (await bcrypt.compare(channel.password, channelFound.password) === false)
+        return false;
     }
     await this.chanServices.pushUserToChan(channel, client.data.user);
     this.logger.log(`${client.data.user.username} joinned ${channel.name}`);
+    return true;
   }
 
 
@@ -199,20 +203,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('getChannelUsers')
   async getChanneUsers(client: Socket, params: any): Promise<any> {
     this.logger.log('Get channel users');
-    const channel = await this.chanServices.findChannelWithUsersAndMuted(params.id);
+    const channelUsers: RolesI[] = await this.chanServices.getChannelUsers(params.id);
     let isMember = false;
     let res = [] as any[];
-    for (let user of channel.users) {
-      let role = '' as string;
-      if (user.id === client.data.user.id) {
+
+    for (let user of channelUsers) {
+      if (user.userId === client.data.user.id) {
         isMember = true;
       }
-      if (user.id === channel.owner) {
-        role = 'owner';
-      } else if (channel.admins.includes(user.id)) {
-        role = 'admin';
-      }
-      res.push({ 'id': user.id, 'role': role })
+      res.push({ 'id': user.userId, 'role': user.role}) //better changeThis
     }
     if (isMember === false) {
       this.logger.log('Access Refused');

@@ -574,7 +574,6 @@ export default defineComponent({
     let txt = ref<string>('');
 
 		onMounted(async() => {
-      console.log('render');
 			try {
         connection.value = store.getters.getSocketVal;
         if (connection.value === null) {
