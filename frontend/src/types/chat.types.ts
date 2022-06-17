@@ -46,7 +46,7 @@ export enum Status {
 
 export interface Channel {
     id: string;
-    channelName: string;
+    name: string;
 	type: string;
     avatar?: Uint8Array;
 }

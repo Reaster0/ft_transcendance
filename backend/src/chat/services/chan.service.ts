@@ -83,7 +83,7 @@ export class ChanServices {
   async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
     let query = await this.chanRepository
       .createQueryBuilder('channel')
-      .select(['channel.id', 'channel.channelName', 'channel.avatar']) //Test
+      .select(['channel.id', 'channel.name', 'channel.avatar']) //Test
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
