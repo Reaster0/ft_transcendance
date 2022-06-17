@@ -67,12 +67,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     const createChannel: Channel = await this.chanServices.createChannel(channel, client.data.user);
     if (!createChannel) {
-      this.logger.log(`ERROR will creating: ${channel.name}`);
+      this.logger.log(`Error while creating: ${channel.name}`);
       return false;
     }
-    // add owner to chanUser ?
     await this.emitChannels();
-    this.logger.log(`new Channel: ${createChannel.name} created`);
+    this.logger.log(`New Channel: ${createChannel.name} created`);
     return true;
   }
 
