@@ -25,6 +25,7 @@ export class ChanServices {
 
   async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
     let { name, type, password } = channel;
+    if (!name) return null;
     const sameName = await this.chanRepository.findOne({ name: name });
 		if (sameName) //channel name already exist
 			return null;
@@ -37,7 +38,7 @@ export class ChanServices {
 		}
 		const newChannel = await this.chanRepository.save(channel);
     const user: RolesI = {userId: creator.id, role: ERoles.owner, muteDate: null, channel: newChannel}
-    await this.roleRepository.save(user);
+    this.roleRepository.save(user);
     return newChannel;
 	}
 

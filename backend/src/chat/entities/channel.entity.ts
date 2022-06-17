@@ -20,10 +20,6 @@ export class Channel {
   @CreateDateColumn()
   date: Date;
 
-  @ApiProperty({ type: Number, description: 'channel owner / creator id' })
-  @Column('int', { default: 0 })
-  owner: number;
-
   // todo change this to number if front is ok
   @Column({ type: 'text', default: ChannelType.public })
   @ApiProperty({ enum: ChannelType, type: String, description: 'channel type, either public/private/protected/pm.' })
@@ -51,7 +47,7 @@ export class Channel {
   users: User[];
 
   @ApiProperty({ type: Roles, description: 'Relation | channels <=> ChannelUser | OneToMany : User that have bein join that channel + there status' })
-  @OneToMany(() => Roles, muted => muted.channel, { cascade: true })
+  @OneToMany(() => Roles, roles => roles.channel, { cascade: true })
   channelUsers: Roles[];
 
   @ApiProperty({ type: Message, description: 'Relation | OneMany: all message posted on that Channel' })
