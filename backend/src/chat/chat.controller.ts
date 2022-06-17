@@ -9,6 +9,7 @@ import { AuthUser } from "src/users/guards/userAuth.guard";
 import { UsersService } from "../users/services/users.service";
 import { ChannelI } from './interfaces/back.interface';
 import { ChannelType } from "src/users/enums/channelType.enum";
+import { truncate } from "fs";
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
@@ -20,43 +21,41 @@ export class ChatController {
 
     @Get('genJoinUrl')
     async makeUrl(@Query() invite: InviteDto): Promise<string> {
-        console.log('generating url');
-        console.log(invite);
+        //console.log('generating url');
+        //console.log(invite);
         const params = {
-            chanID: invite.chanID,
-            invitedUser: invite.invitedUser,
+            chanId: invite.chanId,
+            invitedUserId: invite.invitedUserId,
             
         };
         const query = {
-            k: 'queryTest',
+            k: 'secretQuery',
         }
 
         const res: string= this.urlGeneratorService.generateUrlFromController({
             controller: ChatController,
             controllerMethod: ChatController.prototype.joinChannel,
-            query: query,
+            //query: query,
             params: params,
           });
 
-          console.log(res);
           return (res);
         }
 
-        @Get('joinChannel/:id/:nickname')
+        @Get('joinChannel/:chanId/:invitedUserId')
         @UseGuards(AuthGuard('jwt'), AuthUser) // try
-        async joinChannel(@Param('id') id: string, @Req() req: RequestUser): Promise<void> {
+        async joinChannel(@Param('chanId') id: string, @Req() req: RequestUser): Promise<boolean> {
         console.log('try to join channel whit link');
         const channelFound = await this.chanServices.findChannelWithUsers(id);
         if (!channelFound) {
-            console.log('channel whit id: ', id, ' not found' );
-            return ;
+            return false;
         }
         
         //const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
 
         await this.chanServices.pushUserToChan(channelFound, req.user);
         //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
-        console.log(req.user, ' joined: ', channelFound.name);
+        return true;
         //return 'lets join this private channel';
   }
 
@@ -67,7 +66,7 @@ export class ChatController {
     const chan: ChannelI = {
         name: "channeltest3",
         password: '',
-        type: ChannelType.public
+        type: ChannelType.PUBLIC
     };
     return await this.chanServices.createChannel(chan, creator);
   }

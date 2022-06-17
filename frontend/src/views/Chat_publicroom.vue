@@ -107,7 +107,6 @@ export default defineComponent({
 
     function previewFiles(event: any) {
         file.value = event.target.files[0];
-        console.log(event.target.files[0]);
     }
 
     function creationError() {

@@ -1,48 +1,21 @@
 export enum Status {
-	ONLINE = 'online',
-	OFFLINE = 'offline',
-	PLAYING = 'playing',
-  }
+    ONLINE = 'online',
+    OFFLINE = 'offline',
+    PLAYING = 'playing',
+}
   
-//export interface ChannelI {
+export enum ChannelType {
+    PUBLIC = 0,
+    PRIVATE = 1,
+    PROTECTED = 2,
+    PM = 3,
+}
 
-//	id: string,
-//	channelName: string,
-//	date: Date,
-//	update_at: Date,
-//	owner: number, //id or nickname ?
-//	publicChannel: boolean,
-//	password: string,
-//	adminUsers: string[],
-//    // -- relations //
-//	users: User[],
-//	chanUsers: JoinnedUserI[],
-//	messages: MessageI[],
-//}
-
-//export class Channel implements ChannelI {
-
-//	id = '';
-//	channelName = '';
-//	date = new Date();
-//	update_at = new Date();
-//	owner = 0; // id
-//	publicChannel = true;
-//	password = '';
-//	adminUsers = [];
-//    // --- relations //
-//	users = [];
-//	chanUsers = [];
-//	messages = [];
-//}
-
-//export class newChannel {
-//  name: string = '';
-//  public: boolean = true;
-//  password: string = '';
-//  members: User[] = [];
-//  admin: User[] = []; 
-//}
+export enum Roles {
+    OWNER = 1,
+    ADMIN = 2,
+    USER = 3
+}
 
 export interface Channel {
     id: string;
@@ -67,17 +40,4 @@ export interface Message {
     content: string;
     userId: number;
     date: any;
-}
-
-export enum ChannelType {
-    PUBLIC = 0,
-    PRIVATE = 1,
-    PROTECTED = 2,
-    PM = 3,
-}
-
-export enum Roles {
-    OWNER = 1,
-    ADMIN = 2,
-    USER = 3
 }
