@@ -5,6 +5,7 @@
 
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
+        
           <v-col>
 
             <!-- SEARCH PANNEL -->
@@ -21,7 +22,7 @@
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
             </v-btn>
-
+          
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
@@ -143,7 +144,7 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-      <div v-if="currentChannel.role != 'admin' && !chat_person">
+      <div v-if="currentChannel.role != 'admin' && currentChannel.type != 'mp'">
         <v-card height="100%" class="text-center offsetphoto" shaped >
             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
                   <v-avatar class="s" elevation="10" size="60px">
@@ -739,9 +740,9 @@ export default defineComponent({
       // 			console.log("after blockUser");
       // 		}
 
-		return { isChannelJoined, update, txt,
-      userChannels, displayChannel, currentChannel, currentUser, getUserName,
-      getUserAvatar, getUserStatus, getUserColor, sendingMessage, currentUserRole }
+		return { isChannelJoined, update, txt, userChannels, displayChannel,
+      currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
+      getUserColor, sendingMessage, currentUserRole }
 	},
 })
 </script>
