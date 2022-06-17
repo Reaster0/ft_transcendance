@@ -24,14 +24,16 @@ export class ChanServices {
     private readonly userServices: UsersService,
   ) {}
 
-  async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
+  async createChannel(channel: ChannelI, creator: User): Promise<{channel: Channel, error: string}> {
     let { name, type, password } = channel;
-    if (!name) return null;
+    if (!name) return {channel:null, error: 'Channel name must not be empty'};
+
+		if (/^([a-zA-Z0-9-]+)$/.test(name) === false)
+			return {channel:null, error: 'Channel name must be alphabetical'};
+
     const sameName = await this.chanRepository.findOne({ name: name });
-		if (sameName) //channel name already exist
-			return null;
-		if (/^([a-zA-Z0-9-]+)$/.test(name) === false) //isalphanum()
-			return null;
+		if (sameName) return {channel:null, error: 'This channel name is already taked'};
+
     channel.users = [creator];
 		if (type === ChannelType.PROTECTED || password) {
 			const salt = await bcrypt.genSalt();
@@ -40,7 +42,8 @@ export class ChanServices {
 		const newChannel = await this.chanRepository.save(channel);
     const user: RolesI = {userId: creator.id, role: ERoles.OWNER, muteDate: null, channel: newChannel}
     this.roleRepository.save(user);
-    return newChannel;
+
+    return {channel: newChannel, error: ''};
 	}
 
 	async deleteChannel(channel: ChannelI) {
