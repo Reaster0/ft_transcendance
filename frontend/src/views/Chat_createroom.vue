@@ -1,66 +1,71 @@
 <template>
   <v-app >
     <v-container fluid>
-      <h3>Please, choose a type of new chat room</h3>
-            <div class="spacetopplus">
-            <p class="font-weight-black">
-              Public chat 
-            </p>
-            <p>
-              Visible and accessible for anyone
-            </p>
-          <v-btn color = "rgb(0,0,255)" width="240px" to="/publicroom">
-            <div :style="{color: ' #ffffff'}">
-              Create public room
-            </div>
-          </v-btn>
+
+      <div class="d-flex">
+        <h3>Please, choose a type of new chat room</h3>
+        <v-spacer />
+        <v-btn to="/thechat" x-small fab>
+          <v-icon color="rgb(0,0,255)">mdi-close</v-icon>
+        </v-btn>
+      </div>
+
+      <div class="spacetopplus">
+        <p class="font-weight-black">
+          Public chat 
+        </p>
+        <p>
+          Visible and accessible for anyone
+        </p>
+        <v-btn color="rgb(0,0,255)" width="240px" to="/publicroom">
+          <div :style="{color: ' #ffffff'}">
+            Create public room
           </div>
+        </v-btn>
+      </div>
 
-          <v-divider ></v-divider>
+      <v-divider ></v-divider>
 
-          <div class="spacetopplus">
-            <p class="font-weight-black">
-              Private chat 
-            </p>
-            <p>
-              Accessible for users that has a direct link
-            </p>
-          <v-btn color = "rgb(0,0,255)" width="240px" to="/privateroom">
-            <div :style="{color: ' #ffffff'}">
-              Create private room
-            </div>
-          </v-btn>
+      <div class="spacetopplus">
+        <p class="font-weight-black">
+          Private chat 
+        </p>
+        <p>
+          Accessible for users that has a direct link
+        </p>
+        <v-btn color = "rgb(0,0,255)" width="240px" to="/privateroom">
+          <div :style="{color: ' #ffffff'}">
+            Create private room
           </div>
+        </v-btn>
+      </div>
 
-          <v-divider></v-divider>
+      <v-divider></v-divider>
 
-          <div class="spacetopplus">
-            <p class="font-weight-black">
-              Protected chat 
-            </p>
-            <p>
-              Accessible by the password
-            </p>
-          <v-btn color = "rgb(0,0,255)" width="240px" to="/protectedroom">
-            <div :style="{color: ' #ffffff'}">
-              Create protected room
-            </div>
-          </v-btn>
+      <div class="spacetopplus">
+        <p class="font-weight-black">
+          Protected chat 
+        </p>
+        <p>
+          Accessible by the password
+        </p>
+        <v-btn color = "rgb(0,0,255)" width="240px" to="/protectedroom">
+          <div :style="{color: ' #ffffff'}">
+            Create protected room
           </div>
+        </v-btn>
+      </div>
 
     </v-container>
   </v-app>
 </template>
-
-
-
 
 <script lang="ts">
 
 import { defineComponent } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { Store, useStore } from 'vuex';
-import leaveChat from '../helper';
+import { leaveChat } from '../helper';
 
 export default defineComponent({
   name: "NewRoom",
@@ -81,7 +86,6 @@ export default defineComponent({
     }
   },
   setup () {
-
     let store = useStore() as Store<any>;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
@@ -92,7 +96,6 @@ export default defineComponent({
   }
 })
 </script>
-
 
 <style scoped>
 .border 
@@ -107,7 +110,6 @@ export default defineComponent({
   padding-top: 20px;
   padding-bottom: 20px;
 }
-
 .spacetopplus {
   padding-top: 30px;
   padding-bottom: 20px;
@@ -125,5 +127,4 @@ export default defineComponent({
 .row>.col {
   flex-basis: auto;
 }
-
 </style>

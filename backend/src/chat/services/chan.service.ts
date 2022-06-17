@@ -1,69 +1,54 @@
-import { Injectable, InternalServerErrorException, StreamableFile } from '@nestjs/common';
+import { Inject, forwardRef, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
-import { ChanUser } from '../entities/channelUser.entity';
-import { ChannelI } from '../interfaces/channel.interface';
-import { ChanUserI } from '../interfaces/channelUser.interface';
+import { Roles } from '../entities/role.entity';
+import { ChannelI, RolesI } from '../interfaces/back.interface';
 import * as bcrypt from 'bcrypt';
-import { timeStamp } from 'console';
 import { UsersService } from 'src/users/services/users.service';
-import { FrontChannelI } from '../interfaces/frontChannel.interface';
+import { FrontChannelI } from '../interfaces/front.interface';
+import { ChannelType } from 'src/users/enums/channelType.enum';
+import { ERoles } from 'src/users/enums/roles.enum';
+import { relative } from 'path';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChanServices {
   constructor(
     @InjectRepository(Channel)
     private readonly chanRepository: Repository<Channel>,
-    @InjectRepository(ChanUser)
-    private readonly chanUserRepository: Repository<ChanUser>,
+    @InjectRepository(Roles)
+    private readonly roleRepository: Repository<Roles>,
+    @Inject(forwardRef(() => UsersService))
     private readonly userServices: UsersService,
   ) {}
 
-  async createChannel(channel: ChannelI, creator: User): Promise<Channel> {
-    let { channelName, publicChannel, password } = channel;
-    //console.log(channelName);
-    const name = await this.chanRepository.findOne({ channelName: channelName });
+  async createChannel(channel: ChannelI, creator: User): Promise<{channel: string, error: string}> {
+    let { name, type, password } = channel;
+    if (!name) return {channel:null, error: 'Channel name must not be empty'};
 
-		if (name) //channel name already exist
-			return null;
+		if (/^([a-zA-Z0-9-]+)$/.test(name) === false)
+			return {channel:null, error: 'Channel name must be alphabetical'};
 
-		if (/^([a-zA-Z0-9-]+)$/.test(channelName) === false) //isalphanum()
-			return null;
+    const sameName = await this.chanRepository.findOne({ name: name });
+		if (sameName) return {channel:null, error: 'This channel name is already taked'};
 
     channel.users = [creator];
-		channel.adminUsers = [creator.id]; //Alina asking for this
-		channel.owner = creator.id;
-
-  //will see 
-		if (publicChannel === false) {
-			if (password) {
-				const salt = await bcrypt.genSalt();
-				channel.password = await bcrypt.hash(password, salt);
-      }
+		if (type === ChannelType.PROTECTED || password) {
+			const salt = await bcrypt.genSalt();
+			channel.password = await bcrypt.hash(password, salt);
 		}
-		//console.log(channel);
+		const newChannel = await this.chanRepository.save(channel);
+    const user: RolesI = {userId: creator.id, role: ERoles.OWNER, muteDate: null, channel: newChannel}
+    this.roleRepository.save(user);
 
-		return this.chanRepository.save(channel);
+    return {channel: newChannel.name, error: ''};
 	}
 
 	async deleteChannel(channel: ChannelI) {
-		/*
- 		 if (!channel.id)
-	  		throw new InternalServerErrorException('bad request: deleteChannel');
-	  */
     const channelFound: Channel = await this.chanRepository.findOne(channel.id);
     if (channelFound) {
-      /*
-					 channelFound.users = []; //is this necessary ?
-						 try {
-							 await this.chanRepository.save(channelFound);
-						 } catch (error) {
-							 console.log(error);
-							 throw new InternalServerErrorException('failed to empty user list');
-						 }
-			 */
       try {
         await this.chanRepository.delete(channelFound.id);
       } catch (error) {
@@ -73,21 +58,29 @@ export class ChanServices {
     }
   }
 
-  //try
   async pushUserToChan(channel: ChannelI, user: User){
     let update: Channel = await this.chanRepository.findOne(channel.id);
     update.users.push(user);
     this.chanRepository.update(channel.id, update);
+    const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel: update}
+    this.roleRepository.save(newUser);
   }
 
-  //test
-  async removeUserToChan(channel: ChannelI, user: User) {
+  async removeUserFromChan(channel: ChannelI, user: User) {
     let update: Channel = await this.chanRepository.findOne(channel.id);
     const index = update.users.indexOf(user);
     if (index != -1) {
       update.users.splice(index, 1);
     }
     this.chanRepository.update(channel.id, update);
+    ////////////////////////////////////////////////////////////////
+    const chanUser = await this.roleRepository.findOne({ where: { channel: channel, userId: user.id} });
+    console.log(chanUser);
+    try {
+      this.roleRepository.remove(chanUser)
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async updateChannel(channel: ChannelI, info: any): Promise<Boolean> {
@@ -107,9 +100,9 @@ export class ChanServices {
   }
 
   async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
-    let query = await this.chanRepository
+    let query = this.chanRepository
       .createQueryBuilder('channel')
-      .select(['channel.id', 'channel.channelName', 'channel.avatar']) //Test
+      .select(['channel.id', 'channel.name', 'channel.avatar']) //Test
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
@@ -118,46 +111,30 @@ export class ChanServices {
     return channels;
   }
 
-  async getChan(channelID: string): Promise<ChannelI> {
+  async getChannelUsers(channelID: string): Promise<Roles[]> {
+    const channel = await this.chanRepository.findOne(channelID, { relations: ['channelUsers'] });
+    return channel.channelUsers;
+  }
+
+
+  async getChannelFromId(channelID: string): Promise<Channel> {
+    return this.chanRepository.findOne(channelID);
+  }
+
+  async findChannelWithUsers(channelID: string): Promise<ChannelI> {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
 
-  /*
-  async findUserByChannel(channel: ChannelI, userID: number): Promise<ChanUserI> {
-    console.log(userID, channel); //this look strange
-    return this.chanUserRepository.findOne({ where: { channel: channel, userID: userID } });
-  }
-  */
-
-  async findChannel(channelName: string): Promise<Channel> {
-    return this.chanRepository.findOne({channelName});
+  async findChannelByName(name: string): Promise<Channel> {
+    return this.chanRepository.findOne({name});
   }
 
-  /* no need anymore ----------
-  GetImageFromBuffer(channels: ChannelI[]): StreamableFile[] {
-    var image: StreamableFile[] = [];
-    const defaultStream = createReadStream(join(process.cwd(), process.env.DEFAULT_AVATAR),);
-
-    for (const chan of channels) {
-      if (!chan.avatar || chan.avatar.byteLength === 0) {
-        image.push(new StreamableFile(defaultStream));
-      } else {
-        const stream = Readable.from(chan.avatar);
-        image.push(new StreamableFile(stream));
-      }
-    }
-    
-    return image;
-  }
-  */
-
-
-  async getAllChanUser(channel: ChannelI): Promise<User[]> {
-    const channelWhitChanUser: Channel = await this.chanRepository.findOne(
-      channel.id,
+  async getAllChanUser(channelId: string): Promise<User[]> {
+    const currentChanUsers: Channel = await this.chanRepository.findOne(
+      channelId,
       { relations: ['users'] }
     );
-    return channelWhitChanUser.users;
+    return currentChanUsers.users;
   }
 
   async filterJoinableChannel(name: string): Promise<Channel[]> {
@@ -165,40 +142,53 @@ export class ChanServices {
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      order: {channelName: "DESC"},
-      select: ['id', 'channelName', 'avatar'],
-      where: [ { channelName: Like(`%${name}%`), publicChannel: true} ]
+      order: {name: "DESC"},
+      select: ['id', 'name', 'avatar'],
+      where: [ { name: Like(`%${name}%`), publicChannel: true} ]
     })
   }
 
-  //-------------------------------------------------//
+  async userIsInChannel(user: User, channelId: string): Promise<boolean> {
+    const currentChanUsers = await this.getAllChanUser(channelId);
+    const me: User = currentChanUsers.find( (element) => element.id === user.id);
+    if (user)
+      return true;
+    return false;
+  }
+
   async findSocketByChannel(channel: ChannelI): Promise<string[]> {
-    
     const member: ChannelI = await this.chanRepository.findOne({
       where: {id: channel.id},
       relations: ['users'],
     });
+    let res: string[]
+    for (const user of member.users) {
+      res.push(user.chatSocket);
+    }
+    return (res);
+  }
 
+  async muteUser(channel: Channel, userId: number, time: number): Promise<Roles> {
+    const chanUser = await this.roleRepository.findOne({ where: { channel, userId} });
 
-      var res: string[]
-      for (const user of member.users) {
-        res.push(user.chatSocket);
-      }
-      return (res);
-    /*
-    return this.joinedSocketRepository.find({
-      where: { channel: channel },
-      relations: ['user'],
-    });
-    */
+    const muteDate = new Date;
+    muteDate.setDate(muteDate.getDate() + time)
+
+    chanUser.muteDate = muteDate;
+    return this.roleRepository.save(chanUser);
+}
+
+  async unmuteUser(channel: Channel, userId: number): Promise<Roles> {
+    const chanUser: Roles = await this.roleRepository.findOne({ where: { channel, userId} });
+    chanUser.muteDate = null;
+    return this.roleRepository.save(chanUser);
   }
 
   /*
-  async addSocket(joinedChannel: JoinedSocketI): Promise<JoinedSocketI> {
-    return this.joinedSocketRepository.save(joinedChannel);
-  }
-  async removeSocket(socketID: string) {
-    return this.joinedSocketRepository.delete({ socketID });
-  }
+    I belive that the request to channelRepository is not necessary, it should be able to retrive the User only whit the channelId
+    remember to test that !
   */
+  async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
+    return this.roleRepository.findOne({channel, userId});
+  }
 }

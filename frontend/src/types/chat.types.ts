@@ -1,91 +1,43 @@
-export enum UserStatus {
-	OFFLINE = 'Offline',
-	ONLINE = 'Online',
-	INGAME = 'In Game',
+export enum Status {
+    ONLINE = 'online',
+    OFFLINE = 'offline',
+    PLAYING = 'playing',
+}
+  
+export enum ChannelType {
+    PUBLIC = 0,
+    PRIVATE = 1,
+    PROTECTED = 2,
+    PM = 3,
 }
 
-export interface UserI {
-    id: number,
-    nickname: string,
-    status: UserStatus,
+export enum Roles {
+    OWNER = 1,
+    ADMIN = 2,
+    USER = 3
 }
 
-export class User implements UserI{
-    id = 0;
-    nickname = '';
-    status =  UserStatus.OFFLINE;
+export interface Channel {
+    id: string;
+    name: string;
+	type: string;
+    avatar?: Uint8Array;
 }
 
-export interface ChannelI {
-
-	id: string,
-	channelName: string,
-	date: Date,
-	update_at: Date,
-	owner: number, //id or nickname ?
-	publicChannel: boolean,
-	password: string,
-	adminUsers: string[],
-    // -- relations //
-	users: User[],
-	chanUsers: JoinnedUserI[],
-	messages: MessageI[],
+export interface UserGlobal {
+    id: number;
+    name: string;
+	avatar: Blob;
+	status: Status;
 }
 
-export class Channel implements ChannelI {
-
-	id = '';
-	channelName = '';
-	date = new Date();
-	update_at = new Date();
-	owner = 0; // id
-	publicChannel = true;
-	password = '';
-	adminUsers = [];
-    // --- relations //
-	users = [];
-	chanUsers = [];
-	messages = [];
+export interface UserChannel {
+	id : number;
+	role: string;
 }
 
-export interface JoinnedUserI {
-	id: string;
-	socketID: string;
-	user: User;
-	chan: Channel;
-}
-
-export class JoinnedUser implements JoinnedUserI {
-	id = '';
-	socketID = '';
-	user =  new User;
-	chan = new Channel;
-}
-
-export interface MessageI {
-	id: number
-	content: string;
-	date: Date;
-	update_at: Date;
- // relation //
-	user: User;
-	channel: Channel;
-}
-
-export class Message implements MessageI {
-	id = 0;
-	content = '';
-	date = new Date;
-	update_at = new Date;
-
-	user = new User;
-	channel = new Channel;
-}
-
-export class newChannel {
-  name: string = '';
-  public: boolean = true;
-  password: string = '';
-  members: User[] = [];
-  admin: User[] = [];
+export interface Message {
+    content: string;
+    userId: number;
+    date: any;
 }

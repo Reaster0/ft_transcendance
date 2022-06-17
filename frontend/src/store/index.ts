@@ -1,4 +1,5 @@
-import {createStore} from "vuex"
+import { createStore } from 'vuex';
+import { UserGlobal } from '../types/chat.types';
 
 const store = createStore({
 	state: {
@@ -15,6 +16,7 @@ const store = createStore({
 		channels: [] as any[],
 		joinedChannel: false as boolean,
 		theSocketVal: null as any,
+		usersList: [] as UserGlobal[],
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -36,6 +38,9 @@ const store = createStore({
 		getSocketVal:(state) => {
 			return state.theSocketVal;
 		},
+		getUsersList:(state) => {
+			return state.usersList;
+		}
 	},
 	mutations: {
 		setUser(state, user) {
@@ -57,6 +62,9 @@ const store = createStore({
 		},
 		setSocketVal(state, val) {
 			state.theSocketVal = val;
+		},
+		setUsersList(state, val) {
+			state.usersList = val;
 		},
 	},
 	actions: {},

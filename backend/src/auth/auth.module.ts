@@ -4,9 +4,10 @@ import { AuthController } from './auth.controller';
 import { OauthStrategy42 } from './strategies/oauth-42.strategy';
 import { UsersModule } from 'src/users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { PassportModule } from '@nestjs/passport';
       },
       inject: [ConfigService],
     }),
-   forwardRef(() => UsersModule)
+   forwardRef(() => UsersModule),
   ],
   providers: [AuthService, OauthStrategy42, JwtStrategy],
   exports: [AuthService],

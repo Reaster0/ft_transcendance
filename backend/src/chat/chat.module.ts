@@ -1,26 +1,24 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { ChatGateway } from './chat.gateway';
-import { ChanUser } from './entities/channelUser.entity';
 import { Message } from './entities/message.entity';
 import { ChanServices } from './services/chan.service';
-import { ConnectService } from './services/connect.service';
 import { MessageService } from './services/message.service';
 import { AuthModule } from '../auth/auth.module';
 import { ChatController } from './chat.controller';
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { Channel } from './entities/channel.entity';
-import { ChanUserService } from './services/chanUser.service';
+import { Roles } from './entities/role.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Channel,
-      ChanUser,
+      Roles,
       Message,
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     AuthModule,
     UrlGeneratorModule.forRoot({
       secret: 'thisIsNotASecret',
@@ -31,10 +29,8 @@ import { ChanUserService } from './services/chanUser.service';
   providers: [
     ChatGateway,
     ChanServices,
-    ChanUserService,
-    ConnectService,
     MessageService,
   ],
-  exports: [ChatGateway],
+  exports: [ChatGateway, ChanServices, MessageService],
 })
 export class ChatModule {}

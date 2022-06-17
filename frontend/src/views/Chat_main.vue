@@ -1,10 +1,11 @@
 <template>
-  <v-app >
+  <v-app>
     <v-container fluid v-if="update.connected">
       <v-row>
 
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
+        
           <v-col>
 
             <!-- SEARCH PANNEL -->
@@ -21,12 +22,12 @@
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
             </v-btn>
-
+          
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div id="app" class="text-left">
-            <v-app id="inspire">
+          <div class="text-left overflow-y-auto" style="max-height: 700px;">
+            <v-app>
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -63,7 +64,7 @@
                         </v-list-item-avatar>
                       </v-badge>
                     </v-btn>
-                    <v-list-item-title class="offsetmess">{{ item.channelName }}
+                    <v-list-item-title class="offsetmess">{{ item.name }}
                     </v-list-item-title>
                   </v-list-item>
                   <v-divider v-if="index < userChannels.channels.length"
@@ -77,96 +78,82 @@
 
         <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
         <v-col cols="auto" sm="6" class="border">
-          <div id="app">
-            <v-app id="inspire" v-if="update.messages && currentChannel.name != ''"> <!-- Modify to inverse-->
-              <template v-for="(msg, index) in currentChannel.messages">
-                <v-spacer v-if="msg.user === currentUser.id" :key="index"></v-spacer>
-                <v-toolbar dense  color="rgba(0,0,0,0)"
-                  class="spacebottom messagefield" v-if="msg" :key="index">
-                  <v-btn elevation="0" min-height="50px"
-                    max-width="50px">
-                    <v-badge bordered bottom color="green" dot offset-x="4"
-                      offset-y="10">
-                      <v-avatar class="mt-n4 " size="32"
-                        elevation="2">
-                        <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-                      </v-avatar>
-                    </v-badge>
-                  </v-btn>
-                  <v-card class="mt-2 ml-2" max-width="450px">
-                    <v-list-item >
-                      <v-list-item-content>
-                        <div class="mb-2"> {{ msg.content }} </div>
-                        <v-list-item-subtitle> 19:45 </v-list-item-subtitle>  
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-card >
-                </v-toolbar>
-              </template>
-              
+          <v-app id="chatdisplay" v-if="update.messages && update.users
+            && currentChannel.name != ''" style="max-height: 600px;">
 
-          <!--<v-toolbar dense  color="rgba(0,0,0,0)" class="spacebottom messagefield">
-            <v-spacer></v-spacer>
-            <v-card class="mt-2 mr-2" max-width="450px" color="rgb(0,0,255)"  dark>
-              <v-list-item >
-                <v-list-item-content>
-                  <div  :style="{color: ' #ffffff'}" class="mb-2">
-                    Yeah, a lot of syntaxic sugar
-                  </div>
-                  <v-list-item-subtitle :style="{color: ' #ffffff'}"> 19:46 </v-list-item-subtitle>  
-                </v-list-item-content>
-              </v-list-item>
-            </v-card >
-            <v-btn elevation="0" min-height="50px"  max-width="50px">
-              <v-badge bordered bottom color="green" dot offset-x="4" offset-y="10">
-              <v-avatar class="mt-n4 " size="32" elevation="2">
-                    <img src="https://www.referenseo.com/wp-content/uploads/2019/03/image-attractive-960x540.jpg" />
-              </v-avatar>
-              </v-badge>
-            </v-btn>
-          </v-toolbar>-->
-          <!-- <v-toolbar dense  color="rgba(0,0,0,0)" class="spacetop"> -->
-          <div class="d-flex">
-            <v-text-field
-              clearable
-              class="messagefield"
-              width="100%"
-              label="Write a message"
-              placeholder="Message"
-              @keyup.enter="sendingMessage(txt, this.currentChannel)"
-              v-model="txt"
-            ></v-text-field>
-            <!-- button bellow is from old design, I save it just in case -->
-            <!-- <v-btn height="54px" color="rgb(0,0,255)" class="spacetop" @click="sendingMessage(this.txt, this.currentChannel)"> // TODO this.values may be undefined ?
-              <div  :style="{color: ' #ffffff'}">
-                send
+            <!-- MESSAGES DISPLAY -->
+            <!--<div id="chatdisplay">-->
+            <div class="specialscroll">
+              <div v-for="(msg, index) in currentChannel.messages" :key="index"
+                :class="['d-flex flex-row align-center my-2',
+                msg.userId == currentUser.id ? 'justify-end': null]">
+                <v-card class="d-flex-column" max-width="450px"
+                  v-if="msg.userId === currentUser.id" :key="index"
+                  color="rgb(0,0,255)" dark>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <div class="mb-2" :style="{color: ' #ffffff'}">
+                        {{ msg.content }} </div>
+                      <v-list-item-subtitle :style="{color: ' #ffffff'}">
+                        {{ msg.date }} </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-card>
+                <v-btn elevation="0" min-height="50px"
+                  max-width="50px">
+                  <v-badge bordered bottom :color="getUserColor(msg.userId)" dot offset-x="4"
+                    offset-y="10">
+                    <v-avatar class="mt-n4 " size="32" elevation="2">
+                      <img :src="getUserAvatar(msg.userId)" />
+                    </v-avatar>
+                  </v-badge>
+                </v-btn>
+                <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
+                  != currentUser.id" :key="index">   
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title :style="{color: 'grey'}">{{ getUserName(msg.userId) }}</v-list-item-title>
+                      <div class="mb-2"> {{ msg.content }} </div>
+                      <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-card >
               </div>
-            </v-btn> -->
-          </div>
+            </div>
 
-        </v-app>
-        <v-app v-else-if="updatemessage">
-          <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
-        </v-app>
-        <v-app v-else>
-          <h1 class="Spotnik text-center" data-text="Select">Select channel to display</h1>
-        </v-app>
-        </div>
+                      <!-- SEND MESSAGE -->
+            <div class="d-flex" overflow-hidden>
+              <v-text-field clearable class="messagefield" width="100%"
+                type="text" label="Write a message" v-model="txt"
+                @keyup.enter="sendingMessage(currentChannel.id)">
+              </v-text-field>
+            </div>
+
+          <!-- LOADING / NON SELECTED MESSAGES -->
+          </v-app>
+          <v-app v-else-if="currentChannel.name != ''">
+            <h1 class="Spotnik textfullcenter" data-text="Loading messages">Loading messages</h1>
+          </v-app>
+          <v-app v-else>
+            <h1 class="Spotnik textfullcenter" data-text="Select">Select channel to display</h1>
+          </v-app>
         </v-col>
+
 
 
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-      <div v-if="!chat_channel_isAdmin && !chat_person">
+    <!-- Correct with correct enum -->
+      <div v-if="currentChannel.role != 'admin' && currentChannel.type != 'mp'">
         <v-card height="100%" class="text-center offsetphoto" shaped >
             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
                   <v-avatar class="s" elevation="10" size="60px">
                     <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
                   </v-avatar>
             </v-badge>
-              <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
-              <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
+              <v-card-title class="layout justify-center">{{ currentChannel.name }}</v-card-title>
+              <v-card-subtitle class="layout justify-center">{{ currentChannel.type }}</v-card-subtitle>
         <div id="app" class="pt-6"> 
         <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
         <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
@@ -457,7 +444,7 @@
 
     </v-container>
     <v-container fluid v-else>
-			<h1 class="Spotnik text-center" data-text="Loading">Loading</h1>
+			<h1 class="Spotnik textfullcenter" data-text="Loading">Loading</h1>
     </v-container>
     <!--<v-container fluid v-else>
       <h1>Loading...</h1>
@@ -468,146 +455,132 @@
 
 <script lang="ts">
 import { onMounted } from "@vue/runtime-core"
-import { ref } from "vue"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
-import { defineComponent, reactive } from 'vue'
+import { ref, defineComponent } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import leaveChat from '../helper';
-
+import { leaveChat } from '../helper';
+import { Status, Message, UserChannel, Channel } from '../types/chat.types';
+import { getAvatarID } from '../components/FetchFunctions';
 
 export default defineComponent({
   name: "ChatMain",
   components: {
     'modale': TheModale
   },
-  data: () => ({
+  //data() {
+  //  return {
+  //    txt: '',
       // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
       // accordind to this info we change the interface
       // for the moment we change the value manualy, but we should get it from backend
-      chat_channel_isAdmin: true as boolean,
+      
+      //chat_channel_isAdmin: true as boolean,
       // chat_person is indicator that now user communicate not with a channel, but with another user
       // accordind to this info we change the interface
       // for the moment we change the value manualy, but we should get it from backend
-      chat_person: false as boolean,
-      revele: false,
-      fav: true as boolean,
-      menu: false as boolean,
-      currentTab: 0 as number,
-      loading: false as boolean,
-      tab: null as null | any,
 
-      tabs_manager: [
-        {tabs: 'Members',},
-        {tabs: 'Administrators',}
-      ] as any,
+      //chat_person: false as boolean,
+      //revele: false,
+      //fav: true as boolean,
+      //menu: false as boolean,
+      //currentTab: 0 as number,
+      //loading: false as boolean,
+      //tab: null as null | any,
+
+      //tabs_manager: [
+      //  {tabs: 'Members',},
+      //  {tabs: 'Administrators',}
+      //] as any,
+
       // members and admins are here only as an example of the design:
       // they dont content the read data. The real data we will receive
       // from backend ib the dame format (list of dictionaries (each channel has its dictionary))
-      members: [
-      {   
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-        title: "abaudot",
-      },
-      ] as any,
-      admins: [
-      {   
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-        title: "abaudot",
-      },
-      ] as any,
+      
+      //members: [
+      //{   
+      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
+      //  title: "abaudot",
+      //},
+      //] as any,
+      //admins: [
+      //{   
+      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
+      //  title: "abaudot",
+      //},
+      //] as any,
       // txt is a variable made to save CURRENT message that user is GOING TO send
       // with this we will emit this data to backend
-      txt: '',
-      // Comment for Aimé: Remind me why do you need it, pls ? :)
-      // Not - used vars that we can need
-      // Comment for Aimé: we will still use it ? Or we will take info from storage ? Cause now this data is empty.
-      /*
-      currentChannel: {
-        id: '',
-        chanName: '',
-        date: new Date,
-        update_date: new Date,
-        owner: 0,
-        publicChannel: true,
-        password: '',
-        users: [],
-        adminUsers: [],
-        joinChannel: [],
-        messages: []
-      },
-      */ //aime response: for now not in use...
-      // Not used vars that we can need
-      // Comment for Aimé: seems like this info is for administrators
-      // On what key-word can we get this data from backend ?
-      userBanned: false,
-      userMuted: false,
-      banDate: new Date,
-      muteDate: new Date,
+
+      //userBanned: false,
+      //userMuted: false,
+      //banDate: new Date,
+      //muteDate: new Date,
       // Not - used vars that we can need
       // Comment for Aimé: what was the idea ?
-      newChannel: {
-        name:'',
-        public: true,
-        password: '',
-        members: [],
-        admins: [],
-        },
+
+      //newChannel: {
+      //  name:'',
+      //  public: true,
+      //  password: '',
+      //  members: [],
+      //  admins: [],
+      //  },
+
       // Not - used vars that we can need
       // Comment for Aimé: this one we realy need, but now we just can know 
       // if the channel is public ot not
-      protectByPassword: false,
-      channelSettings: {
-        password: '',
-        applyPassword: false,
-        members: [],
-      },
-  }),
 
-  methods: {
-    toggleModale: function() {
-      this.revele = !this.revele;
-    },
-    // blockAlert activated after pushing button "Block this user"
-    // its, of course, temporary solution cause we need to clock for real
-    // when user block another user - he cant see the messages anymore
-    blockAlert: function (event : any) // TODO check event tupe 
-    {
-      if (event) 
-      {
-        alert("WE NEED TO BLOCK THIS USER")
-      }
-    },
-  },
-
+      //protectByPassword: false,
+      //channelSettings: {
+      //  password: '',
+      //  applyPassword: false,
+      //  members: [],
+      //},
+  //  }
+  //},
+  //methods: {
+  //  toggleModale: function() {
+  //    this.revele = !this.revele;
+  //  },
+  //  // blockAlert activated after pushing button "Block this user"
+  //  // its, of course, temporary solution cause we need to clock for real
+  //  // when user block another user - he cant see the messages anymore
+  //  blockAlert: function (event : any)
+  //  {
+  //    if (event) 
+  //    {
+  //      alert("WE NEED TO BLOCK THIS USER")
+  //    }
+  //  },
+  //},
   // this is needed to limit (3000 ms) loading process after pushing bitton "Invite to play togetrer"
   // made show on template the animation "while waiting"
-  watch: {
-    loading (val: number) {
-      if (!val) return
-      setTimeout(() => (this.loading = false), 3000)
-    },
-  },
-
+  //watch: {
+  //  loading (val: number) {
+  //    if (!val) return
+  //    setTimeout(() => (this.loading = false), 3000)
+  //  },
+  //},
 	setup() {
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
+    let usersList = ref<any>(null);
     let isChannelJoined = store.getters.isChannelJoined as boolean;
-    let userChannels = reactive({ channels: [] as any[] });
-    let update = reactive({ connected: false as boolean, users: false as boolean,
+    let userChannels = ref({ channels: [] as any[] });
+    let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
-    let currentChannel = reactive({ name: '' as string, id: '' as string,
-      messages: [] as any[], users: [] as any[] });
+    let currentChannel = ref({ name: '' as string, id: '' as string, type: '' as string,
+      messages: [] as Message[], users: [] as UserChannel[], role: '' as string });
+    let txt = ref<string>('');
 
-
-		onMounted(() =>{
-			console.log(document.cookie.toString());
+		onMounted(async() => {
 			try {
         connection.value = store.getters.getSocketVal;
         if (connection.value === null) {
-          connection.value = io('http://:3000/chat',{
+          connection.value = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
@@ -615,44 +588,131 @@ export default defineComponent({
           store.commit('setSocketVal' , connection.value);
           console.log("starting connection to websocket");
         } else {
-          update.connected = true;
+          update.value.connected = true;
           connection.value!.emit('emitMyChannels');
         }
 			} catch (error) {
 				console.log("the error is:" + error)
 			}
 
-      connection.value!.on('connectedToChat', function() {
-        update.connected = true;
-        console.log('connectedToChat: ' + update.connected);
-        connection.value!.emit('emitMyChannels');
+      connection.value!.on('usersList', async function(params: any) {
+        console.log('receive new users list');
+        for (let user of params) {
+          user.avatar = await getAvatarID(user.id) as any; 
+        }
+        store.commit('setUsersList', params);
+        usersList = store.getters.getUsersList;
+        if (!update.value.connected) {
+          connection.value!.emit('emitMyChannels');
+        }
       })
 
-      connection.value!.on('channelList', function(params: any) {
+      connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
-        userChannels.channels = params;
+        userChannels.value.channels = params;
+        update.value.connected = true;
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
-        if (params.id != currentChannel.id) {
-          console.log('Error of channel correspondance inside channelsUsers');
+        if (!currentChannel.value || params.id != currentChannel.value.id) {
+          console.log('error of channel correspondance inside channelUsers');
+          return;
         }
-        console.log('receive users from channel ' + currentChannel.name);
-        //currentChannel.users = params.users;
-        currentChannel.users = [{ id: 1, nickname: 'User1', role: 'admin'}, { id: 2, nickname: 'User2', role: ''}]
+        console.log('receive users from channel ' + currentChannel.value.name);
+        currentChannel.value.users = params.users;
+        currentUserRole();
+        update.value.users = true;
       })
 
       connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
-        if (params.id != currentChannel.id) {
+        if (params.id != currentChannel.value.id) {
           console.log('Error of channel correspondance inside channelMessages');
+          return;
         }
-        console.log('receive messages from channel ' + currentChannel.name);
-        //currentChannel.messages = params.messages;
-        currentChannel.messages = [{ content: 'Hello', user: 1, date: '19:45'}, { content: 'How are you ?', user: 2, date: '12:38'}, {content : 'Fine and you ?', user: 1, date: '14:12'}];
-        update.messages = true;
+        console.log('receive messages from channel ' + currentChannel.value.name);
+        currentChannel.value.messages = params.messages;
+        update.value.messages = true;
       })
-
 		})
+
+		onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next, store);
+    })
+
+    function displayChannel(channel: any) {
+      currentChannel.value.name = channel.name;
+      currentChannel.value.id = channel.id;
+      console.log('ask for ' + channel.name + ' users and messages');
+      update.value.messages = false;
+      update.value.users = false;
+      connection.value.emit('getChannelUsers', { id: channel.id });
+      connection.value.emit('getChannelMessages', { id: channel.id });
+    }
+
+    function getUserName(userId: number) {
+      if (!usersList.value) {
+        console.log('Error when retrieving users');
+        return;
+      }
+      for (let user of usersList.value) {
+        if (user.id === userId) {
+          return user.name;
+        }
+      }
+      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.value.name);
+    }
+
+    function getUserAvatar(userId: number) {
+      if (!usersList.value) {
+        console.log('Error when retrieving users');
+        return;
+      }
+      for (let user of usersList.value) {
+        if (user.id === userId) {
+          return user.avatar;
+        }
+      }
+      console.log('Something went wrong: User id ' + userId + ' not found');
+    }
+    
+    function getUserStatus(userId: number) {
+      if (!usersList.value) {
+        console.log('Error when retrieving user avatar');
+        return;
+      }
+      for (let user of usersList.value) {
+        if (user.id === userId) {
+          return user.status;
+        }
+      }
+      console.log('Something went wrong: User id ' + userId + ' not found');
+    }
+
+    function getUserColor(userId: number) {
+      const status = getUserStatus(userId) as Status;
+      if (status === Status.ONLINE)
+        return "green";
+      else if (status === Status.PLAYING)
+        return "yellow";
+      return "grey";
+    }
+
+		function sendingMessage(channelId: string) {
+      if (!txt.value || txt.value === '')
+        return ;
+      connection.value.emit('message', {'channelId': channelId, 'content': txt.value });
+      txt.value = '';
+    }
+
+    function currentUserRole() {
+      for (let user of currentChannel.value.users) {
+        if (user.id === currentUser.id) {
+          currentChannel.value.role = user.role;
+        }
+      }
+    }
 
       // function joinChannel(id)
       // {
@@ -666,12 +726,11 @@ export default defineComponent({
       //   connection.value.emit('leaveChannel', id);
       // }
         
-      function getPassToJoin()
-      {
+      //function getPassToJoin() {
         // this function is for protected channels (see the specification)
         // as a parameter we will reseve info about the channel, our goal is to chack the password
         // for now it will just open modal window
-      }
+      //}
 
       // 		// for bloking or unblocking  a user:
       // 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
@@ -682,34 +741,10 @@ export default defineComponent({
       // 			console.log("after blockUser");
       // 		}
 
-		function sendingMessage(content: string, channel: any) // TODO check type
-		{
-      // NB! Need to be done
-      console.log(content, channel);
-      if (!content)
-        return ;
-      connection.value.emit('message', {content, channel});
-		}
-
-		onBeforeRouteLeave( function(to: any, from: any, next: any) {
-      void from;
-      const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
-    })
-
-    function displayChannel(channel: any) {
-      console.log('ask for ' + channel.channelName + ' users and messages');
-      update.messages = false;
-      currentChannel.name = channel.channelName;
-      currentChannel.id = channel.id;
-      connection.value.emit('retrieveUsers', { id: channel.id });
-      connection.value.emit('retrieveMessages', { id: channel.id });
-    }
-
-		return { sendingMessage, isChannelJoined, getPassToJoin, update, 
-      userChannels, displayChannel, currentChannel, currentUser }
-
-	}
+		return { isChannelJoined, update, txt, userChannels, displayChannel,
+      currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
+      getUserColor, sendingMessage, currentUserRole }
+	},
 })
 </script>
 
@@ -747,4 +782,17 @@ export default defineComponent({
   /* bottom: 0px; */
 }
 
+.specialscroll {
+  overflow: auto;
+  display: flex;
+  flex-direction:column-reverse;
+}
+
+.textfullcenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);  
+}
 </style>

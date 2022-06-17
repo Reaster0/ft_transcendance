@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
 import { UsersService } from './services/users.service';
@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AvatarsService } from 'src/users/services/avatars.service';
 import { Avatar } from './entities/avatar.entity';
 import { AuthModule } from '../auth/auth.module';
+import { ChatModule } from '../chat/chat.module';
+import { ChatGateway } from '../chat/chat.gateway';
 
 
 @Module({
@@ -14,6 +16,7 @@ import { AuthModule } from '../auth/auth.module';
     TypeOrmModule.forFeature([User, Avatar]),
     ConfigModule,
     AuthModule,
+    ChatModule,    
   ],
   controllers: [UsersController],
   providers: [UsersService, AvatarsService],

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res, BadRequestException} from '@nestjs/common';
+  Res, BadRequestException, Inject, forwardRef} from '@nestjs/common';
 import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
-import { tmpdir } from 'os';
+import { ChatGateway } from '../../chat/chat.gateway';
 
 @Injectable()
 export class UsersService {
@@ -18,8 +18,10 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly avatarsService: AvatarsService,
-    private connection: Connection,
-  ) { }
+    private readonly connection: Connection,
+    @Inject(forwardRef(() => ChatGateway))
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id);
@@ -93,6 +95,7 @@ export class UsersService {
 
   async changeStatus(user: User, newStatus: Status): Promise<void> {
     await this.userRepository.update(user.id, { status: newStatus });
+    this.chatGateway.sendUsersList();
   }
 
   async modifyElo(user: User, opponentElo: number, userWon: boolean): Promise<void> {
@@ -200,6 +203,7 @@ export class UsersService {
     return res;
   }
 
+  //why by nickname and not by id ?
   async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
@@ -216,27 +220,36 @@ export class UsersService {
     return connectedUser;
   }
 
+  // for chat
+  async getUsers(): Promise<User[]> {
+    const users: User[] = await this.userRepository.find({
+      select: ['id', 'nickname', 'status']
+    });
+    return users;
+  }
+
   async connectUserToChat(user: User, socketID: string) {
     this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
   }
 
-  async disconectUserToChat(user: User) {
+  async disconnectUserToChat(user: User) {
     this.userRepository.update(user.id, { status: Status.OFFLINE, chatSocket: '' });
+  
   }
 
 
   //maybe us id insted of userToBlock
   async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
-    const userFound = user.blockedUID.find((element) => element === userToBlock.id);
+    const userFound = user.blockedIds.find((element) => element === userToBlock.id);
     // userFound only if already in blocket list
 
     if (block === true && !userFound) {
-      user.blockedUID.push(userToBlock.id); // add it
+      user.blockedIds.push(userToBlock.id); // add it
       await this.userRepository.save(user);
     }
     if (block === false && userFound) { // unblock
-      const index = user.blockedUID.indexOf(userToBlock.id);
-      user.blockedUID.splice(index, 1);
+      const index = user.blockedIds.indexOf(userToBlock.id);
+      user.blockedIds.splice(index, 1);
       await this.userRepository.save(user);
     }
     return user;
@@ -311,4 +324,11 @@ export class UsersService {
     })
   }
 
+
+  isMyFriend(user: User, friendId: number): boolean {
+
+    const friend = user.friends.find(element => element === friendId);
+
+    return (friend !== undefined);
+  }
 }
