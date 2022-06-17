@@ -143,15 +143,15 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
-      <div v-if="!chat_channel_isAdmin && !chat_person">
+      <div v-if="currentChannel.role != 'admin' && !chat_person">
         <v-card height="100%" class="text-center offsetphoto" shaped >
             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
                   <v-avatar class="s" elevation="10" size="60px">
                     <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
                   </v-avatar>
             </v-badge>
-              <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
-              <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
+              <v-card-title class="layout justify-center">{{ currentChannel.name }}</v-card-title>
+              <!--<v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>-->
         <div id="app" class="pt-6"> 
         <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
         <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
@@ -459,7 +459,7 @@ import { ref, defineComponent } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
-import { Status, Message, UserChannel } from '../types/chat.types';
+import { Status, Message, UserChannel, Channel } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 
 export default defineComponent({
@@ -565,12 +565,13 @@ export default defineComponent({
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
+    let usersList = ref<any>(null);
     let isChannelJoined = store.getters.isChannelJoined as boolean;
     let userChannels = ref({ channels: [] as any[] });
     let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
-    let currentChannel = ref({ name: '' as string, id: '' as string,
-      messages: [] as Message[], users: [] as UserChannel[] });
+    let currentChannel = ref({ name: '' as string, id: '' as string, type: '' as string,
+      messages: [] as Message[], users: [] as UserChannel[], role: '' as string });
     let txt = ref<string>('');
 
 		onMounted(async() => {
@@ -598,12 +599,13 @@ export default defineComponent({
           user.avatar = await getAvatarID(user.id) as any; 
         }
         store.commit('setUsersList', params);
+        usersList = store.getters.getUsersList;
         if (!update.value.connected) {
           connection.value!.emit('emitMyChannels');
         }
       })
 
-      connection.value!.on('channelList', function(params: any) {
+      connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
         userChannels.value.channels = params;
         update.value.connected = true;
@@ -616,6 +618,7 @@ export default defineComponent({
         }
         console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
+        this.currentUserRole();
         update.value.users = true;
       })
 
@@ -647,11 +650,11 @@ export default defineComponent({
     }
 
     function getUserName(userId: number) {
-      if (!store.getters.getUsersList) {
+      if (!usersList.value) {
         console.log('Error when retrieving users');
         return;
       }
-      for (let user of store.getters.getUsersList) {
+      for (let user of usersList.value) {
         if (user.id === userId) {
           return user.name;
         }
@@ -660,11 +663,11 @@ export default defineComponent({
     }
 
     function getUserAvatar(userId: number) {
-      if (!store.getters.getUsersList) {
+      if (!usersList.value) {
         console.log('Error when retrieving users');
         return;
       }
-      for (let user of store.getters.getUsersList) {
+      for (let user of usersList.value) {
         if (user.id === userId) {
           return user.avatar;
         }
@@ -673,11 +676,11 @@ export default defineComponent({
     }
     
     function getUserStatus(userId: number) {
-      if (!store.getters.getUsersList) {
+      if (!usersList.value) {
         console.log('Error when retrieving user avatar');
         return;
       }
-      for (let user of store.getters.getUsersList) {
+      for (let user of usersList.value) {
         if (user.id === userId) {
           return user.status;
         }
@@ -699,7 +702,15 @@ export default defineComponent({
         return ;
       connection.value.emit('message', {'channelId': channelId, 'content': txt.value });
       txt.value = '';
-    } 
+    }
+
+    function currentUserRole() {
+      for (let user of currentChannel.value.users) {
+        if (user.id === currentUser.id) {
+          currentChannel.value.role = user.role;
+        }
+      }
+    }
 
       // function joinChannel(id)
       // {
@@ -730,7 +741,7 @@ export default defineComponent({
 
 		return { isChannelJoined, update, txt,
       userChannels, displayChannel, currentChannel, currentUser, getUserName,
-      getUserAvatar, getUserStatus, getUserColor, sendingMessage }
+      getUserAvatar, getUserStatus, getUserColor, sendingMessage, currentUserRole }
 	},
 })
 </script>
