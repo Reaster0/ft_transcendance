@@ -46,8 +46,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
   }
 
-  
-
   /******* Disconection ********/
   @SubscribeMessage('disconnect')
   async handleDisconnect(client: Socket) {
@@ -218,7 +216,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         role = 'owner';
       } else if (channel.admins.includes(user.id)) {
         role = 'admin';
-      } // TODO else if check for muted user (may be a little more complicated)
+      }
       res.push({ 'id': user.id, 'role': role })
     }
     if (isMember === false) {
@@ -230,12 +228,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage('getChannelMessages')
-  async getChannelMessage(client: Socket, channelId: string) {
+  async getChannelMessage(client: Socket, params: any) {
     this.logger.log('Get channel messages');
-    if (!await this.chanServices.userIsInChannel(client.data.user, channelId))
+    if (!await this.chanServices.userIsInChannel(client.data.user, params.id))
       return;
-    const message = await this.messageServices.findMessagesForChannel(channelId, client.data.user);
-    client.emit('channelMessages', message);
+    const messages = await this.messageServices.findMessagesForChannel(params.id, client.data.user);
+    client.emit('channelMessages', { id: params.id, messages: messages });
   }
 
   @SubscribeMessage('getJoinnableChannels')

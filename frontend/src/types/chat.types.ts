@@ -1,9 +1,9 @@
 export enum Status {
-	OFFLINE = 'Offline',
-	ONLINE = 'Online',
-	PLAYING = 'In Game',
-}
-
+	ONLINE = 'online',
+	OFFLINE = 'offline',
+	PLAYING = 'playing',
+  }
+  
 //export interface ChannelI {
 
 //	id: string,
@@ -67,3 +67,4 @@ export interface Message {
     content: string;
     userId: number;
     date: any;
+}

@@ -103,7 +103,7 @@
                   <v-badge bordered bottom :color="getUserColor(msg.userId)" dot offset-x="4"
                     offset-y="10">
                     <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img :src="'/users/getAvatarByAvatarId' + msg.userId" />
+                      <img :src="getUserAvatar(msg.userId)" />
                     </v-avatar>
                   </v-badge>
                 </v-btn>
@@ -462,7 +462,7 @@ import { ref, defineComponent, reactive } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import leaveChat from '../helper';
-import { Message, UserChannel } from '../types/chat.types';
+import { Status, Message, UserChannel } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 
 export default defineComponent({
@@ -594,10 +594,10 @@ export default defineComponent({
 				console.log("the error is:" + error)
 			}
 
-      connection.value!.on('usersList', function(params: any) {
+      connection.value!.on('usersList', async function(params: any) {
         console.log('receive new users list');
         for (let user of params) {
-          user.avatar = getAvatarID(user.id) as any; 
+          user.avatar = await getAvatarID(user.id) as any; 
         }
         store.commit('setUsersList', params);
         if (!update.connected) {
@@ -630,12 +630,7 @@ export default defineComponent({
         console.log('receive messages from channel ' + currentChannel.name);
         currentChannel.messages = params.messages;
         console.log(params);
-        currentChannel.messages = [{ content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
-        { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
-        { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
-        { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'}];
         update.messages = true;
-        //console.log(params.messages);
       })
 		})
 
@@ -694,11 +689,11 @@ export default defineComponent({
       console.log('Something went wrong: User id ' + userId + ' not found');
     }
 
-    function getUserColor(userId: number) { //TODO check if works
-      const status = getUserStatus(userId);
-      if (status === 'online')
+    function getUserColor(userId: number) {
+      const status = getUserStatus(userId) as Status;
+      if (status === Status.ONLINE)
         return "green";
-      else if (status === 'playing')
+      else if (status === Status.PLAYING)
         return "yellow";
       return "grey";
     }
