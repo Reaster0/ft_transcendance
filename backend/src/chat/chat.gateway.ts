@@ -199,9 +199,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage('getChannelUsers')
-  async getChanneUsers(client: Socket, channelId: string): Promise<any> {
+  async getChanneUsers(client: Socket, params: any): Promise<any> {
     this.logger.log('Get channel users');
-    const channel = await this.chanServices.findChannelWithUsersAndMuted(channelId);
+    const channel = await this.chanServices.findChannelWithUsersAndMuted(params.id);
     let isMember = false;
     let res = [] as any[];
     for (let user of channel.users) {
@@ -221,7 +221,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       client.emit('AccessRefused');
       return;
     }
-    client.emit('channelUsers', res);
+    client.emit('channelUsers', { id: params.id, users: res });
   }
 
   @SubscribeMessage('getChannelMessages')
@@ -237,10 +237,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async getJoinnableChannels(client: Socket, name: string) {
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
     client.emit('joinnableChannel', channels); // only for client
-  }
-
-  @SubscribeMessage('retrieveUsers')
-  async retrieveUsersTest(client: Socket, param: { id: string }) {
-    client.emit('channelUsers', { id: param.id, users: [] });
   }
 }

@@ -612,8 +612,11 @@ export default defineComponent({
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
-        if (params.id != currentChannel.id) {
+        if (!currentChannel || params.id != currentChannel.id) {
+          console.log(currentChannel);
+          console.log(params);
           console.log('error of channel correspondance inside channelUsers');
+          return;
         }
         console.log('receive users from channel ' + currentChannel.name);
         currentChannel.users = params.users;
@@ -625,7 +628,8 @@ export default defineComponent({
           console.log('Error of channel correspondance inside channelMessages');
         }
         console.log('receive messages from channel ' + currentChannel.name);
-        //currentChannel.messages = params.messages;
+        currentChannel.messages = params.messages;
+        console.log(params);
         currentChannel.messages = [{ content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
         { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
         { content: 'Hello', userId: 1, date: '19:45'}, { content: 'How are you ?', userId: 2, date: '12:38'}, {content : 'Fine and you ?', userId: 1, date: '14:12'},
@@ -648,7 +652,7 @@ export default defineComponent({
       update.messages = false;
       update.users = false;
       connection.value.emit('getChannelUsers', { id: channel.id });
-      //connection.value.emit('getChannelMessages', { id: channel.id });
+      connection.value.emit('getChannelMessages', { id: channel.id });
     }
 
     function getUserName(userId: number) {
@@ -690,7 +694,7 @@ export default defineComponent({
       console.log('Something went wrong: User id ' + userId + ' not found');
     }
 
-    function getUserColor(userId: number) {
+    function getUserColor(userId: number) { //TODO check if works
       const status = getUserStatus(userId);
       if (status === 'online')
         return "green";
