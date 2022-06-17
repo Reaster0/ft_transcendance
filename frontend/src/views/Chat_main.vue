@@ -619,7 +619,7 @@ export default defineComponent({
         }
         console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
-        this.currentUserRole();
+        currentUserRole();
         update.value.users = true;
       })
 

@@ -68,3 +68,16 @@ export interface Message {
     userId: number;
     date: any;
 }
+
+export enum ChannelType {
+    PUBLIC = 0,
+    PRIVATE = 1,
+    PROTECTED = 2,
+    PM = 3,
+}
+
+export enum Roles {
+    OWNER = 1,
+    ADMIN = 2,
+    USER = 3
+}

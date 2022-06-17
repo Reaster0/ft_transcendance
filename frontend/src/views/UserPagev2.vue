@@ -68,8 +68,8 @@ export default defineComponent ({
 			const store = useStore() as Store<any>;
 			user.value = await store.getters.whoAmI as any;
 			nickname.value = user.value.nickname as string;
-			avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
-			gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
+			avatar.value = await getAvatarID(user.value.id) as any;
+			gameHistory.value = await getHistoryID(user.value.id) as any;
 			console.log(gameHistory.value['won'])
 		})
 
@@ -85,7 +85,6 @@ export default defineComponent ({
 			router.push('/user/friends')
 		}
 
-		//TODO check type of e
 		async function imgReceived(e : any) {
 			img_accepted.value = await uploadAvatar(e)
 			if (img_accepted.value && user && user.value && user.value.id)
@@ -93,7 +92,7 @@ export default defineComponent ({
 		}
 
 		watch(nickname, async (newnick: any) => {
-			name_accepted.value = await updateUser(newnick) as any; //TODO check type
+			name_accepted.value = await updateUser(newnick) as any; 
 		})
 
 		return {user,
