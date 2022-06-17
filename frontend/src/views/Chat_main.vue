@@ -26,7 +26,7 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left">
+          <div class="text-left overflow-y-auto" style="max-height: 700px;">
             <v-app>
               <v-list>
                <v-list-item-group> 
@@ -84,7 +84,7 @@
             <!-- MESSAGES DISPLAY -->
             <!--<div id="chatdisplay">-->
             <div class="specialscroll">
-              <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
+              <div v-for="(msg, index) in currentChannel.messages" :key="index"
                 :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"

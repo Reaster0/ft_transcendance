@@ -71,7 +71,7 @@ export default defineComponent({
     const store = reactive(useStore() as Store<any>);
     let socketVal = store.getters.getSocketVal;
     let name = ref<string>('');
-    let file = ref<any[]>([]);
+    let file = ref<any>(null);
     let created = ref<boolean>(false);
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
