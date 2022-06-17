@@ -44,7 +44,7 @@
 
       <div v-else>
         <h2 class="textabovecenter">
-          Public channel was successfully created
+          Private channel was successfully created
         </h2>
         <v-btn class="buttoncenter" to="/thechat">Return to chat</v-btn>
       </div>
@@ -59,7 +59,7 @@ import { onMounted } from "@vue/runtime-core"
 import { useStore, Store } from "vuex";
 import { defineComponent, reactive, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import leaveChat from "../helper";
+import { leaveChat, verifyChannelName } from "../helper";
 import io from 'socket.io-client';
 import { ChannelType } from '../types/chat.types';
 
@@ -79,7 +79,7 @@ export default defineComponent ({
     })
 
     onMounted(() =>{
-            try {
+      try {
         if (!socketVal) {
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
@@ -94,12 +94,14 @@ export default defineComponent ({
         console.log("the error is:" + error)
       }
 
-      socketVal.on("channelCreated", function() {
-        created.value = true;
+      socketVal.on("channelCreated", function(channel: string) {
+        if (channel === name.value) {
+          created.value = true;
+        }
       })
 
-      socketVal.on("errorChannelCreation", function(params: any) {
-        alert("Channel creation failed: " + params.reason);
+      socketVal.on("errorChannelCreation", function(reason: string) {
+        alert("Channel creation failed: " + reason);
       })
     })
 
@@ -107,13 +109,8 @@ export default defineComponent ({
         file.value = event.target.files[0];
     }
 
-    function creationError() {
-        alert("Your channel name can't be empty")
-    }
-
     function submitIt(name: string, file: any) {
-      if (name == '') {
-        creationError();
+      if (verifyChannelName(name) === false) {
         return ;
       }
       socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PRIVATE, avatar: file });   
@@ -172,4 +169,28 @@ export default defineComponent ({
   background-color: rgb(0,0,255);
 }
 
+.buttoncenter {
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  background-color: rgb(0,0,255);
+}
+
+.textabovecenter {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);  
+}
 </style>

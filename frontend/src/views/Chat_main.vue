@@ -132,10 +132,10 @@
           <!-- LOADING / NON SELECTED MESSAGES -->
           </v-app>
           <v-app v-else-if="currentChannel.name != ''">
-            <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
+            <h1 class="Spotnik textfullcenter" data-text="Loading messages">Loading messages</h1>
           </v-app>
           <v-app v-else>
-            <h1 class="Spotnik text-center" data-text="Select">Select channel to display</h1>
+            <h1 class="Spotnik textfullcenter" data-text="Select">Select channel to display</h1>
           </v-app>
         </v-col>
 
@@ -144,6 +144,7 @@
 
 		<!-- info group / person -->
 		<v-col cols="auto" sm="3" class="border">
+    <!-- Correct with correct enum -->
       <div v-if="currentChannel.role != 'admin' && currentChannel.type != 'mp'">
         <v-card height="100%" class="text-center offsetphoto" shaped >
             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
@@ -152,7 +153,7 @@
                   </v-avatar>
             </v-badge>
               <v-card-title class="layout justify-center">{{ currentChannel.name }}</v-card-title>
-              <!--<v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>-->
+              <v-card-subtitle class="layout justify-center">{{ currentChannel.type }}</v-card-subtitle>
         <div id="app" class="pt-6"> 
         <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
         <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
@@ -443,7 +444,7 @@
 
     </v-container>
     <v-container fluid v-else>
-			<h1 class="Spotnik text-center" data-text="Loading">Loading</h1>
+			<h1 class="Spotnik textfullcenter" data-text="Loading">Loading</h1>
     </v-container>
     <!--<v-container fluid v-else>
       <h1>Loading...</h1>
@@ -459,7 +460,7 @@ import { useStore, Store } from "vuex";
 import { ref, defineComponent } from 'vue'
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import leaveChat from '../helper';
+import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 
@@ -787,4 +788,11 @@ export default defineComponent({
   flex-direction:column-reverse;
 }
 
+.textfullcenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);  
+}
 </style>

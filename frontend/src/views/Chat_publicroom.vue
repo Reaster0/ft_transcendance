@@ -45,7 +45,7 @@
 
       <div v-else>
         <h2 class="textabovecenter">
-          Public channel was successfully created
+          Public channel {{ name }} was successfully created
         </h2>
         <v-btn class="buttoncenter" to="/thechat">Return to chat</v-btn>
       </div>
@@ -62,7 +62,7 @@ import { defineComponent, reactive, ref } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from "vue-router";
 import { ChannelType } from '../types/chat.types';
-import leaveChat from '../helper';
+import { leaveChat, verifyChannelName } from '../helper';
 import io from 'socket.io-client';
 
 export default defineComponent({
@@ -96,8 +96,10 @@ export default defineComponent({
         console.log("the error is:" + error)
       }
 
-      socketVal.on("channelCreated", function() {
-        created.value = true;
+      socketVal.on("channelCreated", function(channel: string) {
+        if (channel === name.value) {
+          created.value = true;
+        }
       })
 
       socketVal.on("errorChannelCreation", function(reason: string) {
@@ -109,13 +111,8 @@ export default defineComponent({
         file.value = event.target.files[0];
     }
 
-    function creationError() {
-        alert("Your channel name can't be empty")
-    }
-
     function submitIt(name: string, file: any) {
-      if (name == '') {
-        creationError();
+      if (verifyChannelName(name) === false) {
         return ;
       }
       socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file });   

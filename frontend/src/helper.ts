@@ -18,4 +18,18 @@ function leaveChat(socket: any, to: any, next: any, store: Store<any>) {
 	next(false);	
 }
 
-export default leaveChat;
+function verifyChannelName (name: string) {
+	if (name === '') {
+		alert("Your channel name can't be empty.");
+        return false;
+    } else if (name.length > 10) {
+		alert("Your channel name can't be more than 10 characters.")
+		return false;
+	} else if (/^([a-zA-Z0-9-]+)$/.test(name) === false) {
+		alert("Your channel name must only contains digits or letters.")
+		return false;
+	}
+	return true;
+}
+
+export { leaveChat, verifyChannelName };

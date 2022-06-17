@@ -104,7 +104,7 @@
 
 import { defineComponent } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import leaveChat from "../helper";
+import { leaveChat } from "../helper";
 import { Store, useStore } from 'vuex';
 
 

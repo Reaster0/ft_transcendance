@@ -113,7 +113,7 @@
 import { defineComponent } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from 'vue-router';
-import leaveChat from '../helper';
+import { leaveChat } from '../helper';
 
 // https://codesource.io/vue-export-default-vs-vue-new/
 export default defineComponent ({

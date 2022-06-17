@@ -75,7 +75,6 @@ export async function updateUser(nick: string) {
 	})
 }
 
-// TODO please check type of file
 export async function uploadAvatar(file: any) {
 	const formData = new FormData()
 	formData.append('avatar', file.target.files[0])
