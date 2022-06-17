@@ -2,7 +2,6 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { ChatGateway } from './chat.gateway';
-import { Muted } from './entities/muted.entity';
 import { Message } from './entities/message.entity';
 import { ChanServices } from './services/chan.service';
 import { MessageService } from './services/message.service';
@@ -10,12 +9,13 @@ import { AuthModule } from '../auth/auth.module';
 import { ChatController } from './chat.controller';
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { Channel } from './entities/channel.entity';
+import { Roles } from './entities/role.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Channel,
-      Muted,
+      Roles,
       Message,
     ]),
     forwardRef(() => UsersModule),

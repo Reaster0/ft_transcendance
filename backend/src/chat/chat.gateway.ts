@@ -6,14 +6,13 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { ChannelI} from './interfaces/back.interface';
+import { ChannelI, RolesI} from './interfaces/back.interface';
 import { MessageI } from './interfaces/back.interface';
 import { ChanServices } from './services/chan.service';
-import { MutedI } from './interfaces/back.interface';
 import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import { Channel } from './entities/channel.entity';
-
+import * as bcrypt from 'bcrypt';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -204,20 +203,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('getChannelUsers')
   async getChanneUsers(client: Socket, params: any): Promise<any> {
     this.logger.log('Get channel users');
-    const channel = await this.chanServices.findChannelWithUsersAndMuted(params.id); //change this
+    const channelUsers: RolesI[] = await this.chanServices.getChannelUsers(params.id);
     let isMember = false;
     let res = [] as any[];
-    for (let user of channel.users) {
-      let role = '' as string;
-      if (user.id === client.data.user.id) {
+
+    for (let user of channelUsers) {
+      if (user.userId === client.data.user.id) {
         isMember = true;
       }
-      if (user.id === channel.owner) {
-        role = 'owner';
-      } else if (channel.admins.includes(user.id)) {
-        role = 'admin';
-      }
-      res.push({ 'id': user.id, 'role': role })
+      res.push({ 'id': user.userId, 'role': user.role}) //better changeThis
     }
     if (isMember === false) {
       this.logger.log('Access Refused');

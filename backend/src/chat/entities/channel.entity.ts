@@ -1,9 +1,10 @@
 import { User } from '../../users/entities/user.entity';
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany,
   PrimaryGeneratedColumn } from 'typeorm';
-import { Muted } from './muted.entity'
+import { Roles } from './role.entity'
 import { Message } from './message.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { ChannelType } from 'src/users/enums/channelType.enum';
 
 @Entity()
 export class Channel {
@@ -23,17 +24,14 @@ export class Channel {
   @Column('int', { default: 0 })
   owner: number;
 
-  @ApiProperty({ type: String, description: 'channel type (public/protected/private/pm)' })
-  @Column('text', { default: 'public' })
-  type: string;
+  // todo change this to number if front is ok
+  @Column({ type: 'text', default: ChannelType.public })
+  @ApiProperty({ enum: ChannelType, type: String, description: 'channel type, either public/private/protected/pm.' })
+  type: ChannelType;
 
   @ApiProperty({ type: String, description: 'encrypted password' })
   @Column('text', { default: '' })
   password: string;
-
-  @ApiProperty({ type: Number, description: 'array of administrator id' })
-  @Column({ type: 'int', array: true, default: {} })
-  admins: number[];
 
   @ApiProperty({ type: Number, description: 'array of blocked User id' })
   @Column({ type: 'int', array: true, default: {} })
@@ -52,9 +50,9 @@ export class Channel {
   @JoinTable()
   users: User[];
 
-  @ApiProperty({ type: Muted, description: 'Relation | channels <=> ChannelUser | OneToMany : User that have bein join that channel + there status' })
-  @OneToMany(() => Muted, muted => muted.channel, { cascade: true })
-  muted: Muted[];
+  @ApiProperty({ type: Roles, description: 'Relation | channels <=> ChannelUser | OneToMany : User that have bein join that channel + there status' })
+  @OneToMany(() => Roles, muted => muted.channel, { cascade: true })
+  channelUsers: Roles[];
 
   @ApiProperty({ type: Message, description: 'Relation | OneMany: all message posted on that Channel' })
   @OneToMany(() => Message, (message) => message.channel, { cascade: true }) // all message in that channel
