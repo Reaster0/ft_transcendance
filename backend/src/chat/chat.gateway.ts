@@ -132,14 +132,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   //  @UseGuards(AuthChat)
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChannelI) {
-    const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
-    if (! channelFound) return ; // better handel in get chan and catch
+    const channelFound = await this.chanServices.getChannelFromId(channel.id);
+    if (! channelFound) return false; // better handel in get chan and catch
+
     if (channelFound.password) {
       if (!channel.password)
-        return ;
+        return false;
+      if (await bcrypt.compare(channel.password, channelFound.password) === false)
+        return false;
     }
     await this.chanServices.pushUserToChan(channel, client.data.user);
     this.logger.log(`${client.data.user.username} joinned ${channel.name}`);
+    return true;
   }
 
 
@@ -202,7 +206,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('getChannelUsers')
   async getChanneUsers(client: Socket, params: any): Promise<any> {
     this.logger.log('Get channel users');
-    const channel = await this.chanServices.findChannelWithUsersAndMuted(params.id);
+    const channel = await this.chanServices.findChannelWithUsersAndMuted(params.id); //change this
     let isMember = false;
     let res = [] as any[];
     for (let user of channel.users) {

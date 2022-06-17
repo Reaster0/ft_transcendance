@@ -96,6 +96,9 @@ export class ChanServices {
     return this.chanRepository.findOne(channelID, { relations: ['users', 'muted'] });
   }
 
+  async getChannelFromId(channelID: string): Promise<Channel> {
+    return this.chanRepository.findOne(channelID);
+  }
   async findChannelWithUsers(channelID: string): Promise<ChannelI> {
     return this.chanRepository.findOne(channelID, { relations: ['users'] });
   }
