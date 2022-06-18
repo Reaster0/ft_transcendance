@@ -1,7 +1,7 @@
 import { Inject, forwardRef, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Like, Repository } from 'typeorm';
+import { Brackets, Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Roles } from '../entities/role.entity';
 import { ChannelI, RolesI } from '../interfaces/back.interface';
@@ -138,14 +138,12 @@ export class ChanServices {
   }
 
   async filterJoinableChannel(name: string): Promise<Channel[]> {
-
-    console.log('coucou: ', name);
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      order: {name: "DESC"},
       select: ['id', 'name', 'avatar'],
-      where: [ { name: Like(`%${name}%`) }]
+      where: [ { name: Like(`%${name}%`), type: ChannelType.PUBLIC}, {name: Like(`%${name}%`), type: ChannelType.PROTECTED}],
+      order: {name: "ASC"},
     })
   }
 

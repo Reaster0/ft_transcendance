@@ -73,11 +73,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.channel} created`);
-<<<<<<< HEAD
       client.emit('channelCreation', `${createChannel.channel}`);
-=======
-      client.emit('channelCreated', `${createChannel.channel}`);
->>>>>>> 92a4c8769129a1d52c660b47a6232c69e12d563c
     return true;
   }
 
