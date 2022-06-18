@@ -619,8 +619,7 @@ export default defineComponent({
 
       connection.value!.on('joinnableChannel', function(params: Channel[]) {
         console.log('!!!!!!!!>>>>>>' + params);
-        // userChannels.value.channels = params;
-        // update.value.connected = true;
+        joinableChannels.value.channels = params;
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
