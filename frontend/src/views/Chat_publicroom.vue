@@ -107,15 +107,31 @@ export default defineComponent({
       })
     })
 
-    function previewFiles(event: any) {
-        file.value = event.target.files[0];
+    async function previewFiles(event: any) {
+      if (event.target.files && event.target.files.length != 0) {
+        const img = event.target.files[0];
+        if (!img.type.match(/\/(jpg|jpeg|png|gif)$/)) {
+          alert('Image must be a jpg, jpeg, png or gif file.')
+          return ;
+        } else if (img.size > (1024 * 1024)) {
+          alert('Image is too big.')
+          return ;
+        }
+        await img.arrayBuffer().then(function(buff: any) {
+             file.value = new Uint8Array(buff);
+         });
+        console.log(file.value);
+      } else {
+        alert('Image can\'t be uploaded.');
+      }
     }
 
-    function submitIt(name: string, file: any) {
+    function submitIt(name: string) {
       if (verifyChannelName(name) === false) {
         return ;
       }
-      socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file });   
+      console.assert(file.value);
+      socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file.value });   
     }
 
     return { submitIt, name, file, previewFiles, created }

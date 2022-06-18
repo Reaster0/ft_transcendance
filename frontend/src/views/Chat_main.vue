@@ -40,7 +40,7 @@
                       @click="displayChannel(item)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
-                          <v-img v-if="item.avatar != null" src="item.avatar"
+                          <v-img v-if="item.avatar != null" :src="item.avatar"
                             min-width="50px" min-height="50px"></v-img>
                           <v-avatar v-else color="blue" min-width="50px"
                             min-height="50px">
@@ -53,7 +53,7 @@
                       <v-badge bordered bottom color="green" dot offset-x="6"
                         offset-y="34">
                         <v-list-item-avatar v-if="item.avatar != null">
-                          <v-img src="item.avatar" min-width="50px"
+                          <v-img :src="item.avatar" min-width="50px"
                             min-height="50px"></v-img>
                         </v-list-item-avatar>
                         <v-list-item-avatar v-else>
@@ -610,12 +610,13 @@ export default defineComponent({
       connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
         userChannels.value.channels = params;
+        avatarsToUrl();
         update.value.connected = true;
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
         if (!currentChannel.value || params.id != currentChannel.value.id) {
-          console.log('error of channel correspondance inside channelUsers');
+          console.log('Error of channel correspondance inside channelUsers ' + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive users from channel ' + currentChannel.value.name);
@@ -626,7 +627,7 @@ export default defineComponent({
 
       connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
         if (params.id != currentChannel.value.id) {
-          console.log('Error of channel correspondance inside channelMessages');
+          console.log('Error of channel correspondance inside channelMessages ' + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive messages from channel ' + currentChannel.value.name);
@@ -710,6 +711,18 @@ export default defineComponent({
       for (let user of currentChannel.value.users) {
         if (user.id === currentUser.id) {
           currentChannel.value.role = user.role;
+        }
+      }
+    }
+
+    function avatarsToUrl() {
+      if (userChannels.value.channels === []) {
+        return;
+      }
+      for (let channel of userChannels.value.channels) {
+        if (channel.avatar != null) {
+          let blob = new Blob([channel.avatar]) as Blob;
+          channel.avatar = URL.createObjectURL(blob);
         }
       }
     }

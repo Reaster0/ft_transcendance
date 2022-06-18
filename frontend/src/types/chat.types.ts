@@ -12,9 +12,9 @@ export enum ChannelType {
 }
 
 export enum Roles {
-    OWNER = 1,
-    ADMIN = 2,
-    USER = 3
+    OWNER = 0,
+    ADMIN = 1,
+    USER = 2
 }
 
 export interface Channel {
