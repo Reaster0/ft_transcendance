@@ -147,6 +147,7 @@ export class ChanServices {
     })
   }
 
+
   async userIsInChannel(user: User, channelId: string): Promise<boolean> {
     const currentChanUsers = await this.getAllChanUser(channelId);
     const me: User = currentChanUsers.find( (element) => element.id === user.id);
