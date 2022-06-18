@@ -221,8 +221,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('getJoinnableChannels')
   async getJoinnableChannels(client: Socket, name: string) {
-    console.log("GETTING JOINABLE CHANNELS")
+    console.log("GETTING JOINABLE CHANNELS: ", name);
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
+    console.log(channels);
     client.emit('joinnableChannel', channels); // only for client
   }
 
