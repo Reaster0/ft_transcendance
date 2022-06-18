@@ -5,15 +5,16 @@
 
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
-        
           <v-col>
-
             <!-- SEARCH PANNEL -->
             <!-- NB! When serach field will work on backen -
             add onclick option calling method  -->
-            <div class="d-flex">
+            <div class="d-flex" overflow-hidden>
               <v-text-field clearable label="Find user or group to chat"
-              placeholder="Search" height = "50px"></v-text-field>
+              type="text" placeholder="Search" 
+              height = "50px" v-model="searchRequest"
+              @keyup.enter="sendingSearchRequest()"
+              ></v-text-field>
             </div>
 
             <!-- CREATE NEW ROOM BUTTON -->
@@ -26,7 +27,7 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left overflow-y-auto" style="max-height: 700px;">
+          <div class="text-left overflow-y-auto" style="max-height: 1000px;">
             <v-app>
               <v-list>
                <v-list-item-group> 
@@ -122,7 +123,7 @@
             </div>
 
                       <!-- SEND MESSAGE -->
-            <div class="d-flex" overflow-hidden>
+            <div class="d-flex " overflow-hidden>
               <v-text-field clearable class="messagefield" width="100%"
                 type="text" label="Write a message" v-model="txt"
                 @keyup.enter="sendingMessage(currentChannel.id)">
@@ -464,6 +465,7 @@ import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 
+
 export default defineComponent({
   name: "ChatMain",
   components: {
@@ -575,6 +577,8 @@ export default defineComponent({
     let currentChannel = ref({ name: '' as string, id: '' as string, type: '' as string,
       messages: [] as Message[], users: [] as UserChannel[], role: '' as string });
     let txt = ref<string>('');
+    let searchRequest = ref<string>('');
+    let joinableChannels = ref({ channels: [] as any[] });
 
 		onMounted(async() => {
 			try {
@@ -612,6 +616,11 @@ export default defineComponent({
         userChannels.value.channels = params;
         avatarsToUrl();
         update.value.connected = true;
+      })
+
+      connection.value!.on('joinnableChannel', function(params: Channel[]) {
+        console.log('!!!!!!!!>>>>>>' + params);
+        joinableChannels.value.channels = params;
       })
 
       connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
@@ -707,6 +716,15 @@ export default defineComponent({
       txt.value = '';
     }
 
+    function sendingSearchRequest() 
+    {
+      console.log(">>>>>>" + searchRequest.value + "<<<<<<<")
+      if (!searchRequest.value || searchRequest.value === '')
+        return ;
+      connection.value.emit('getJoinnableChannels', searchRequest.value);
+      searchRequest.value = '';
+    }
+
     function currentUserRole() {
       for (let user of currentChannel.value.users) {
         if (user.id === currentUser.id) {
@@ -756,7 +774,7 @@ export default defineComponent({
 
 		return { isChannelJoined, update, txt, userChannels, displayChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage, currentUserRole }
+      getUserColor, sendingMessage, currentUserRole, sendingSearchRequest, searchRequest, joinableChannels }
 	},
 })
 </script>

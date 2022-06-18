@@ -13,6 +13,8 @@ import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import { Channel } from './entities/channel.entity';
 import * as bcrypt from 'bcrypt';
+import { isUUID } from 'class-validator';
+import { ChannelType } from 'src/users/enums/channelType.enum';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -73,7 +75,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.channel} created`);
-      client.emit('channelCreated', `${createChannel.channel}`);
+      client.emit('channelCreation', `${createChannel.channel}`);
     return true;
   }
 
@@ -219,7 +221,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('getJoinnableChannels')
   async getJoinnableChannels(client: Socket, name: string) {
+    console.log("GETTING JOINABLE CHANNELS")
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
     client.emit('joinnableChannel', channels); // only for client
   }
+
+  @SubscribeMessage('getFindUser')
+  async findUser(client: Socket, name: string) {
+    const user = await this.userServices.filterUserByName(name);
+    client.emit('findUser', user);
+  }
 }
+
+// const channels = [{name: "hello", id: "string", type: ChannelType.PUBLIC, avatar: null}];
