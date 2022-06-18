@@ -27,7 +27,7 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left overflow-y-auto" style="max-height: calc(100vh - 15%);">
+          <div class="text-left overflow-y-auto margin-top" style="max-height: calc(100vh - 15%);">
             <!--<v-app>-->
               <v-list>
                <v-list-item-group> 
@@ -121,6 +121,9 @@
                   </v-list-item>
                 </v-card >
               </div>
+            </div>
+            <div v-if="currentChannel.messages.length === 0">
+              <h1 class="Spotnik textfullcenter" data-text="Start conversation">Start conversation</h1>  
             </div>
 
             <!-- SEND MESSAGE -->
@@ -826,6 +829,10 @@ export default defineComponent({
   width:100%;
   /* position: absolute; */
   /* bottom: 0px; */
+}
+
+.margin-top {
+  margin-top: 6%;
 }
 
 .specialscroll {
