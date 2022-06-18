@@ -75,7 +75,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     await this.emitChannels();
     this.logger.log(`new Channel: ${createChannel.channel} created`);
-      client.emit('channelCreated', `${createChannel.channel}`);
+      client.emit('channelCreation', `${createChannel.channel}`);
     return true;
   }
 
@@ -223,6 +223,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async getJoinnableChannels(client: Socket, name: string) {
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
     client.emit('joinnableChannel', channels); // only for client
+  }
+
+  @SubscribeMessage('getFindUser')
+  async findUser(client: Socket, name: string) {
+    const user = await this.userServices.filterUserByName(name);
+    client.emit('findUser', user);
   }
 }
 

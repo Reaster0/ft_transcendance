@@ -1,7 +1,7 @@
 import { Inject, forwardRef, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Like, Repository } from 'typeorm';
+import { Brackets, Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Roles } from '../entities/role.entity';
 import { ChannelI, RolesI } from '../interfaces/back.interface';
