@@ -62,7 +62,7 @@ import { defineComponent, reactive, ref } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from "vue-router";
 import { ChannelType } from '../types/chat.types';
-import { leaveChat, verifyChannelName } from '../helper';
+import { leaveChat, verifyChannelName, imgToBuffer } from '../helper';
 import io from 'socket.io-client';
 
 export default defineComponent({
@@ -108,29 +108,13 @@ export default defineComponent({
     })
 
     async function previewFiles(event: any) {
-      if (event.target.files && event.target.files.length != 0) {
-        const img = event.target.files[0];
-        if (!img.type.match(/\/(jpg|jpeg|png|gif)$/)) {
-          alert('Image must be a jpg, jpeg, png or gif file.')
-          return ;
-        } else if (img.size > (1024 * 1024)) {
-          alert('Image is too big.')
-          return ;
-        }
-        await img.arrayBuffer().then(function(buff: any) {
-             file.value = new Uint8Array(buff);
-         });
-        console.log(file.value);
-      } else {
-        alert('Image can\'t be uploaded.');
-      }
+      file.value = await imgToBuffer(event);
     }
 
     function submitIt(name: string) {
       if (verifyChannelName(name) === false) {
         return ;
       }
-      console.assert(file.value);
       socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file.value });   
     }
 

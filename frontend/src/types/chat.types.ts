@@ -21,7 +21,7 @@ export interface Channel {
     id: string;
     name: string;
 	type: string;
-    avatar?: Uint8Array;
+    avatar?: Blob | Uint8Array;
 }
 
 export interface UserGlobal {

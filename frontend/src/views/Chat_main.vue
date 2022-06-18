@@ -28,7 +28,7 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto" style="max-height: 1000px;">
-            <v-app>
+            <!--<v-app>-->
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -42,7 +42,8 @@
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
-                            min-width="50px" min-height="50px"></v-img>
+                            min-width="50px" min-height="50px" transition="false"
+                            loading="lazy"></v-img>
                           <v-avatar v-else color="blue" min-width="50px"
                             min-height="50px">
                             <v-icon color="white">mdi-duck</v-icon>
@@ -55,7 +56,7 @@
                         offset-y="34">
                         <v-list-item-avatar v-if="item.avatar != null">
                           <v-img :src="item.avatar" min-width="50px"
-                            min-height="50px"></v-img>
+                            min-height="50px" transition="false" loading="lazy"></v-img>
                         </v-list-item-avatar>
                         <v-list-item-avatar v-else>
                           <v-avatar color="blue" min-width="50px"
@@ -73,7 +74,7 @@
                 </template>
                 </v-list-item-group>
               </v-list>
-            </v-app>
+            <!--</v-app>-->
           </div>
         </v-col>
 
@@ -85,7 +86,7 @@
             <!-- MESSAGES DISPLAY -->
             <!--<div id="chatdisplay">-->
             <div class="specialscroll">
-              <div v-for="(msg, index) in currentChannel.messages" :key="index"
+              <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
                 :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
@@ -122,8 +123,8 @@
               </div>
             </div>
 
-                      <!-- SEND MESSAGE -->
-            <div class="d-flex " overflow-hidden>
+            <!-- SEND MESSAGE -->
+            <div class="d-flex" overflow-hidden>
               <v-text-field clearable class="messagefield" width="100%"
                 type="text" label="Write a message" v-model="txt"
                 @keyup.enter="sendingMessage(currentChannel.id)">
@@ -592,8 +593,7 @@ export default defineComponent({
           store.commit('setSocketVal' , connection.value);
           console.log("starting connection to websocket");
         } else {
-          update.value.connected = true;
-          connection.value!.emit('emitMyChannels');
+          connection.value!.emit('getUsersList');
         }
 			} catch (error) {
 				console.log("the error is:" + error)
@@ -604,9 +604,10 @@ export default defineComponent({
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
-        store.commit('setUsersList', params);
-        usersList = store.getters.getUsersList;
+        usersList.value = params;
+        store.commit('setUsersList', usersList.value);
         if (!update.value.connected) {
+          console.log('here');
           connection.value!.emit('emitMyChannels');
         }
       })
@@ -614,38 +615,40 @@ export default defineComponent({
       connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
         userChannels.value.channels = params;
-        avatarsToUrl();
+        avatarToUrl();
         update.value.connected = true;
       })
 
-      connection.value!.on('joinnableChannel', function(params: Channel[]) {
+      connection.value!.on('joinableChannel', function(params: Channel[]) {
         console.log('!!!!!!!!>>>>>>' + params);
         joinableChannels.value.channels = params;
       })
 
-      connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
+      connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
         if (!currentChannel.value || params.id != currentChannel.value.id) {
-          console.log('Error of channel correspondance inside channelUsers ' + params.id + ' vs '+ currentChannel.value.id);
+          console.log('error of channel correspondance inside channelUsers ' + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
-        currentUserRole();
+        await currentUserRole();
         update.value.users = true;
       })
 
-      connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
+      connection.value!.on('channelMessages', function(params: { id: string, messages: Message[] }) {
         if (params.id != currentChannel.value.id) {
-          console.log('Error of channel correspondance inside channelMessages ' + params.id + ' vs '+ currentChannel.value.id);
+          console.log('error of channel correspondance inside channelMessages ' + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive messages from channel ' + currentChannel.value.name);
         currentChannel.value.messages = params.messages;
         update.value.messages = true;
       })
+
+      connection.value!.on('newMessage', function(params: {id: string, message: Message}))
 		})
 
-		onBeforeRouteLeave( function(to: any, from: any, next: any) {
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(socket, to, next, store);
@@ -662,7 +665,7 @@ export default defineComponent({
     }
 
     function getUserName(userId: number) {
-      if (!usersList.value) {
+      if (usersList.value === null) {
         console.log('Error when retrieving users');
         return;
       }
@@ -675,7 +678,7 @@ export default defineComponent({
     }
 
     function getUserAvatar(userId: number) {
-      if (!usersList.value) {
+      if (usersList.value === null) {
         console.log('Error when retrieving users');
         return;
       }
@@ -733,16 +736,19 @@ export default defineComponent({
       }
     }
 
-    function avatarsToUrl() {
-      if (userChannels.value.channels === []) {
-        return;
-      }
+    function avatarToUrl() {
+      console.log('TO URL');
       for (let channel of userChannels.value.channels) {
-        if (channel.avatar != null) {
-          let blob = new Blob([channel.avatar]) as Blob;
-          channel.avatar = URL.createObjectURL(blob);
+          if (channel.avatar && !/blob/.test(channel.avatar)) {
+            let blob = new Blob([channel.avatar]) as Blob;
+            channel.avatar = URL.createObjectURL(blob);
         }
       }
+    }
+
+    function log(log: string) {
+      console.log('log: ' + log);
+      return true;
     }
 
       // function joinChannel(id)
@@ -774,7 +780,8 @@ export default defineComponent({
 
 		return { isChannelJoined, update, txt, userChannels, displayChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage, currentUserRole, sendingSearchRequest, searchRequest, joinableChannels }
+      getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
+      searchRequest, joinableChannels, avatarToUrl, log }
 	},
 })
 </script>

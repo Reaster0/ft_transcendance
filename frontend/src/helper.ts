@@ -32,4 +32,25 @@ function verifyChannelName (name: string) {
 	return true;
 }
 
-export { leaveChat, verifyChannelName };
+async function imgToBuffer(event: any) {
+	let file = null as any;
+	if (event.target.files && event.target.files.length != 0) {
+	  const img = event.target.files[0];
+	  if (!img.type.match(/\/(jpg|jpeg|png|gif)$/)) {
+		alert('Image must be a jpg, jpeg, png or gif file.')
+		return null;
+	  } else if (img.size > (1024 * 1024)) {
+		alert('Image is too big.')
+		return null;
+	  }
+	  await img.arrayBuffer().then(function(buff: any) {
+		   file = new Uint8Array(buff);
+	   });
+	} else {
+	  alert('Image can\'t be uploaded.');
+	  return null;
+	}
+	return file;
+  }
+
+export { leaveChat, verifyChannelName, imgToBuffer };
