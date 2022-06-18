@@ -645,7 +645,13 @@ export default defineComponent({
         update.value.messages = true;
       })
 
-      connection.value!.on('newMessage', function(params: {id: string, message: Message}))
+      connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
+        if (params.id != currentChannel.value.id) {
+          return ;
+        }
+        console.log('incoming message');
+        currentChannel.value.messages.push(params.message);
+      })
 		})
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
