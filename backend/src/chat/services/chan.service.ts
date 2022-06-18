@@ -137,16 +137,16 @@ export class ChanServices {
     return currentChanUsers.users;
   }
 
-  async filterJoinableChannel(name: string): Promise<Channel[]> {
-
+  async filterJoinableChannel(name: string): Promise<FrontChannelI[]> {
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      order: {name: "DESC"},
-      select: ['id', 'name', 'avatar'],
-      where: [ { name: Like(`%${name}%`), publicChannel: true} ]
+      select: ['id', 'name', 'type', 'avatar'],
+      where: [ { name: Like(`%${name}%`), type: ChannelType.PUBLIC}, {name: Like(`%${name}%`), type: ChannelType.PROTECTED}],
+      order: {name: "ASC"},
     })
   }
+
 
   async userIsInChannel(user: User, channelId: string): Promise<boolean> {
     const currentChanUsers = await this.getAllChanUser(channelId);

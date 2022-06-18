@@ -13,6 +13,8 @@ import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import { Channel } from './entities/channel.entity';
 import * as bcrypt from 'bcrypt';
+import { isUUID } from 'class-validator';
+import { ChannelType } from 'src/users/enums/channelType.enum';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -223,3 +225,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     client.emit('joinnableChannel', channels); // only for client
   }
 }
+
+// const channels = [{name: "hello", id: "string", type: ChannelType.PUBLIC, avatar: null}];
