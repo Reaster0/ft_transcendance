@@ -21,5 +21,5 @@ export class FrontUserChannelI {
 export class FrontMessageI {
     content: string;
     userId: number;
-    date: Date;  
+    date: string;  
 }

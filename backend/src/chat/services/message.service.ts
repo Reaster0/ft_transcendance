@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -24,8 +24,9 @@ export class MessageService {
     const query = this.messageRepository
       .createQueryBuilder('message')
       .leftJoin('message.channel', 'channel')
-      .where('channel.id = :channelID', { channelID: channelId })
+      .where('channel.id = :channelId', { channelId: channelId })
       .leftJoinAndSelect('message.user', 'user') // mmmhhh
+      .select(['message.content', 'user.id', 'message.date'])
       .orderBy('message.date', 'ASC');
 
     const messagesFound: MessageI[] = await query.getMany();
@@ -36,13 +37,9 @@ export class MessageService {
       const blocked: number = user.blockedIds.find(
         (element) => element === message.user.id,
       );
-      if (blocked) message.content = '... 🛑 ...';
-
-      var frontMessage: FrontMessageI;
-      frontMessage.content = message.content;
-      frontMessage.date = message.date;
-      frontMessage.userId = message.user.id;
-
+      if (blocked)
+        message.content = '... 🛑 ...';
+      const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
       updateMessageFound.push(frontMessage);
     }
     return updateMessageFound;

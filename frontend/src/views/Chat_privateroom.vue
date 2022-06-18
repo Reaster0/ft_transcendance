@@ -59,7 +59,7 @@ import { onMounted } from "@vue/runtime-core"
 import { useStore, Store } from "vuex";
 import { defineComponent, reactive, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import { leaveChat, verifyChannelName } from "../helper";
+import { leaveChat, verifyChannelName, imgToBuffer } from "../helper";
 import io from 'socket.io-client';
 import { ChannelType } from '../types/chat.types';
 
@@ -105,8 +105,8 @@ export default defineComponent ({
       })
     })
 
-    function previewFiles(event: any) {
-        file.value = event.target.files[0];
+    async function previewFiles(event: any) {
+      file.value = await imgToBuffer(event);
     }
 
     function submitIt(name: string, file: any) {

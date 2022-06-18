@@ -1,7 +1,7 @@
 import { Inject, forwardRef, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Like, Repository } from 'typeorm';
+import { Brackets, Like, Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Roles } from '../entities/role.entity';
 import { ChannelI, RolesI } from '../interfaces/back.interface';
@@ -10,8 +10,6 @@ import { UsersService } from 'src/users/services/users.service';
 import { FrontChannelI } from '../interfaces/front.interface';
 import { ChannelType } from 'src/users/enums/channelType.enum';
 import { ERoles } from 'src/users/enums/roles.enum';
-import { relative } from 'path';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChanServices {
@@ -137,16 +135,16 @@ export class ChanServices {
     return currentChanUsers.users;
   }
 
-  async filterJoinableChannel(name: string): Promise<Channel[]> {
-
+  async filterJoinableChannel(name: string): Promise<FrontChannelI[]> {
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      order: {name: "DESC"},
-      select: ['id', 'name', 'avatar'],
-      where: [ { name: Like(`%${name}%`), publicChannel: true} ]
+      select: ['id', 'name', 'type', 'avatar'],
+      where: [ { name: Like(`%${name}%`), type: ChannelType.PUBLIC}, {name: Like(`%${name}%`), type: ChannelType.PROTECTED}],
+      order: {name: "ASC"},
     })
   }
+
 
   async userIsInChannel(user: User, channelId: string): Promise<boolean> {
     const currentChanUsers = await this.getAllChanUser(channelId);

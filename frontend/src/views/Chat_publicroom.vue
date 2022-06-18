@@ -62,7 +62,7 @@ import { defineComponent, reactive, ref } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from "vue-router";
 import { ChannelType } from '../types/chat.types';
-import { leaveChat, verifyChannelName } from '../helper';
+import { leaveChat, verifyChannelName, imgToBuffer } from '../helper';
 import io from 'socket.io-client';
 
 export default defineComponent({
@@ -107,15 +107,15 @@ export default defineComponent({
       })
     })
 
-    function previewFiles(event: any) {
-        file.value = event.target.files[0];
+    async function previewFiles(event: any) {
+      file.value = await imgToBuffer(event);
     }
 
-    function submitIt(name: string, file: any) {
+    function submitIt(name: string) {
       if (verifyChannelName(name) === false) {
         return ;
       }
-      socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file });   
+      socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file.value });   
     }
 
     return { submitIt, name, file, previewFiles, created }

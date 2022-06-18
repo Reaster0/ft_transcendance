@@ -12,16 +12,16 @@ export enum ChannelType {
 }
 
 export enum Roles {
-    OWNER = 1,
-    ADMIN = 2,
-    USER = 3
+    OWNER = 0,
+    ADMIN = 1,
+    USER = 2
 }
 
 export interface Channel {
     id: string;
     name: string;
 	type: string;
-    avatar?: Uint8Array;
+    avatar?: Blob | Uint8Array;
 }
 
 export interface UserGlobal {

@@ -314,7 +314,6 @@ export class UsersService {
   }
 
   async filterUserByName(name: string): Promise<User[]> {
-
     return this.userRepository.find({ //or findAndCount
       skip: 0,
       take: 10,

@@ -5,15 +5,16 @@
 
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
-        
           <v-col>
-
             <!-- SEARCH PANNEL -->
             <!-- NB! When serach field will work on backen -
             add onclick option calling method  -->
-            <div class="d-flex">
+            <div class="d-flex" overflow-hidden>
               <v-text-field clearable label="Find user or group to chat"
-              placeholder="Search" height = "50px"></v-text-field>
+              type="text" placeholder="Search" 
+              height = "50px" v-model="searchRequest"
+              @keyup.enter="sendingSearchRequest()"
+              ></v-text-field>
             </div>
 
             <!-- CREATE NEW ROOM BUTTON -->
@@ -26,8 +27,8 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left overflow-y-auto" style="max-height: 700px;">
-            <v-app>
+          <div class="text-left overflow-y-auto margin-top" style="max-height: calc(100vh - 15%);">
+            <!--<v-app>-->
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -40,8 +41,9 @@
                       @click="displayChannel(item)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
-                          <v-img v-if="item.avatar != null" src="item.avatar"
-                            min-width="50px" min-height="50px"></v-img>
+                          <v-img v-if="item.avatar != null" :src="item.avatar"
+                            min-width="50px" min-height="50px" transition="false"
+                            loading="lazy"></v-img>
                           <v-avatar v-else color="blue" min-width="50px"
                             min-height="50px">
                             <v-icon color="white">mdi-duck</v-icon>
@@ -53,8 +55,8 @@
                       <v-badge bordered bottom color="green" dot offset-x="6"
                         offset-y="34">
                         <v-list-item-avatar v-if="item.avatar != null">
-                          <v-img src="item.avatar" min-width="50px"
-                            min-height="50px"></v-img>
+                          <v-img :src="item.avatar" min-width="50px"
+                            min-height="50px" transition="false" loading="lazy"></v-img>
                         </v-list-item-avatar>
                         <v-list-item-avatar v-else>
                           <v-avatar color="blue" min-width="50px"
@@ -72,7 +74,7 @@
                 </template>
                 </v-list-item-group>
               </v-list>
-            </v-app>
+            <!--</v-app>-->
           </div>
         </v-col>
 
@@ -84,17 +86,17 @@
             <!-- MESSAGES DISPLAY -->
             <!--<div id="chatdisplay">-->
             <div class="specialscroll">
-              <div v-for="(msg, index) in currentChannel.messages" :key="index"
+              <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
                 :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
                   v-if="msg.userId === currentUser.id" :key="index"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
-                    <v-list-item-content>
-                      <div class="mb-2" :style="{color: ' #ffffff'}">
+                    <v-list-item-content class="user-message-container">
+                      <div class="mb-2 message">
                         {{ msg.content }} </div>
-                      <v-list-item-subtitle :style="{color: ' #ffffff'}">
+                      <v-list-item-subtitle>
                         {{ msg.date }} </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
@@ -111,17 +113,20 @@
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
                   != currentUser.id" :key="index">   
                   <v-list-item>
-                    <v-list-item-content>
-                      <v-list-item-title :style="{color: 'grey'}">{{ getUserName(msg.userId) }}</v-list-item-title>
-                      <div class="mb-2"> {{ msg.content }} </div>
+                    <v-list-item-content class="other-message-container">
+                      <v-list-item-title class="message-name">{{ getUserName(msg.userId) }}</v-list-item-title>
+                      <div class="mb-2 message"> {{ msg.content }} </div>
                       <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                 </v-card >
               </div>
             </div>
+            <div v-if="currentChannel.messages.length === 0">
+              <h1 class="Spotnik textfullcenter" data-text="Start conversation">Start conversation</h1>  
+            </div>
 
-                      <!-- SEND MESSAGE -->
+            <!-- SEND MESSAGE -->
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable class="messagefield" width="100%"
                 type="text" label="Write a message" v-model="txt"
@@ -464,6 +469,7 @@ import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 
+
 export default defineComponent({
   name: "ChatMain",
   components: {
@@ -575,6 +581,8 @@ export default defineComponent({
     let currentChannel = ref({ name: '' as string, id: '' as string, type: '' as string,
       messages: [] as Message[], users: [] as UserChannel[], role: '' as string });
     let txt = ref<string>('');
+    let searchRequest = ref<string>('');
+    let joinableChannels = ref({ channels: [] as any[] });
 
 		onMounted(async() => {
 			try {
@@ -588,8 +596,7 @@ export default defineComponent({
           store.commit('setSocketVal' , connection.value);
           console.log("starting connection to websocket");
         } else {
-          update.value.connected = true;
-          connection.value!.emit('emitMyChannels');
+          connection.value!.emit('getUsersList');
         }
 			} catch (error) {
 				console.log("the error is:" + error)
@@ -600,9 +607,10 @@ export default defineComponent({
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
-        store.commit('setUsersList', params);
-        usersList = store.getters.getUsersList;
+        usersList.value = params;
+        store.commit('setUsersList', usersList.value);
         if (!update.value.connected) {
+          console.log('here');
           connection.value!.emit('emitMyChannels');
         }
       })
@@ -610,32 +618,48 @@ export default defineComponent({
       connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
         userChannels.value.channels = params;
+        avatarToUrl();
         update.value.connected = true;
       })
 
-      connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
+      connection.value!.on('joinableChannel', function(params: Channel[]) {
+        console.log('!!!!!!!!>>>>>>' + params);
+        joinableChannels.value.channels = params;
+      })
+
+      connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
         if (!currentChannel.value || params.id != currentChannel.value.id) {
-          console.log('error of channel correspondance inside channelUsers');
+          console.log('error of channel correspondance inside channelUsers ' + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
-        currentUserRole();
+        await currentUserRole();
         update.value.users = true;
       })
 
-      connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
+      connection.value!.on('channelMessages', function(params: { id: string, messages: Message[] }) {
         if (params.id != currentChannel.value.id) {
-          console.log('Error of channel correspondance inside channelMessages');
+          console.log('error of channel correspondance inside channelMessages ' + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive messages from channel ' + currentChannel.value.name);
         currentChannel.value.messages = params.messages;
         update.value.messages = true;
       })
+
+      connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
+        if (params.id != currentChannel.value.id) {
+          console.log('receive message from non current');
+          return ;
+        }
+        console.log('incoming message');
+        console.log(params.message);
+        currentChannel.value.messages.push(params.message);
+      })
 		})
 
-		onBeforeRouteLeave( function(to: any, from: any, next: any) {
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(socket, to, next, store);
@@ -652,7 +676,7 @@ export default defineComponent({
     }
 
     function getUserName(userId: number) {
-      if (!usersList.value) {
+      if (usersList.value === null) {
         console.log('Error when retrieving users');
         return;
       }
@@ -665,7 +689,7 @@ export default defineComponent({
     }
 
     function getUserAvatar(userId: number) {
-      if (!usersList.value) {
+      if (usersList.value === null) {
         console.log('Error when retrieving users');
         return;
       }
@@ -706,12 +730,36 @@ export default defineComponent({
       txt.value = '';
     }
 
+    function sendingSearchRequest() 
+    {
+      console.log(">>>>>>" + searchRequest.value + "<<<<<<<")
+      if (!searchRequest.value || searchRequest.value === '')
+        return ;
+      connection.value.emit('getJoinnableChannels', searchRequest.value);
+      searchRequest.value = '';
+    }
+
     function currentUserRole() {
       for (let user of currentChannel.value.users) {
         if (user.id === currentUser.id) {
           currentChannel.value.role = user.role;
         }
       }
+    }
+
+    function avatarToUrl() {
+      console.log('TO URL');
+      for (let channel of userChannels.value.channels) {
+          if (channel.avatar && !/blob/.test(channel.avatar)) {
+            let blob = new Blob([channel.avatar]) as Blob;
+            channel.avatar = URL.createObjectURL(blob);
+        }
+      }
+    }
+
+    function log(log: string) {
+      console.log('log: ' + log);
+      return true;
     }
 
       // function joinChannel(id)
@@ -743,7 +791,8 @@ export default defineComponent({
 
 		return { isChannelJoined, update, txt, userChannels, displayChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage, currentUserRole }
+      getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
+      searchRequest, joinableChannels, avatarToUrl, log }
 	},
 })
 </script>
@@ -782,10 +831,19 @@ export default defineComponent({
   /* bottom: 0px; */
 }
 
+.margin-top {
+  margin-top: 6%;
+}
+
 .specialscroll {
   overflow: auto;
   display: flex;
   flex-direction:column-reverse;
+  height: 80%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  margin-top: 5%;
+  margin-bottom: 2%;
 }
 
 .textfullcenter {
@@ -794,5 +852,22 @@ export default defineComponent({
   left: 50%;
   margin-right: -50%;
   transform: translate(-50%, -50%);  
+}
+
+.message {
+  word-wrap: break-word;
+}
+
+.user-message-container {
+  max-width: 100%;
+  color: #ffffff;
+}
+
+.other-message-container {
+  max-width:100%;
+}
+
+.message-name {
+  color: grey;
 }
 </style>
