@@ -10,6 +10,8 @@ import { UsersService } from "../users/services/users.service";
 import { ChannelI } from './interfaces/back.interface';
 import { ChannelType } from "src/users/enums/channelType.enum";
 import { truncate } from "fs";
+import { FrontChannelI } from "./interfaces/front.interface";
+import { User } from "src/users/entities/user.entity";
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
@@ -76,7 +78,12 @@ export class ChatController {
   }
 
   @Get('joinnableChannel/:name')
-  async joinnableChannel(@Param('name') chanName: string): Promise<ChannelI[]> {
+  async joinnableChannel(@Param('name') chanName: string): Promise<FrontChannelI[]> {
     return await this.chanServices.filterJoinableChannel(chanName);
+  }
+
+  @Get('findUser/:name')
+  async findUser(@Param('name') name: string): Promise<User[]> {
+    return await this.userService.filterUserByName(name);
   }
 }

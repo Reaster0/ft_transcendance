@@ -137,11 +137,11 @@ export class ChanServices {
     return currentChanUsers.users;
   }
 
-  async filterJoinableChannel(name: string): Promise<Channel[]> {
+  async filterJoinableChannel(name: string): Promise<FrontChannelI[]> {
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
-      select: ['id', 'name', 'avatar'],
+      select: ['id', 'name', 'type', 'avatar'],
       where: [ { name: Like(`%${name}%`), type: ChannelType.PUBLIC}, {name: Like(`%${name}%`), type: ChannelType.PROTECTED}],
       order: {name: "ASC"},
     })

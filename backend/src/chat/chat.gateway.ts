@@ -222,4 +222,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
     client.emit('joinnableChannel', channels); // only for client
   }
+
+  @SubscribeMessage('getFindUser')
+  async findUser(client: Socket, name: string) {
+    const user = await this.userServices.filterUserByName(name);
+    client.emit('findUser', user);
+  }
 }
