@@ -39,7 +39,7 @@ export class MessageService {
       );
       if (blocked)
         message.content = '... 🛑 ...';
-      const frontMessage = {content: message.content, date: message.date, userId: message.user.id};
+      const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
       updateMessageFound.push(frontMessage);
     }
     return updateMessageFound;

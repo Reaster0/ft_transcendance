@@ -27,7 +27,7 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left overflow-y-auto" style="max-height: 1000px;">
+          <div class="text-left overflow-y-auto" style="max-height: calc(100vh - 15%);">
             <!--<v-app>-->
               <v-list>
                <v-list-item-group> 
@@ -93,10 +93,10 @@
                   v-if="msg.userId === currentUser.id" :key="index"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
-                    <v-list-item-content>
-                      <div class="mb-2" :style="{color: ' #ffffff'}">
+                    <v-list-item-content class="user-message-container">
+                      <div class="mb-2 message">
                         {{ msg.content }} </div>
-                      <v-list-item-subtitle :style="{color: ' #ffffff'}">
+                      <v-list-item-subtitle>
                         {{ msg.date }} </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
@@ -113,9 +113,9 @@
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
                   != currentUser.id" :key="index">   
                   <v-list-item>
-                    <v-list-item-content>
-                      <v-list-item-title :style="{color: 'grey'}">{{ getUserName(msg.userId) }}</v-list-item-title>
-                      <div class="mb-2"> {{ msg.content }} </div>
+                    <v-list-item-content class="other-message-container">
+                      <v-list-item-title class="message-name">{{ getUserName(msg.userId) }}</v-list-item-title>
+                      <div class="mb-2 message"> {{ msg.content }} </div>
                       <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
@@ -647,9 +647,11 @@ export default defineComponent({
 
       connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
+          console.log('receive message from non current');
           return ;
         }
         console.log('incoming message');
+        console.log(params.message);
         currentChannel.value.messages.push(params.message);
       })
 		})
@@ -830,6 +832,11 @@ export default defineComponent({
   overflow: auto;
   display: flex;
   flex-direction:column-reverse;
+  height: 80%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  margin-top: 5%;
+  margin-bottom: 2%;
 }
 
 .textfullcenter {
@@ -838,5 +845,22 @@ export default defineComponent({
   left: 50%;
   margin-right: -50%;
   transform: translate(-50%, -50%);  
+}
+
+.message {
+  word-wrap: break-word;
+}
+
+.user-message-container {
+  max-width: 100%;
+  color: #ffffff;
+}
+
+.other-message-container {
+  max-width:100%;
+}
+
+.message-name {
+  color: grey;
 }
 </style>

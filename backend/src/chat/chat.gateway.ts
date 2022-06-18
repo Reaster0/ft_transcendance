@@ -95,18 +95,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     let date = new Date;
     if (user.muteDate >= date) return;
 
-    const createMessage: MessageI = await this.messageServices.create({ channel, date, content: params.content, user: client.data.user });
-    const originalMessage = createMessage.content;
-    const sender = createMessage.user;
+    const message: MessageI = await this.messageServices.create({ channel, date, content: params.content, user: client.data.user });
+    const originalMessage = message.content;
+    const sender = message.user;
 
     const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
     for (const user of connectedUsers) {
       const blockedUser: number = user.blockedIds.find(element => element === sender.id)
       if (blockedUser)
-        createMessage.content = "... 🛑 ..."; // if it is the case blur the message
+        message.content = "... 🛑 ..."; // if it is the case blur the message
       else
-        createMessage.content = originalMessage;
-      this.server.to(user.chatSocket).emit('newMessage', { id: params.channelId, message: createMessage });
+        message.content = originalMessage;
+      const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
+      this.server.to(user.chatSocket).emit('newMessage', { id: params.channelId, message: frontMessage });
     }
   }
 
