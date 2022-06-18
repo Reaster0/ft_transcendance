@@ -75,8 +75,8 @@ export class ChatController {
   async createMsgTest() {
   }
 
-  @Get('joinnableChannel')
-  async joinnableChannel(@Query() chanName: string): Promise<ChannelI[]> {
+  @Get('joinnableChannel/:name')
+  async joinnableChannel(@Param('name') chanName: string): Promise<ChannelI[]> {
     return await this.chanServices.filterJoinableChannel(chanName);
   }
 }

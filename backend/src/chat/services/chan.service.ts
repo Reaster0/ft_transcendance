@@ -139,12 +139,13 @@ export class ChanServices {
 
   async filterJoinableChannel(name: string): Promise<Channel[]> {
 
+    console.log('coucou: ', name);
     return this.chanRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
       order: {name: "DESC"},
       select: ['id', 'name', 'avatar'],
-      where: [ { name: Like(`%${name}%`), publicChannel: true} ]
+      where: [ { name: Like(`%${name}%`) }]
     })
   }
 

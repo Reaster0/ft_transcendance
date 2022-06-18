@@ -65,7 +65,7 @@
 import { defineComponent } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { Store, useStore } from 'vuex';
-import leaveChat from '../helper';
+import { leaveChat } from '../helper';
 
 export default defineComponent({
   name: "NewRoom",

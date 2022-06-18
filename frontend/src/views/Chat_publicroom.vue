@@ -45,7 +45,7 @@
 
       <div v-else>
         <h2 class="textabovecenter">
-          Public channel was successfully created
+          Public channel {{ name }} was successfully created
         </h2>
         <v-btn class="buttoncenter" to="/thechat">Return to chat</v-btn>
       </div>
@@ -62,7 +62,7 @@ import { defineComponent, reactive, ref } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from "vue-router";
 import { ChannelType } from '../types/chat.types';
-import leaveChat from '../helper';
+import { leaveChat, verifyChannelName } from '../helper';
 import io from 'socket.io-client';
 
 export default defineComponent({
@@ -71,7 +71,7 @@ export default defineComponent({
     const store = reactive(useStore() as Store<any>);
     let socketVal = store.getters.getSocketVal;
     let name = ref<string>('');
-    let file = ref<any[]>([]);
+    let file = ref<any>(null);
     let created = ref<boolean>(false);
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
@@ -96,27 +96,23 @@ export default defineComponent({
         console.log("the error is:" + error)
       }
 
-      socketVal.on("channelCreated", function() {
-        created.value = true;
+      socketVal.on("channelCreated", function(channel: string) {
+        if (channel === name.value) {
+          created.value = true;
+        }
       })
 
-      socketVal.on("errorChannelCreation", function(params: any) {
-        alert("Channel creation failed: " + params.reason);
+      socketVal.on("errorChannelCreation", function(reason: string) {
+        alert("Channel creation failed: " + reason);
       })
     })
 
     function previewFiles(event: any) {
         file.value = event.target.files[0];
-        console.log(event.target.files[0]);
-    }
-
-    function creationError() {
-        alert("Your channel name can't be empty")
     }
 
     function submitIt(name: string, file: any) {
-      if (name == '') {
-        creationError();
+      if (verifyChannelName(name) === false) {
         return ;
       }
       socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PUBLIC, avatar: file });   
