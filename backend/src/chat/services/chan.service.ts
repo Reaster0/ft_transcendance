@@ -188,26 +188,31 @@ export class ChanServices {
     return this.roleRepository.save(chanUser);
 }
 
-  async unmuteUser(channel: Channel, userId: number): Promise<Roles> {
+  async unmuteUser(channelId: string, userId: number): Promise<Roles> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {return null;}
+
     const chanUser: Roles = await this.roleRepository.findOne({ where: { channel, userId} });
     chanUser.muteDate = null;
     return this.roleRepository.save(chanUser);
   }
 
-  async banUser(channelId: string, user: User): Promise<void> {
+  async banUser(channelId: string, user: User): Promise<ChannelI> {
     let channel = await this.removeUserFromChan(channelId, user);
-    if (!channel) {return ;} /* User was not in channel */
+    if (!channel) {return null;} /* User was not in channel */
     channel.blocked.push(user.id);
     await this.chanRepository.update(channelId, channel);
+    return channel;
   }
 
   async unBanUser(channelId: string, userId: number) {
     let channel = await this.chanRepository.findOne(channelId);
-    if (!channel) {return ;}
+    if (!channel) {return null;}
     const index = channel.blocked.indexOf(userId);
-    if (index == -1) { return; }
+    if (index == -1) { return null; }
     channel.blocked.splice(index, 1);
     await this.chanRepository.update(channelId, channel);
+    return channel;
   }
 
   /*

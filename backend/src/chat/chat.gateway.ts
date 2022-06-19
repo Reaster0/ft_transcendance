@@ -172,12 +172,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     client.emit('UserMuted', `you have muted ${user.username} for ${time} seconds`);
     this.server.to(user.chatSocket).emit('muted', `you have being muted for ${time} seconds`);
   }
+  @SubscribeMessage('unmuteUser')
+  async unmuteUser(client: Socket, data: any): Promise<void> {
+    const {channelId, targetId} = data; 
+    await this.chanServices.unmuteUser(channelId, targetId)
+  }
 
   /* dose back check the right for calling this socket route or front end ensure this ? */
   @SubscribeMessage('banUser')
   async banUser(client: Socket, data: any): Promise<void> {
-    
-    
+    const {chanelId, userId} = data;
+    const user = await this.userServices.findUserById(userId + '');
+    if (!user) return ;
+    const channel = await this.chanServices.banUser(chanelId, user);
+    client.emit('UserBanned', `you have banned ${user.username} from ${channel.name}`);
+    this.server.to(user.chatSocket).emit('banned', `you have been banned from ${channel.name}`);
+  }
+  
+  @SubscribeMessage('unBanUser')
+  async unBanUser(client: Socket, data: any): Promise<void> {
+    const {chanelId, userId} = data;
+    const user = await this.userServices.findUserById(userId + '');
+    if (!user) return ;
+    const channel = await this.chanServices.unBanUser(chanelId, userId);
+    if (!channel) { return ; }
+    client.emit('UserUnbanned', `you have unbanned ${user.username} from ${channel.name}`);
+    this.server.to(user.chatSocket).emit('unBanned', `you have been unbanned from ${channel.name}`);
   }
 
   /****** Emit Service ******/
