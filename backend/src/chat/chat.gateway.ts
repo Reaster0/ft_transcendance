@@ -123,7 +123,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       if (await bcrypt.compare(channel.password, channelFound.password) === false)
         return false;
     }
-    await this.chanServices.pushUserToChan(channel, client.data.user);
+    await this.chanServices.pushUserToChan(channelFound.id, client.data.user);
     this.logger.log(`${client.data.user.username} joined ${channel.name}`);
     return true;
   }
@@ -132,8 +132,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /********************* Leave Channel ********************/
   // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
-  async handleLeaveChannel(client: Socket, channel: ChannelI) {
-    await this.chanServices.removeUserFromChan(channel, client.data.user);
+  async handleLeaveChannel(client: Socket, channelId: string) {
+    await this.chanServices.removeUserFromChan(channelId, client.data.user);
     //await this.chanServices.unmuteUser(channel.id, client.data.user);
     this.logger.log(`${client.data.user.username} leave a channel`);
   }
@@ -161,6 +161,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const userUpdate = this.userServices.updateBlockedUser(client.data.user, block, user);
     this.logger.log(`${client.data.user} block ${user.username}`);
     return userUpdate;
+  }
+
+  /* dose back check the right for calling this socket route or front end ensure this ? */
+  @SubscribeMessage('muteUser')
+  async muteUser(client: Socket, data: any): Promise<void> {
+    const {channelId, targetId, time} = data;
+    await this.chanServices.muteUser(channelId, targetId, time);
+    const user = await this.userServices.findUserById(targetId + '');
+    client.emit('UserMuted', `you have muted ${user.username} for ${time} seconds`);
+    this.server.to(user.chatSocket).emit('muted', `you have being muted for ${time} seconds`);
+  }
+
+  /* dose back check the right for calling this socket route or front end ensure this ? */
+  @SubscribeMessage('banUser')
+  async banUser(client: Socket, data: any): Promise<void> {
+    
+    
   }
 
   /****** Emit Service ******/
@@ -221,11 +238,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     client.emit('channelMessages', { id: params.id, messages: messages });
   }
 
+  // add banned logic into this
   @SubscribeMessage('getJoinnableChannels')
-  async getJoinnableChannels(client: Socket, name: string) {
-    console.log("GETTING JOINABLE CHANNELS: ", name);
-    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
-    console.log(channels);
+  async getJoinnableChannels(client: Socket, data: any) {
+    const {name, targetId} = data;
+    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name, targetId);
     client.emit('joinnableChannel', channels); // only for client
   }
 

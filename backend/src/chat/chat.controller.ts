@@ -48,14 +48,17 @@ export class ChatController {
         @UseGuards(AuthGuard('jwt'), AuthUser) // try
         async joinChannel(@Param('chanId') id: string, @Req() req: RequestUser): Promise<boolean> {
         console.log('try to join channel whit link');
+        /*
         const channelFound = await this.chanServices.findChannelWithUsers(id);
         if (!channelFound) {
             return false;
         }
+        */
         
         //const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
 
-        await this.chanServices.pushUserToChan(channelFound, req.user);
+        const channel = await this.chanServices.pushUserToChan(id, req.user);
+        if (!channel) { return false; }
         //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
         return true;
         //return 'lets join this private channel';
@@ -77,9 +80,9 @@ export class ChatController {
   async createMsgTest() {
   }
 
-  @Get('joinnableChannel/:name')
-  async joinnableChannel(@Param('name') chanName: string): Promise<FrontChannelI[]> {
-    return await this.chanServices.filterJoinableChannel(chanName);
+  @Get('joinnableChannel/:name/:id')
+  async joinnableChannel(@Param('name') chanName: string, @Param('id') id: number): Promise<FrontChannelI[]> {
+    return await this.chanServices.filterJoinableChannel(chanName, id);
   }
 
   @Get('findUser/:name')
