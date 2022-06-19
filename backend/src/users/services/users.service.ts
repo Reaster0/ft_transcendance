@@ -229,12 +229,13 @@ export class UsersService {
   }
 
   async connectUserToChat(user: User, socketID: string) {
-    this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
+    await this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
+    this.chatGateway.sendUsersList();
   }
 
   async disconnectUserToChat(user: User) {
     this.userRepository.update(user.id, { status: Status.OFFLINE, chatSocket: '' });
-  
+    this.chatGateway.sendUsersList(); 
   }
 
 

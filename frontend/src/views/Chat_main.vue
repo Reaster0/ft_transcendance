@@ -716,6 +716,7 @@ export default defineComponent({
 
     function getUserColor(userId: number) {
       const status = getUserStatus(userId) as Status;
+      console.log(status);
       if (status === Status.ONLINE)
         return "green";
       else if (status === Status.PLAYING)

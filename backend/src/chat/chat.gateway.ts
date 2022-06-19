@@ -36,7 +36,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
       await this.userServices.connectUserToChat(user, client.id);
-      this.sendUsersList();
       this.logger.log(`Client connected: ${client.id}`);
     } catch {
       this.logger.log('Failed to retrieve user from client');
@@ -52,7 +51,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     await this.userServices.disconnectUserToChat(client.data.user)
     client.disconnect();
-    this.sendUsersList();
     this.logger.log(`Client disconnected: ${client}`);
   }
 
