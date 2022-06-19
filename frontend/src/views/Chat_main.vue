@@ -28,7 +28,6 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top" style="max-height: calc(100vh - 15%);">
-            <!--<v-app>-->
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -75,23 +74,22 @@
                 </template>
                 </v-list-item-group>
               </v-list>
-            <!--</v-app>-->
           </div>
         </v-col>
 
+        <!-- NO CHANNEL DISPLAYED -->
         <v-col cols="auto" sm="9" class="border" v-if="currentChannel.id === ''">
           <v-app v-if="currentChannel.id === ''">
               <h1 class="Spotnik textfullcenter" data-text="Select">Select channel to display</h1>
           </v-app>
         </v-col>
 
-        <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
+        <!-- CHANNEL DISPLAY : CENTRAL ELEMENTS -->
         <v-col cols="auto" sm="6" class="border" v-else>
           <v-app id="chatdisplay" v-if="update.messages && update.users
             && currentChannel.name != ''" style="max-height: 600px;">
 
             <!-- MESSAGES DISPLAY -->
-            <!--<div id="chatdisplay">-->
             <div class="specialscroll" @scroll="isScrollAtBottom">
               <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
                 :class="['d-flex flex-row align-center my-2',
@@ -136,16 +134,19 @@
             <!-- SEND MESSAGE -->
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable class="messagefield" width="100%"
-                type="text" label="Write a message" v-model="txt"
+                type="text" label="Write a message" v-model="message"
                 @keyup.enter="sendingMessage(currentChannel.id)">
               </v-text-field>
             </div>
 
           <!-- LOADING / NON SELECTED MESSAGES -->
           </v-app>
+          <!-- TODO modify for case or channel is joined -->
           <v-app v-else-if="currentChannel.id != ''">
             <h1 class="Spotnik textfullcenter" data-text="Loading messages">Loading messages</h1>
           </v-app>
+
+          <!-- TODO Add case when channel isn't joined -->
 
         </v-col>
 
@@ -176,22 +177,14 @@
             <v-card-subtitle class="layout justify-center">{{ currentChannel.description }}</v-card-subtitle>
             
             <!-- CASE CHANNEL -->
-            <div id="app" class="pt-6" v-if="currentChannel.type != 'pm'"> 
-              <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
-              <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
-              cause this condition is for PROTECTED (<div v-if="!isChannelJoined" && PROTECTED ID>) -->
-              <modale :revele="revele" :toggleModale="toggleModale"></modale>
-              <!-- <div v-if="!isChannelJoined">
-                <v-btn v-on:click="toggleModale" class="btn btn-success" elevation="2" width="100%">Join the chat room </v-btn>
-              </div> -->
-              <!-- NB! Activate scenario "joinChannel" in "getPassToJoin" on clink for PRIVATE and PUBLIC! 
-              (how to get info about exact channel ? ) -->
+            <div id="app" class="pt-6" v-if="currentChannel.type != ChannelType.PM"> 
 
               <!-- SUBCASE CHANNEL NOT JOINED -->
-              <div v-if="!isChannelJoined">
-                <v-btn v-if="!isChannelJoined" elevation="2" width="100%" @click="getPassToJoin">
+              <div v-if="currentChannel.member">
+                <v-btn elevation="2" width="100%" @click="joinChannel">
                   Join the chat room
                 </v-btn>
+                <modale :showPasswordModal="showPasswordModal" :toggleModal="toggleModal" @password="joinProtectedChannel"></modale>
               </div>
 
               <!-- SUBCASE CHANNEL JOINED -->
@@ -368,7 +361,6 @@ export default defineComponent({
   },
   //data() {
   //  return {
-  //    txt: '',
       // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
       // accordind to this info we change the interface
       // for the moment we change the value manualy, but we should get it from backend
@@ -465,18 +457,18 @@ export default defineComponent({
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
     let usersList = ref<any>(null);
-    let isChannelJoined = store.getters.isChannelJoined as boolean;
     let userChannels = ref({ channels: [] as any[] });
     let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
     let currentChannel = ref({ name: '' as string, id: '' as string,
-      type: ChannelType.PUBLIC as ChannelType, messages: [] as Message[],
-      users: [] as UserChannel[], role: Roles.USER as Roles,
-      avatar: null as null | string, notif: false as boolean,
-      description: '' as string});
-    let txt = ref<string>('');
+      type: ChannelType.PUBLIC as ChannelType, member: false as boolean,
+      messages: [] as Message[], users: [] as UserChannel[],
+      role: Roles.USER as Roles, avatar: null as null | string,
+      notif: false as boolean, description: '' as string});
+    let messageText = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
+    let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
 
 		onMounted(async() => {
 			try {
@@ -543,14 +535,14 @@ export default defineComponent({
         update.value.messages = true;
       })
 
-      connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
+      connection.value!.on('newMessage', function(params: {id: string, messageText: Message }) {
         if (params.id != currentChannel.value.id) {
-          console.log('receive message from non current');
+          console.log('receive messageText from non current');
           return ;
         }
-        console.log('incoming message');
-        currentChannel.value.messages.push(params.message);
-        if (params.message.userId != currentUser.value.id) {
+        console.log('incoming messageText');
+        currentChannel.value.messages.push(params.messageText);
+        if (params.messageText.userId != currentUser.value.id) {
           currentChannel.value.notif = true;
         }
       })
@@ -567,7 +559,8 @@ export default defineComponent({
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
-      console.log(channel.type);
+      currentChannel.value.member = true;
+      currentChannel.value.type = channel.type;
       if (channel.type === ChannelType.PUBLIC) {
         currentChannel.value.description = 'Public Channel';
       } else if (channel.type === ChannelType.PRIVATE) {
@@ -634,10 +627,10 @@ export default defineComponent({
     }
 
 		function sendingMessage(channelId: string) {
-      if (!txt.value || txt.value === '')
+      if (!messageText.value || messageText.value === '')
         return ;
-      connection.value.emit('message', {'channelId': channelId, 'content': txt.value });
-      txt.value = '';
+      connection.value.emit('messageText', {'channelId': channelId, 'content': messageText.value });
+      messageText.value = '';
     }
 
     function sendingSearchRequest() 
@@ -681,6 +674,30 @@ export default defineComponent({
       }
     }
 
+    function toggleModal() {
+      showPasswordModal.value = !(showPasswordModal.value);
+    }
+
+    function joinChannel() {
+      console.log('join channel');
+      if (currentChannel.value.type === ChannelType.PROTECTED) {
+        console.log('here');
+        showPasswordModal.value = true;
+        return ;
+      }
+      //TODO emit to back to join channel
+    }
+
+    function joinProtectedChannel(password: string) {
+      console.log('join channel with password: ' + password);
+      if (password === '') {
+        alert('Password entered is empty. Please retry.');
+        return;
+      }
+      showPasswordModal.value = false;
+      //TODO emit to back to join channel
+    }
+
       // function joinChannel(id)
       // {
       //   store.commit('setChannelJoinedStatus' , true);
@@ -708,10 +725,12 @@ export default defineComponent({
       // 			console.log("after blockUser");
       // 		}
 
-		return { isChannelJoined, update, txt, userChannels, displayChannel,
+		return { update, messageText, userChannels, displayChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
-      searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom }
+      searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
+      ChannelType, toggleModal, showPasswordModal, joinChannel, 
+      joinProtectedChannel }
 	},
 })
 </script>
@@ -758,7 +777,7 @@ export default defineComponent({
   overflow: auto;
   display: flex;
   flex-direction:column-reverse;
-  height: 80%;
+  height: 78%;
   padding-top: 5%;
   padding-bottom: 5%;
   margin-top: 5%;

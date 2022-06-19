@@ -79,14 +79,6 @@ const routes = [
 			return store.getters.isConnected? true: "/login"
 		}
 	},
-	// {
-	// 	path: '/chat',
-	// 	name: "chat",
-	// 	component: TheChat,
-	// 	beforeEnter: () => {
-	// 		return store.getters.isConnected? true: "/login"
-	// 	}
-	// },
 	{
 		path: '/thechat',
 		name: "Chat",
