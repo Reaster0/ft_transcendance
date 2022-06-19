@@ -38,7 +38,7 @@
                     :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="displayChannel(item)"
+                      @click="displayMemberChannel(item)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
@@ -92,7 +92,8 @@
         <!-- CHANNEL DISPLAY : CENTRAL ELEMENTS -->
         <v-col cols="auto" sm="6" class="border" v-else>
           <v-app id="chatdisplay" v-if="update.messages && update.users
-            && currentChannel.name != '' && currentChannel.member"
+            && currentChannel.name != ''
+            && currentChannel.role != Roles.NONMEMBER"
             style="max-height: 600px;">
 
             <!-- MESSAGES DISPLAY -->
@@ -158,7 +159,8 @@
           </v-app>
 
           <!-- LOADING / NON SELECTED MESSAGES -->
-          <v-app v-else-if="currentChannel.id != '' && !currentChannel.member">
+          <v-app v-else-if="currentChannel.id != ''
+            && currentChannel.role === Roles.NONMEMBER">
             <h1 class="Spotnik textfullcenter" data-text="Non member">
               You are not a room member
             </h1>
@@ -207,7 +209,7 @@
               v-if="currentChannel.type != ChannelType.PM">
 
               <!-- SUBCASE CHANNEL NOT JOINED -->
-              <div v-if="!currentChannel.member">
+              <div v-if="currentChannel.role === Roles.NONMEMBER">
                 <v-btn elevation="2" class="my-2" width="80%"
                   @click="joinChannel">
                   Join the chat room
@@ -339,7 +341,7 @@
             <!-- CASE PRIVATE MESSAGE -->
             <div id="privatemessage" v-else>
               <v-app id="subprivatemessage" class="pt-6">
-                <div v-if="!currentChannel.member">
+                <div v-if="currentChannel.role === Roles.NONMEMBER">
                   <v-btn @click="joinChannel" elevation="2" class="my-2"
                     width="80%">
                     Start conversation
@@ -357,7 +359,7 @@
                     Unblock this user
                   </v-btn>
                 </div>
-                <div v-if="currentChannel.member && !currentChannel.blocked && 
+                <div v-if="currentChannel.role != Roles.NONMEMBER && !currentChannel.blocked && 
                   !game.request" class="text-center">
                   <v-btn color="rgb(0,0,255)" @click="waitingGame()"
                   class="my-2" elevation="2" width="80%">
@@ -408,16 +410,6 @@ export default defineComponent({
   components: {
     'modale': TheModale
   },
-  //data() {
-  //  return {
-      // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
-      // accordind to this info we change the interface
-      // for the moment we change the value manualy, but we should get it from backend
-      
-      //chat_channel_isAdmin: true as boolean,
-      // chat_person is indicator that now user communicate not with a channel, but with another user
-      // accordind to this info we change the interface
-      // for the moment we change the value manualy, but we should get it from backend
 
       //chat_person: false as boolean,
       //revele: false,
@@ -458,46 +450,6 @@ export default defineComponent({
       // Not - used vars that we can need
       // Comment for Aimé: what was the idea ?
 
-      //newChannel: {
-      //  name:'',
-      //  public: true,
-      //  password: '',
-      //  members: [],
-      //  admins: [],
-      //  },
-
-      // Not - used vars that we can need
-      // Comment for Aimé: this one we realy need, but now we just can know 
-      // if the channel is public ot not
-
-      //protectByPassword: false,
-      //channelSettings: {
-      //  password: '',
-      //  applyPassword: false,
-      //  members: [],
-      //},
-  //  }
-  //},
-  //methods: {
-  //  // blockAlert activated after pushing button "Block this user"
-  //  // its, of course, temporary solution cause we need to clock for real
-  //  // when user block another user - he cant see the messages anymore
-  //  blockAlert: function (event : any)
-  //  {
-  //    if (event) 
-  //    {
-  //      alert("WE NEED TO BLOCK THIS USER")
-  //    }
-  //  },
-  //},
-  // this is needed to limit (3000 ms) loading process after pushing bitton "Invite to play togetrer"
-  // made show on template the animation "while waiting"
-  //watch: {
-  //  loading (val: number) {
-  //    if (!val) return
-  //    setTimeout(() => (this.loading = false), 3000)
-  //  },
-  //},
 	setup() {
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
@@ -507,7 +459,7 @@ export default defineComponent({
     let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
     let currentChannel = ref({ name: '' as string, id: '' as string,
-      type: ChannelType.PUBLIC as ChannelType, member: false as boolean,
+      type: ChannelType.PUBLIC as ChannelType, 
       messages: [] as Message[], users: [] as UserChannel[],
       role: Roles.USER as Roles, avatar: null as null | string,
       notif: false as boolean, description: '' as string, 
@@ -561,6 +513,7 @@ export default defineComponent({
       connection.value!.on('joinableChannel', function(params: Channel[]) {
         console.log('!!!!!!!!>>>>>>' + params);
         joinableChannels.value.channels = params;
+        // TODO continue
       })
 
       connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
@@ -603,13 +556,13 @@ export default defineComponent({
       leaveChat(socket, to, next, store);
     })
 
-    function displayChannel(channel: any) {
+    function displayMemberChannel(channel: any) {
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
-      currentChannel.value.member = true;
       currentChannel.value.type = channel.type;
+      currentChannel.value.blocked = false;
       if (channel.type === ChannelType.PUBLIC) {
         currentChannel.value.description = 'Public Channel';
       } else if (channel.type === ChannelType.PRIVATE) {
@@ -624,6 +577,33 @@ export default defineComponent({
       update.value.users = false;
       connection.value.emit('getChannelUsers', { id: channel.id });
       connection.value.emit('getChannelMessages', { id: channel.id });
+    }
+
+    function displayJoinableChannel(channel: any) {
+      // TODO check channel not in userChannels and set role depending of it
+      if (currentChannel.value.role != Roles.NONMEMBER) {
+        return displayMemberChannel(channel);
+      }
+      currentChannel.value.name = channel.name;
+      currentChannel.value.id = channel.id;
+      currentChannel.value.avatar = channel.avatar; // TODO fetch avatar
+      currentChannel.value.notif = false;
+      currentChannel.value.type = channel.type;
+      // TODO fetch blocked value (if you blocked an user)
+      if (channel.type === ChannelType.PUBLIC) {
+        currentChannel.value.description = 'Public Channel';
+      } else if (channel.type === ChannelType.PRIVATE) {
+        currentChannel.value.description = 'Private Channel';
+      } else if (channel.type === ChannelType.PROTECTED) {
+        currentChannel.value.description = 'Protected Channel';
+      } else {
+        currentChannel.value.description = 'Private Conversation';
+      }
+      currentChannel.value.messages = [];
+      currentChannel.value.users = [];
+      console.log('display ' + channel.name + ' join interface');
+      update.value.messages = false;
+      update.value.users = false;
     }
 
     function getUserName(userId: number) {
@@ -695,8 +675,10 @@ export default defineComponent({
       for (let user of currentChannel.value.users) {
         if (user.id === currentUser.id) {
           currentChannel.value.role = user.role;
+          return ;
         }
       }
+      currentChannel.value.role = Roles.NONMEMBER;
     }
 
     function avatarToUrl() {
@@ -735,6 +717,7 @@ export default defineComponent({
         return ;
       }
       //TODO emit to back to join channel
+      //TODO if user is blocked from channel / user, get message
     }
 
     function joinProtectedChannel(password: string) {
@@ -789,13 +772,13 @@ export default defineComponent({
       // 			console.log("after blockUser");
       // 		}
 
-		return { update, messageText, userChannels, displayChannel,
+		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
       ChannelType, toggleModal, showPasswordModal, joinChannel, 
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
-      unblockUser, leaveChannel }
+      unblockUser, leaveChannel, displayJoinableChannel }
 	},
 })
 </script>
