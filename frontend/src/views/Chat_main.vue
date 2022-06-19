@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app id="chat">
     <v-container fluid v-if="update.connected">
       <v-row>
 
@@ -27,7 +27,8 @@
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left overflow-y-auto margin-top" style="max-height: calc(100vh - 15%);">
+          <div class="text-left overflow-y-auto margin-top"
+            style="max-height: calc(100vh - 15%);">
               <v-list>
                <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -41,8 +42,9 @@
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
-                            min-width="50px" min-height="50px" transition="false"
-                            loading="lazy"></v-img>
+                            min-width="50px" min-height="50px"
+                            transition="false" loading="lazy">
+                          </v-img>
                           <v-avatar v-else color="blue" min-width="50px"
                             min-height="50px">
                             <v-icon color="white">mdi-duck</v-icon>
@@ -78,9 +80,12 @@
         </v-col>
 
         <!-- NO CHANNEL DISPLAYED -->
-        <v-col cols="auto" sm="9" class="border" v-if="currentChannel.id === ''">
+        <v-col cols="auto" sm="9" class="border"
+          v-if="currentChannel.id === ''">
           <v-app v-if="currentChannel.id === ''">
-              <h1 class="Spotnik textfullcenter" data-text="Select">Select channel to display</h1>
+              <h1 class="Spotnik textfullcenter" data-text="Select">
+                Select channel to display
+              </h1>
           </v-app>
         </v-col>
 
@@ -92,8 +97,9 @@
 
             <!-- MESSAGES DISPLAY -->
             <div class="specialscroll" @scroll="isScrollAtBottom">
-              <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
-                :class="['d-flex flex-row align-center my-2',
+              <div v-for="(msg, index) in
+                currentChannel.messages.slice().reverse()"
+                :key="index" :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
                   v-if="msg.userId === currentUser.id" :key="index"
@@ -109,8 +115,8 @@
                 </v-card>
                 <v-btn elevation="0" min-height="50px"
                   max-width="50px">
-                  <v-badge bordered bottom :color="getUserColor(msg.userId)" dot offset-x="4"
-                    offset-y="10">
+                  <v-badge bordered bottom :color="getUserColor(msg.userId)" dot
+                    offset-x="4" offset-y="10">
                     <v-avatar class="mt-n4 " size="32" elevation="2">
                       <img :src="getUserAvatar(msg.userId)"/>
                     </v-avatar>
@@ -120,17 +126,26 @@
                   != currentUser.id" :key="index">   
                   <v-list-item>
                     <v-list-item-content class="other-message-container">
-                      <v-list-item-title class="message-name">{{ getUserName(msg.userId) }}</v-list-item-title>
-                      <div class="mb-2 message"> {{ msg.content }} </div>
-                      <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
+                      <v-list-item-title class="message-name">
+                        {{ getUserName(msg.userId) }}
+                      </v-list-item-title>
+                      <div class="mb-2 message">
+                        {{ msg.content }}
+                      </div>
+                      <v-list-item-subtitle>
+                        {{ msg.date }}
+                      </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                 </v-card >
               </div>
             </div>
 
+            <!-- NO MESSAGE YET -->
             <div v-if="currentChannel.messages.length === 0">
-              <h1 class="Spotnik textfullcenter" data-text="Start conversation">Start conversation</h1>  
+              <h1 class="Spotnik textfullcenter" data-text="Start conversation">
+                Start conversation
+              </h1>  
             </div>
 
             <!-- SEND MESSAGE -->
@@ -144,11 +159,15 @@
 
           <!-- LOADING / NON SELECTED MESSAGES -->
           <v-app v-else-if="currentChannel.id != '' && !currentChannel.member">
-            <h1 class="Spotnik textfullcenter" data-text="Non member">You are not a member</h1>
+            <h1 class="Spotnik textfullcenter" data-text="Non member">
+              You are not a room member
+            </h1>
           </v-app>
 
           <v-app v-else-if="currentChannel.id != ''">
-            <h1 class="Spotnik textfullcenter" data-text="Loading messages">Loading messages</h1>
+            <h1 class="Spotnik textfullcenter" data-text="Loading messages">
+              Loading messages
+            </h1>
           </v-app>
 
         </v-col>
@@ -163,45 +182,56 @@
               <v-badge avatar dark color="warning" bordered offset-x="50px"
                 offset-y="5px" content="!">
                 <v-avatar class="s" elevation="10" size="60px" color="blue">
-                  <img v-if="currentChannel.avatar" :src="currentChannel.avatar" width="70" height="70">
+                  <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
+                    width="70" height="70">
                   <v-icon v-else color="white">mdi-duck</v-icon>
                 </v-avatar>
               </v-badge>
             </div>
             <div v-else>
               <v-avatar class="s" elevation="10" size="60px" color="blue">
-                <img v-if="currentChannel.avatar" :src="currentChannel.avatar" width="70" height="70">
+                <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
+                  width="70" height="70">
                 <v-icon v-else color="white">mdi-duck</v-icon>
               </v-avatar>
             </div>
-            <v-card-title class="layout justify-center">{{ currentChannel.name }}</v-card-title>
-            <v-card-subtitle class="layout justify-center">{{ currentChannel.description }}</v-card-subtitle>
+            <v-card-title class="layout justify-center">
+              {{ currentChannel.name }}
+            </v-card-title>
+            <v-card-subtitle class="layout justify-center">
+              {{ currentChannel.description }}
+            </v-card-subtitle>
             
             <!-- CASE CHANNEL -->
-            <div id="app" class="pt-6" v-if="currentChannel.type != ChannelType.PM"> 
+            <div id="channel" class="pt-6"
+              v-if="currentChannel.type != ChannelType.PM">
 
               <!-- SUBCASE CHANNEL NOT JOINED -->
               <div v-if="!currentChannel.member">
-                <v-btn elevation="2" width="100%" @click="joinChannel">
+                <v-btn elevation="2" class="my-2" width="80%"
+                  @click="joinChannel">
                   Join the chat room
                 </v-btn>
-                <modale :showPasswordModal="showPasswordModal" :toggleModal="toggleModal" @password="joinProtectedChannel"></modale>
+                <modale :showPasswordModal="showPasswordModal"
+                  :toggleModal="toggleModal"
+                  @password="joinProtectedChannel">
+                </modale>
               </div>
 
               <!-- SUBCASE CHANNEL JOINED -->
               <div v-else>
-                <v-btn elevation="2" width="100%">
+                <v-btn class="my-1" elevation="2" width="80%" color="warning"
+                  @click="leaveChannel">
                   Leave the chat room
                 </v-btn>
-                <v-btn color="red" @click="leaveChannel" to="/">Logout</v-btn> // TODO logOut property doesn't exist ?
-                
-                <!-- OPTION FOR ADMINS -->
                 <div v-if="currentChannel.role === Roles.ADMIN
                   || currentChannel.role === Roles.OWNER">
-                  <v-btn :to="{ name: 'ChangeRoom' }" elevation="2" width="350px">
+                  <v-btn class="my-1" :to="{ name: 'ChangeRoom' }" elevation="2"
+                    width="80%">
                     Room settings
                   </v-btn>
                 </div>
+                <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
 
                 <!-- INFOS ABOUT CHANNEL USERS  -->
                 <!-- <div id="app" class="pt-6">
@@ -307,29 +337,47 @@
             </div>
 
             <!-- CASE PRIVATE MESSAGE -->
-            <div id="app" v-else>
-              <v-app id="inspire" class="pt-6">
-                <v-btn v-on:click="blockAlert" elevation="2" width="350px">
-                  Block this user
-                </v-btn>
-                <v-scale-transition>
-                  <div v-if="!loading" class="text-center">
-                    <v-btn color="rgb(0,0,255)" @click="loading = true" elevation="2" width="350px">
-                      <div  :style="{color: ' #ffffff'}">
-                        Invite to play together
-                      </div>
-                    </v-btn>
-                  </div>
-                </v-scale-transition>
+            <div id="privatemessage" v-else>
+              <v-app id="subprivatemessage" class="pt-6">
+                <div v-if="!currentChannel.member">
+                  <v-btn @click="joinChannel" elevation="2" class="my-2"
+                    width="80%">
+                    Start conversation
+                  </v-btn>
+                </div>
+                <div v-if="!currentChannel.blocked">
+                  <v-btn @click="blockUser" elevation="2"
+                    class="my-2" width="80%" color="warning">
+                    Block this user
+                  </v-btn>
+                </div>
+                <div v-else>
+                  <v-btn @click="unblockUser" elevation="2"
+                    class="my-2" width="80%" color="success">
+                    Unblock this user
+                  </v-btn>
+                </div>
+                <div v-if="currentChannel.member && !currentChannel.blocked && 
+                  !game.request" class="text-center">
+                  <v-btn color="rgb(0,0,255)" @click="waitingGame()"
+                  class="my-2" elevation="2" width="80%">
+                    <div  :style="{color: ' #ffffff'}">
+                      Invite to play together
+                    </div>
+                  </v-btn>
+                </div>
+                <div v-if="!game.response" class="text-center">
+                  <p>No response from user</p>
+                </div>
                 <v-toolbar dense  color="rgba(0,0,0,0)">
-                  <v-progress-linear :active="loading"
-                    :indeterminate="loading" absolute bottom
+                  <v-progress-linear :active="game.request"
+                    :indeterminate="game.request" absolute bottom
                     color="rgb(0,0,255)">
                   </v-progress-linear>
                 </v-toolbar>
+
               </v-app>
             </div>
-
           </v-card>  
         </v-col>
       </v-row>
@@ -462,11 +510,14 @@ export default defineComponent({
       type: ChannelType.PUBLIC as ChannelType, member: false as boolean,
       messages: [] as Message[], users: [] as UserChannel[],
       role: Roles.USER as Roles, avatar: null as null | string,
-      notif: false as boolean, description: '' as string});
+      notif: false as boolean, description: '' as string, 
+      blocked: false as boolean });
+    // blocked = for pm
     let messageText = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
     let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
+    let game = ref({ request: false as boolean, response: true as boolean });
 
 		onMounted(async() => {
 			try {
@@ -696,6 +747,27 @@ export default defineComponent({
       //TODO emit to back to join channel
     }
 
+    function waitingGame() {
+      game.value.request = true;
+      // TODO send game request
+      setTimeout(() => (
+        game.value.request = false,
+        game.value.response = false
+        ), 10000);
+    }
+
+    function blockUser() {
+      //TODO
+    }
+
+    function unblockUser() {
+      //TODO
+    }
+
+    function leaveChannel() {
+      //TODO
+    }
+
       // function joinChannel(id)
       // {
       //   store.commit('setChannelJoinedStatus' , true);
@@ -707,12 +779,6 @@ export default defineComponent({
       //   store.commit('setChannelJoinedStatus' , false);
       //   connection.value.emit('leaveChannel', id);
       // }
-        
-      //function getPassToJoin() {
-        // this function is for protected channels (see the specification)
-        // as a parameter we will reseve info about the channel, our goal is to chack the password
-        // for now it will just open modal window
-      //}
 
       // 		// for bloking or unblocking  a user:
       // 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
@@ -728,7 +794,8 @@ export default defineComponent({
       getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
       ChannelType, toggleModal, showPasswordModal, joinChannel, 
-      joinProtectedChannel, Roles }
+      joinProtectedChannel, Roles, waitingGame, game, blockUser,
+      unblockUser, leaveChannel }
 	},
 })
 </script>
