@@ -9,6 +9,7 @@
             <!-- SEARCH PANNEL -->
             <!-- NB! When serach field will work on backen -
             add onclick option calling method  -->
+              <!--
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable label="Find user or group to chat"
               type="text" placeholder="Search" 
@@ -16,6 +17,18 @@
               @keyup.enter="sendingSearchRequest()"
               ></v-text-field>
             </div>
+            <v-select 
+            label="name"
+            v-model="searchRequest"
+            :option="joinableChannels"
+            :dropdown-should-open="dropdownShouldOpen"
+
+            ></v-select>
+            </div>
+            -->
+            <v-select 
+            label="name"
+            :options="userChannels.channels"></v-select>
 
             <!-- CREATE NEW ROOM BUTTON -->
             <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
@@ -463,113 +476,25 @@ import { onMounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { ref, defineComponent } from 'vue'
+import vSelect from "vue-select";
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
+import "vue-select/dist/vue-select.css";
+
 
 
 export default defineComponent({
   name: "ChatMain",
   components: {
-    'modale': TheModale
+    'modale': TheModale,
+   'v-select': vSelect,
   },
-  //data() {
-  //  return {
-  //    txt: '',
-      // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
-      // accordind to this info we change the interface
-      // for the moment we change the value manualy, but we should get it from backend
-      
-      //chat_channel_isAdmin: true as boolean,
-      // chat_person is indicator that now user communicate not with a channel, but with another user
-      // accordind to this info we change the interface
-      // for the moment we change the value manualy, but we should get it from backend
 
-      //chat_person: false as boolean,
-      //revele: false,
-      //fav: true as boolean,
-      //menu: false as boolean,
-      //currentTab: 0 as number,
-      //loading: false as boolean,
-      //tab: null as null | any,
-
-      //tabs_manager: [
-      //  {tabs: 'Members',},
-      //  {tabs: 'Administrators',}
-      //] as any,
-
-      // members and admins are here only as an example of the design:
-      // they dont content the read data. The real data we will receive
-      // from backend ib the dame format (list of dictionaries (each channel has its dictionary))
-      
-      //members: [
-      //{   
-      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-      //  title: "abaudot",
-      //},
-      //] as any,
-      //admins: [
-      //{   
-      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-      //  title: "abaudot",
-      //},
-      //] as any,
-      // txt is a variable made to save CURRENT message that user is GOING TO send
-      // with this we will emit this data to backend
-
-      //userBanned: false,
-      //userMuted: false,
-      //banDate: new Date,
-      //muteDate: new Date,
-      // Not - used vars that we can need
-      // Comment for Aimé: what was the idea ?
-
-      //newChannel: {
-      //  name:'',
-      //  public: true,
-      //  password: '',
-      //  members: [],
-      //  admins: [],
-      //  },
-
-      // Not - used vars that we can need
-      // Comment for Aimé: this one we realy need, but now we just can know 
-      // if the channel is public ot not
-
-      //protectByPassword: false,
-      //channelSettings: {
-      //  password: '',
-      //  applyPassword: false,
-      //  members: [],
-      //},
-  //  }
-  //},
-  //methods: {
-  //  toggleModale: function() {
-  //    this.revele = !this.revele;
-  //  },
-  //  // blockAlert activated after pushing button "Block this user"
-  //  // its, of course, temporary solution cause we need to clock for real
-  //  // when user block another user - he cant see the messages anymore
-  //  blockAlert: function (event : any)
-  //  {
-  //    if (event) 
-  //    {
-  //      alert("WE NEED TO BLOCK THIS USER")
-  //    }
-  //  },
-  //},
-  // this is needed to limit (3000 ms) loading process after pushing bitton "Invite to play togetrer"
-  // made show on template the animation "while waiting"
-  //watch: {
-  //  loading (val: number) {
-  //    if (!val) return
-  //    setTimeout(() => (this.loading = false), 3000)
-  //  },
-  //},
 	setup() {
+
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
@@ -733,10 +658,7 @@ export default defineComponent({
 
     function sendingSearchRequest() 
     {
-      console.log(">>>>>>" + searchRequest.value + "<<<<<<<")
-      if (!searchRequest.value || searchRequest.value === '')
-        return ;
-      connection.value.emit('getJoinnableChannels', searchRequest.value);
+      connection.value.emit('getJoinnableChannels', {'name': searchRequest.value, 'targetId': 1});
       searchRequest.value = '';
     }
 
@@ -761,6 +683,13 @@ export default defineComponent({
     function log(log: string) {
       console.log('log: ' + log);
       return true;
+    }
+
+   function dropdownShouldOpen(VueSelect:any) {
+      if (searchRequest.value !== null) {
+       return VueSelect.open
+      }
+      return VueSelect.search.length !== 0 && VueSelect.open
     }
 
       // function joinChannel(id)
@@ -793,8 +722,9 @@ export default defineComponent({
 		return { isChannelJoined, update, txt, userChannels, displayChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
-      searchRequest, joinableChannels, avatarToUrl, log }
+      searchRequest, joinableChannels, avatarToUrl, log, dropdownShouldOpen }
 	},
+  // test
 })
 </script>
 

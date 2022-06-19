@@ -7,6 +7,7 @@ import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
 // import EditUser from "../views/EditUser.vue";
 import Chat from "../views/Chat_main.vue";
+import TheTest from "../views/the_test.vue";
 import NewRoom from "../views/Chat_createroom.vue";
 import NewRoomPublic from "../views/Chat_publicroom.vue";
 import NewRoomPrivate from "../views/Chat_privateroom.vue";
@@ -139,6 +140,14 @@ const routes = [
 		path: '/mu',
 		name: "ManageUsers",
 		component: MU,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/test',
+		name: "Test",
+		component: TheTest,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}
