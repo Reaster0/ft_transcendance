@@ -87,7 +87,8 @@
         <!-- CHANNEL DISPLAY : CENTRAL ELEMENTS -->
         <v-col cols="auto" sm="6" class="border" v-else>
           <v-app id="chatdisplay" v-if="update.messages && update.users
-            && currentChannel.name != ''" style="max-height: 600px;">
+            && currentChannel.name != '' && currentChannel.member"
+            style="max-height: 600px;">
 
             <!-- MESSAGES DISPLAY -->
             <div class="specialscroll" @scroll="isScrollAtBottom">
@@ -127,6 +128,7 @@
                 </v-card >
               </div>
             </div>
+
             <div v-if="currentChannel.messages.length === 0">
               <h1 class="Spotnik textfullcenter" data-text="Start conversation">Start conversation</h1>  
             </div>
@@ -134,26 +136,25 @@
             <!-- SEND MESSAGE -->
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable class="messagefield" width="100%"
-                type="text" label="Write a message" v-model="message"
+                type="text" label="Write a message" v-model="messageText"
                 @keyup.enter="sendingMessage(currentChannel.id)">
               </v-text-field>
             </div>
+          </v-app>
 
           <!-- LOADING / NON SELECTED MESSAGES -->
+          <v-app v-else-if="currentChannel.id != '' && !currentChannel.member">
+            <h1 class="Spotnik textfullcenter" data-text="Non member">You are not a member</h1>
           </v-app>
-          <!-- TODO modify for case or channel is joined -->
+
           <v-app v-else-if="currentChannel.id != ''">
             <h1 class="Spotnik textfullcenter" data-text="Loading messages">Loading messages</h1>
           </v-app>
-
-          <!-- TODO Add case when channel isn't joined -->
 
         </v-col>
 
         <!-- INFOS ON CURRENT/SEARCHED CHAT -->
         <v-col cols="auto" sm="3" class="border">
-        <!-- Correct with correct enum -->
-          <!--<div v-if="currentChannel.id != ''">-->
           
           <!-- CHANNEL DESCRIPTION -->
           <v-card height="100%" class="text-center offsetphoto" shaped
@@ -180,7 +181,7 @@
             <div id="app" class="pt-6" v-if="currentChannel.type != ChannelType.PM"> 
 
               <!-- SUBCASE CHANNEL NOT JOINED -->
-              <div v-if="currentChannel.member">
+              <div v-if="!currentChannel.member">
                 <v-btn elevation="2" width="100%" @click="joinChannel">
                   Join the chat room
                 </v-btn>
@@ -192,7 +193,7 @@
                 <v-btn elevation="2" width="100%">
                   Leave the chat room
                 </v-btn>
-                <v-btn color="red" @click="logOut" to="/">Logout</v-btn> // TODO logOut property doesn't exist ?
+                <v-btn color="red" @click="leaveChannel" to="/">Logout</v-btn> // TODO logOut property doesn't exist ?
                 
                 <!-- OPTION FOR ADMINS -->
                 <div v-if="currentChannel.role === Roles.ADMIN
@@ -430,9 +431,6 @@ export default defineComponent({
   //  }
   //},
   //methods: {
-  //  toggleModale: function() {
-  //    this.revele = !this.revele;
-  //  },
   //  // blockAlert activated after pushing button "Block this user"
   //  // its, of course, temporary solution cause we need to clock for real
   //  // when user block another user - he cant see the messages anymore
@@ -535,14 +533,14 @@ export default defineComponent({
         update.value.messages = true;
       })
 
-      connection.value!.on('newMessage', function(params: {id: string, messageText: Message }) {
+      connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
           console.log('receive messageText from non current');
           return ;
         }
         console.log('incoming messageText');
-        currentChannel.value.messages.push(params.messageText);
-        if (params.messageText.userId != currentUser.value.id) {
+        currentChannel.value.messages.push(params.message);
+        if (params.message.userId != currentUser.value.id) {
           currentChannel.value.notif = true;
         }
       })
@@ -629,7 +627,7 @@ export default defineComponent({
 		function sendingMessage(channelId: string) {
       if (!messageText.value || messageText.value === '')
         return ;
-      connection.value.emit('messageText', {'channelId': channelId, 'content': messageText.value });
+      connection.value.emit('message', {'channelId': channelId, 'content': messageText.value });
       messageText.value = '';
     }
 
@@ -730,7 +728,7 @@ export default defineComponent({
       getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
       ChannelType, toggleModal, showPasswordModal, joinChannel, 
-      joinProtectedChannel }
+      joinProtectedChannel, Roles }
 	},
 })
 </script>
