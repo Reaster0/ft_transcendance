@@ -33,7 +33,7 @@ export interface UserGlobal {
 
 export interface UserChannel {
 	id : number;
-	role: string;
+	role: Roles;
 }
 
 export interface Message {
