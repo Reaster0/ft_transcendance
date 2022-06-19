@@ -152,7 +152,8 @@
           <!--<div v-if="currentChannel.id != ''">-->
           
           <!-- CHANNEL DESCRIPTION -->
-          <v-card height="100%" class="text-center offsetphoto" shaped >
+          <v-card height="100%" class="text-center offsetphoto" shaped
+            v-if="currentChannel.id != ''">
             <div v-if="currentChannel.notif">
               <v-badge avatar dark color="warning" bordered offset-x="50px"
                 offset-y="5px" content="!">
@@ -169,7 +170,7 @@
               </v-avatar>
             </div>
             <v-card-title class="layout justify-center">{{ currentChannel.name }}</v-card-title>
-            <v-card-subtitle class="layout justify-center">{{ currentChannel.type }}</v-card-subtitle>
+            <v-card-subtitle class="layout justify-center">{{ currentChannel.description }}</v-card-subtitle>
             
             <!-- CASE CHANNEL -->
             <div id="app" class="pt-6" v-if="currentChannel.type != 'pm'"> 
@@ -468,7 +469,8 @@ export default defineComponent({
     let currentChannel = ref({ name: '' as string, id: '' as string,
       type: ChannelType.PUBLIC as ChannelType, messages: [] as Message[],
       users: [] as UserChannel[], role: Roles.USER as Roles,
-      avatar: null as null | string, notif: false as boolean });
+      avatar: null as null | string, notif: false as boolean,
+      description: '' as string});
     let txt = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
@@ -506,6 +508,7 @@ export default defineComponent({
 
       connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
+        console.log(params);
         userChannels.value.channels = params;
         avatarToUrl();
         update.value.connected = true;
@@ -561,6 +564,16 @@ export default defineComponent({
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
+      console.log(channel.type);
+      if (channel.type === ChannelType.PUBLIC) {
+        currentChannel.value.description = 'Public Channel';
+      } else if (channel.type === ChannelType.PRIVATE) {
+        currentChannel.value.description = 'Private Channel';
+      } else if (channel.type === ChannelType.PROTECTED) {
+        currentChannel.value.description = 'Protected Channel';
+      } else {
+        currentChannel.value.description = 'Private Conversation';
+      }
       console.log('ask for ' + channel.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
