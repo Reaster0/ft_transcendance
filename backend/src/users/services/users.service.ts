@@ -11,6 +11,7 @@ import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
 import { ChatGateway } from '../../chat/chat.gateway';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class UsersService {
@@ -93,8 +94,8 @@ export class UsersService {
     await this.userRepository.remove(user);
   }
 
-  async changeStatus(user: User, newStatus: Status): Promise<void> {
-    await this.userRepository.update(user.id, { status: newStatus });
+  async changeStatus(user: User, newStatus: Status, chatSocketId: string | null): Promise<void> {
+    await this.userRepository.update(user.id, { status: newStatus, chatSocket: chatSocketId });
     this.chatGateway.sendUsersList();
   }
 
@@ -227,17 +228,6 @@ export class UsersService {
     });
     return users;
   }
-
-  async connectUserToChat(user: User, socketID: string) {
-    await this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
-    this.chatGateway.sendUsersList();
-  }
-
-  async disconnectUserToChat(user: User) {
-    this.userRepository.update(user.id, { status: Status.OFFLINE, chatSocket: '' });
-    this.chatGateway.sendUsersList(); 
-  }
-
 
   //maybe us id insted of userToBlock
   async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
