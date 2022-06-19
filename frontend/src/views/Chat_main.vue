@@ -79,8 +79,14 @@
           </div>
         </v-col>
 
+        <v-col cols="auto" sm="9" class="border" v-if="currentChannel.id === ''">
+          <v-app v-if="currentChannel.id === ''">
+              <h1 class="Spotnik textfullcenter" data-text="Select">Select channel to display</h1>
+          </v-app>
+        </v-col>
+
         <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
-        <v-col cols="auto" sm="6" class="border">
+        <v-col cols="auto" sm="6" class="border" v-else>
           <v-app id="chatdisplay" v-if="update.messages && update.users
             && currentChannel.name != ''" style="max-height: 600px;">
 
@@ -137,11 +143,8 @@
 
           <!-- LOADING / NON SELECTED MESSAGES -->
           </v-app>
-          <v-app v-else-if="currentChannel.name != ''">
+          <v-app v-else-if="currentChannel.id != ''">
             <h1 class="Spotnik textfullcenter" data-text="Loading messages">Loading messages</h1>
-          </v-app>
-          <v-app v-else>
-            <h1 class="Spotnik textfullcenter" data-text="Select">Select channel to display</h1>
           </v-app>
 
         </v-col>
