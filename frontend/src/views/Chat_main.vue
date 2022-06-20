@@ -21,23 +21,27 @@
             v-model="searchRequest"
             :option="joinableChannels"
             :dropdown-should-open="dropdownShouldOpen"
+            :dropdown-should-open="dropdownShouldOpen"
 
             ></v-select>
             </div>
-            -->
-            <h1 class="Spotnik"> Channels </h1>
-            <v-selection label="name" createOption=getJoinableChannels
             :dropdown-should-open="dropdownShouldOpen"
-            :options="userChannels.channels">
-            </v-selection>
-            
-            <h4 class="Spotnik"> Users</h4>
+            -->
+            <div id="joinnableChan" v-on:click="getJoinnableChannels">
+            <h1 class="Spotnik"> Channels </h1>
             <v-selection 
             label="name"
-            v-model="searchRequest"
-            :dropdown-should-open="dropdownShouldOpen"
-            :options="userChannels.channels">
+            :options="joinableChannels.channels">
             </v-selection>
+            </div>
+            
+            <div id="connectedUsers" v-on:click="getConnectedUsers">
+            <h4 class="Spotnik"> Users</h4>
+            <v-selection 
+            label="nickname"
+            :options="connectedUsers">
+            </v-selection>
+            </div>
 
 
             <!-- CREATE NEW ROOM BUTTON -->
@@ -438,7 +442,8 @@ import GameModal from "./Chat_gamemodal.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
-  Roles } from '../types/chat.types';
+  Roles, 
+UserGlobal} from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 import "vue-select/dist/vue-select.css";
 
@@ -470,8 +475,10 @@ export default defineComponent({
       members: [] as any[], admins: [] as any[],
       displayIndex: 0 as number });
     let messageText = ref<string>('');
+
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
+    let connectedUsers = ref<UserGlobal[]>([]);
     let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
@@ -520,10 +527,8 @@ export default defineComponent({
         update.value.connected = true;
       })
 
-      connection.value!.on('joinableChannel', function(params: Channel[]) {
-        console.log('!!!!!!!!>>>>>>' + params);
+      connection.value!.on('joinnableChannels', function(params: Channel[]) {
         joinableChannels.value.channels = params;
-        // TODO continue
       })
 
       connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
@@ -545,6 +550,12 @@ export default defineComponent({
         console.log('receive messages from channel ' + currentChannel.value.name);
         currentChannel.value.messages = params.messages;
         update.value.messages = true;
+      })
+
+      connection.value!.on('connectedUsers', function(params: any ) {
+        console.log('receive');
+        connectedUsers.value = params;
+        console.log(connectedUsers.value);
       })
 
       connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
@@ -698,11 +709,12 @@ export default defineComponent({
       messageText.value = '';
     }
 
-    function getJoinableChannels() 
-    {
-      console.log('coucou');
-      connection.value.emit('getJoinnableChannels', {'name': 'cou', 'targetId': 1});
-      searchRequest.value = '';
+    function getJoinnableChannels() {
+      connection.value.emit('getJoinnableChannels', currentUser.id);
+    }
+
+    function getConnectedUsers() {
+      connection.value.emit('getConnectedUsers');
     }
 
     function avatarToUrl() {
@@ -795,8 +807,8 @@ export default defineComponent({
       ChannelType, togglePasswordModal, showPasswordModal, joinChannel, 
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
       unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
-      getJoinableChannels, channelManager, showGameModal, toggleGameModal,
-      responseGame }
+      getJoinnableChannels, channelManager, showGameModal, toggleGameModal,
+      responseGame, getConnectedUsers, connectedUsers}
 	},
 })
 </script>

@@ -12,6 +12,7 @@ import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
 import { ChatGateway } from '../../chat/chat.gateway';
 import { Socket } from 'socket.io';
+import { Channel } from 'src/chat/entities/channel.entity';
 
 @Injectable()
 export class UsersService {
@@ -320,5 +321,25 @@ export class UsersService {
     const friend = user.friends.find(element => element === friendId);
 
     return (friend !== undefined);
+  }
+
+  async getUserChannels(userId: number): Promise<Channel[]> {
+    const user = await this.userRepository.findOne(userId, 
+      {
+        relations: ['channels']
+      });
+    if (!user) { return null; }
+    return user.channels;
+  }
+
+  async getUserChannelsId(userId: number): Promise<string[]> {
+    const channels = await this.getUserChannels(userId);
+    if (channels === null) { return null}
+
+    let result: string[] = [];
+    for (const chan of channels) {
+     result.push(chan.id);
+    }
+    return result;
   }
 }

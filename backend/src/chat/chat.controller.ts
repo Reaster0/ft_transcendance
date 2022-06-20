@@ -67,7 +67,7 @@ export class ChatController {
   // test ----------------------------------------------------------------
   @Get('/channeltest')
   async createChannelTest() {
-    const creator = await this.userService.findUserById('1');
+    const creator = await this.userService.findUserById('2');
     const chan: ChannelI = {
         name: "channeltest3",
         password: '',
@@ -80,9 +80,9 @@ export class ChatController {
   async createMsgTest() {
   }
 
-  @Get('joinnableChannel/:name/:id')
-  async joinnableChannel(@Param('name') chanName: string, @Param('id') id: number): Promise<FrontChannelI[]> {
-    return await this.chanServices.filterJoinableChannel(chanName, id);
+  @Get('joinnableChannel/:id')
+  async joinnableChannel(@Param('id') id: number): Promise<FrontChannelI[]> {
+    return await this.chanServices.filterJoinableChannel(id);
   }
 
   @Get('findUser/:name')
