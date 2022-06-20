@@ -2,7 +2,6 @@
   <v-app id="chat">
     <v-container fluid v-if="update.connected">
       <v-row>
-
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
           <v-col>
@@ -239,10 +238,10 @@
                   @click="joinChannel">
                   Join the chat room
                 </v-btn>
-                <modale :showPasswordModal="showPasswordModal"
-                  :toggleModal="toggleModal"
+                <password-modal :showPasswordModal="showPasswordModal"
+                  :togglePasswordModal="togglePasswordModal"
                   @password="joinProtectedChannel">
-                </modale>
+                </password-modal>
               </div>
 
               <!-- SUBCASE CHANNEL JOINED -->
@@ -409,10 +408,14 @@
                     color="rgb(0,0,255)">
                   </v-progress-linear>
                 </v-toolbar>
-
               </v-app>
             </div>
           </v-card>  
+          <game-modal :showGameModal="showGameModal"
+            :toggleGameModal="toggleGameModal"
+            :inviter="game.inviter"
+            @responseGame="responseGame">
+          </game-modal>
         </v-col>
       </v-row>
     </v-container>
@@ -430,7 +433,8 @@ import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { ref, defineComponent } from 'vue'
 import vSelect from "vue-select";
-import TheModale from "./Chat_modale.vue";
+import PasswordModal from "./Chat_passwordmodal.vue";
+import GameModal from "./Chat_gamemodal.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
@@ -443,7 +447,8 @@ import "vue-select/dist/vue-select.css";
 export default defineComponent({
   name: "ChatMain",
   components: {
-    'modale': TheModale,
+    'password-modal': PasswordModal,
+    'game-modal': GameModal,
    'v-selection': vSelect,
   },
 	setup() {
@@ -468,7 +473,9 @@ export default defineComponent({
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
     let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
-    let game = ref({ request: false as boolean, response: true as boolean });
+    let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
+    let game = ref({ request: false as boolean, response: true as boolean,
+      inviter: '' as string });
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
@@ -550,6 +557,12 @@ export default defineComponent({
         if (params.message.userId != currentUser.value.id) {
           currentChannel.value.notif = true;
         }
+      })
+
+      connection.value!.on('gameInvitation', function(params: { id: number }) {
+        //TODO
+        game.value.inviter = getUserName(params.id);
+        showGameModal.value = true;
       })
 		})
 
@@ -715,9 +728,14 @@ export default defineComponent({
       }
     }
 
-    function toggleModal() {
-      showPasswordModal.value = !(showPasswordModal.value);
+    function togglePasswordModal() {
+      showPasswordModal.value = false;
     }
+
+    function toggleGameModal() {
+      showGameModal.value = false;
+    }
+
 
     function joinChannel() {
       console.log('join channel');
@@ -764,14 +782,21 @@ export default defineComponent({
       return VueSelect.search.length !== 0 && VueSelect.open
     }
 
+    function responseGame(responseGame: true) {
+      console.log('game response ' + responseGame);
+      showGameModal.value = false;    
+      // TODO emit answer  
+    }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage,
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
-      ChannelType, toggleModal, showPasswordModal, joinChannel, 
+      ChannelType, togglePasswordModal, showPasswordModal, joinChannel, 
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
       unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
-      getJoinableChannels, channelManager }
+      getJoinableChannels, channelManager, showGameModal, toggleGameModal,
+      responseGame }
 	},
 })
 </script>
