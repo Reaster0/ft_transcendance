@@ -21,7 +21,7 @@ export enum Roles {
 export interface Channel {
     id: string;
     name: string;
-	type: string;
+	type: ChannelType;
     avatar?: Blob | Uint8Array;
 }
 

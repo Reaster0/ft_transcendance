@@ -269,8 +269,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('getFindUser')
   async findUser(client: Socket, name: string) {
-    const user = await this.userServices.filterUserByName(name);
-    client.emit('findUser', user);
+    const users = await this.userServices.filterUserByName(name) as any;
+    for (let user of users) {
+      user.avatar =  user.id;
+    }
+    client.emit('findUser', users);
   }
 
   @SubscribeMessage('getConnectedUsers')
