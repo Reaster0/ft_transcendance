@@ -6,8 +6,6 @@
         <v-col cols="auto" sm="3" class="border">
           <v-col>
             <!-- SEARCH PANNEL -->
-            <!-- NB! When serach field will work on backen -
-            add onclick option calling method  -->
               <!--
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable label="Find user or group to chat"
@@ -27,26 +25,24 @@
             </div>
             :dropdown-should-open="dropdownShouldOpen"
             -->
-            <div id="joinnableChan" >
-            <h1 class="Spotnik"> Channels </h1>
-            <v-selection @open="getJoinnableChannels"
-            @option:selected="displayJoinableChannel"
-            label="name"
-            :options="joinableChannels.channels"
-            :value="chanJoinSelected"
-            >
-            </v-selection>
+            <div id="joinableChan" class="searchtool-one">
+              <h1 class="Spotnik"> Search channel </h1>
+              <v-selection @open="getJoinableChannels"
+                @option:selected="displayJoinableChannel"
+                label="name"
+                :options="joinableChannels.channels"
+                :value="chanJoinSelected">
+              </v-selection>
             </div>
             
-            <div id="connectedUsers" >
-            <h4 class="Spotnik"> Users</h4>
-            <v-selection @open="getConnectedUsers"
-            @option:selected="displayJoinableChannel"
-            label="nickname"
-            :options="connectedUsers">
-            </v-selection>
+            <div id="connectedUsers" class="searchtool-two">
+              <h4 class="Spotnik"> Search user </h4>
+              <v-selection @open="getConnectedUsers"
+                @option:selected="displayJoinableChannel"
+                label="nickname"
+                :options="connectedUsers">
+              </v-selection>
             </div>
-
 
             <!-- CREATE NEW ROOM BUTTON -->
             <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
@@ -532,9 +528,9 @@ export default defineComponent({
         update.value.connected = true;
       })
 
-      connection.value!.on('joinnableChannels', function(params: Channel[]) {
-        console.log('retrieving joinableChannels');
+      connection.value!.on('joinableChannels', function(params: Channel[]) {
         joinableChannels.value.channels = params;
+        console.log(joinableChannels.value.channels);
       })
 
       connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
@@ -628,8 +624,17 @@ export default defineComponent({
       channelManager.value.admins = admins;
     }
 
+    function checkIfUserIsMember(channelId: string) {
+      const channelsToCheck = userChannels.value.channels as Channel[];
+      const found = channelsToCheck
+        .find(channelsToCheck => channelsToCheck.id === channelId);
+      if (!found) {
+        currentChannel.value.role = Roles.NONMEMBER;
+      }
+    }
+
     function displayJoinableChannel(channel: any) {
-      // TODO check channel not in userChannels and set role depending of it
+      checkIfUserIsMember(channel.id);
       if (currentChannel.value.role != Roles.NONMEMBER) {
         return displayMemberChannel(channel);
       }
@@ -714,8 +719,8 @@ export default defineComponent({
       messageText.value = '';
     }
 
-    function getJoinnableChannels() {
-      connection.value.emit('getJoinnableChannels', currentUser.id);
+    function getJoinableChannels() {
+      connection.value.emit('getJoinableChannels', currentUser.id);
     }
 
     function getConnectedUsers() {
@@ -816,7 +821,7 @@ export default defineComponent({
       ChannelType, togglePasswordModal, showPasswordModal, joinChannel, 
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
       unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
-      getJoinnableChannels, channelManager, showGameModal, toggleGameModal,
+      getJoinableChannels, channelManager, showGameModal, toggleGameModal,
       responseGame, getConnectedUsers, connectedUsers, chanJoinSelected, testUniq}
 	},
 })
@@ -824,14 +829,22 @@ export default defineComponent({
 
 
 <style scoped>
-.border 
-{
+.searchtool-one {
+  padding-bottom: 2%;
+}
+.searchtool-two {
+  padding-bottom: 10%;
+}
+
+.border {
   border-right: 0.5px solid rgb(196, 192, 207);
 }
+
 .spacebottom {
   padding-top: 20px;
   padding-bottom: 24px;
 }
+
 .spacetop {
   padding-top: 20px;
   padding-bottom: 20px;
