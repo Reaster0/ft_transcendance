@@ -6,3 +6,4 @@ declare module '*.vue' {
 }
 
 declare module 'particles-bg-vue';
+declare module 'vue-select';

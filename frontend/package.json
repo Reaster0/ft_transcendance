@@ -24,6 +24,7 @@
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.15",
+    "vue-select": "^4.0.0-beta.3",
     "vue-simple-search-dropdown": "^1.0.1",
     "vue3-keypress": "^4.0.1",
     "vuetify": "^3.0.0-beta.0",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@nuxtjs/vuetify": "^1.12.3",
     "@types/webfontloader": "^1.6.34",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",

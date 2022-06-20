@@ -13,6 +13,7 @@ import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '../users/enums/status.enum';
+import { subscribeOn } from 'rxjs';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -123,7 +124,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       if (await bcrypt.compare(channel.password, channelFound.password) === false)
         return false;
     }
-    await this.chanServices.pushUserToChan(channel, client.data.user);
+    await this.chanServices.pushUserToChan(channelFound.id, client.data.user);
     this.logger.log(`${client.data.user.username} joined ${channel.name}`);
     return true;
   }
@@ -132,8 +133,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /********************* Leave Channel ********************/
   // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
-  async handleLeaveChannel(client: Socket, channel: ChannelI) {
-    await this.chanServices.removeUserFromChan(channel, client.data.user);
+  async handleLeaveChannel(client: Socket, channelId: string) {
+    await this.chanServices.removeUserFromChan(channelId, client.data.user);
     //await this.chanServices.unmuteUser(channel.id, client.data.user);
     this.logger.log(`${client.data.user.username} leave a channel`);
   }
@@ -161,6 +162,43 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const userUpdate = this.userServices.updateBlockedUser(client.data.user, block, user);
     this.logger.log(`${client.data.user} block ${user.username}`);
     return userUpdate;
+  }
+
+  /* dose back check the right for calling this socket route or front end ensure this ? */
+  @SubscribeMessage('muteUser')
+  async muteUser(client: Socket, data: any): Promise<void> {
+    const {channelId, targetId, time} = data;
+    await this.chanServices.muteUser(channelId, targetId, time);
+    const user = await this.userServices.findUserById(targetId + '');
+    client.emit('UserMuted', `you have muted ${user.username} for ${time} seconds`);
+    this.server.to(user.chatSocket).emit('muted', `you have being muted for ${time} seconds`);
+  }
+  @SubscribeMessage('unmuteUser')
+  async unmuteUser(client: Socket, data: any): Promise<void> {
+    const {channelId, targetId} = data; 
+    await this.chanServices.unmuteUser(channelId, targetId)
+  }
+
+  /* dose back check the right for calling this socket route or front end ensure this ? */
+  @SubscribeMessage('banUser')
+  async banUser(client: Socket, data: any): Promise<void> {
+    const {chanelId, userId} = data;
+    const user = await this.userServices.findUserById(userId + '');
+    if (!user) return ;
+    const channel = await this.chanServices.banUser(chanelId, user);
+    client.emit('UserBanned', `you have banned ${user.username} from ${channel.name}`);
+    this.server.to(user.chatSocket).emit('banned', `you have been banned from ${channel.name}`);
+  }
+  
+  @SubscribeMessage('unBanUser')
+  async unBanUser(client: Socket, data: any): Promise<void> {
+    const {chanelId, userId} = data;
+    const user = await this.userServices.findUserById(userId + '');
+    if (!user) return ;
+    const channel = await this.chanServices.unBanUser(chanelId, userId);
+    if (!channel) { return ; }
+    client.emit('UserUnbanned', `you have unbanned ${user.username} from ${channel.name}`);
+    this.server.to(user.chatSocket).emit('unBanned', `you have been unbanned from ${channel.name}`);
   }
 
   /****** Emit Service ******/
@@ -221,18 +259,35 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     client.emit('channelMessages', { id: params.id, messages: messages });
   }
 
+  // add banned logic into this
   @SubscribeMessage('getJoinnableChannels')
-  async getJoinnableChannels(client: Socket, name: string) {
-    console.log("GETTING JOINABLE CHANNELS: ", name);
-    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name);
-    console.log(channels);
-    client.emit('joinnableChannel', channels); // only for client
+  async getJoinnableChannels(client: Socket, targetId: number) {
+    this.logger.log('retriving Joinnable Channels');
+    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
+    client.emit('joinnableChannels', channels); // only for client
   }
 
   @SubscribeMessage('getFindUser')
   async findUser(client: Socket, name: string) {
     const user = await this.userServices.filterUserByName(name);
     client.emit('findUser', user);
+  }
+
+  @SubscribeMessage('getConnectedUsers')
+  async getConnectedUsers(client: Socket) {
+    this.logger.log('retriving connected users');
+    let connectedUsers = await this.userServices.getConnectedUsers();
+
+    // remove client from list
+    const clientId = client.data.user.id;
+    for (const [i, value] of connectedUsers.entries()) {
+      if (value.id === clientId) {
+        connectedUsers.splice(i, 1);
+        break ;
+      }
+  }
+//  console.log(connectedUsers);
+    client.emit('connectedUsers', connectedUsers);
   }
 }
 
