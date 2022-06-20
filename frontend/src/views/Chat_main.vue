@@ -31,7 +31,7 @@
                 @option:selected="initDisplayChannel"
                 label="name"
                 :options="joinableChannels"
-                :value="chanJoinSelected">
+                :value="{channel: chanJoinSelected, isMember: false}">
               </v-selection>
             </div>
             
@@ -65,7 +65,7 @@
                     :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="initDisplayChannel(item)"
+                      @click="initDisplayChannel(item, true)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
@@ -591,6 +591,7 @@ export default defineComponent({
 
     /* Functions for channel display and management */
 
+    /*
     function checkIfUserIsMember(channelId: string) {
       const channelsToCheck = userChannels.value.channels as Channel[];
       const found = channelsToCheck
@@ -600,8 +601,9 @@ export default defineComponent({
       }
       return true;
     }
+    */
 
-    function initDisplayChannel(channel: any) {
+    function initDisplayChannel(channel: any, isMember: boolean) {
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
@@ -619,9 +621,9 @@ export default defineComponent({
       console.log('display ' + currentChannel.value.name + ' join interface');
       update.value.messages = false;
       update.value.users = false;
-      if (checkIfUserIsMember(channel.id) === true) {
-        return displayMemberChannel(channel);
-      }
+        if (isMember) {
+          return displayMemberChannel(channel);
+        }
     }
 
     function displayMemberChannel(channel: any) {
