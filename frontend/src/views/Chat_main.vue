@@ -825,7 +825,7 @@ export default defineComponent({
       unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
       getJoinableChannels, channelManager, showGameModal, toggleGameModal,
       responseGame, getConnectedUsers, chanJoinSelected,
-      testUniq}
+      testUniq }
 	},
 })
 </script>
