@@ -1,10 +1,8 @@
 <template>
   <v-app>
-
-
 <div id="app">
   <h1>Vue Select</h1>
-  <v-select :options="['Canada', 'United States']"></v-select>
+  <v-selection :options="['Canada', 'United States']"></v-selection>
 </div>
 
  </v-app>
@@ -18,7 +16,7 @@ import 'vue-select/dist/vue-select.css';
 export default defineComponent({
   name: "TheTest",
   components: {
-   'v-select': vSelect,
+   'v-selection': vSelect,
   },
   setup() {}
 })

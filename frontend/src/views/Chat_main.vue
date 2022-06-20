@@ -26,9 +26,22 @@
             ></v-select>
             </div>
             -->
-            <v-select 
+            <h1 class="Spotnik"> Channels </h1>
+            <v-selection 
             label="name"
-            :options="userChannels.channels"></v-select>
+            createOption=getJoinnableChannels
+            :dropdown-should-open="dropdownShouldOpen"
+            :options="userChannels.channels">
+            </v-selection>
+            
+            <h4 class="Spotnik"> Users</h4>
+            <v-selection 
+            label="name"
+            v-model="searchRequest"
+            :dropdown-should-open="dropdownShouldOpen"
+            :options="userChannels.channels">
+            </v-selection>
+
 
             <!-- CREATE NEW ROOM BUTTON -->
             <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
@@ -490,7 +503,7 @@ export default defineComponent({
   name: "ChatMain",
   components: {
     'modale': TheModale,
-   'v-select': vSelect,
+   'v-selection': vSelect,
   },
 
 	setup() {
@@ -656,9 +669,10 @@ export default defineComponent({
       txt.value = '';
     }
 
-    function sendingSearchRequest() 
+    function getJoinnableChannels() 
     {
-      connection.value.emit('getJoinnableChannels', {'name': searchRequest.value, 'targetId': 1});
+      console.log('coucou');
+      connection.value.emit('getJoinnableChannels', {'name': 'cou', 'targetId': 1});
       searchRequest.value = '';
     }
 
@@ -686,9 +700,6 @@ export default defineComponent({
     }
 
    function dropdownShouldOpen(VueSelect:any) {
-      if (searchRequest.value !== null) {
-       return VueSelect.open
-      }
       return VueSelect.search.length !== 0 && VueSelect.open
     }
 
@@ -721,7 +732,7 @@ export default defineComponent({
 
 		return { isChannelJoined, update, txt, userChannels, displayChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
+      getUserColor, sendingMessage, currentUserRole, getJoinnableChannels,
       searchRequest, joinableChannels, avatarToUrl, log, dropdownShouldOpen }
 	},
   // test
