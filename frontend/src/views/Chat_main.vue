@@ -632,15 +632,13 @@ export default defineComponent({
     }
 
     async function setChannelManager() {
-      let members = [] as UserChannel[];
+      let members = currentChannel.value.users as UserChannel[];
       let admins = [] as UserChannel[];
       if (currentChannel.value.users === []) {
         console.log('error in retrieving channels users');
         return ;
       }
       for (let user of currentChannel.value.users) {
-        //console.log(user);
-        members.push(user);
         if (user.role === Roles.ADMIN || user.role === Roles.OWNER) {
           admins.push(user);
         }
