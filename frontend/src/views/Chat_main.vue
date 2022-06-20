@@ -30,7 +30,7 @@
             <div id="joinnableChan" >
             <h1 class="Spotnik"> Channels </h1>
             <v-selection @open="getJoinnableChannels"
-            @option:selected="joinChannel"
+            @option:selected="displayJoinableChannel"
             label="name"
             :options="joinableChannels.channels"
             :value="chanJoinSelected"
@@ -41,6 +41,7 @@
             <div id="connectedUsers" >
             <h4 class="Spotnik"> Users</h4>
             <v-selection @open="getConnectedUsers"
+            @option:selected="displayJoinableChannel"
             label="nickname"
             :options="connectedUsers">
             </v-selection>
