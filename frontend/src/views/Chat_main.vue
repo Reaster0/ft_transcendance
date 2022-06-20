@@ -65,7 +65,7 @@
                     :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="displayMemberChannel(item)"
+                      @click="initDisplayChannel(item)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
@@ -596,12 +596,12 @@ export default defineComponent({
       const found = channelsToCheck
         .find(channelsToCheck => channelsToCheck.id === channelId);
       if (!found) {
-        currentChannel.value.role = Roles.NONMEMBER;
+        return false;
       }
+      return true;
     }
 
     function initDisplayChannel(channel: any) {
-      checkIfUserIsMember(channel.id);
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.notif = false;
@@ -614,16 +614,16 @@ export default defineComponent({
       channelManager.value.admins = [];
       channelManager.value.members = [];
       channelManager.value.displayIndex = 0;
+      currentChannel.value.role = Roles.NONMEMBER;
       console.log('display ' + currentChannel.value.name + ' join interface');
       update.value.messages = false;
       update.value.users = false;
-      if (currentChannel.value.role != Roles.NONMEMBER) {
+      if (checkIfUserIsMember(channel.id) === true) {
         return displayMemberChannel(channel);
       }
     }
 
     function displayMemberChannel(channel: any) {
-      initDisplayChannel(channel);
       console.log('ask for ' + channel.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
