@@ -472,7 +472,7 @@ export default defineComponent({
       role: Roles.USER as Roles, avatar: null as null | string,
       notif: false as boolean, description: '' as string, 
       blocked: false as boolean });
-    let channelManager = ref({title: ['members', 'admins'] as string[],
+    let channelManager = ref({title: ['all members', 'admins'] as string[],
       members: [] as any[], admins: [] as any[],
       displayIndex: 0 as number });
     let messageText = ref<string>('');
