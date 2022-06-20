@@ -6,8 +6,6 @@
         <v-col cols="auto" sm="3" class="border">
           <v-col>
             <!-- SEARCH PANNEL -->
-            <!-- NB! When serach field will work on backen -
-            add onclick option calling method  -->
               <!--
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable label="Find user or group to chat"
@@ -27,22 +25,24 @@
             </div>
             :dropdown-should-open="dropdownShouldOpen"
             -->
-            <div id="joinnableChan" v-on:click="getJoinnableChannels">
-            <h1 class="Spotnik"> Channels </h1>
-            <v-selection 
-            label="name"
-            :options="joinableChannels.channels">
-            </v-selection>
+            <div id="joinableChannels" class="searchtool-one">
+              <h1 class="Spotnik"> Search channel </h1>
+              <v-selection @open="getJoinableChannels"
+                @option:selected="initDisplayChannel"
+                label="name"
+                :options="joinableChannels"
+                :value="{channel: chanJoinSelected, isMember: false}">
+              </v-selection>
             </div>
             
-            <div id="connectedUsers" v-on:click="getConnectedUsers">
-            <h4 class="Spotnik"> Users</h4>
-            <v-selection 
-            label="nickname"
-            :options="connectedUsers">
-            </v-selection>
+            <div id="joinableUsers" class="searchtool-two">
+              <h4 class="Spotnik"> Search user </h4>
+              <v-selection @open="getConnectedUsers"
+                @option:selected="initDisplayChannel"
+                label="name"
+                :options="joinableChannels">
+              </v-selection>
             </div>
-
 
             <!-- CREATE NEW ROOM BUTTON -->
             <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
@@ -65,7 +65,7 @@
                     :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="displayMemberChannel(item)"
+                      @click="initDisplayChannel(item, true)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
@@ -298,7 +298,8 @@
                                 </div>
                                 <v-btn elevation="0" min-height="50px"
                                   max-width="50px">
-                                  <v-badge bordered bottom :color="getUserColor(item.id)"
+                                  <v-badge bordered bottom
+                                    :color="getUserColor(item.id)"
                                     dot offset-x="6" offset-y="34" >
                                     <v-list-item-avatar>
                                       <v-img :src="getUserAvatar(item.id)"
@@ -394,8 +395,9 @@
                     Unblock this user
                   </v-btn>
                 </div>
-                <div v-if="currentChannel.role != Roles.NONMEMBER && !currentChannel.blocked && 
-                  !game.request" class="text-center">
+                <div v-if="currentChannel.role != Roles.NONMEMBER
+                  && !currentChannel.blocked
+                  && !game.request" class="text-center">
                   <v-btn color="rgb(0,0,255)" @click="waitingGame()"
                   class="my-2" elevation="2" width="80%">
                     <div  :style="{color: ' #ffffff'}">
@@ -442,8 +444,7 @@ import GameModal from "./Chat_gamemodal.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
-  Roles, 
-UserGlobal} from '../types/chat.types';
+  Roles } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 import "vue-select/dist/vue-select.css";
 
@@ -471,18 +472,17 @@ export default defineComponent({
       role: Roles.USER as Roles, avatar: null as null | string,
       notif: false as boolean, description: '' as string, 
       blocked: false as boolean });
-    let channelManager = ref({title: ['members', 'admins'] as string[],
+    let channelManager = ref({title: ['all members', 'admins'] as string[],
       members: [] as any[], admins: [] as any[],
       displayIndex: 0 as number });
     let messageText = ref<string>('');
-
     let searchRequest = ref<string>('');
-    let joinableChannels = ref({ channels: [] as any[] });
-    let connectedUsers = ref<UserGlobal[]>([]);
+    let joinableChannels = ref<Channel[]>([]);
     let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: '' as string });
+    let chanJoinSelected = {name: 'enter channer'} as Channel;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
@@ -494,7 +494,8 @@ export default defineComponent({
 			try {
         connection.value = store.getters.getSocketVal;
         if (connection.value === null) {
-          connection.value = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+          connection.value = io(window.location.protocol + '//' +
+            window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
@@ -527,13 +528,16 @@ export default defineComponent({
         update.value.connected = true;
       })
 
-      connection.value!.on('joinnableChannels', function(params: Channel[]) {
-        joinableChannels.value.channels = params;
+      connection.value!.on('joinableChannels', function(params: Channel[]) {
+        joinableChannels.value = params;
+        console.log(joinableChannels.value);
       })
 
-      connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
+      connection.value!.on('channelUsers',
+        async function(params: { id: string, users: any[] }) {
         if (!currentChannel.value || params.id != currentChannel.value.id) {
-          console.log('error of channel correspondance inside channelUsers ' + params.id + ' vs '+ currentChannel.value.id);
+          console.log('error of channel correspondance inside channelUsers '
+            + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive users from channel ' + currentChannel.value.name);
@@ -542,9 +546,11 @@ export default defineComponent({
         update.value.users = true;
       })
 
-      connection.value!.on('channelMessages', function(params: { id: string, messages: Message[] }) {
+      connection.value!.on('channelMessages',
+        function(params: { id: string, messages: Message[] }) {
         if (params.id != currentChannel.value.id) {
-          console.log('error of channel correspondance inside channelMessages ' + params.id + ' vs '+ currentChannel.value.id);
+          console.log('error of channel correspondance inside channelMessages '
+            + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         console.log('receive messages from channel ' + currentChannel.value.name);
@@ -552,13 +558,19 @@ export default defineComponent({
         update.value.messages = true;
       })
 
-      connection.value!.on('connectedUsers', function(params: any ) {
-        console.log('receive');
-        connectedUsers.value = params;
-        console.log(connectedUsers.value);
+      connection.value!.on('connectedUsers', async function(params: any ) {
+        console.log('receive connectedUsers');
+        joinableChannels.value = [];
+        for (let user of params) {
+          let avatar = await getUserAvatar(user.id);
+          joinableChannels.value.push({ id: user.id, name: user.nickname, 
+            type: ChannelType.PM, avatar: avatar });
+        }
+        console.log(joinableChannels.value);
       })
 
-      connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
+      connection.value!.on('newMessage',
+        function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
           console.log('receive messageText from non current');
           return ;
@@ -577,22 +589,44 @@ export default defineComponent({
       })
 		})
 
-    function displayMemberChannel(channel: any) {
+    /* Functions for channel display and management */
+
+    /*
+    function checkIfUserIsMember(channelId: string) {
+      const channelsToCheck = userChannels.value.channels as Channel[];
+      const found = channelsToCheck
+        .find(channelsToCheck => channelsToCheck.id === channelId);
+      if (!found) {
+        return false;
+      }
+      return true;
+    }
+    */
+
+    function initDisplayChannel(channel: any, isMember: boolean) {
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
-      currentChannel.value.blocked = false;
-      if (channel.type === ChannelType.PUBLIC) {
-        currentChannel.value.description = 'Public Channel';
-      } else if (channel.type === ChannelType.PRIVATE) {
-        currentChannel.value.description = 'Private Channel';
-      } else if (channel.type === ChannelType.PROTECTED) {
-        currentChannel.value.description = 'Protected Channel';
-      } else {
-        currentChannel.value.description = 'Private Conversation';
-      }
+      currentChannel.value.blocked = false; // TODO modify accordingly
+      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
+      currentChannel.value.description = channelTypes[channel.type];
+      currentChannel.value.messages = [];
+      currentChannel.value.users = [];
+      channelManager.value.admins = [];
+      channelManager.value.members = [];
+      channelManager.value.displayIndex = 0;
+      currentChannel.value.role = Roles.NONMEMBER;
+      console.log('display ' + currentChannel.value.name + ' join interface');
+      update.value.messages = false;
+      update.value.users = false;
+        if (isMember) {
+          return displayMemberChannel(channel);
+        }
+    }
+
+    function displayMemberChannel(channel: any) {
       console.log('ask for ' + channel.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
@@ -601,57 +635,27 @@ export default defineComponent({
     }
 
     async function setChannelManager() {
-      let members = [] as UserChannel[];
+      let members = currentChannel.value.users as UserChannel[];
       let admins = [] as UserChannel[];
       if (currentChannel.value.users === []) {
         console.log('error in retrieving channels users');
         return ;
       }
       for (let user of currentChannel.value.users) {
-        console.log(user);
         if (user.role === Roles.ADMIN || user.role === Roles.OWNER) {
           admins.push(user);
-        } else {
-          members.push(user);
         }
         if (user.id === currentUser.id) {
           currentChannel.value.role = user.role;
         }
       }
+
       channelManager.value.displayIndex = 0;
       channelManager.value.members = members;
       channelManager.value.admins = admins;
     }
 
-    function displayJoinableChannel(channel: any) {
-      // TODO check channel not in userChannels and set role depending of it
-      if (currentChannel.value.role != Roles.NONMEMBER) {
-        return displayMemberChannel(channel);
-      }
-      currentChannel.value.name = channel.name;
-      currentChannel.value.id = channel.id;
-      currentChannel.value.avatar = channel.avatar; // TODO fetch avatar
-      currentChannel.value.notif = false;
-      currentChannel.value.type = channel.type;
-      // TODO fetch blocked value (if you blocked an user)
-      if (channel.type === ChannelType.PUBLIC) {
-        currentChannel.value.description = 'Public Channel';
-      } else if (channel.type === ChannelType.PRIVATE) {
-        currentChannel.value.description = 'Private Channel';
-      } else if (channel.type === ChannelType.PROTECTED) {
-        currentChannel.value.description = 'Protected Channel';
-      } else {
-        currentChannel.value.description = 'Private Conversation';
-      }
-      currentChannel.value.messages = [];
-      currentChannel.value.users = [];
-      channelManager.value.admins = [];
-      channelManager.value.members = [];
-      channelManager.value.displayIndex = 0;
-      console.log('display ' + channel.name + ' join interface');
-      update.value.messages = false;
-      update.value.users = false;
-    }
+    /* Functions for getting informations about users */
 
     function getUserName(userId: number) {
       if (usersList.value === null) {
@@ -663,7 +667,8 @@ export default defineComponent({
           return user.nickname;
         }
       }
-      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.value.name);
+      console.log('Something went wrong: User id ' + userId +
+        ' not found in channel ' + currentChannel.value.name);
     }
 
     function getUserAvatar(userId: number) {
@@ -678,7 +683,7 @@ export default defineComponent({
       }
       console.log('Something went wrong: User id ' + userId + ' not found');
     }
-    
+
     function getUserStatus(userId: number) {
       if (!usersList.value) {
         console.log('Error when retrieving user avatar');
@@ -702,28 +707,86 @@ export default defineComponent({
       return "grey";
     }
 
-		function sendingMessage(channelId: string) {
-      if (!messageText.value || messageText.value === '')
-        return ;
-      connection.value.emit('message', {'channelId': channelId, 'content': messageText.value });
-      messageText.value = '';
-    }
+    /* Function for search pannel */
 
-    function getJoinnableChannels() {
-      connection.value.emit('getJoinnableChannels', currentUser.id);
+    function getJoinableChannels() {
+      connection.value.emit('getJoinableChannels', currentUser.id);
     }
 
     function getConnectedUsers() {
       connection.value.emit('getConnectedUsers');
     }
 
+		function sendingMessage(channelId: string) {
+      if (!messageText.value || messageText.value === '')
+        return ;
+      connection.value.emit('message', {'channelId': channelId,
+        'content': messageText.value });
+      messageText.value = '';
+    }
+
+    /* Functions for channels actions */
+
+    function joinChannel() {
+      console.log('join channel');
+      if (currentChannel.value.type === ChannelType.PROTECTED) {
+        showPasswordModal.value = true;
+        return ;
+      }
+      //TODO emit to back to join channel
+      //TODO if user is blocked from channel / user, get message
+    }
+
+    function joinProtectedChannel(password: string) {
+      console.log('join channel with password: ' + password);
+      if (password === '') {
+        alert('Password entered is empty. Please retry.');
+        return;
+      }
+      showPasswordModal.value = false;
+      //TODO emit to back to join channel
+    }
+
+    function blockUser() {
+      //TODO
+    }
+
+    function unblockUser() {
+      //TODO
+    }
+
+    function leaveChannel() {
+      //TODO
+    }
+
+    /* Functions for game invitation system */
+
+    function waitingGame() {
+      game.value.request = true;
+      // TODO send game request
+      setTimeout(() => (
+        game.value.request = false,
+        game.value.response = false
+        ), 10000);
+    }
+
+    function responseGame(responseGame: true) {
+      console.log('game response ' + responseGame);
+      showGameModal.value = false;    
+      // TODO emit answer  
+    }
+
+    /* Utilities function */
+
     function avatarToUrl() {
       for (let channel of userChannels.value.channels) {
-          if (channel.avatar && !/blob/.test(channel.avatar)) {
+          if (channel.avatar && channel.type != ChannelType.PM
+            && !/blob/.test(channel.avatar)) {
             let blob = new Blob([channel.avatar]) as Blob;
             channel.avatar = URL.createObjectURL(blob);
         }
       }
+
     }
 
     function log(log: string) {
@@ -747,57 +810,13 @@ export default defineComponent({
     function toggleGameModal() {
       showGameModal.value = false;
     }
-
-
-    function joinChannel() {
-      console.log('join channel');
-      if (currentChannel.value.type === ChannelType.PROTECTED) {
-        showPasswordModal.value = true;
-        return ;
-      }
-      //TODO emit to back to join channel
-      //TODO if user is blocked from channel / user, get message
-    }
-
-    function joinProtectedChannel(password: string) {
-      console.log('join channel with password: ' + password);
-      if (password === '') {
-        alert('Password entered is empty. Please retry.');
-        return;
-      }
-      showPasswordModal.value = false;
-      //TODO emit to back to join channel
-    }
-
-    function waitingGame() {
-      game.value.request = true;
-      // TODO send game request
-      setTimeout(() => (
-        game.value.request = false,
-        game.value.response = false
-        ), 10000);
-    }
-
-    function blockUser() {
-      //TODO
-    }
-
-    function unblockUser() {
-      //TODO
-    }
-
-    function leaveChannel() {
-      //TODO
-    }
     
    function dropdownShouldOpen(VueSelect:any) {
       return VueSelect.search.length !== 0 && VueSelect.open
     }
 
-    function responseGame(responseGame: true) {
-      console.log('game response ' + responseGame);
-      showGameModal.value = false;    
-      // TODO emit answer  
+    function testUniq(params: any) {
+      console.log('test ' + params);
     }
 
 		return { update, messageText, userChannels, displayMemberChannel,
@@ -806,23 +825,32 @@ export default defineComponent({
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
       ChannelType, togglePasswordModal, showPasswordModal, joinChannel, 
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
-      unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
-      getJoinnableChannels, channelManager, showGameModal, toggleGameModal,
-      responseGame, getConnectedUsers, connectedUsers}
+      unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
+      getJoinableChannels, channelManager, showGameModal, toggleGameModal,
+      responseGame, getConnectedUsers, chanJoinSelected,
+      testUniq }
 	},
 })
 </script>
 
 
 <style scoped>
-.border 
-{
+.searchtool-one {
+  padding-bottom: 2%;
+}
+.searchtool-two {
+  padding-bottom: 10%;
+}
+
+.border {
   border-right: 0.5px solid rgb(196, 192, 207);
 }
+
 .spacebottom {
   padding-top: 20px;
   padding-bottom: 24px;
 }
+
 .spacetop {
   padding-top: 20px;
   padding-bottom: 20px;

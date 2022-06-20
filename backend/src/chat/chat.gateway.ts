@@ -260,17 +260,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   // add banned logic into this
-  @SubscribeMessage('getJoinnableChannels')
-  async getJoinnableChannels(client: Socket, targetId: number) {
-    this.logger.log('retriving Joinnable Channels');
+  @SubscribeMessage('getJoinableChannels')
+  async getJoinableChannels(client: Socket, targetId: number) {
+    this.logger.log('retrieving Joinable Channels');
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
-    client.emit('joinnableChannels', channels); // only for client
+    client.emit('joinableChannels', channels); // only for client
   }
 
   @SubscribeMessage('getFindUser')
   async findUser(client: Socket, name: string) {
-    const user = await this.userServices.filterUserByName(name);
-    client.emit('findUser', user);
+    const users = await this.userServices.filterUserByName(name) as any;
+    for (let user of users) {
+      user.avatar =  user.id;
+    }
+    client.emit('findUser', users);
   }
 
   @SubscribeMessage('getConnectedUsers')

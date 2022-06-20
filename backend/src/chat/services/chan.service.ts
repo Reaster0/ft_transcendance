@@ -140,7 +140,7 @@ export class ChanServices {
   }
 
   async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
-    const joinnableList = await this.chanRepository.find({ //or findAndCount
+    const joinableList = await this.chanRepository.find({ //or findAndCount
       select: ['id', 'name', 'type', 'blocked','avatar'],
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
@@ -150,7 +150,7 @@ export class ChanServices {
     if (userChannels == null) {return []};
 
     let res: FrontChannelI[] = [];
-    for (const channel of joinnableList) {
+    for (const channel of joinableList) {
       const ban = channel.blocked.indexOf(targetId)
       const joinned = userChannels.indexOf(channel.id) ;
       if (ban == -1 && joinned == -1) {

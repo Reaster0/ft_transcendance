@@ -1,5 +1,5 @@
 <template>
-<v-container fluid v-if="user">
+<v-container fluid v-if="user" >
 	<particles-bg type="cobweb" :bg="true"/>
 	<v-row>
 		<v-col class="center">
