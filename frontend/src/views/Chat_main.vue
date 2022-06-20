@@ -65,7 +65,7 @@
                     :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="displayMemberChannel(item)"
+                      @click="initDisplayChannel(item)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
@@ -591,29 +591,39 @@ export default defineComponent({
 
     /* Functions for channel display and management */
 
-    /*
     function checkIfUserIsMember(channelId: string) {
       const channelsToCheck = userChannels.value.channels as Channel[];
       const found = channelsToCheck
         .find(channelsToCheck => channelsToCheck.id === channelId);
       if (!found) {
-        currentChannel.value.role = Roles.NONMEMBER;
+        return false;
       }
+      return true;
     }
-    */
 
     function initDisplayChannel(channel: any) {
-//      checkIfUserIsMember(channel.id); // no use for the actual usage og initDisplayChannel
-      currentChannel.value.role = Roles.NONMEMBER;
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
-      currentChannel.value.blocked = false;
+      currentChannel.value.blocked = false; // TODO modify accordingly
       const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
       currentChannel.value.description = channelTypes[channel.type];
-      currentChannel.value.avatar = channel.avatar;
-      currentChannel.value.blocked = false; // TODO modify accordingly
+      currentChannel.value.messages = [];
+      currentChannel.value.users = [];
+      channelManager.value.admins = [];
+      channelManager.value.members = [];
+      channelManager.value.displayIndex = 0;
+      currentChannel.value.role = Roles.NONMEMBER;
+      console.log('display ' + currentChannel.value.name + ' join interface');
+      update.value.messages = false;
+      update.value.users = false;
+      if (checkIfUserIsMember(channel.id) === true) {
+        return displayMemberChannel(channel);
+      }
+    }
+
+    function displayMemberChannel(channel: any) {
       console.log('ask for ' + channel.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
@@ -644,52 +654,7 @@ export default defineComponent({
       channelManager.value.admins = admins;
     }
 
-    /* no used for now
-    function checkIfUserIsMember(channelId: string) {
-      const channelsToCheck = userChannels.value.channels as Channel[];
-      const found = channelsToCheck
-        .find(channelsToCheck => channelsToCheck.id === channelId);
-      if (!found) {
-        currentChannel.value.role = Roles.NONMEMBER;
-      }
-    }
-    */
-
-    function displayMemberChannel(channel: any) {
-      /* So fat this function is only use to join non-member channels
-      checkIfUserIsMember(channel.id);
-      if (currentChannel.value.role != Roles.NONMEMBER) {
-        return displayMemberChannel(channel);
-      }
-      */
-      currentChannel.value.name = channel.name;
-      currentChannel.value.id = channel.id;
-      currentChannel.value.avatar = channel.avatar; // TODO fetch avatar
-      currentChannel.value.notif = false;
-      currentChannel.value.type = channel.type;
-      // TODO fetch blocked value (if you blocked an user)
-      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
-      currentChannel.value.description = channelTypes[channel.type];
-      /*
-      if (channel.type === ChannelType.PUBLIC) {
-        currentChannel.value.description = 'Public Channel';
-      } else if (channel.type === ChannelType.PRIVATE) {
-        currentChannel.value.description = 'Private Channel';
-      } else if (channel.type === ChannelType.PROTECTED) {
-        currentChannel.value.description = 'Protected Channel';
-      } else {
-        currentChannel.value.description = 'Private Conversation';
-      }
-      */
-      currentChannel.value.messages = [];
-      currentChannel.value.users = [];
-      channelManager.value.admins = [];
-      channelManager.value.members = [];
-      channelManager.value.displayIndex = 0;
-      console.log('display ' + channel.name + ' join interface');
-      update.value.messages = false;
-      update.value.users = false;
-    }
+    /* Functions for getting informations about users */
 
     function getUserName(userId: number) {
       if (usersList.value === null) {
@@ -860,7 +825,7 @@ export default defineComponent({
       unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
       getJoinableChannels, channelManager, showGameModal, toggleGameModal,
       responseGame, getConnectedUsers, chanJoinSelected,
-      testUniq}
+      testUniq }
 	},
 })
 </script>
