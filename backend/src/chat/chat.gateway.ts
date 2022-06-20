@@ -12,6 +12,7 @@ import { ChanServices } from './services/chan.service';
 import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import * as bcrypt from 'bcrypt';
+import { Status } from '../users/enums/status.enum';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -35,8 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     try {
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
-      await this.userServices.connectUserToChat(user, client.id);
-      this.sendUsersList();
+      await this.userServices.changeStatus(client.data.user, Status.ONLINE, client.id);
       this.logger.log(`Client connected: ${client.id}`);
     } catch {
       this.logger.log('Failed to retrieve user from client');
@@ -50,9 +50,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     if (!client.data.user) {
       return client.disconnect();
     }
-    await this.userServices.disconnectUserToChat(client.data.user)
+    await this.userServices.changeStatus(client.data.user, Status.OFFLINE, null);
     client.disconnect();
-    this.sendUsersList();
     this.logger.log(`Client disconnected: ${client}`);
   }
 
