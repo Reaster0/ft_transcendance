@@ -9,6 +9,7 @@
             <!-- SEARCH PANNEL -->
             <!-- NB! When serach field will work on backen -
             add onclick option calling method  -->
+              <!--
             <div class="d-flex" overflow-hidden>
               <v-text-field clearable label="Find user or group to chat"
               type="text" placeholder="Search" 
@@ -16,6 +17,29 @@
               @keyup.enter="sendingSearchRequest()"
               ></v-text-field>
             </div>
+            <v-select 
+            label="name"
+            v-model="searchRequest"
+            :option="joinableChannels"
+            :dropdown-should-open="dropdownShouldOpen"
+
+            ></v-select>
+            </div>
+            -->
+            <h1 class="Spotnik"> Channels </h1>
+            <v-selection label="name" createOption=getJoinableChannels
+            :dropdown-should-open="dropdownShouldOpen"
+            :options="userChannels.channels">
+            </v-selection>
+            
+            <h4 class="Spotnik"> Users</h4>
+            <v-selection 
+            label="name"
+            v-model="searchRequest"
+            :dropdown-should-open="dropdownShouldOpen"
+            :options="userChannels.channels">
+            </v-selection>
+
 
             <!-- CREATE NEW ROOM BUTTON -->
             <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
@@ -28,9 +52,9 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top"
-            style="max-height: calc(100vh - 15%);">
-              <v-list>
-               <v-list-item-group> 
+            style="max-height: calc(100vh - 18%);">
+            <v-list>
+              <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
                   <v-subheader v-if="item.header" :key="item.header"
                     v-text="item.header"></v-subheader>
@@ -72,10 +96,11 @@
                     </v-list-item-title>
                   </v-list-item>
                   <v-divider v-if="index < userChannels.channels.length"
-                    :key="index"></v-divider>
+                    :key="index">
+                  </v-divider>
                 </template>
-                </v-list-item-group>
-              </v-list>
+              </v-list-item-group>
+            </v-list>
           </div>
         </v-col>
 
@@ -118,7 +143,7 @@
                   max-width="50px">
                   <v-badge bordered bottom :color="getUserColor(msg.userId)" dot
                     offset-x="4" offset-y="10">
-                    <v-avatar class="mt-n4 " size="32" elevation="2">
+                    <v-avatar class="mt-n4" size="32" elevation="2">
                       <img :src="getUserAvatar(msg.userId)"/>
                     </v-avatar>
                   </v-badge>
@@ -236,70 +261,68 @@
                 <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
 
                 <!-- INFOS ABOUT CHANNEL USERS  -->
-                <!-- <div id="app" class="pt-6">
-                  <v-tabs fixed-tabs v-model="tab">
+                <div id="app" class="pt-6">
+                  <v-tabs fixed-tabs>
                     <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
                     <v-tab color="rgb(0,0,255)"
-                      v-for="(item, index) in tabs_manager"
-                      :class="{active: currentTab === index}"
-                      @click="currentTab = index" :key="item">
-                      {{ item.tabs }}
+                      v-for="(item, index) in channelManager.title"
+                      :class="{active: channelManager.displayIndex === index}"
+                      @click="channelManager.displayIndex = index" :key="item">
+                      {{ channelManager.title[index] }}
                     </v-tab>
                   </v-tabs>
-                  <v-tabs-items v-model="tab">
-                    <v-card flat>            
-                      <div v-show="currentTab === 0">
-                        <v-list> -->
-                          <!-- NB : v-model="selectedItem" after v-list-item-group ? -->
-                          <!-- <v-list-item-group>
-                            <template v-for="(item, index) in members">
-
+                  <!-- DISPLAY MEMBERS -->
+                  <v-tabs-items>
+                    <v-card flat class="overflow-y-auto">       
+                      <div v-if="channelManager.displayIndex === 0">
+                        <v-list>
+                          <v-list-item-group>
+                            <template v-for="(item, index) in
+                              channelManager.members">
                               <v-subheader v-if="item.header" :key="item.header"
-                                v-text="item.header">
-                              </v-subheader>
-
+                                v-text="item.header"></v-subheader>
                               <v-divider v-else-if="item.divider" :key="index"
-                                :inset="item.inset">
-                              </v-divider>
-                        
+                                :inset="item.inset"></v-divider>
                               <v-list-item v-else :key="item.title">
-
-                                <div v-if="currentUser.role === Role.ADMIN 
-                                  || currentUser.role === Role.OWNER">
+                                <!-- MANAGE USER BUTTON IF ADMIN -->
+                                <div v-if="currentUser.role === Roles.ADMIN 
+                                  || currentUser.role === Roles.OWNER">
                                   <v-btn :to="{ name: 'ManageUsers' }" icon
-                                    v-bind="attrs" v-on="on" elevation="0">
-                                    <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
+                                    elevation="0">
+                                    <v-app-bar-nav-icon elevation="0">
+                                    </v-app-bar-nav-icon>
                                   </v-btn>
                                 </div>
-
-                                <v-btn elevation="0" min-height="50px" max-width="50px">
-                                  <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                                <v-btn elevation="0" min-height="50px"
+                                  max-width="50px">
+                                  <v-badge bordered bottom :color="getUserColor(item.id)"
+                                    dot offset-x="6" offset-y="34" >
                                     <v-list-item-avatar>
-                                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
+                                      <v-img :src="getUserAvatar(item.id)"
+                                        min-width="50px" min-height="50px">
+                                      </v-img>
                                     </v-list-item-avatar>
                                   </v-badge>
                                 </v-btn>
-                                
                                 <v-list-item-content>
                                   <v-list-item-title class="offsetmess">
-                                    {{ item.title }}
+                                    {{ getUserName(item.id) }}
                                   </v-list-item-title>
                                 </v-list-item-content>
                               </v-list-item>
-
-                              <v-divider v-if="index < members.length" :key="index">
+                              <v-divider v-if="index <
+                                channelManager.members.length" :key="index">
                               </v-divider>
-
                             </template>
                           </v-list-item-group>
                         </v-list>
                       </div>
-
-                      <div v-show="currentTab === 1">
-                        <v-list> -->
-                          <!-- NB v-model="selectedItem" after v-list-item-group ? -->
-                          <!-- <v-list-item-group>
-                            <template v-for="(item, index) in admins">
+                      <!-- DISPLAY ADMINS -->
+                      <div v-show="channelManager.displayIndex === 1">
+                        <v-list>
+                          <v-list-item-group>
+                            <template v-for="(item, index) in
+                              channelManager.admins">
                               <v-subheader v-if="item.header" :key="item.header" 
                                 v-text="item.header">
                               </v-subheader>
@@ -307,26 +330,35 @@
                                 :inset="item.inset">
                               </v-divider>
                               <v-list-item v-else :key="item.title">
-
-                                <div v-if="user is admin">
-                                  <v-btn :to="{ name: 'ManageUsers' }" icon v-bind="attrs"
-                                    v-on="on" elevation="0">
-                                    <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
+                                <!-- MANAGE USER BUTTON IF ADMIN -->
+                                <div v-if="currentUser.role === Roles.ADMIN 
+                                  || currentUser.role === Roles.OWNER">
+                                  <v-btn :to="{ name: 'ManageUsers' }" icon
+                                    elevation="0">
+                                    <v-app-bar-nav-icon elevation="0">
+                                    </v-app-bar-nav-icon>
                                   </v-btn>
                                 </div>
-                              
-                                <v-btn elevation="0" min-height="50px" max-width="50px" >
-                                  <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
+                                <v-btn elevation="0" min-height="50px"
+                                  max-width="50px" >
+                                  <v-badge bordered bottom
+                                    :color="getUserColor(item.id)"
+                                    dot offset-x="6" offset-y="34" >
                                     <v-list-item-avatar>
-                                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
+                                      <v-img :src="getUserAvatar(item.id)"
+                                        min-width="50px" min-height="50px">
+                                      </v-img>
                                     </v-list-item-avatar>
                                   </v-badge>
                                 </v-btn>
                                 <v-list-item-content>
-                                  <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
+                                  <v-list-item-title class="offsetmess">
+                                    {{ getUserName(item.id) }}
+                                  </v-list-item-title>
                                 </v-list-item-content>
                               </v-list-item>
-                              <v-divider v-if="index < admins.length" :key="index">
+                              <v-divider v-if="index <
+                                channelManager.admins.length" :key="index">
                               </v-divider>
                             </template>
                           </v-list-item-group>
@@ -334,7 +366,7 @@
                       </div>
                     </v-card>
                   </v-tabs-items>
-                </div>-->
+                </div>
               </div>
             </div>
 
@@ -397,60 +429,25 @@ import { onMounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { ref, defineComponent } from 'vue'
+import vSelect from "vue-select";
 import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
   Roles } from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
+import "vue-select/dist/vue-select.css";
+
 
 
 export default defineComponent({
   name: "ChatMain",
   components: {
-    'modale': TheModale
+    'modale': TheModale,
+   'v-selection': vSelect,
   },
-
-      //chat_person: false as boolean,
-      //revele: false,
-      //fav: true as boolean,
-      //menu: false as boolean,
-      //currentTab: 0 as number,
-      //loading: false as boolean,
-      //tab: null as null | any,
-
-      //tabs_manager: [
-      //  {tabs: 'Members',},
-      //  {tabs: 'Administrators',}
-      //] as any,
-
-      // members and admins are here only as an example of the design:
-      // they dont content the read data. The real data we will receive
-      // from backend ib the dame format (list of dictionaries (each channel has its dictionary))
-      
-      //members: [
-      //{   
-      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-      //  title: "abaudot",
-      //},
-      //] as any,
-      //admins: [
-      //{   
-      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-      //  title: "abaudot",
-      //},
-      //] as any,
-      // txt is a variable made to save CURRENT message that user is GOING TO send
-      // with this we will emit this data to backend
-
-      //userBanned: false,
-      //userMuted: false,
-      //banDate: new Date,
-      //muteDate: new Date,
-      // Not - used vars that we can need
-      // Comment for Aimé: what was the idea ?
-
 	setup() {
+
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
@@ -464,12 +461,20 @@ export default defineComponent({
       role: Roles.USER as Roles, avatar: null as null | string,
       notif: false as boolean, description: '' as string, 
       blocked: false as boolean });
-    // blocked = for pm
+    let channelManager = ref({title: ['members', 'admins'] as string[],
+      members: [] as any[], admins: [] as any[],
+      displayIndex: 0 as number });
     let messageText = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
     let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
     let game = ref({ request: false as boolean, response: true as boolean });
+
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(socket, to, next, store);
+    })
 
 		onMounted(async() => {
 			try {
@@ -497,14 +502,12 @@ export default defineComponent({
         usersList.value = params;
         store.commit('setUsersList', usersList.value);
         if (!update.value.connected) {
-          console.log('here');
           connection.value!.emit('emitMyChannels');
         }
       })
 
       connection.value!.on('channelList', function(params: Channel[]) {
         console.log('list of joined channels received');
-        console.log(params);
         userChannels.value.channels = params;
         avatarToUrl();
         update.value.connected = true;
@@ -523,7 +526,7 @@ export default defineComponent({
         }
         console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
-        await currentUserRole();
+        await setChannelManager();
         update.value.users = true;
       })
 
@@ -550,12 +553,6 @@ export default defineComponent({
       })
 		})
 
-		onBeforeRouteLeave(function(to: any, from: any, next: any) {
-      void from;
-      const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
-    })
-
     function displayMemberChannel(channel: any) {
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
@@ -577,6 +574,29 @@ export default defineComponent({
       update.value.users = false;
       connection.value.emit('getChannelUsers', { id: channel.id });
       connection.value.emit('getChannelMessages', { id: channel.id });
+    }
+
+    async function setChannelManager() {
+      let members = [] as UserChannel[];
+      let admins = [] as UserChannel[];
+      if (currentChannel.value.users === []) {
+        console.log('error in retrieving channels users');
+        return ;
+      }
+      for (let user of currentChannel.value.users) {
+        console.log(user);
+        if (user.role === Roles.ADMIN || user.role === Roles.OWNER) {
+          admins.push(user);
+        } else {
+          members.push(user);
+        }
+        if (user.id === currentUser.id) {
+          currentChannel.value.role = user.role;
+        }
+      }
+      channelManager.value.displayIndex = 0;
+      channelManager.value.members = members;
+      channelManager.value.admins = admins;
     }
 
     function displayJoinableChannel(channel: any) {
@@ -601,6 +621,9 @@ export default defineComponent({
       }
       currentChannel.value.messages = [];
       currentChannel.value.users = [];
+      channelManager.value.admins = [];
+      channelManager.value.members = [];
+      channelManager.value.displayIndex = 0;
       console.log('display ' + channel.name + ' join interface');
       update.value.messages = false;
       update.value.users = false;
@@ -613,7 +636,7 @@ export default defineComponent({
       }
       for (let user of usersList.value) {
         if (user.id === userId) {
-          return user.name;
+          return user.nickname;
         }
       }
       console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.value.name);
@@ -662,27 +685,14 @@ export default defineComponent({
       messageText.value = '';
     }
 
-    function sendingSearchRequest() 
+    function getJoinableChannels() 
     {
-      console.log(">>>>>>" + searchRequest.value + "<<<<<<<")
-      if (!searchRequest.value || searchRequest.value === '')
-        return ;
-      connection.value.emit('getJoinnableChannels', searchRequest.value);
+      console.log('coucou');
+      connection.value.emit('getJoinnableChannels', {'name': 'cou', 'targetId': 1});
       searchRequest.value = '';
     }
 
-    function currentUserRole() {
-      for (let user of currentChannel.value.users) {
-        if (user.id === currentUser.id) {
-          currentChannel.value.role = user.role;
-          return ;
-        }
-      }
-      currentChannel.value.role = Roles.NONMEMBER;
-    }
-
     function avatarToUrl() {
-      console.log('TO URL');
       for (let channel of userChannels.value.channels) {
           if (channel.avatar && !/blob/.test(channel.avatar)) {
             let blob = new Blob([channel.avatar]) as Blob;
@@ -712,7 +722,6 @@ export default defineComponent({
     function joinChannel() {
       console.log('join channel');
       if (currentChannel.value.type === ChannelType.PROTECTED) {
-        console.log('here');
         showPasswordModal.value = true;
         return ;
       }
@@ -750,35 +759,19 @@ export default defineComponent({
     function leaveChannel() {
       //TODO
     }
-
-      // function joinChannel(id)
-      // {
-      //   store.commit('setChannelJoinedStatus' , true);
-      //   connection.value.emit('joinChannel', id);
-      // }
-
-      // function leaveChannel(id)
-      // {
-      //   store.commit('setChannelJoinedStatus' , false);
-      //   connection.value.emit('leaveChannel', id);
-      // }
-
-      // 		// for bloking or unblocking  a user:
-      // 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
-      // 		function blockUser(user, block)
-      // 		{
-      // 			console.log("before blockUser");
-      // 			connection.value.emit('blockUser', user, block);
-      // 			console.log("after blockUser");
-      // 		}
+    
+   function dropdownShouldOpen(VueSelect:any) {
+      return VueSelect.search.length !== 0 && VueSelect.open
+    }
 
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage, currentUserRole, sendingSearchRequest,
+      getUserColor, sendingMessage,
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
       ChannelType, toggleModal, showPasswordModal, joinChannel, 
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
-      unblockUser, leaveChannel, displayJoinableChannel }
+      unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
+      getJoinableChannels, channelManager }
 	},
 })
 </script>
@@ -813,8 +806,6 @@ export default defineComponent({
 
 .messagefield{
   width:100%;
-  /* position: absolute; */
-  /* bottom: 0px; */
 }
 
 .margin-top {

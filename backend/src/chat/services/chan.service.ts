@@ -56,29 +56,33 @@ export class ChanServices {
     }
   }
 
-  async pushUserToChan(channel: ChannelI, user: User){
-    let update: Channel = await this.chanRepository.findOne(channel.id);
+  async pushUserToChan(channelId: string, user: User){
+    let update: Channel = await this.chanRepository.findOne(channelId);
+    if (!update)
+      return (null);
     update.users.push(user);
-    this.chanRepository.update(channel.id, update);
+    this.chanRepository.update(channelId, update);
     const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel: update}
     this.roleRepository.save(newUser);
+    return (update);
   }
 
-  async removeUserFromChan(channel: ChannelI, user: User) {
-    let update: Channel = await this.chanRepository.findOne(channel.id);
+  async removeUserFromChan(channelId: string, user: User): Promise<Channel> {
+    let update: Channel = await this.chanRepository.findOne(channelId);
     const index = update.users.indexOf(user);
-    if (index != -1) {
-      update.users.splice(index, 1);
-    }
-    this.chanRepository.update(channel.id, update);
-    ////////////////////////////////////////////////////////////////
-    const chanUser = await this.roleRepository.findOne({ where: { channel: channel, userId: user.id} });
+    if (index == -1) { return null; }
+
+    update.users.splice(index, 1);
+    await this.chanRepository.update(channelId, update);
+
+    const chanUser = await this.roleRepository.findOne({ where: { channel: update, userId: user.id} });
     console.log(chanUser);
     try {
       this.roleRepository.remove(chanUser)
     } catch (err) {
       console.log(err);
     }
+    return update;
   }
 
   async updateChannel(channel: ChannelI, info: any): Promise<Boolean> {
@@ -135,14 +139,20 @@ export class ChanServices {
     return currentChanUsers.users;
   }
 
-  async filterJoinableChannel(name: string): Promise<FrontChannelI[]> {
-    return this.chanRepository.find({ //or findAndCount
-      skip: 0,
-      take: 10,
-      select: ['id', 'name', 'type', 'avatar'],
+  async filterJoinableChannel(name: string, targetId: number): Promise<FrontChannelI[]> {
+    const joinnableList = await this.chanRepository.find({ //or findAndCount
+      select: ['id', 'name', 'type', 'blocked','avatar'],
       where: [ { name: Like(`%${name}%`), type: ChannelType.PUBLIC}, {name: Like(`%${name}%`), type: ChannelType.PROTECTED}],
       order: {name: "ASC"},
     })
+
+    let res: FrontChannelI[] = [];
+    for (const channel of joinnableList) {
+      const index = channel.blocked.indexOf(targetId)
+      if (index == -1)
+        res.push(channel);
+    }
+    return res;
   }
 
 
@@ -166,8 +176,10 @@ export class ChanServices {
     return (res);
   }
 
-  async muteUser(channel: Channel, userId: number, time: number): Promise<Roles> {
-    const chanUser = await this.roleRepository.findOne({ where: { channel, userId} });
+  async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
+
+    const channel = await this.chanRepository.findOne(channelId);
+    const chanUser = await this.roleRepository.findOne({ where: { channel, targetId} });
 
     const muteDate = new Date;
     muteDate.setDate(muteDate.getDate() + time)
@@ -176,10 +188,31 @@ export class ChanServices {
     return this.roleRepository.save(chanUser);
 }
 
-  async unmuteUser(channel: Channel, userId: number): Promise<Roles> {
+  async unmuteUser(channelId: string, userId: number): Promise<Roles> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {return null;}
+
     const chanUser: Roles = await this.roleRepository.findOne({ where: { channel, userId} });
     chanUser.muteDate = null;
     return this.roleRepository.save(chanUser);
+  }
+
+  async banUser(channelId: string, user: User): Promise<ChannelI> {
+    let channel = await this.removeUserFromChan(channelId, user);
+    if (!channel) {return null;} /* User was not in channel */
+    channel.blocked.push(user.id);
+    await this.chanRepository.update(channelId, channel);
+    return channel;
+  }
+
+  async unBanUser(channelId: string, userId: number) {
+    let channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {return null;}
+    const index = channel.blocked.indexOf(userId);
+    if (index == -1) { return null; }
+    channel.blocked.splice(index, 1);
+    await this.chanRepository.update(channelId, channel);
+    return channel;
   }
 
   /*
