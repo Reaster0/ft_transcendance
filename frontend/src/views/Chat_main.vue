@@ -585,6 +585,9 @@ export default defineComponent({
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
       currentChannel.value.blocked = false;
+      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
+      currentChannel.value.description = channelTypes[channel.type];
+      /*
       if (channel.type === ChannelType.PUBLIC) {
         currentChannel.value.description = 'Public Channel';
       } else if (channel.type === ChannelType.PRIVATE) {
@@ -594,6 +597,7 @@ export default defineComponent({
       } else {
         currentChannel.value.description = 'Private Conversation';
       }
+      */
       console.log('ask for ' + channel.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
@@ -609,21 +613,22 @@ export default defineComponent({
         return ;
       }
       for (let user of currentChannel.value.users) {
-        console.log(user);
+        //console.log(user);
+        members.push(user);
         if (user.role === Roles.ADMIN || user.role === Roles.OWNER) {
           admins.push(user);
-        } else {
-          members.push(user);
         }
         if (user.id === currentUser.id) {
           currentChannel.value.role = user.role;
         }
       }
+
       channelManager.value.displayIndex = 0;
       channelManager.value.members = members;
       channelManager.value.admins = admins;
     }
 
+    /* no used for now
     function checkIfUserIsMember(channelId: string) {
       const channelsToCheck = userChannels.value.channels as Channel[];
       const found = channelsToCheck
@@ -632,18 +637,25 @@ export default defineComponent({
         currentChannel.value.role = Roles.NONMEMBER;
       }
     }
+    */
 
     function displayJoinableChannel(channel: any) {
+      /* So fat this function is only use to join non-member channels
       checkIfUserIsMember(channel.id);
       if (currentChannel.value.role != Roles.NONMEMBER) {
         return displayMemberChannel(channel);
       }
+      */
+      currentChannel.value.role = Roles.NONMEMBER;
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar; // TODO fetch avatar
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
       // TODO fetch blocked value (if you blocked an user)
+      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
+      currentChannel.value.description = channelTypes[channel.type];
+      /*
       if (channel.type === ChannelType.PUBLIC) {
         currentChannel.value.description = 'Public Channel';
       } else if (channel.type === ChannelType.PRIVATE) {
@@ -653,6 +665,7 @@ export default defineComponent({
       } else {
         currentChannel.value.description = 'Private Conversation';
       }
+      */
       currentChannel.value.messages = [];
       currentChannel.value.users = [];
       channelManager.value.admins = [];
