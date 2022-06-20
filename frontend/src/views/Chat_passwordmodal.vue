@@ -1,6 +1,6 @@
 <template>
   <div class="bloc-modale" v-if="showPasswordModal">
-    <div class="overlay" v-on:click="toggleModal"></div>
+    <div class="overlay" v-on:click="togglePasswordModal"></div>
       <div class="modale card">
         <v-card>
           <v-card-title>
@@ -20,7 +20,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="red darken-1" text @click="toggleModal">
+            <v-btn color="red darken-1" text @click="togglePasswordModal">
               Cancel
             </v-btn>
             <v-btn color="blue darken-1" text @click="enterPassword">
@@ -37,8 +37,8 @@
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent ({
-  name: "TheModale",
-  props: ["showPasswordModal", "toggleModal"],
+  name: "PasswordModal",
+  props: ["showPasswordModal", "togglePasswordModal"],
   setup(props, { emit }) {
     let password = ref<string>('');
 
