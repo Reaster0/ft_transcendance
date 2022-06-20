@@ -27,17 +27,21 @@
             </div>
             :dropdown-should-open="dropdownShouldOpen"
             -->
-            <div id="joinnableChan" v-on:click="getJoinnableChannels">
+            <div id="joinnableChan" >
             <h1 class="Spotnik"> Channels </h1>
-            <v-selection 
+            <v-selection @open="getJoinnableChannels"
+            @option:selected="displayJoinableChannel"
             label="name"
-            :options="joinableChannels.channels">
+            :options="joinableChannels.channels"
+            :value="chanJoinSelected"
+            >
             </v-selection>
             </div>
             
-            <div id="connectedUsers" v-on:click="getConnectedUsers">
+            <div id="connectedUsers" >
             <h4 class="Spotnik"> Users</h4>
-            <v-selection 
+            <v-selection @open="getConnectedUsers"
+            @option:selected="displayJoinableChannel"
             label="nickname"
             :options="connectedUsers">
             </v-selection>
@@ -483,6 +487,7 @@ export default defineComponent({
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: '' as string });
+    let chanJoinSelected = {name: 'enter channer'} as Channel;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
@@ -528,6 +533,7 @@ export default defineComponent({
       })
 
       connection.value!.on('joinnableChannels', function(params: Channel[]) {
+        console.log('retrieving joinableChannels');
         joinableChannels.value.channels = params;
       })
 
@@ -553,9 +559,8 @@ export default defineComponent({
       })
 
       connection.value!.on('connectedUsers', function(params: any ) {
-        console.log('receive');
+        console.log('receive connectedUsers');
         connectedUsers.value = params;
-        console.log(connectedUsers.value);
       })
 
       connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
@@ -800,6 +805,10 @@ export default defineComponent({
       // TODO emit answer  
     }
 
+    function testUniq(params: any) {
+      console.log('test ' + params);
+    }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage,
@@ -808,7 +817,7 @@ export default defineComponent({
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
       unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
       getJoinnableChannels, channelManager, showGameModal, toggleGameModal,
-      responseGame, getConnectedUsers, connectedUsers}
+      responseGame, getConnectedUsers, connectedUsers, chanJoinSelected, testUniq}
 	},
 })
 </script>
