@@ -87,6 +87,8 @@ export default defineComponent ({
 		const isFriend = ref<boolean>(false);
 
 		onMounted(async () => {
+			if (route.value.query.first)
+				edit.value = true
 			if (route.value.params.username){
 				console.log(route.value.params.username)
 				user.value = await getUserInfos(route.value.params.username as string) as any;
