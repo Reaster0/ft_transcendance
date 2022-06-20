@@ -65,7 +65,7 @@
                     :inset="item.inset"></v-divider>
                   <v-list-item v-else :key="item.title">
                     <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="initDisplayChannel(item)"
+                      @click="initDisplayChannel(item, true)"
                       v-if="item.id != currentChannel.id">
                         <v-list-item-avatar>
                           <v-img v-if="item.avatar != null" :src="item.avatar"
@@ -601,7 +601,8 @@ export default defineComponent({
       return true;
     }
 
-    function initDisplayChannel(channel: any) {
+    function initDisplayChannel(channel: any, test: boolean) {
+      console.log(test);
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.notif = false;
