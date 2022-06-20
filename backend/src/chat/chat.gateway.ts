@@ -13,6 +13,7 @@ import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '../users/enums/status.enum';
+import { subscribeOn } from 'rxjs';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -263,14 +264,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async getJoinnableChannels(client: Socket, targetId: number) {
     this.logger.log('retriving Joinnable Channels');
     const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
-    console.log(channels);
-    client.emit('joinnableChannel', channels); // only for client
+    client.emit('joinnableChannels', channels); // only for client
   }
 
   @SubscribeMessage('getFindUser')
   async findUser(client: Socket, name: string) {
     const user = await this.userServices.filterUserByName(name);
     client.emit('findUser', user);
+  }
+
+  @SubscribeMessage('getConnectedUsers')
+  async getConnectedUsers(client: Socket) {
+    this.logger.log('retriving connected users');
+    let connectedUsers = await this.userServices.getConnectedUsers();
+
+    // remove client from list
+    const clientId = client.data.user.id;
+    for (const [i, value] of connectedUsers.entries()) {
+      if (value.id === clientId) {
+        connectedUsers.splice(i, 1);
+        break ;
+      }
+  }
+//  console.log(connectedUsers);
+    client.emit('connectedUsers', connectedUsers);
   }
 }
 

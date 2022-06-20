@@ -22,6 +22,7 @@
             v-model="searchRequest"
             :option="joinableChannels"
             :dropdown-should-open="dropdownShouldOpen"
+            :dropdown-should-open="dropdownShouldOpen"
 
             ></v-select>
             </div>
@@ -35,13 +36,14 @@
             </v-selection>
             </div>
             
+            <div id="connectedUsers" v-on:click="getConnectedUsers">
             <h4 class="Spotnik"> Users</h4>
             <v-selection 
-            label="name"
+            label="nickname"
             v-model="searchRequest"
-            :dropdown-should-open="dropdownShouldOpen"
-            :options="userChannels.channels">
+            :options="connectedUsers">
             </v-selection>
+            </div>
 
 
             <!-- CREATE NEW ROOM BUTTON -->
@@ -429,7 +431,8 @@ import TheModale from "./Chat_modale.vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
-  Roles } from '../types/chat.types';
+  Roles, 
+UserGlobal} from '../types/chat.types';
 import { getAvatarID } from '../components/FetchFunctions';
 import "vue-select/dist/vue-select.css";
 
@@ -461,6 +464,7 @@ export default defineComponent({
     let messageText = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref({ channels: [] as any[] });
+    let connectedUsers = ref<UserGlobal[]>([]);
     let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
     let game = ref({ request: false as boolean, response: true as boolean });
 
@@ -503,10 +507,8 @@ export default defineComponent({
         update.value.connected = true;
       })
 
-      connection.value!.on('joinableChannel', function(params: Channel[]) {
-        console.log('!!!!!!!!>>>>>>' + params);
+      connection.value!.on('joinnableChannels', function(params: Channel[]) {
         joinableChannels.value.channels = params;
-        // TODO continue
       })
 
       connection.value!.on('channelUsers', async function(params: { id: string, users: any[] }) {
@@ -528,6 +530,11 @@ export default defineComponent({
         console.log('receive messages from channel ' + currentChannel.value.name);
         currentChannel.value.messages = params.messages;
         update.value.messages = true;
+      })
+
+      connection.value!.on('connectedUsers', function(params: any ) {
+        connectedUsers.value = params;
+        console.log(connectedUsers.value);
       })
 
       connection.value!.on('newMessage', function(params: {id: string, message: Message }) {
@@ -655,9 +662,7 @@ export default defineComponent({
       messageText.value = '';
     }
 
-    function getJoinnableChannels() 
-    {
-      console.log('coucou');
+    function getJoinnableChannels() {
       connection.value.emit('getJoinnableChannels', currentUser.id);
     }
 
@@ -765,13 +770,17 @@ export default defineComponent({
       return VueSelect.search.length !== 0 && VueSelect.open
       }
 
+      function getConnectedUsers() {
+        connection.value.emit('getConnectedUsers');
+      }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage, currentUserRole, dropdownShouldOpen,
       searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
       ChannelType, toggleModal, showPasswordModal, joinChannel, getJoinnableChannels,
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
-      unblockUser, leaveChannel, displayJoinableChannel }
+      unblockUser, leaveChannel, displayJoinableChannel, connectedUsers, getConnectedUsers}
 	},
   // test
 })
