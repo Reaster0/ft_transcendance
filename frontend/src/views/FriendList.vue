@@ -9,14 +9,14 @@
 		<v-row v-if="listFriends && userInfo" justify="center">
 			<v-col cols="10" v-for="(user, index) in listFriends.friends.names" :key="user.names">
 				<div class="overlay">
-						<v-img class="clickable" min-width="15%" max-width="20%" v-if="userInfo[user]" :src="userInfo[user].avatar" @click="toUserPage(user)"></v-img>
-						<h1 class="text">{{user}}</h1>
-						<v-spacer></v-spacer>
-						<h1 v-if="userInfo[user]" class="text">{{userInfo[user].eloScore}}📈</h1>
-						<v-spacer></v-spacer>
-						<h1 class="text">{{listFriends.friends.status[index]}}</h1>
-						<v-spacer></v-spacer>
-						<div class="button_slick button_slide Spotnik" @click="removeAFriend(user)">Remove</div>
+					<v-img class="clickable" min-width="15%" max-width="20%" v-if="userInfo[user]" :src="userInfo[user].avatar" @click="toUserPage(user)"></v-img>
+					<h1 class="text">{{user}}</h1>
+					<v-spacer></v-spacer>
+					<h1 v-if="userInfo[user]" class="text">{{userInfo[user].eloScore}}📈</h1>
+					<v-spacer></v-spacer>
+					<h1 class="text">{{listFriends.friends.status[index]}}</h1>
+					<v-spacer></v-spacer>
+					<div class="button_slick button_slide Spotnik" @click="removeAFriend(user)">Remove</div>
 				</div>
 			</v-col>
 		</v-row>
@@ -86,22 +86,6 @@ export default defineComponent ({
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
-
-.clickable{
-	cursor: pointer;
-}
-
-.overlay {
-  margin: 1em;
-  padding: 2em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(#00214A, 0.8);
-  border-radius: 3rem;
-  box-shadow: 0 0 0 8px rgba(#FF82F4, 0.2);
-  filter:  drop-shadow(0px 20px 10px rgba(0, 0, 0, 0.50));
-}
 
 .error_msg{
 	display: block;

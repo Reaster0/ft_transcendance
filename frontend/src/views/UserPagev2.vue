@@ -238,7 +238,6 @@ h1{
 }
 
 .overlay {
-//   padding-bottom: 20%;
   margin: 1em;
   padding: 1em;
   display: flex;
@@ -251,3 +250,19 @@ h1{
 }
 
 </style>
+
+<style lang="scss">
+
+.overlay {
+  margin: 1em;
+  padding: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(#00214A, 0.8);
+  border-radius: 3rem;
+  box-shadow: 0 0 0 8px rgba(#FF82F4, 0.2);
+  filter:  drop-shadow(0px 20px 10px rgba(0, 0, 0, 0.50));
+}
+
+</style> 
