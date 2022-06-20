@@ -260,9 +260,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   // add banned logic into this
   @SubscribeMessage('getJoinnableChannels')
-  async getJoinnableChannels(client: Socket, data: any) {
-    const {name, targetId} = data;
-    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(name, targetId);
+  async getJoinnableChannels(client: Socket, targetId: number) {
+    this.logger.log('retriving Joinnable Channels');
+    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
+    console.log(channels);
     client.emit('joinnableChannel', channels); // only for client
   }
 

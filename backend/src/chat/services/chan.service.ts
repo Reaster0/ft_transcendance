@@ -104,7 +104,7 @@ export class ChanServices {
   async getChannelsFromUser(id: number): Promise<FrontChannelI[]> {
     let query = this.chanRepository
       .createQueryBuilder('channel')
-      .select(['channel.id', 'channel.name', 'channel.avatar']) //Test
+      .select(['channel.id', 'channel.name', 'channel.avatar', 'channel.type'])
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
@@ -139,18 +139,23 @@ export class ChanServices {
     return currentChanUsers.users;
   }
 
-  async filterJoinableChannel(name: string, targetId: number): Promise<FrontChannelI[]> {
+  async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
     const joinnableList = await this.chanRepository.find({ //or findAndCount
       select: ['id', 'name', 'type', 'blocked','avatar'],
-      where: [ { name: Like(`%${name}%`), type: ChannelType.PUBLIC}, {name: Like(`%${name}%`), type: ChannelType.PROTECTED}],
+      where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
 
+    const userChannels = await this.userServices.getUserChannelsId(targetId);
+    if (userChannels == null) {return []};
+
     let res: FrontChannelI[] = [];
     for (const channel of joinnableList) {
-      const index = channel.blocked.indexOf(targetId)
-      if (index == -1)
+      const ban = channel.blocked.indexOf(targetId)
+      const joinned = userChannels.indexOf(channel.id) ;
+      if (ban == -1 && joinned == -1) {
         res.push(channel);
+      }
     }
     return res;
   }
