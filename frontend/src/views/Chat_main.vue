@@ -604,6 +604,7 @@ export default defineComponent({
     function initDisplayChannel(channel: any) {
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
+      currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
       currentChannel.value.blocked = false; // TODO modify accordingly
@@ -777,11 +778,13 @@ export default defineComponent({
 
     function avatarToUrl() {
       for (let channel of userChannels.value.channels) {
-          if (channel.avatar && !/blob/.test(channel.avatar)) {
+          if (channel.avatar && channel.type != ChannelType.PM
+            && !/blob/.test(channel.avatar)) {
             let blob = new Blob([channel.avatar]) as Blob;
             channel.avatar = URL.createObjectURL(blob);
         }
       }
+
     }
 
     function log(log: string) {
