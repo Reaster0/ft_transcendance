@@ -215,6 +215,8 @@ export default defineComponent ({
 				console.log(event)
 				fatalError.value = true
 			}
+			
+			window.addEventListener('resize', resizeCanvas);
 		})
 
 		watch(gameStarted, (gameChange) =>{
@@ -241,6 +243,13 @@ export default defineComponent ({
 			// }
 			// return false
 		})
+
+		function resizeCanvas(){
+			if (canvas){
+			canvas.width = window.innerWidth
+			canvas.height = window.innerHeight
+			}
+		}
 
 		function WatchGame(){
 			console.log("watchGame")
