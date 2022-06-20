@@ -808,7 +808,7 @@ export default defineComponent({
       joinProtectedChannel, Roles, waitingGame, game, blockUser,
       unblockUser, leaveChannel, displayJoinableChannel, dropdownShouldOpen, 
       getJoinnableChannels, channelManager, showGameModal, toggleGameModal,
-      responseGame, getConnectedUsers, connectedUsers}
+      responseGame, getConnectedUsers, connectedUsers,}
 	},
 })
 </script>
