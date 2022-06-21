@@ -81,9 +81,7 @@
             </p>
           </div>
           <v-col cols="12" sm="6" class="offsetmess">
-            <v-btn elevation="2">
-              Upload new avatar
-            </v-btn>
+            <input type="file" @change="previewFiles">
           </v-col>
         </v-list> 
       </v-radio-group>
@@ -96,39 +94,39 @@
 import { onMounted } from "@vue/runtime-core"
 import { defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import { leaveChat } from "../helper";
+import { leaveChat, imgToBuffer } from '../helper';
 import { Store, useStore } from 'vuex';
-//import io from 'socket.io-client';
+import io from 'socket.io-client';
 import router from "../router/index";
+import { ChannelType } from '../types/chat.types';
 
-// https://codesource.io/vue-export-default-vs-vue-new/
 export default defineComponent ({
   setup() {
 
     let store = useStore() as Store<any>;
     let channelId = store.getters.getCurrentChannelId;
     let channelType = store.getters.getCurrentChannelType;
-    //let socketVal = store.getters.getSocketVal;
+    let socketVal = store.getters.getSocketVal;
     let newType = ref<any>(null);
     let password = ref<string>('');
+    let file = ref<any>(null);
 
     onMounted(async() => {
       try {
-        if (!channelId || !channelType) {
+        if (!channelId || channelType === null || channelType === ChannelType.PM) {
           alert('Something went wrong. Redirect to chat.');
           router.push('/thechat');
           return ;
+        } else if (!socketVal) {
+          const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+            transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          store.commit('setSocketVal' , connection);
+          console.log("starting connection to websocket");
+          socketVal = store.getters.getSocketVal;
         }
-        //if (!socketVal) {
-        //  const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
-        //    transportOptions: {
-        //      polling: { extraHeaders: { auth: document.cookie} },
-        //    },
-        //  })
-        //  store.commit('setSocketVal' , connection);
-        //  console.log("starting connection to websocket");
-        //  socketVal = store.getters.getSocketVal;
-        //}
       } catch (error) {
         console.log("the error is:" + error)
       }
@@ -141,13 +139,34 @@ export default defineComponent ({
     })
 
     function changeRoomSettings() {
-      console.log(newType.value);
-      console.log(password.value);
+      const array = ['public', 'private', 'protected'];
+      newType.value = array.indexOf(newType.value);
+      if (newType.value === ChannelType.PROTECTED && password.value === '') {
+        alert('Password can\'t be empty.');
+        return ;
+      }
+      if ((newType.value === channelType && file.value === null)
+        || (newType.value === ChannelType.PROTECTED && password.value === '')) {
+        alert('No significant change made.');
+        return ;
+      }
+      if (newType.value != ChannelType.PROTECTED) {
+        password.value = '';
+      }
+      socketVal.emit('modifyChannel',
+        { channelId: channelId, type: newType.value, password: password.value,
+        avatar: file.value});
+      router.push('/thechat');
     }
 
-    return { newType, changeRoomSettings, password };
+    async function previewFiles(event: any) {
+      file.value = await imgToBuffer(event);
+    }
 
+    return { newType, changeRoomSettings, password, ChannelType, previewFiles };
   }
+
+
 })
 </script>
 
