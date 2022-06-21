@@ -3,28 +3,8 @@
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
-        <v-col cols="auto" sm="3" class="border">
+        <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
-            <!-- SEARCH PANNEL -->
-              <!--
-            <div class="d-flex" overflow-hidden>
-              <v-text-field clearable label="Find user or group to chat"
-              type="text" placeholder="Search" 
-              height = "50px" v-model="searchRequest"
-              @keyup.enter="sendingSearchRequest()"
-              ></v-text-field>
-            </div>
-            <v-select 
-            label="name"
-            v-model="searchRequest"
-            :option="joinableChannels"
-            :dropdown-should-open="dropdownShouldOpen"
-            :dropdown-should-open="dropdownShouldOpen"
-
-            ></v-select>
-            </div>
-            :dropdown-should-open="dropdownShouldOpen"
-            -->
             <div id="joinableChannels" class="searchtool-one">
               <h1 class="Spotnik"> Search channel </h1>
               <v-selection @open="getJoinableChannels"
@@ -55,7 +35,7 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top"
-            style="max-height: calc(100vh - 18%);">
+            style="max-height: calc(100vh - 50%);">
             <v-list>
               <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -131,7 +111,7 @@
                 :key="index" :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
-                  v-if="msg.userId === currentUser.id" :key="index"
+                  v-if="msg.userId === currentUser.id"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
                     <v-list-item-content class="user-message-container">
@@ -152,7 +132,7 @@
                   </v-badge>
                 </v-btn>
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
-                  != currentUser.id" :key="index">   
+                  != currentUser.id">   
                   <v-list-item>
                     <v-list-item-content class="other-message-container">
                       <v-list-item-title class="message-name">
@@ -254,9 +234,14 @@
                   @click="leaveChannel">
                   Leave the chat room
                 </v-btn>
-                <div v-if="currentChannel.role === Roles.ADMIN
-                  || currentChannel.role === Roles.OWNER">
-                  <v-btn class="my-1" :to="{ name: 'ChangeRoom' }" elevation="2"
+                <div v-if="currentChannel.type === ChannelType.PRIVATE">
+                <v-btn class="my-1" elevation="2" width="80%" color="success"
+                  @click="genJoinUrl(currentChannel.id)">
+                  Generate invitation link
+                </v-btn>
+                </div>
+                <div v-if="currentChannel.role === Roles.OWNER">
+                  <v-btn class="my-1" @click="goToRoomSettings" elevation="2"
                     width="80%">
                     Room settings
                   </v-btn>
@@ -264,7 +249,7 @@
                 <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
 
                 <!-- INFOS ABOUT CHANNEL USERS  -->
-                <div id="app" class="pt-6">
+                <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
                   <v-tabs fixed-tabs>
                     <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
                     <v-tab color="rgb(0,0,255)"
@@ -288,9 +273,11 @@
                                 :inset="item.inset"></v-divider>
                               <v-list-item v-else :key="item.title">
                                 <!-- MANAGE USER BUTTON IF ADMIN -->
-                                <div v-if="currentUser.role === Roles.ADMIN 
-                                  || currentUser.role === Roles.OWNER">
-                                  <v-btn :to="{ name: 'ManageUsers' }" icon
+                                <div v-if="(currentChannel.role === Roles.ADMIN 
+                                  || currentChannel.role === Roles.OWNER)
+                                  && item.id != currentUser.id
+                                  && item.role != Roles.OWNER">
+                                  <v-btn @click="goToManageUser(item)" icon
                                     elevation="0">
                                     <v-app-bar-nav-icon elevation="0">
                                     </v-app-bar-nav-icon>
@@ -335,9 +322,11 @@
                               </v-divider>
                               <v-list-item v-else :key="item.title">
                                 <!-- MANAGE USER BUTTON IF ADMIN -->
-                                <div v-if="currentUser.role === Roles.ADMIN 
-                                  || currentUser.role === Roles.OWNER">
-                                  <v-btn :to="{ name: 'ManageUsers' }" icon
+                                <div v-if="(currentChannel.role === Roles.ADMIN 
+                                  || currentChannel.role === Roles.OWNER)
+                                  && item.id != currentUser.id
+                                  && item.role != Roles.OWNER">
+                                  <v-btn @click="goToManageUser(item)" icon
                                     elevation="0">
                                     <v-app-bar-nav-icon elevation="0">
                                     </v-app-bar-nav-icon>
@@ -384,13 +373,13 @@
                   </v-btn>
                 </div>
                 <div v-if="!currentChannel.blocked">
-                  <v-btn @click="blockUser" elevation="2"
+                  <v-btn @click="blockUser(parseInt(currentChannel.id), true)" elevation="2"
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
                 </div>
                 <div v-else>
-                  <v-btn @click="unblockUser" elevation="2"
+                  <v-btn @click="blockUser(parseInt(currentChannel.id), false)" elevation="2"
                     class="my-2" width="80%" color="success">
                     Unblock this user
                   </v-btn>
@@ -434,6 +423,7 @@
 </template>
 
 <script lang="ts">
+
 import { onMounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
@@ -445,17 +435,16 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
   Roles } from '../types/chat.types';
-import { getAvatarID } from '../components/FetchFunctions';
+import { getAvatarID, genJoinLink } from '../components/FetchFunctions';
 import "vue-select/dist/vue-select.css";
-
-
+import router from "../router/index";
 
 export default defineComponent({
   name: "ChatMain",
   components: {
     'password-modal': PasswordModal,
     'game-modal': GameModal,
-   'v-selection': vSelect,
+    'v-selection': vSelect,
   },
 	setup() {
 
@@ -469,7 +458,7 @@ export default defineComponent({
     let currentChannel = ref({ name: '' as string, id: '' as string,
       type: ChannelType.PUBLIC as ChannelType, 
       messages: [] as Message[], users: [] as UserChannel[],
-      role: Roles.USER as Roles, avatar: null as null | string,
+      role: Roles.NONMEMBER as Roles, avatar: null as null | string,
       notif: false as boolean, description: '' as string, 
       blocked: false as boolean });
     let channelManager = ref({title: ['all members', 'admins'] as string[],
@@ -478,11 +467,12 @@ export default defineComponent({
     let messageText = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref<Channel[]>([]);
-    let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
+    let showPasswordModal = ref<boolean>(false);
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: '' as string });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
+    let confirm =  0 as number;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
@@ -501,6 +491,9 @@ export default defineComponent({
             },
           })
           store.commit('setSocketVal' , connection.value);
+          store.commit('setUserToManage' , null);
+          store.commit('setCurrentChannelId' , null);
+          store.commit('setCurrentChannelType', null);
           console.log("starting connection to websocket");
         } else {
           connection.value!.emit('getUsersList');
@@ -569,18 +562,68 @@ export default defineComponent({
         console.log(joinableChannels.value);
       })
 
+      connection.value!.on('joinAccepted', function(params: { id: string }){
+        if (currentChannel.value.id != params.id) {
+          console.log('error in correspondance join channel');
+          return;
+        }
+        alert('Welcome to ' + currentChannel.value.name + ' !');
+        displayMemberChannel();
+      })
+
+      connection.value!.on('banned', function(){
+        alert('You are banned from ' + currentChannel.value.name + ' !');
+      })
+
+      connection.value!.on('wrongPassword', function(){
+        alert('You entered the wrong password for '
+          + currentChannel.value.name);
+      })
+
       connection.value!.on('newMessage',
         function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
           console.log('receive messageText from non current');
           return ;
         }
-        console.log('incoming messageText');
+        console.log('incoming message');
         currentChannel.value.messages.push(params.message);
-        if (params.message.userId != currentUser.value.id) {
+        if (params.message.userId != currentUser.id) {
           currentChannel.value.notif = true;
         }
       })
+
+      connection.value!.on('leftChannel', function(params: { id: string }) {
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('successfully left channel ' + currentChannel.value.name);
+        initDisplayChannel(currentChannel.value, false);
+        connection.value!.emit('emitMyChannels');
+      })
+
+      connection.value!.on('userLeftChannel', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('one user left channel ' + currentChannel.value.name);
+        connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      })
+
+      connection.value!.on('channelDestruction', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          connection.value!.emit('emitMyChannels');
+          return ;
+        }
+        console.log('destruction of channel ' + currentChannel.value.name);
+        alert('Channel ' + currentChannel.value.name
+          + ' is being erased by it\'s owner!');
+        router.push('/thechat');
+      })
+
+      connection.value!.on('isBlocked', function (params: boolean) {
+        currentChannel.value.blocked = params;
+      }) 
 
       connection.value!.on('gameInvitation', function(params: { id: number }) {
         //TODO
@@ -591,25 +634,19 @@ export default defineComponent({
 
     /* Functions for channel display and management */
 
-    /*
-    function checkIfUserIsMember(channelId: string) {
-      const channelsToCheck = userChannels.value.channels as Channel[];
-      const found = channelsToCheck
-        .find(channelsToCheck => channelsToCheck.id === channelId);
-      if (!found) {
-        return false;
-      }
-      return true;
-    }
-    */
-
     function initDisplayChannel(channel: any, isMember: boolean) {
+      confirm = 0;
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
+
       currentChannel.value.blocked = false; // TODO modify accordingly
+      if (channel.type === 3) {
+        connection.value!.emit('isUserBlocked', channel.id); // or maby use a route
+      }
+
       const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
       currentChannel.value.description = channelTypes[channel.type];
       currentChannel.value.messages = [];
@@ -622,16 +659,17 @@ export default defineComponent({
       update.value.messages = false;
       update.value.users = false;
         if (isMember) {
-          return displayMemberChannel(channel);
+          return displayMemberChannel();
         }
     }
 
-    function displayMemberChannel(channel: any) {
-      console.log('ask for ' + channel.name + ' users and messages');
+    function displayMemberChannel() {
+      console.log('ask for '
+        + currentChannel.value.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
-      connection.value.emit('getChannelUsers', { id: channel.id });
-      connection.value.emit('getChannelMessages', { id: channel.id });
+      connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      connection.value.emit('getChannelMessages', { id: currentChannel.value.id });
     }
 
     async function setChannelManager() {
@@ -699,7 +737,6 @@ export default defineComponent({
 
     function getUserColor(userId: number) {
       const status = getUserStatus(userId) as Status;
-      console.log(status);
       if (status === Status.ONLINE)
         return "green";
       else if (status === Status.PLAYING)
@@ -710,11 +747,11 @@ export default defineComponent({
     /* Function for search pannel */
 
     function getJoinableChannels() {
-      connection.value.emit('getJoinableChannels', currentUser.id);
+      connection.value!.emit('getJoinableChannels', currentUser.id);
     }
 
     function getConnectedUsers() {
-      connection.value.emit('getConnectedUsers');
+      connection.value!.emit('getConnectedUsers');
     }
 
 		function sendingMessage(channelId: string) {
@@ -728,27 +765,30 @@ export default defineComponent({
     /* Functions for channels actions */
 
     function joinChannel() {
-      console.log('join channel');
+      console.log('join channel', currentChannel.value.name);
       if (currentChannel.value.type === ChannelType.PROTECTED) {
         showPasswordModal.value = true;
         return ;
       }
-      //TODO emit to back to join channel
-      //TODO if user is blocked from channel / user, get message
+      console.log(currentChannel.value);
+      connection.value!.emit('joinChannel', {id: currentChannel.value.id,
+         password: ''});
     }
 
     function joinProtectedChannel(password: string) {
-      console.log('join channel with password: ' + password);
+      console.log('join channel ' + currentChannel.value.name +
+        ' with password: ' + password);
       if (password === '') {
         alert('Password entered is empty. Please retry.');
         return;
       }
       showPasswordModal.value = false;
-      //TODO emit to back to join channel
+      connection.value!.emit('joinChannel', {id: currentChannel.value.id,
+         password: password});
     }
 
-    function blockUser() {
-      //TODO
+    function blockUser(targetId: number, block: boolean) {
+      connection.value!.emit('blockUser', {targetId, block});
     }
 
     function unblockUser() {
@@ -756,7 +796,14 @@ export default defineComponent({
     }
 
     function leaveChannel() {
-      //TODO
+      console.log('leave channel ' + currentChannel.value.name);
+      if (currentChannel.value.role === Roles.OWNER && confirm === 0) {
+        confirm++;
+        alert('\tYou\'re the channel owner: It will be erased.\nPlease click another time on \'Leave Channel\' to confirm.');
+        return;
+      }
+      confirm = 0;
+      connection.value!.emit('leaveChannel', { id: currentChannel.value.id });
     }
 
     /* Functions for game invitation system */
@@ -786,12 +833,6 @@ export default defineComponent({
             channel.avatar = URL.createObjectURL(blob);
         }
       }
-
-    }
-
-    function log(log: string) {
-      console.log('log: ' + log);
-      return true;
     }
 
     function isScrollAtBottom(event: any) {
@@ -815,24 +856,46 @@ export default defineComponent({
       return VueSelect.search.length !== 0 && VueSelect.open
     }
 
-    function testUniq(params: any) {
-      console.log('test ' + params);
+    async function genJoinUrl(channelId: string) {
+      console.log('gen ' + channelId);
+      const res = await genJoinLink(channelId);
+      alert('invitation link: ' + res);
+    }
+
+    /* Sub routes functions */
+
+    function goToManageUser(user: UserChannel) {
+      let userToManage = null as any;
+      for (let globalUser of usersList.value) {
+        if (globalUser.id === user.id) {
+          userToManage = globalUser;
+          break;
+        }
+      }
+      userToManage.role = user.role;
+      store.commit('setCurrentChannelId', currentChannel.value.id);
+      store.commit('setUserToManage', userToManage);
+      router.push('/mu');
+    }
+
+    function goToRoomSettings() {
+      store.commit('setCurrentChannelId', currentChannel.value.id);
+      store.commit('setCurrentChannelType', currentChannel.value.type);
+      router.push('/roomsettings');
     }
 
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage,
-      searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
-      ChannelType, togglePasswordModal, showPasswordModal, joinChannel, 
-      joinProtectedChannel, Roles, waitingGame, game, blockUser,
-      unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
-      getJoinableChannels, channelManager, showGameModal, toggleGameModal,
-      responseGame, getConnectedUsers, chanJoinSelected,
-      testUniq }
+      getUserColor, sendingMessage, searchRequest, joinableChannels,
+      avatarToUrl, isScrollAtBottom, ChannelType, togglePasswordModal,
+      showPasswordModal, joinChannel, joinProtectedChannel, Roles, waitingGame,
+      game, blockUser, unblockUser, leaveChannel, initDisplayChannel,
+      dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
+      toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
+      genJoinUrl, goToManageUser, goToRoomSettings }
 	},
 })
 </script>
-
 
 <style scoped>
 .searchtool-one {

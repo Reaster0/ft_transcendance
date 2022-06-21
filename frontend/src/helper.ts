@@ -12,6 +12,8 @@ function leaveChat(socket: any, to: any, next: any, store: Store<any>) {
 			console.log('disconnection from chat');
 		socket.disconnect();
 		store.commit('setSocketVal' , null);
+		store.commit('setUserToManage' , null);
+		store.commit('setCurrentChannelId' , null);
 		next(true);
 		return;
 	}

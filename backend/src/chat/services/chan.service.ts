@@ -33,6 +33,7 @@ export class ChanServices {
 		if (sameName) return {channel:null, error: 'This channel name is already taked'};
 
     channel.users = [creator];
+    channel.blocked = [];
 		if (type === ChannelType.PROTECTED || password) {
 			const salt = await bcrypt.genSalt();
 			channel.password = await bcrypt.hash(password, salt);
@@ -56,32 +57,34 @@ export class ChanServices {
     }
   }
 
-  async pushUserToChan(channelId: string, user: User){
-    let update: Channel = await this.chanRepository.findOne(channelId);
-    if (!update)
-      return (null);
-    update.users.push(user);
-    this.chanRepository.update(channelId, update);
-    const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel: update}
-    this.roleRepository.save(newUser);
-    return (update);
+  async pushUserToChan(channel: ChannelI, user: User){
+    (channel.users).push(user);
+//    await this.chanRepository.update(channel.id, channel);
+//  update dont work
+    await this.chanRepository.save(channel);
+    const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel}
+    await this.roleRepository.save(newUser);
+    return (channel);
   }
 
   async removeUserFromChan(channelId: string, user: User): Promise<Channel> {
-    let update: Channel = await this.chanRepository.findOne(channelId);
-    const index = update.users.indexOf(user);
-    if (index == -1) { return null; }
+    let update: Channel = await this.chanRepository.findOne(channelId, { relations : ['users'] });
 
-    update.users.splice(index, 1);
-    await this.chanRepository.update(channelId, update);
-
+    for (const [i, value] of update.users.entries()) {
+      if (value.id === user.id) {
+        update.users.splice(i, 1);
+        break ;
+      }
+    }
+    
+    await this.chanRepository.save(update);
     const chanUser = await this.roleRepository.findOne({ where: { channel: update, userId: user.id} });
-    console.log(chanUser);
     try {
-      this.roleRepository.remove(chanUser)
+      this.roleRepository.remove(chanUser);
     } catch (err) {
       console.log(err);
     }
+    console.log('remove user from channel');
     return update;
   }
 
@@ -184,11 +187,8 @@ export class ChanServices {
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
 
     const channel = await this.chanRepository.findOne(channelId);
-    const chanUser = await this.roleRepository.findOne({ where: { channel, targetId} });
-
-    const muteDate = new Date;
-    muteDate.setDate(muteDate.getDate() + time)
-
+    const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
+    const muteDate = new Date(new Date().getTime() + 10 * 60000) // 10 minutes
     chanUser.muteDate = muteDate;
     return this.roleRepository.save(chanUser);
 }
@@ -206,7 +206,7 @@ export class ChanServices {
     let channel = await this.removeUserFromChan(channelId, user);
     if (!channel) {return null;} /* User was not in channel */
     channel.blocked.push(user.id);
-    await this.chanRepository.update(channelId, channel);
+    await this.chanRepository.save(channel);
     return channel;
   }
 
@@ -216,7 +216,7 @@ export class ChanServices {
     const index = channel.blocked.indexOf(userId);
     if (index == -1) { return null; }
     channel.blocked.splice(index, 1);
-    await this.chanRepository.update(channelId, channel);
+    await this.chanRepository.save(channel);
     return channel;
   }
 
@@ -226,5 +226,13 @@ export class ChanServices {
   */
   async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
     return this.roleRepository.findOne({channel, userId});
+  }
+
+  async addAdmin(chanelId: string, userId: number): Promise<Roles> {
+    const channel = await this.chanRepository.findOne(chanelId);
+    let user = await this.roleRepository.findOne({channel, userId});
+    if (!user) {return null;}
+    user.role = ERoles.ADMIN;
+    return await this.roleRepository.save(user);
   }
 }

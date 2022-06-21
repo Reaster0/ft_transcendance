@@ -108,29 +108,56 @@
 
 
 <script lang="ts">
-// создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
 
-import { defineComponent } from "vue";
-import { useStore, Store } from "vuex";
+import { onMounted } from "@vue/runtime-core"
+import { defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import { leaveChat } from '../helper';
+import { leaveChat } from "../helper";
+import { Store, useStore } from 'vuex';
+import io from 'socket.io-client';
+import router from "../router/index";
 
 // https://codesource.io/vue-export-default-vs-vue-new/
 export default defineComponent ({
-  data: () => ({
-    public: false,
-    private: false,
-    protected: true,
-  }),
   setup() {
 
     let store = useStore() as Store<any>;
+    let channelId = store.getters.getCurrentChannelId;
+    let channelType = store.getters.getChannelType;
+    let socketVal = store.getters.getSocketVal;
+    let publicChat = ref<boolean>(false);
+    let privateChat = ref<boolean>(false);
+    let protectedChat = ref<boolean>(false);
+
+    onMounted(async() => {
+      try {
+        if (!channelId || !channelType) {
+          alert('Something went wrong. Redirect to chat.');
+          router.push('/thechat');
+          return ;
+        } else if (!socketVal) {
+          const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+            transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          store.commit('setSocketVal' , connection);
+          console.log("starting connection to websocket");
+          socketVal = store.getters.getSocketVal;
+        }
+      } catch (error) {
+        console.log("the error is:" + error)
+      }
+    })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(socket, to, next, store);
     })
+
+    return { publicChat, privateChat, protectedChat }
+
   }
 })
 </script>

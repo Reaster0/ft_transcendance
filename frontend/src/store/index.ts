@@ -15,8 +15,10 @@ const store = createStore({
 		// ----chat---- //
 		channels: [] as any[],
 		joinedChannel: false as boolean,
-		theSocketVal: null as any,
+		socketVal: null as any,
 		usersList: [] as UserGlobal[],
+		userToManage: null as any,
+		currentChannelId: null as any,
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -36,10 +38,16 @@ const store = createStore({
 			return state.joinedChannel;
 		},
 		getSocketVal:(state) => {
-			return state.theSocketVal;
+			return state.socketVal;
 		},
 		getUsersList:(state) => {
 			return state.usersList;
+		},
+		getUserToManage:(state) => {
+			return state.userToManage;
+		},
+		getCurrentChannelId:(state) => {
+			return state.currentChannelId;
 		}
 	},
 	mutations: {
@@ -61,10 +69,16 @@ const store = createStore({
 			state.joinedChannel = thestatus;
 		},
 		setSocketVal(state, val) {
-			state.theSocketVal = val;
+			state.socketVal = val;
 		},
 		setUsersList(state, val) {
 			state.usersList = val;
+		},
+		setUserToManage(state, val) {
+			state.userToManage = val;
+		},
+		setCurrentChannelId(state, val) {
+			state.currentChannelId = val;
 		},
 	},
 	actions: {},

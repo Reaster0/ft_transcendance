@@ -135,3 +135,11 @@ export async function getUserInfos(nickName: string) {
 		return res
 	})
 }
+
+export async function genJoinLink(channelId: string) {
+	return await fetch(process.env.VUE_APP_BACKEND + '/chat/genJoinUrl?' + new URLSearchParams({chanId: channelId}),
+	{
+		method: 'get',
+		credentials: 'include'
+	}).then(function(body){return body.text()});
+}

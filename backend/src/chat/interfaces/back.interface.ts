@@ -6,6 +6,7 @@ export interface ChannelI {
   id?: string;
   name?: string;
   users?: User[];
+  blocked?: number[];
   password?: string;
   type?: ChannelType;
   avatar?: Uint8Array;

@@ -1,24 +1,23 @@
 <template>
   <div class="bloc-modale" v-if="showGameModal">
     <div class="overlay"></div>
-      <div class="modale card">
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">Game invitation from {{ inviter }}</span>
-          </v-card-title>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" text @click="toggleGameModal">
-              Refuse
-            </v-btn>
-            <v-btn color="blue darken-1" text @click="respondToGame">
-              Accept
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </div>
+    <div class="modale card">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">Game invitation from {{ inviter }}</span>
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="toggleGameModal">
+            Refuse
+          </v-btn>
+          <v-btn color="blue darken-1" text @click="respondToGame">
+            Accept
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </div>
-
+  </div>
 </template>
 
 

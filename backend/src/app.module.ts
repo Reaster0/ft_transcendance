@@ -28,6 +28,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         ENCRYPTION_IV_LENGTH: Joi.number().required(),
         ENCRYPTION_ALGORITHM: Joi.string().required(),
         DEFAULT_AVATAR: Joi.string().required(),
+        URLGENSECRET: Joi.string().required(),
         isGlobal: true,
       }),
     }),
