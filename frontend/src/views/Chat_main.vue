@@ -3,7 +3,7 @@
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
-        <v-col cols="auto" sm="3" class="border" style="max-height: calc(100vh - 52px);">
+        <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
             <div id="joinableChannels" class="searchtool-one">
               <h1 class="Spotnik"> Search channel </h1>
@@ -111,7 +111,7 @@
                 :key="index" :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
-                  v-if="msg.userId === currentUser.id" :key="msg"
+                  v-if="msg.userId === currentUser.id"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
                     <v-list-item-content class="user-message-container">
@@ -132,7 +132,7 @@
                   </v-badge>
                 </v-btn>
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
-                  != currentUser.id" :key="msg">   
+                  != currentUser.id">   
                   <v-list-item>
                     <v-list-item-content class="other-message-container">
                       <v-list-item-title class="message-name">
