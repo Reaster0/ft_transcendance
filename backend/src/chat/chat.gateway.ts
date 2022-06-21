@@ -140,6 +140,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.emitMyChannels(client);
   }
 
+  joinPrivateChan(clientSocketId: string, result: boolean) {
+    if (!result) {
+    this.server.to(clientSocketId).emit('joinResult')
+    }
+    
+  }
+
 
   /********************* Leave Channel ********************/
   // @UseGuards(AuthChat)

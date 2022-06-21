@@ -254,6 +254,12 @@
                   @click="leaveChannel">
                   Leave the chat room
                 </v-btn>
+                <div v-if="currentChannel.type === ChannelType.PRIVATE">
+                <v-btn class="my-1" elevation="2" width="80%" color="blue"
+                  @click="genJoinUrl(currentChannel.id)">
+                  Generate invitation link
+                </v-btn>
+                </div>
                 <div v-if="currentChannel.role === Roles.ADMIN
                   || currentChannel.role === Roles.OWNER">
                   <v-btn class="my-1" :to="{ name: 'ChangeRoom' }" elevation="2"
@@ -445,7 +451,7 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from '../helper';
 import { Status, Message, UserChannel, Channel, ChannelType,
   Roles } from '../types/chat.types';
-import { getAvatarID } from '../components/FetchFunctions';
+import { getAvatarID, genJoinLink } from '../components/FetchFunctions';
 import "vue-select/dist/vue-select.css";
 
 
@@ -826,6 +832,13 @@ export default defineComponent({
       console.log('test ' + params);
     }
 
+    async function genJoinUrl(channelId: string) {
+      console.log('gen ' + channelId);
+      const res = await genJoinLink(channelId);
+      // for now we use that ugly way
+      alert('invitation link:\n' + res);
+    }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage,
@@ -835,7 +848,7 @@ export default defineComponent({
       unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
       getJoinableChannels, channelManager, showGameModal, toggleGameModal,
       responseGame, getConnectedUsers, chanJoinSelected,
-      testUniq }
+      testUniq, genJoinUrl }
 	},
 })
 </script>
