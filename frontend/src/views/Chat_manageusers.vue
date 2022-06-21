@@ -10,13 +10,13 @@
                       <v-card color="rgba(0,0,0,0)" flat >
                         <v-toolbar dense color="rgba(0,0,0,0)">
                           <v-btn elevation="0" min-height="50px"  max-width="50px">
-                          <v-badge bordered bottom color="green" dot offset-x="4" offset-y="34" class="spacetop" >
-                              <v-avatar class="col" elevation="10" size="40px">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg" width="50" height="50">
-                              </v-avatar>
-                          </v-badge>
+                            <v-avatar class="col" elevation="10" size="40px">
+                              <img :src="userToManage.avatar" width="50" height="50">
+                            </v-avatar>
                           </v-btn>
-                          <v-toolbar-title class="offsetmess">anadege</v-toolbar-title>
+                          <v-toolbar-title class="offsetmess">
+                            {{ userToManage.nickname }}
+                          </v-toolbar-title>
                         </v-toolbar>
                       </v-card>
                     </v-list-item>
@@ -27,7 +27,7 @@
                   <v-list>
                     <div>
                     <p align="left" class="font-weight-black offsetmess spacetoponly">
-                      Ban this user for 30 days
+                      Ban this user indefinetly (non revocable !)
                     </p>
                     </div>
                     <v-list-item>
@@ -82,7 +82,7 @@
                     </v-btn>
                     <v-btn
                       color="rgb(0,0,255)"
-                      to="/thechat"
+                      @click="manageUser"
                     >
                       Save
                     </v-btn>
@@ -99,30 +99,74 @@
 
 
 <script lang="ts">
-// создание и объявление компонентов. В темплейте мы по ним будем итерироваться.
-// https://codesource.io/vue-export-default-vs-vue-new/
 
-import { defineComponent } from "vue";
+import { onMounted } from "@vue/runtime-core"
+import { defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from "../helper";
 import { Store, useStore } from 'vuex';
-
+import io from 'socket.io-client';
+import router from "../router/index";
 
 export default defineComponent ({
-  data: () => ({
-    ban: false as boolean,
-    mute: false as boolean,
-    admin: false as boolean,
-  }),
   setup() {
 
     let store = useStore() as Store<any>;
+    let channelId = store.getters.getCurrentChannelId;
+    let userToManage = ref<any>(store.getters.getUserToManage);
+    let socketVal = store.getters.getSocketVal;
+    let ban = ref<boolean>(false);
+    let mute = ref<boolean>(false);
+    let admin = ref<boolean>(false);
 
-		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+
+    onMounted(async() => {
+      console.log(userToManage.value);
+      try {
+        if (!channelId || !userToManage.value) {
+          alert('Something went wrong. Redirect to chat.');
+          router.push('/thechat');
+          return ;
+        } else if (!socketVal) {
+          const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+            transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          store.commit('setSocketVal' , connection);
+          console.log("starting connection to websocket");
+          socketVal = store.getters.getSocketVal;
+        }
+      } catch (error) {
+        console.log("the error is:" + error)
+      }
+    })
+
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {  
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(socket, to, next, store);
     })
+
+    function manageUser() {
+      if (ban.value && (mute.value || admin.value) || (mute.value && admin.value)) {
+        alert('You can only choose ONE option.');
+        return;
+      }
+      if (ban.value) {
+        socketVal.emit('banUser',
+          { channelId: channelId, userId: userToManage.value.id});
+      } else if (mute.value) {
+        socketVal.emit('muteUser',
+          { channelId: channelId, userId: userToManage.value.id});        
+      } else {
+        socketVal.emit('giveAdminRights',
+          { channelId: channelId, userId: userToManage.value.id});
+      }
+      router.push('/thechat');
+    }
+
+    return { userToManage, ban, mute, admin, manageUser };
   }
 });
 </script>

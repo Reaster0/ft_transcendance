@@ -219,7 +219,7 @@
               <!-- SUBCASE CHANNEL NOT JOINED -->
               <div v-if="currentChannel.role === Roles.NONMEMBER">
                 <v-btn elevation="2" class="my-2" width="80%"
-                  @click="joinChannel(currentChannel.id)">
+                  @click="joinChannel">
                   Join the chat room
                 </v-btn>
                 <password-modal :showPasswordModal="showPasswordModal"
@@ -278,7 +278,7 @@
                                   || currentChannel.role === Roles.OWNER)
                                   && item.id != currentUser.id
                                   && item.role != Roles.OWNER">
-                                  <v-btn :to="{ name: 'ManageUsers' }" icon
+                                  <v-btn @click="goToManageUser(item)" icon
                                     elevation="0">
                                     <v-app-bar-nav-icon elevation="0">
                                     </v-app-bar-nav-icon>
@@ -327,7 +327,7 @@
                                   || currentChannel.role === Roles.OWNER)
                                   && item.id != currentUser.id
                                   && item.role != Roles.OWNER">
-                                  <v-btn :to="{ name: 'ManageUsers' }" icon
+                                  <v-btn @click="goToManageUser(item)" icon
                                     elevation="0">
                                     <v-app-bar-nav-icon elevation="0">
                                     </v-app-bar-nav-icon>
@@ -424,6 +424,7 @@
 </template>
 
 <script lang="ts">
+
 import { onMounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
@@ -437,15 +438,14 @@ import { Status, Message, UserChannel, Channel, ChannelType,
   Roles } from '../types/chat.types';
 import { getAvatarID, genJoinLink } from '../components/FetchFunctions';
 import "vue-select/dist/vue-select.css";
-
-
+import router from "../router/index";
 
 export default defineComponent({
   name: "ChatMain",
   components: {
     'password-modal': PasswordModal,
     'game-modal': GameModal,
-   'v-selection': vSelect,
+    'v-selection': vSelect,
   },
 	setup() {
 
@@ -492,6 +492,8 @@ export default defineComponent({
             },
           })
           store.commit('setSocketVal' , connection.value);
+          store.commit('setUserToManage' , null);
+          store.commit('setCurrentChannelId' , null);
           console.log("starting connection to websocket");
         } else {
           connection.value!.emit('getUsersList');
@@ -725,7 +727,6 @@ export default defineComponent({
 
     function getUserColor(userId: number) {
       const status = getUserStatus(userId) as Status;
-      console.log(status);
       if (status === Status.ONLINE)
         return "green";
       else if (status === Status.PLAYING)
@@ -788,7 +789,7 @@ export default defineComponent({
       console.log('leave channel ' + currentChannel.value.name);
       if (currentChannel.value.role === Roles.OWNER && confirm === 0) {
         confirm++;
-        alert('You\'re the channel owner: It will be erased.\nPlease click another time on \'Leave Channel\' to confirm.');
+        alert('\tYou\'re the channel owner: It will be erased.\nPlease click another time on \'Leave Channel\' to confirm.');
         return;
       }
       confirm = 0;
@@ -860,6 +861,22 @@ export default defineComponent({
       alert('invitation link: ' + res);
     }
 
+    /* Sub routes functions */
+
+    function goToManageUser(user: UserChannel) {
+      let userToManage = null as any;
+      for (let globalUser of usersList.value) {
+        if (globalUser.id === user.id) {
+          userToManage = globalUser;
+          break;
+        }
+      }
+      userToManage.role = user.role;
+      store.commit('setCurrentChannelId', currentChannel.value.id);
+      store.commit('setUserToManage', userToManage);
+      router.push('/mu');
+    }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage,
@@ -869,7 +886,7 @@ export default defineComponent({
       unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
       getJoinableChannels, channelManager, showGameModal, toggleGameModal,
       responseGame, getConnectedUsers, chanJoinSelected,
-      testUniq, genJoinUrl }
+      testUniq, genJoinUrl, goToManageUser }
 	},
 })
 </script>
