@@ -745,7 +745,7 @@ export default defineComponent({
     }
 
     function leaveChannel() {
-      //TODO
+      console.log('leave channel ' + currentChannel.value.name);
     }
 
     /* Functions for game invitation system */
