@@ -373,13 +373,13 @@
                   </v-btn>
                 </div>
                 <div v-if="!currentChannel.blocked">
-                  <v-btn @click="blockUser" elevation="2"
+                  <v-btn @click="blockUser(parseInt(currentChannel.id), true)" elevation="2"
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
                 </div>
                 <div v-else>
-                  <v-btn @click="unblockUser" elevation="2"
+                  <v-btn @click="blockUser(parseInt(currentChannel.id), false)" elevation="2"
                     class="my-2" width="80%" color="success">
                     Unblock this user
                   </v-btn>
@@ -621,6 +621,10 @@ export default defineComponent({
         router.push('/thechat');
       })
 
+      connection.value!.on('isBlocked', function (params: boolean) {
+        currentChannel.value.blocked = params;
+      }) 
+
       connection.value!.on('gameInvitation', function(params: { id: number }) {
         //TODO
         game.value.inviter = getUserName(params.id);
@@ -637,7 +641,12 @@ export default defineComponent({
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
+
       currentChannel.value.blocked = false; // TODO modify accordingly
+      if (channel.type === 3) {
+        connection.value!.emit('isUserBlocked', channel.id); // or maby use a route
+      }
+
       const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
       currentChannel.value.description = channelTypes[channel.type];
       currentChannel.value.messages = [];
@@ -778,8 +787,8 @@ export default defineComponent({
          password: password});
     }
 
-    function blockUser() {
-      //TODO
+    function blockUser(targetId: number, block: boolean) {
+      connection.value!.emit('blockUser', {targetId, block});
     }
 
     function unblockUser() {

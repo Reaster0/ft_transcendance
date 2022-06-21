@@ -187,11 +187,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /********************* Block user *********************/
   //@UseGuards(AuthChat)
   @SubscribeMessage('blockUser')
-  async blockOrDefiUser(client: Socket, data: any): Promise<User> {
-    const { user, block } = data;
-    const userUpdate = this.userServices.updateBlockedUser(client.data.user, block, user);
-    this.logger.log(`${client.data.user} block ${user.username}`);
-    return userUpdate;
+  async blockOrDefiUser(client: Socket, data: {targetId: number, block: boolean}): Promise<void>{
+    const { targetId, block } = data;
+    const userUpdate = await this.userServices.updateBlockedUser(client.data.user, block, targetId);
+    this.logger.log(`${client.data.user} block ${userUpdate.nickname}`);
+    // emit result
   }
 
   /* dose back check the right for calling this socket route or front end ensure this ? */
@@ -336,6 +336,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('CreatePrivateConversation')
   async privateConversation(client: Socket, targetId: number) {
 
+  }
+  @SubscribeMessage('isUserBlocked')
+  async isUserBlocked(client: Socket, targetId: number) {
+    const user: User = client.data.user;
+    
+    const index = user.blockedIds.indexOf(targetId);
+    client.emit('isBlocked', index !== -1);
   }
 }
 
