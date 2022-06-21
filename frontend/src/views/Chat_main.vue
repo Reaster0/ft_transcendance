@@ -274,8 +274,10 @@
                                 :inset="item.inset"></v-divider>
                               <v-list-item v-else :key="item.title">
                                 <!-- MANAGE USER BUTTON IF ADMIN -->
-                                <div v-if="currentUser.role === Roles.ADMIN 
-                                  || currentUser.role === Roles.OWNER">
+                                <div v-if="(currentChannel.role === Roles.ADMIN 
+                                  || currentChannel.role === Roles.OWNER)
+                                  && item.id != currentUser.id
+                                  && item.role != Roles.OWNER">
                                   <v-btn :to="{ name: 'ManageUsers' }" icon
                                     elevation="0">
                                     <v-app-bar-nav-icon elevation="0">
@@ -321,8 +323,10 @@
                               </v-divider>
                               <v-list-item v-else :key="item.title">
                                 <!-- MANAGE USER BUTTON IF ADMIN -->
-                                <div v-if="currentUser.role === Roles.ADMIN 
-                                  || currentUser.role === Roles.OWNER">
+                                <div v-if="(currentChannel.role === Roles.ADMIN 
+                                  || currentChannel.role === Roles.OWNER)
+                                  && item.id != currentUser.id
+                                  && item.role != Roles.OWNER">
                                   <v-btn :to="{ name: 'ManageUsers' }" icon
                                     elevation="0">
                                     <v-app-bar-nav-icon elevation="0">
@@ -455,7 +459,7 @@ export default defineComponent({
     let currentChannel = ref({ name: '' as string, id: '' as string,
       type: ChannelType.PUBLIC as ChannelType, 
       messages: [] as Message[], users: [] as UserChannel[],
-      role: Roles.USER as Roles, avatar: null as null | string,
+      role: Roles.NONMEMBER as Roles, avatar: null as null | string,
       notif: false as boolean, description: '' as string, 
       blocked: false as boolean });
     let channelManager = ref({title: ['all members', 'admins'] as string[],
@@ -469,6 +473,7 @@ export default defineComponent({
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: '' as string });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
+    let confirm =  0 as number;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
@@ -603,6 +608,16 @@ export default defineComponent({
         connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
       })
 
+      connection.value!.on('channelDestruction', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('destruction of channel ' + currentChannel.value.name);
+        alert('Channel ' + currentChannel.value.name
+          + ' is being erased by it\'s owner!');
+        connection.value!.emit('emitMyChannels');
+      })
+
       connection.value!.on('gameInvitation', function(params: { id: number }) {
         //TODO
         game.value.inviter = getUserName(params.id);
@@ -613,6 +628,7 @@ export default defineComponent({
     /* Functions for channel display and management */
 
     function initDisplayChannel(channel: any, isMember: boolean) {
+      confirm = 0;
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
@@ -743,6 +759,7 @@ export default defineComponent({
         showPasswordModal.value = true;
         return ;
       }
+      console.log(currentChannel.value);
       connection.value!.emit('joinChannel', {id: currentChannel.value.id,
          password: ''});
     }
@@ -769,6 +786,12 @@ export default defineComponent({
 
     function leaveChannel() {
       console.log('leave channel ' + currentChannel.value.name);
+      if (currentChannel.value.role === Roles.OWNER && confirm === 0) {
+        confirm++;
+        alert('You\'re the channel owner: It will be erased.\nPlease click another time on \'Leave Channel\' to confirm.');
+        return;
+      }
+      confirm = 0;
       connection.value!.emit('leaveChannel', { id: currentChannel.value.id });
     }
 
@@ -799,7 +822,6 @@ export default defineComponent({
             channel.avatar = URL.createObjectURL(blob);
         }
       }
-
     }
 
     function log(log: string) {
@@ -835,8 +857,7 @@ export default defineComponent({
     async function genJoinUrl(channelId: string) {
       console.log('gen ' + channelId);
       const res = await genJoinLink(channelId);
-      // for now we use that ugly way
-      alert('invitation link:\n' + res);
+      alert('invitation link: ' + res);
     }
 
 		return { update, messageText, userChannels, displayMemberChannel,
