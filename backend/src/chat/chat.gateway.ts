@@ -213,11 +213,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /* dose back check the right for calling this socket route or front end ensure this ? */
   @SubscribeMessage('banUser')
   async banUser(client: Socket, data: any): Promise<void> {
-    const {chanelId, userId} = data;
+    const {channelId, userId} = data;
     const user = await this.userServices.findUserById(userId + '');
-    console.log(user);
     if (!user) return ;
-    const channel = await this.chanServices.banUser(chanelId, user);
+    const channel = await this.chanServices.banUser(channelId, user);
     client.emit('UserBanned', `you have banned ${user.username} from ${channel.name}`);
     this.server.to(user.chatSocket).emit('banned', `you have been banned from ${channel.name}`);
   }
