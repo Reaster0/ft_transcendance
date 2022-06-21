@@ -10,6 +10,8 @@ import { ChatController } from './chat.controller';
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { Channel } from './entities/channel.entity';
 import { Roles } from './entities/role.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { urlGeneratorModuleConfig } from './signed-url.config';
 
 @Module({
   imports: [
@@ -20,10 +22,10 @@ import { Roles } from './entities/role.entity';
     ]),
     forwardRef(() => UsersModule),
     AuthModule,
-    UrlGeneratorModule.forRoot({
-      secret: 'thisIsNotASecret',
-      appUrl: 'http://localhost:3000', //or maybe backend.... will see
-    })
+    ConfigModule.forRoot(),
+    UrlGeneratorModule.forRootAsync({
+      useFactory: () => urlGeneratorModuleConfig(),
+    }),
   ],
   controllers: [ChatController],
   providers: [
