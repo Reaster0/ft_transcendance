@@ -508,7 +508,6 @@ export default defineComponent({
           user.avatar = await getAvatarID(user.id) as any; 
         }
         usersList.value = params;
-        store.commit('setUsersList', usersList.value);
         if (!update.value.connected) {
           connection.value!.emit('emitMyChannels');
         }
