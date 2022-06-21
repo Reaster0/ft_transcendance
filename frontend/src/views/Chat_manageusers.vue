@@ -1,7 +1,7 @@
 <template>
   <v-app >
     <v-container fluid >
-        <div id="app">
+        <div id="app" v-if="ok">
           <v-app id="inspire">
             <div class="text-center">
                 <v-card>
@@ -116,10 +116,11 @@ export default defineComponent ({
     let ban = ref<boolean>(false);
     let mute = ref<boolean>(false);
     let admin = ref<boolean>(false);
+    let ok = ref<boolean>(false);
 
     onMounted(async() => {
       try {
-        if (!channelId || !userToManage.value) {
+        if (!channelId || userToManage.value == null) {
           alert('Something went wrong. Redirect to chat.');
           router.push('/thechat');
           return ;
@@ -129,10 +130,12 @@ export default defineComponent ({
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
+          console.log(ok);
           store.commit('setSocketVal' , connection);
           console.log("starting connection to websocket");
           socketVal = store.getters.getSocketVal;
         }
+        ok.value = true;
       } catch (error) {
         console.log("the error is:" + error)
       }
@@ -163,7 +166,7 @@ export default defineComponent ({
       router.push('/thechat');
     }
 
-    return { userToManage, ban, mute, admin, manageUser };
+    return { userToManage, ban, mute, admin, manageUser, ok };
   }
 });
 </script>
