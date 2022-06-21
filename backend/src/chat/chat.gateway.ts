@@ -303,6 +303,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 //  console.log(connectedUsers);
     client.emit('connectedUsers', connectedUsers);
   }
+
+  @SubscribeMessage('CreatePrivateConversation')
+  async privateConversation(client: Socket, targetId: number) {
+    
+  }
 }
 
 // const channels = [{name: "hello", id: "string", type: ChannelType.PUBLIC, avatar: null}];
