@@ -130,7 +130,6 @@ export default defineComponent ({
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
-          console.log(ok);
           store.commit('setSocketVal' , connection);
           console.log("starting connection to websocket");
           socketVal = store.getters.getSocketVal;
@@ -152,7 +151,6 @@ export default defineComponent ({
         alert('You can only choose ONE option.');
         return;
       }
-      console.log(channelId);
       if (ban.value) {
         socketVal.emit('banUser',
           { channelId: channelId, userId: userToManage.value.id});
