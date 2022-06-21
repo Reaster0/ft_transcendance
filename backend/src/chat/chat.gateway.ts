@@ -15,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { Status } from '../users/enums/status.enum';
 import { subscribeOn } from 'rxjs';
 import { emit } from 'process';
+import { number } from '@hapi/joi';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -140,11 +141,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.emitMyChannels(client);
   }
 
-  joinPrivateChan(clientSocketId: string, result: boolean) {
-    if (!result) {
-    this.server.to(clientSocketId).emit('joinResult')
+  async joinPrivateChan(clientSocketId: string, userId: number, channel: ChannelI) {
+    if (!channel) {
+    this.server.to(clientSocketId).emit('joinResult', {message: 'Invalid link', channel})
+    return ;
     }
-    
+    this.server.to(clientSocketId).emit('joinResult',{message: `Wellcome to ${channel.name}`, channel});
+    const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(userId);
+    this.server.to(clientSocketId).emit('channelList', channels);
   }
 
 
@@ -231,6 +235,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     client.emit('usersList', users);    
   }
 
+  //unsure about the user of this function anymore.... as logic as change....
   @SubscribeMessage('emitChannels')
   async emitChannels() {
     const connections: User[] = await this.userServices.getConnectedUsers();
