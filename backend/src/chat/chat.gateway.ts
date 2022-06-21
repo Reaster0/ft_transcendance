@@ -158,14 +158,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /********************* Leave Channel ********************/
   // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
-  async handleLeaveChannel(client: Socket, channelId: string) {
-    await this.chanServices.removeUserFromChan(channelId, client.data.user);
+  async handleLeaveChannel(client: Socket, params: { id: string }) {
+    await this.chanServices.removeUserFromChan(params.id, client.data.user);
     //await this.chanServices.unmuteUser(channel.id, client.data.user);
     this.logger.log(`${client.data.user.username} leave a channel`);
+    client.emit('leftChannel', { id: params.id });
+    const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.id);
+    for (const user of connectedUsers) {
+      this.server.to(user.chatSocket).emit('userLeftChannel', { id: params.id });
+    }
   }
 
-
   /* Owner can edit the channel */
+
   @SubscribeMessage('editChannel')
   async updateChannel(client: Socket, input: any): Promise<boolean> {
     const { channel } = input;
