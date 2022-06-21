@@ -223,13 +223,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   
   @SubscribeMessage('unBanUser')
   async unBanUser(client: Socket, data: any): Promise<void> {
-    const {chanelId, userId} = data;
+    const {channelId, userId} = data;
     const user = await this.userServices.findUserById(userId + '');
     if (!user) return ;
-    const channel = await this.chanServices.unBanUser(chanelId, userId);
+    const channel = await this.chanServices.unBanUser(channelId, userId);
     if (!channel) { return ; }
     client.emit('UserUnbanned', `you have unbanned ${user.username} from ${channel.name}`);
     this.server.to(user.chatSocket).emit('unBanned', `you have been unbanned from ${channel.name}`);
+  }
+
+  @SubscribeMessage('giveAdminRights')
+  async giveAdminRights(client: Socket, data: any): Promise<void> {
+    const {channelId, userId} = data;
+    const res = await this.chanServices.addAdmin(channelId, userId);
+    if (!res)
+      return; //emit error to client
+    //const channelUsers: RolesI[] = await this.chanServices.getChannelUsers(channelId);
+    //emit status chante to userId.chatSocket.... but a bit expensive
+
   }
 
   /****** Emit Service ******/

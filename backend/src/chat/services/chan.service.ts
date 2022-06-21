@@ -227,4 +227,12 @@ export class ChanServices {
   async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
     return this.roleRepository.findOne({channel, userId});
   }
+
+  async addAdmin(chanelId: string, userId: number): Promise<Roles> {
+    const channel = await this.chanRepository.findOne(chanelId);
+    let user = await this.roleRepository.findOne({channel, userId});
+    if (!user) {return null;}
+    user.role = ERoles.ADMIN;
+    return await this.roleRepository.save(user);
+  }
 }

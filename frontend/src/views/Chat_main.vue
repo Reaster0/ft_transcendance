@@ -571,7 +571,7 @@ export default defineComponent({
         displayMemberChannel();
       })
 
-      connection.value!.on('youAreBanned', function(){
+      connection.value!.on('banned', function(){
         alert('You are banned from ' + currentChannel.value.name + ' !');
       })
 
