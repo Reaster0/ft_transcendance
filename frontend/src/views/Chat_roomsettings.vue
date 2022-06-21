@@ -153,7 +153,7 @@ export default defineComponent ({
       if (newType.value != ChannelType.PROTECTED) {
         password.value = '';
       }
-      socketVal.emit('modifyChannel',
+      socketVal.emit('editChannel',
         { channelId: channelId, type: newType.value, password: password.value,
         avatar: file.value});
       router.push('/thechat');

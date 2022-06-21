@@ -88,18 +88,20 @@ export class ChanServices {
     return update;
   }
 
-  async updateChannel(channel: ChannelI, info: any): Promise<Boolean> {
-		const { addPassword, password, removePassword } = info;
+  async updateChannel(channel: ChannelI, info: {type: ChannelType, password: string, avatar: Buffer}): Promise<Boolean> {
+		const { type, password, avatar } = info;
 
-    if (addPassword && password) {
+    
+    channel.type = type;
+    if (type === ChannelType.PROTECTED) {
       if (/^([a-zA-Z0-9]+)$/.test(password) === false)
         return false;
       const salt = await bcrypt.genSalt();
       channel.password = await bcrypt.hash(password, salt);
-    }
-    if (removePassword)
-      channel.password = '';
+    } else { channel.password = ''; }
     
+    if (avatar)
+      channel.avatar = avatar;
     await this.chanRepository.save(channel);
   return true;
   }

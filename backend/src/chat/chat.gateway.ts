@@ -170,13 +170,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /* Owner can edit the channel */
+/*
+      socketVal.emit('modifyChannel',
+        { channelId: channelId, type: newType.value, password: password.value,
+        avatar: file.value});
+*/
 
   @SubscribeMessage('editChannel')
   async updateChannel(client: Socket, input: any): Promise<boolean> {
-    const { channel } = input;
-    const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
+    const { channelId, type, password, avatar} = input;
+    const channelFound = await this.chanServices.findChannelWithUsers(channelId);
 
-    const ret: Boolean = await this.chanServices.updateChannel(channelFound, input.info)
+    const ret: Boolean = await this.chanServices.updateChannel(channelFound, {type, password, avatar});
     if (ret === true) {
       await this.emitChannels();
       return true;
