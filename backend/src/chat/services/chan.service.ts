@@ -33,6 +33,7 @@ export class ChanServices {
 		if (sameName) return {channel:null, error: 'This channel name is already taked'};
 
     channel.users = [creator];
+    channel.blocked = [];
 		if (type === ChannelType.PROTECTED || password) {
 			const salt = await bcrypt.genSalt();
 			channel.password = await bcrypt.hash(password, salt);
@@ -56,15 +57,14 @@ export class ChanServices {
     }
   }
 
-  async pushUserToChan(channelId: string, user: User){
-    let update: Channel = await this.chanRepository.findOne(channelId);
-    if (!update)
-      return (null);
-    update.users.push(user);
-    this.chanRepository.update(channelId, update);
-    const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel: update}
-    this.roleRepository.save(newUser);
-    return (update);
+  async pushUserToChan(channel: ChannelI, user: User){
+    (channel.users).push(user);
+//    await this.chanRepository.update(channel.id, channel);
+//  update dont work
+    await this.chanRepository.save(channel);
+    const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel}
+    await this.roleRepository.save(newUser);
+    return (channel);
   }
 
   async removeUserFromChan(channelId: string, user: User): Promise<Channel> {

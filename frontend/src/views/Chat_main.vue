@@ -239,7 +239,7 @@
               <!-- SUBCASE CHANNEL NOT JOINED -->
               <div v-if="currentChannel.role === Roles.NONMEMBER">
                 <v-btn elevation="2" class="my-2" width="80%"
-                  @click="joinChannel">
+                  @click="joinChannel(currentChannel.id)">
                   Join the chat room
                 </v-btn>
                 <password-modal :showPasswordModal="showPasswordModal"
@@ -569,6 +569,13 @@ export default defineComponent({
         console.log(joinableChannels.value);
       })
 
+      connection.value!.on('joinResult', function(params: any){
+        alert(params.message);
+        if (params.channel) {
+          initDisplayChannel(params.channel, true); //cool
+        }
+      })
+
       connection.value!.on('newMessage',
         function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
@@ -727,13 +734,13 @@ export default defineComponent({
 
     /* Functions for channels actions */
 
-    function joinChannel() {
-      console.log('join channel');
+    function joinChannel(channelId: any) {
+      console.log('join channel', channelId);
       if (currentChannel.value.type === ChannelType.PROTECTED) {
         showPasswordModal.value = true;
         return ;
       }
-      //TODO emit to back to join channel
+      connection.value.emit('joinChannel', {id: channelId, password: ''});
       //TODO if user is blocked from channel / user, get message
     }
 
