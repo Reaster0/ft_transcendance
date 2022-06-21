@@ -575,7 +575,7 @@ export default defineComponent({
           console.log('receive messageText from non current');
           return ;
         }
-        console.log('incoming messageText');
+        console.log('incoming message');
         currentChannel.value.messages.push(params.message);
         if (params.message.userId != currentUser.value.id) {
           currentChannel.value.notif = true;
