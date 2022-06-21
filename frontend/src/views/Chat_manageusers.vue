@@ -156,7 +156,7 @@ export default defineComponent ({
           { channelId: channelId, userId: userToManage.value.id});
       } else if (mute.value) {
         socketVal.emit('muteUser',
-          { channelId: channelId, userId: userToManage.value.id});        
+          { channelId: channelId, targetId: userToManage.value.id});        
       } else {
         socketVal.emit('giveAdminRights',
           { channelId: channelId, userId: userToManage.value.id});

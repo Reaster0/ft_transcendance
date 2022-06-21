@@ -70,8 +70,6 @@ export class ChanServices {
   async removeUserFromChan(channelId: string, user: User): Promise<Channel> {
     let update: Channel = await this.chanRepository.findOne(channelId, { relations : ['users'] });
 
-
-    console.log(update);
     for (const [i, value] of update.users.entries()) {
       if (value.id === user.id) {
         update.users.splice(i, 1);
@@ -190,10 +188,7 @@ export class ChanServices {
 
     const channel = await this.chanRepository.findOne(channelId);
     const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
-
-    const muteDate = new Date;
-    muteDate.setDate(muteDate.getDate() + time)
-
+    const muteDate = new Date(new Date().getTime() + 10 * 60000) // 10 minutes
     chanUser.muteDate = muteDate;
     return this.roleRepository.save(chanUser);
 }
@@ -209,11 +204,9 @@ export class ChanServices {
 
   async banUser(channelId: string, user: User): Promise<ChannelI> {
     let channel = await this.removeUserFromChan(channelId, user);
-    if (!channel) {console.log('coucou'); return null;} /* User was not in channel */
+    if (!channel) {return null;} /* User was not in channel */
     channel.blocked.push(user.id);
-//    console.log(channel);
     await this.chanRepository.save(channel);
-    console.log(channel);
     return channel;
   }
 
