@@ -3,28 +3,8 @@
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
-        <v-col cols="auto" sm="3" class="border">
+        <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
-            <!-- SEARCH PANNEL -->
-              <!--
-            <div class="d-flex" overflow-hidden>
-              <v-text-field clearable label="Find user or group to chat"
-              type="text" placeholder="Search" 
-              height = "50px" v-model="searchRequest"
-              @keyup.enter="sendingSearchRequest()"
-              ></v-text-field>
-            </div>
-            <v-select 
-            label="name"
-            v-model="searchRequest"
-            :option="joinableChannels"
-            :dropdown-should-open="dropdownShouldOpen"
-            :dropdown-should-open="dropdownShouldOpen"
-
-            ></v-select>
-            </div>
-            :dropdown-should-open="dropdownShouldOpen"
-            -->
             <div id="joinableChannels" class="searchtool-one">
               <h1 class="Spotnik"> Search channel </h1>
               <v-selection @open="getJoinableChannels"
@@ -55,7 +35,7 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top"
-            style="max-height: calc(100vh - 18%);">
+            style="max-height: calc(100vh - 50%);">
             <v-list>
               <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -131,7 +111,7 @@
                 :key="index" :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
-                  v-if="msg.userId === currentUser.id" :key="index"
+                  v-if="msg.userId === currentUser.id"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
                     <v-list-item-content class="user-message-container">
@@ -152,7 +132,7 @@
                   </v-badge>
                 </v-btn>
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
-                  != currentUser.id" :key="index">   
+                  != currentUser.id">   
                   <v-list-item>
                     <v-list-item-content class="other-message-container">
                       <v-list-item-title class="message-name">
@@ -270,7 +250,7 @@
                 <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
 
                 <!-- INFOS ABOUT CHANNEL USERS  -->
-                <div id="app" class="pt-6">
+                <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
                   <v-tabs fixed-tabs>
                     <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
                     <v-tab color="rgb(0,0,255)"
@@ -588,7 +568,7 @@ export default defineComponent({
           console.log('receive messageText from non current');
           return ;
         }
-        console.log('incoming messageText');
+        console.log('incoming message');
         currentChannel.value.messages.push(params.message);
         if (params.message.userId != currentUser.value.id) {
           currentChannel.value.notif = true;
@@ -603,18 +583,6 @@ export default defineComponent({
 		})
 
     /* Functions for channel display and management */
-
-    /*
-    function checkIfUserIsMember(channelId: string) {
-      const channelsToCheck = userChannels.value.channels as Channel[];
-      const found = channelsToCheck
-        .find(channelsToCheck => channelsToCheck.id === channelId);
-      if (!found) {
-        return false;
-      }
-      return true;
-    }
-    */
 
     function initDisplayChannel(channel: any, isMember: boolean) {
       currentChannel.value.name = channel.name;
