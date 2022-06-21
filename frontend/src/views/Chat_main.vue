@@ -5,26 +5,6 @@
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border">
           <v-col>
-            <!-- SEARCH PANNEL -->
-              <!--
-            <div class="d-flex" overflow-hidden>
-              <v-text-field clearable label="Find user or group to chat"
-              type="text" placeholder="Search" 
-              height = "50px" v-model="searchRequest"
-              @keyup.enter="sendingSearchRequest()"
-              ></v-text-field>
-            </div>
-            <v-select 
-            label="name"
-            v-model="searchRequest"
-            :option="joinableChannels"
-            :dropdown-should-open="dropdownShouldOpen"
-            :dropdown-should-open="dropdownShouldOpen"
-
-            ></v-select>
-            </div>
-            :dropdown-should-open="dropdownShouldOpen"
-            -->
             <div id="joinableChannels" class="searchtool-one">
               <h1 class="Spotnik"> Search channel </h1>
               <v-selection @open="getJoinableChannels"
@@ -206,7 +186,7 @@
         <v-col cols="auto" sm="3" class="border">
           
           <!-- CHANNEL DESCRIPTION -->
-          <v-card height="100%" class="text-center offsetphoto" shaped
+          <v-card style="max-height: (100vh - 56px);" class="text-center offsetphoto" shaped
             v-if="currentChannel.id != ''">
             <div v-if="currentChannel.notif">
               <v-badge avatar dark color="warning" bordered offset-x="50px"
