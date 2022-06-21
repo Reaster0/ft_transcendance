@@ -3,7 +3,7 @@
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
-        <v-col cols="auto" sm="3" class="border">
+        <v-col cols="auto" sm="3" class="border" style="max-height: calc(100vh - 52px);">
           <v-col>
             <div id="joinableChannels" class="searchtool-one">
               <h1 class="Spotnik"> Search channel </h1>
@@ -35,7 +35,7 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top"
-            style="max-height: calc(100vh - 18%);">
+            style="max-height: calc(100vh - 50%);">
             <v-list>
               <v-list-item-group> 
                 <template v-for="(item, index) in userChannels.channels">
@@ -244,7 +244,7 @@
                 <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
 
                 <!-- INFOS ABOUT CHANNEL USERS  -->
-                <div id="app" class="pt-6">
+                <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
                   <v-tabs fixed-tabs>
                     <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
                     <v-tab color="rgb(0,0,255)"
