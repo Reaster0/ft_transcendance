@@ -57,10 +57,10 @@ export class ChatController {
         
         //const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
 
-        const channel = await this.chanServices.pushUserToChan(id, req.user);
-        if (!channel) { return false; }
-        //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
-        return true;
+        const channel = await this.chanServices.findChannelWithUsers(id);
+        if (!channel) {return false;}
+        const result = await this.chanServices.pushUserToChan(channel, req.user);
+        return (result !== null);
         //return 'lets join this private channel';
   }
 

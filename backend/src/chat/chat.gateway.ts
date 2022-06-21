@@ -14,6 +14,7 @@ import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces
 import * as bcrypt from 'bcrypt';
 import { Status } from '../users/enums/status.enum';
 import { subscribeOn } from 'rxjs';
+import { emit } from 'process';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -112,21 +113,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /************** . Join Channel *************/
-  //  @UseGuards(AuthChat)
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChannelI) {
-    const channelFound = await this.chanServices.getChannelFromId(channel.id);
-    if (!channelFound) return false; // better handel in get chan and catch
+    const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
+    if (!channelFound) return ;
 
     if (channelFound.password) {
-      if (!channel.password)
-        return false;
-      if (await bcrypt.compare(channel.password, channelFound.password) === false)
-        return false;
+      if (!channel.password) {
+        client.emit('joinResult',{message: 'Wrong password', channel: null});
+        return ;
+      }
+      if (await bcrypt.compare(channel.password, channelFound.password) === false) {
+        client.emit('joinResult',{message: 'Wrong password', channel: null});
+        return ;
+      }
     }
-    await this.chanServices.pushUserToChan(channelFound.id, client.data.user);
+    const index = channelFound.blocked.indexOf(client.data.user.id);
+    if (index !== -1) {
+      client.emit('joinResult',{message: 'You are banned from this channel', channel: null});
+      return ;
+    }
+
+    await this.chanServices.pushUserToChan(channelFound, client.data.user);
     this.logger.log(`${client.data.user.username} joined ${channel.name}`);
-    return true;
+    client.emit('joinResult',{message: `Wellcome to ${channelFound.name}`, channel: channelFound});
+    this.emitMyChannels(client);
   }
 
 
