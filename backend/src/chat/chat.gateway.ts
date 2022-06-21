@@ -13,9 +13,8 @@ import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '../users/enums/status.enum';
-import { subscribeOn } from 'rxjs';
-import { emit } from 'process';
-import { number } from '@hapi/joi';
+import { ucs2 } from 'punycode';
+import { ChannelType } from 'src/users/enums/channelType.enum';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -339,9 +338,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   @SubscribeMessage('CreatePrivateConversation')
-  async privateConversation(client: Socket, targetId: number) {
+  async privateConversation(client: Socket, targetId: string) {
+    console.log('creating conversation ', targetId);
 
+    const user1 = client.data.user;
+    const user2 = await this.userServices.findUserById(targetId);
+    const channel = await this.chanServices.privateConversation(user1, user2);
+    // emit info //
+    client.emit('channelCreated', `${channel}`);
+    const channels1: FrontChannelI[] = await this.chanServices.getChannelsFromUser(user1.id);
+    client.emit('channelList', channels1);
+    const channels2: FrontChannelI[] = await this.chanServices.getChannelsFromUser(user2.id);
+    this.server.to(user2.chatSocket).emit('channelList', channels2);
   }
+
+
   @SubscribeMessage('isUserBlocked')
   async isUserBlocked(client: Socket, targetId: number) {
     const user: User = client.data.user;

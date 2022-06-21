@@ -367,7 +367,7 @@
             <div id="privatemessage" v-else>
               <v-app id="subprivatemessage" class="pt-6">
                 <div v-if="currentChannel.role === Roles.NONMEMBER">
-                  <v-btn @click="joinChannel" elevation="2" class="my-2"
+                  <v-btn @click="joinPrivateConversation(currentChannel.id)" elevation="2" class="my-2"
                     width="80%">
                     Start conversation
                   </v-btn>
@@ -786,6 +786,11 @@ export default defineComponent({
          password: password});
     }
 
+    function joinPrivateConversation(targetId: string) {
+      console.log('join conversation ' + targetId);
+      connection.value!.emit('CreatePrivateConversation', targetId);
+    }
+
     function blockUser(targetId: number, block: boolean) {
       connection.value!.emit('blockUser', {targetId, block});
     }
@@ -891,7 +896,7 @@ export default defineComponent({
       game, blockUser, unblockUser, leaveChannel, initDisplayChannel,
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
-      genJoinUrl, goToManageUser, goToRoomSettings }
+      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation }
 	},
 })
 </script>
