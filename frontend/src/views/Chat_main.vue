@@ -235,7 +235,7 @@
                   Leave the chat room
                 </v-btn>
                 <div v-if="currentChannel.type === ChannelType.PRIVATE">
-                <v-btn class="my-1" elevation="2" width="80%" color="blue"
+                <v-btn class="my-1" elevation="2" width="80%" color="success"
                   @click="genJoinUrl(currentChannel.id)">
                   Generate invitation link
                 </v-btn>
@@ -586,6 +586,23 @@ export default defineComponent({
         }
       })
 
+      connection.value!.on('leftChannel', function(params: { id: string }) {
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('successfully left channel ' + currentChannel.value.name);
+        initDisplayChannel(currentChannel.value, false);
+        connection.value!.emit('emitMyChannels');
+      })
+
+      connection.value!.on('userLeftChannel', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('one user left channel ' + currentChannel.value.name);
+        connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      })
+
       connection.value!.on('gameInvitation', function(params: { id: number }) {
         //TODO
         game.value.inviter = getUserName(params.id);
@@ -703,11 +720,11 @@ export default defineComponent({
     /* Function for search pannel */
 
     function getJoinableChannels() {
-      connection.value.emit('getJoinableChannels', currentUser.id);
+      connection.value!.emit('getJoinableChannels', currentUser.id);
     }
 
     function getConnectedUsers() {
-      connection.value.emit('getConnectedUsers');
+      connection.value!.emit('getConnectedUsers');
     }
 
 		function sendingMessage(channelId: string) {
@@ -726,7 +743,7 @@ export default defineComponent({
         showPasswordModal.value = true;
         return ;
       }
-      connection.value.emit('joinChannel', {id: currentChannel.value.id,
+      connection.value!.emit('joinChannel', {id: currentChannel.value.id,
          password: ''});
     }
 
@@ -738,7 +755,7 @@ export default defineComponent({
         return;
       }
       showPasswordModal.value = false;
-      connection.value.emit('joinChannel', {id: currentChannel.value.id,
+      connection.value!.emit('joinChannel', {id: currentChannel.value.id,
          password: password});
     }
 
@@ -752,6 +769,7 @@ export default defineComponent({
 
     function leaveChannel() {
       console.log('leave channel ' + currentChannel.value.name);
+      connection.value!.emit('leaveChannel', { id: currentChannel.value.id });
     }
 
     /* Functions for game invitation system */

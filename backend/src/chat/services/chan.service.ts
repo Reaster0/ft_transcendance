@@ -68,17 +68,17 @@ export class ChanServices {
   }
 
   async removeUserFromChan(channelId: string, user: User): Promise<Channel> {
-    let update: Channel = await this.chanRepository.findOne(channelId);
+    let update: Channel = await this.chanRepository.findOne(channelId, { relations : ['users'] });
     const index = update.users.indexOf(user);
-    if (index == -1) { return null; }
-
+    if (index == -1) {
+      return null;
+    }
     update.users.splice(index, 1);
     await this.chanRepository.update(channelId, update);
-
     const chanUser = await this.roleRepository.findOne({ where: { channel: update, userId: user.id} });
     console.log(chanUser);
     try {
-      this.roleRepository.remove(chanUser)
+      this.roleRepository.remove(chanUser);
     } catch (err) {
       console.log(err);
     }
