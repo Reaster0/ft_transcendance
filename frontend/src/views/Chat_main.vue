@@ -464,7 +464,7 @@ export default defineComponent({
     let messageText = ref<string>('');
     let searchRequest = ref<string>('');
     let joinableChannels = ref<Channel[]>([]);
-    let showPasswordModal = ref<boolean>(false); // TODO set to true when click on join a protected channel
+    let showPasswordModal = ref<boolean>(false);
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: '' as string });
@@ -555,11 +555,22 @@ export default defineComponent({
         console.log(joinableChannels.value);
       })
 
-      connection.value!.on('joinResult', function(params: any){
-        alert(params.message);
-        if (params.channel) {
-          initDisplayChannel(params.channel, true); //cool
+      connection.value!.on('joinAccepted', function(params: { id: string }){
+        if (currentChannel.value.id != params.id) {
+          console.log('error in correspondance join channel');
+          return;
         }
+        alert('Welcome to ' + currentChannel.value.name + ' !');
+        displayMemberChannel();
+      })
+
+      connection.value!.on('youAreBanned', function(){
+        alert('You are banned from ' + currentChannel.value.name + ' !');
+      })
+
+      connection.value!.on('wrongPassword', function(){
+        alert('You entered the wrong password for '
+          + currentChannel.value.name);
       })
 
       connection.value!.on('newMessage',
@@ -570,7 +581,7 @@ export default defineComponent({
         }
         console.log('incoming message');
         currentChannel.value.messages.push(params.message);
-        if (params.message.userId != currentUser.value.id) {
+        if (params.message.userId != currentUser.id) {
           currentChannel.value.notif = true;
         }
       })
@@ -603,16 +614,17 @@ export default defineComponent({
       update.value.messages = false;
       update.value.users = false;
         if (isMember) {
-          return displayMemberChannel(channel);
+          return displayMemberChannel();
         }
     }
 
-    function displayMemberChannel(channel: any) {
-      console.log('ask for ' + channel.name + ' users and messages');
+    function displayMemberChannel() {
+      console.log('ask for '
+        + currentChannel.value.name + ' users and messages');
       update.value.messages = false;
       update.value.users = false;
-      connection.value.emit('getChannelUsers', { id: channel.id });
-      connection.value.emit('getChannelMessages', { id: channel.id });
+      connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      connection.value.emit('getChannelMessages', { id: currentChannel.value.id });
     }
 
     async function setChannelManager() {
@@ -708,24 +720,26 @@ export default defineComponent({
 
     /* Functions for channels actions */
 
-    function joinChannel(channelId: any) {
-      console.log('join channel', channelId);
+    function joinChannel() {
+      console.log('join channel', currentChannel.value.name);
       if (currentChannel.value.type === ChannelType.PROTECTED) {
         showPasswordModal.value = true;
         return ;
       }
-      connection.value.emit('joinChannel', {id: channelId, password: ''});
-      //TODO if user is blocked from channel / user, get message
+      connection.value.emit('joinChannel', {id: currentChannel.value.id,
+         password: ''});
     }
 
     function joinProtectedChannel(password: string) {
-      console.log('join channel with password: ' + password);
+      console.log('join channel ' + currentChannel.value.name +
+        ' with password: ' + password);
       if (password === '') {
         alert('Password entered is empty. Please retry.');
         return;
       }
       showPasswordModal.value = false;
-      //TODO emit to back to join channel
+      connection.value.emit('joinChannel', {id: currentChannel.value.id,
+         password: password});
     }
 
     function blockUser() {
