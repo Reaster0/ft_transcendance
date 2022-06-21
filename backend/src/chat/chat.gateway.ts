@@ -120,23 +120,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     if (channelFound.password) {
       if (!channel.password) {
-        client.emit('joinResult',{message: 'Wrong password', channel: null});
+        client.emit('wrongPassword');
         return ;
       }
       if (await bcrypt.compare(channel.password, channelFound.password) === false) {
-        client.emit('joinResult',{message: 'Wrong password', channel: null});
+        client.emit('wrongPassword');
         return ;
       }
     }
     const index = channelFound.blocked.indexOf(client.data.user.id);
     if (index !== -1) {
-      client.emit('joinResult',{message: 'You are banned from this channel', channel: null});
+      client.emit('youAreBanned');
       return ;
     }
 
     await this.chanServices.pushUserToChan(channelFound, client.data.user);
     this.logger.log(`${client.data.user.username} joined ${channelFound.name}`);
-    client.emit('joinResult',{message: `Wellcome to ${channelFound.name}`, channel: channelFound});
+    client.emit('joinAccepted', { id: channelFound.id });
     this.emitMyChannels(client);
   }
 
@@ -291,8 +291,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async getConnectedUsers(client: Socket) {
     this.logger.log('retriving connected users');
     let connectedUsers = await this.userServices.getConnectedUsers();
-
-    // remove client from list
     const clientId = client.data.user.id;
     for (const [i, value] of connectedUsers.entries()) {
       if (value.id === clientId) {
@@ -300,7 +298,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         break ;
       }
   }
-//  console.log(connectedUsers);
     client.emit('connectedUsers', connectedUsers);
   }
 
