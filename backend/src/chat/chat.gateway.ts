@@ -199,10 +199,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async muteUser(client: Socket, data: any): Promise<void> {
     const {channelId, targetId, time} = data;
     await this.chanServices.muteUser(channelId, targetId, time);
-    const user = await this.userServices.findUserById(targetId + '');
+    const user = await this.userServices.findUserById(targetId );
     client.emit('UserMuted', `you have muted ${user.username} for ${time} seconds`);
     this.server.to(user.chatSocket).emit('muted', `you have being muted for ${time} seconds`);
   }
+
   @SubscribeMessage('unmuteUser')
   async unmuteUser(client: Socket, data: any): Promise<void> {
     const {channelId, targetId} = data; 

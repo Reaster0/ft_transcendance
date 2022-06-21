@@ -189,7 +189,7 @@ export class ChanServices {
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
 
     const channel = await this.chanRepository.findOne(channelId);
-    const chanUser = await this.roleRepository.findOne({ where: { channel, targetId} });
+    const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
 
     const muteDate = new Date;
     muteDate.setDate(muteDate.getDate() + time)
