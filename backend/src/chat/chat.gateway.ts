@@ -214,6 +214,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async banUser(client: Socket, data: any): Promise<void> {
     const {chanelId, userId} = data;
     const user = await this.userServices.findUserById(userId + '');
+    console.log(user);
     if (!user) return ;
     const channel = await this.chanServices.banUser(chanelId, user);
     client.emit('UserBanned', `you have banned ${user.username} from ${channel.name}`);

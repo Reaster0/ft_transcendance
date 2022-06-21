@@ -71,6 +71,7 @@ export class ChanServices {
     let update: Channel = await this.chanRepository.findOne(channelId, { relations : ['users'] });
 
 
+    console.log(update);
     for (const [i, value] of update.users.entries()) {
       if (value.id === user.id) {
         update.users.splice(i, 1);
@@ -85,6 +86,7 @@ export class ChanServices {
     } catch (err) {
       console.log(err);
     }
+    console.log('remove user from channel');
     return update;
   }
 
@@ -207,9 +209,11 @@ export class ChanServices {
 
   async banUser(channelId: string, user: User): Promise<ChannelI> {
     let channel = await this.removeUserFromChan(channelId, user);
-    if (!channel) {return null;} /* User was not in channel */
+    if (!channel) {console.log('coucou'); return null;} /* User was not in channel */
     channel.blocked.push(user.id);
-    await this.chanRepository.update(channelId, channel);
+//    console.log(channel);
+    await this.chanRepository.save(channel);
+    console.log(channel);
     return channel;
   }
 
@@ -219,7 +223,7 @@ export class ChanServices {
     const index = channel.blocked.indexOf(userId);
     if (index == -1) { return null; }
     channel.blocked.splice(index, 1);
-    await this.chanRepository.update(channelId, channel);
+    await this.chanRepository.save(channel);
     return channel;
   }
 
