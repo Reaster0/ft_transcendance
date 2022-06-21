@@ -141,7 +141,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.emitMyChannels(client);
   }
 
+  /*
   async joinPrivateChan(clientSocketId: string, userId: number, channel: ChannelI) {
+    console.log(clientSocketId);
     if (!channel) {
     this.server.to(clientSocketId).emit('joinResult', {message: 'Invalid link', channel})
     return ;
@@ -150,6 +152,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(userId);
     this.server.to(clientSocketId).emit('channelList', channels);
   }
+  */
 
 
   /********************* Leave Channel ********************/

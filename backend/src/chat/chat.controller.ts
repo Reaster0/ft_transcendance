@@ -11,6 +11,7 @@ import { FrontChannelI } from "./interfaces/front.interface";
 import { User } from "src/users/entities/user.entity";
 import { ChatGateway } from "./chat.gateway";
 import { Response } from "express";
+import { use } from "passport";
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
@@ -49,15 +50,15 @@ export class ChatController {
         const channel = await this.chanServices.findChannelWithUsers(id);
         if (!channel) {return {message:"channel do not exist", success: false};}
         const user = req.user;
-        const index = channel.users.indexOf(user);
-        if (index !== -1) {
-          return {message: "user already in channel", success: false};
-        }
+        const already = await this.chanServices.getUserOnChannel(channel, user.id)
+        if (already) {return "already exist";}
+
         const result = await this.chanServices.pushUserToChan(channel, user);
         if (!result) {
          return {message: "failed to push user to channel", success: false};
         }
-        await this.chatGateway.joinPrivateChan(user.chatSocket, user.id, channel);
+        // so far the socket is null;
+        //await this.chatGateway.joinPrivateChan(user.chatSocket, user.id, channel);
 //        res.redirect(process.env.FRONTEND + 'thechat');
         return {message: `you've join ${channel.name}`, success: true};
 
