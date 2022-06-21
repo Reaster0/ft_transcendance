@@ -240,9 +240,8 @@
                   Generate invitation link
                 </v-btn>
                 </div>
-                <div v-if="currentChannel.role === Roles.ADMIN
-                  || currentChannel.role === Roles.OWNER">
-                  <v-btn class="my-1" :to="{ name: 'ChangeRoom' }" elevation="2"
+                <div v-if="currentChannel.role === Roles.OWNER">
+                  <v-btn class="my-1" @click="goToRoomSettings" elevation="2"
                     width="80%">
                     Room settings
                   </v-btn>
@@ -494,6 +493,7 @@ export default defineComponent({
           store.commit('setSocketVal' , connection.value);
           store.commit('setUserToManage' , null);
           store.commit('setCurrentChannelId' , null);
+          store.commit('setCurrentChannelType', null);
           console.log("starting connection to websocket");
         } else {
           connection.value!.emit('getUsersList');
@@ -612,12 +612,13 @@ export default defineComponent({
 
       connection.value!.on('channelDestruction', function (params: {id: string }){
         if (currentChannel.value.id != params.id) {
+          connection.value!.emit('emitMyChannels');
           return ;
         }
         console.log('destruction of channel ' + currentChannel.value.name);
         alert('Channel ' + currentChannel.value.name
           + ' is being erased by it\'s owner!');
-        connection.value!.emit('emitMyChannels');
+        router.push('/thechat');
       })
 
       connection.value!.on('gameInvitation', function(params: { id: number }) {
@@ -825,11 +826,6 @@ export default defineComponent({
       }
     }
 
-    function log(log: string) {
-      console.log('log: ' + log);
-      return true;
-    }
-
     function isScrollAtBottom(event: any) {
       const { scrollTop } = event.target;
       if (scrollTop === 0) {
@@ -849,10 +845,6 @@ export default defineComponent({
     
    function dropdownShouldOpen(VueSelect:any) {
       return VueSelect.search.length !== 0 && VueSelect.open
-    }
-
-    function testUniq(params: any) {
-      console.log('test ' + params);
     }
 
     async function genJoinUrl(channelId: string) {
@@ -877,20 +869,24 @@ export default defineComponent({
       router.push('/mu');
     }
 
+    function goToRoomSettings() {
+      store.commit('setCurrentChannelId', currentChannel.value.id);
+      store.commit('setCurrentChannelType', currentChannel.value.type);
+      router.push('/roomsettings');
+    }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
-      getUserColor, sendingMessage,
-      searchRequest, joinableChannels, avatarToUrl, log, isScrollAtBottom,
-      ChannelType, togglePasswordModal, showPasswordModal, joinChannel, 
-      joinProtectedChannel, Roles, waitingGame, game, blockUser,
-      unblockUser, leaveChannel, initDisplayChannel, dropdownShouldOpen, 
-      getJoinableChannels, channelManager, showGameModal, toggleGameModal,
-      responseGame, getConnectedUsers, chanJoinSelected,
-      testUniq, genJoinUrl, goToManageUser }
+      getUserColor, sendingMessage, searchRequest, joinableChannels,
+      avatarToUrl, isScrollAtBottom, ChannelType, togglePasswordModal,
+      showPasswordModal, joinChannel, joinProtectedChannel, Roles, waitingGame,
+      game, blockUser, unblockUser, leaveChannel, initDisplayChannel,
+      dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
+      toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
+      genJoinUrl, goToManageUser, goToRoomSettings }
 	},
 })
 </script>
-
 
 <style scoped>
 .searchtool-one {

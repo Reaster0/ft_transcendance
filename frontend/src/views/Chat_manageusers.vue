@@ -96,8 +96,6 @@
   </v-app>
 </template>
 
-
-
 <script lang="ts">
 
 import { onMounted } from "@vue/runtime-core"
@@ -119,9 +117,7 @@ export default defineComponent ({
     let mute = ref<boolean>(false);
     let admin = ref<boolean>(false);
 
-
     onMounted(async() => {
-      console.log(userToManage.value);
       try {
         if (!channelId || !userToManage.value) {
           alert('Something went wrong. Redirect to chat.');
@@ -153,6 +149,7 @@ export default defineComponent ({
         alert('You can only choose ONE option.');
         return;
       }
+      console.log(channelId);
       if (ban.value) {
         socketVal.emit('banUser',
           { channelId: channelId, userId: userToManage.value.id});
@@ -170,7 +167,6 @@ export default defineComponent ({
   }
 });
 </script>
-
 
 <style scoped>
 .border 
