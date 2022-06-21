@@ -135,7 +135,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
 
     await this.chanServices.pushUserToChan(channelFound, client.data.user);
-    this.logger.log(`${client.data.user.username} joined ${channel.name}`);
+    this.logger.log(`${client.data.user.username} joined ${channelFound.name}`);
     client.emit('joinResult',{message: `Wellcome to ${channelFound.name}`, channel: channelFound});
     this.emitMyChannels(client);
   }
@@ -306,7 +306,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('CreatePrivateConversation')
   async privateConversation(client: Socket, targetId: number) {
-    
+
   }
 }
 
