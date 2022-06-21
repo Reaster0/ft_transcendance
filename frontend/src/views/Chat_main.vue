@@ -111,7 +111,7 @@
                 :key="index" :class="['d-flex flex-row align-center my-2',
                 msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
-                  v-if="msg.userId === currentUser.id" :key="index"
+                  v-if="msg.userId === currentUser.id" :key="msg"
                   color="rgb(0,0,255)" dark>
                   <v-list-item>
                     <v-list-item-content class="user-message-container">
@@ -132,7 +132,7 @@
                   </v-badge>
                 </v-btn>
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
-                  != currentUser.id" :key="index">   
+                  != currentUser.id" :key="msg">   
                   <v-list-item>
                     <v-list-item-content class="other-message-container">
                       <v-list-item-title class="message-name">
@@ -186,7 +186,7 @@
         <v-col cols="auto" sm="3" class="border">
           
           <!-- CHANNEL DESCRIPTION -->
-          <v-card style="max-height: (100vh - 56px);" class="text-center offsetphoto" shaped
+          <v-card height="100%" class="text-center offsetphoto" shaped
             v-if="currentChannel.id != ''">
             <div v-if="currentChannel.notif">
               <v-badge avatar dark color="warning" bordered offset-x="50px"
@@ -577,18 +577,6 @@ export default defineComponent({
 		})
 
     /* Functions for channel display and management */
-
-    /*
-    function checkIfUserIsMember(channelId: string) {
-      const channelsToCheck = userChannels.value.channels as Channel[];
-      const found = channelsToCheck
-        .find(channelsToCheck => channelsToCheck.id === channelId);
-      if (!found) {
-        return false;
-      }
-      return true;
-    }
-    */
 
     function initDisplayChannel(channel: any, isMember: boolean) {
       currentChannel.value.name = channel.name;
