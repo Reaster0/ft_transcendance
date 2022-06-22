@@ -4,9 +4,13 @@
 		<v-img :aspect-ratio="16/9" height="500" src="../assets/42_Logo.svg"/>
 		<v-row>
 			<v-col align="center">
-			<h1 class="text">Play the</h1>
-			<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
-				<h1 class="text rainbow glitch" data-text="Future">Game</h1>
+				<h1 class="text">The</h1>
+				<h1 class="text glitch" data-text="Future">Game</h1>
+				<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
+					<h1 class="text rainbow">Play</h1>
+				</v-btn>
+				<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(0, 0, 255)" to="/game?watch=true">
+					<h1 class="text rainbow">Watch</h1>
 				</v-btn>
 			</v-col>
 		</v-row>
@@ -19,6 +23,8 @@ import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { isLogged } from "../components/FetchFunctions"
 import { defineComponent } from "vue";
+import router from "../router/index"
+
 export default defineComponent ({
 	components: {
 		ParticlesBg
@@ -27,11 +33,18 @@ export default defineComponent ({
 		onMounted(async() => {
 		useStore().commit('setConnected' , await isLogged())
 		})
+
+		function goToWatch(){
+			router.push("/game?watch=true")
+		}
+
+		return { goToWatch }
 	}
 })
 </script>
 
 <style lang="scss" scoped>
+
 .text{
 	font-size: 4em;
 	font-family: Spotnik;
@@ -40,6 +53,7 @@ export default defineComponent ({
 	cursor: pointer;
 	transition: text-shadow 1s;
 }
+
 .rainbow:hover {
 text-shadow: 0.04em 0.04em #fc0049,
         0.08em 0.08em #fe8f01,
@@ -47,6 +61,7 @@ text-shadow: 0.04em 0.04em #fc0049,
         0.16em 0.16em #3fdf4b,
         0.2em 0.2em #3462fe;
 }
+
 .glitch{
   color: white;
   font-size: 4em;
@@ -54,6 +69,7 @@ text-shadow: 0.04em 0.04em #fc0049,
   width:5em;
   margin:0 auto;
 }
+
 @keyframes noise-anim{
   $steps:20;
   @for $i from 0 through $steps{
@@ -62,18 +78,20 @@ text-shadow: 0.04em 0.04em #fc0049,
     }
   }
 }
+
 .glitch:after{
   content:attr(data-text);
   position:absolute;
   left:2px;
-  text-shadow:-1px 0 red;
+  text-shadow:-1px 0 rgba(0,0,0,0);
   top:0;
   color:white;
-  background:red;
+  background: rgba(0,0,0,0);
   overflow:hidden;
   clip:rect(0,900px,0,0); 
   animation:noise-anim 2s infinite linear alternate-reverse;
 }
+
 @keyframes noise-anim-2{
   $steps:20;
   @for $i from 0 through $steps{
@@ -82,6 +100,7 @@ text-shadow: 0.04em 0.04em #fc0049,
     }
   }
 }
+
 .glitch:before{
   content:attr(data-text);
   position:absolute;
@@ -89,9 +108,10 @@ text-shadow: 0.04em 0.04em #fc0049,
   text-shadow:1px 0 blue; 
   top:0;
   color:white;
-  background:red;
+  background: rgba(0, 0, 0, 0);
   overflow:hidden;
   clip:rect(0,900px,0,0); 
   animation:noise-anim-2 3s infinite linear alternate-reverse;
 }
+
 </style>

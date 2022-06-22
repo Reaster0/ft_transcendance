@@ -1,7 +1,10 @@
 <template>
 <div>
 	<particles-bg type="cobweb" :bg="true" />
-	<div v-if="!gameStarted">
+
+
+	<!-- game options -->
+	<div v-if="!gameStarted && !route.query.watch">
 		<v-row justify="center">
 				<div class="button_slick Spotnik">W ⬆️</div>
 				<div class="button_slick Spotnik">S ⬇️</div>
@@ -15,9 +18,6 @@
 				</v-row>
 			</v-container>
 		</div>
-		<!-- <v-row v-else justify="center">
-			<div class="button_slick big_button Spotnik">FATAL ERROR PLEASE REFRESH</div>
-		</v-row> -->
 		<div class="params">
 			<div class="button_slick">
 				<h1 class="Spotnik">Ball Speed</h1>
@@ -37,6 +37,28 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- game watching -->
+	<div v-if="!gameStarted && route.query.watch">
+		<v-row justify="center" v-if="!matchesList">
+			<div class="button_slick button_slide big_button Spotnik" @click="WatchGame">See Matches List</div>
+		</v-row>
+		<v-row>
+			<v-col v-for="(matches) in matchesList" :key="matches">
+				<div class="button_slide overlay custom_offset" @click="FollowGame(matches.matchId)">
+					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
+					<div class="big_text text_custom">{{matches.leftPlayer}}</div>
+					<v-spacer></v-spacer>
+					<div class="big_text Spotnik" color="white">VS</div>
+					<v-spacer></v-spacer>
+					<v-img min-width="15%" max-width="20%" :src="matches.avatarRight"/>
+					<div class="big_text text_custom">{{matches.rightPlayer}}</div>
+				</div>
+			</v-col>
+		</v-row>
+	</div>
+
+	<!-- canvas of the game -->
 	<div v-show="gameStarted">
 		<canvas id="pongGame"></canvas>
 	</div>
@@ -46,12 +68,14 @@
 </template>
 
 <script lang="ts">
+import { useRoute } from "vue-router"
 import { onMounted } from "@vue/runtime-core";
 import { defineComponent, ref, watch } from "vue";
 import { io } from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
+import { getAvatarID, getUserInfos } from "../components/FetchFunctions"
 
 export default defineComponent ({
 	components: {
@@ -59,6 +83,7 @@ export default defineComponent ({
 	},
 	setup() {
 		const gameSocket = ref< any | null>(null);
+		const matchesList = ref< any | null>(null);
 		const matchId = ref<string | null>(null);
 		const searchingGame = ref<boolean>(false);
 		const fatalError = ref<boolean>(false);
@@ -80,6 +105,7 @@ export default defineComponent ({
 		let showInfo: boolean = true;
 		const ballSpeed = ref<string>("NORMAL");
 		const ballSize = ref<string>("NORMAL");
+		const route: any = useRoute()
 
 		onMounted(async() =>{
 			try {
@@ -156,6 +182,31 @@ export default defineComponent ({
 				console.log("requestError")
 			})
 
+			gameSocket.value!.on('ongoingGame', async (params: { matchId: number, leftPlayer: string, rightPlayer: string }) =>{
+				console.log(params)
+				const leftInfo = await getUserInfos(params.leftPlayer)
+				const rightInfo = await getUserInfos(params.rightPlayer)
+				matchesList.value = {
+					...matchesList.value,
+					[params.matchId]: {
+						matchId: params.matchId,
+						leftPlayer: params.leftPlayer,
+						rightPlayer: params.rightPlayer,
+						avatarLeft: await getAvatarID(leftInfo.id!),
+						avatarRight: await getAvatarID(rightInfo.id!),
+					}
+				}
+			})
+
+			gameSocket.value!.on('newList', () =>{
+				console.log("new list")
+				matchesList.value = null;
+			})
+
+			gameSocket.value!.on('endList', () =>{
+				console.log("end list")
+			})
+
 			gameSocket.value!.onopen = (event: Event) => {
 				console.log(event)
 				console.log("connected to the server")
@@ -165,6 +216,8 @@ export default defineComponent ({
 				console.log(event)
 				fatalError.value = true
 			}
+			
+			window.addEventListener('resize', resizeCanvas);
 		})
 
 		watch(gameStarted, (gameChange) =>{
@@ -183,15 +236,31 @@ export default defineComponent ({
 				window.clearInterval(framesId!)
 		})
 
+		function FollowGame(id: number){
+			console.log(id)
+			gameSocket.value!.emit('followGame', id);
+		}
+
 		onBeforeRouteLeave(() => {
-			const answer = window.confirm("Are you sure you want to leave the game?")
-			if (answer){
+			// const answer = window.confirm("Are you sure you want to leave the game?")
+			// if (answer){
 				gameSocket.value.disconnect()
-				return true
-			}
-			return false
+			// 	return true
+			// }
+			// return false
 		})
 
+		function resizeCanvas(){
+			if (canvas){
+			canvas.width = window.innerWidth
+			canvas.height = window.innerHeight
+			}
+		}
+
+		function WatchGame(){
+			console.log("watchGame")
+			gameSocket.value.emit('watchGame', {})
+		}
 
 		function Play(){
 			gameSocket.value.emit('joinGame', {
@@ -259,7 +328,20 @@ export default defineComponent ({
 		]
 		})
 
-		return { Disconnect, Play, AcceptGame, matchId, fatalError, gameData, gameStarted, searchingGame, ballSize, ballSpeed}
+		return { Disconnect,
+		Play,
+		AcceptGame,
+		matchId,
+		fatalError,
+		gameData,
+		gameStarted,
+		searchingGame,
+		ballSize,
+		ballSpeed,
+		WatchGame,
+		route,
+		matchesList,
+		FollowGame,}
 	},
 })
 </script>
@@ -298,11 +380,32 @@ h1 {
 	box-shadow: inset 0 100px 0 0 #D80286;
 }
 
+.clickable{
+	cursor: pointer;
+}
+
 </style>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
+
+.custom_offset {
+  margin-top: 80px;
+}
+
+.big_text {
+	font-size: 350%;
+	font-weight: bold;
+	color: #EA25B5;
+}
+
+.text_custom {
+	font-family: 'Rajdhani', sans-serif;
+	color: #04BBEC;
+}
 
 .big_button {  
   margin: 180px auto 0 auto;
 }
+
 </style>

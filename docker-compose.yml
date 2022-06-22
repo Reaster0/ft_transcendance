@@ -12,7 +12,8 @@ services:
     #  - /data/postgres:/data/postgres
     
   # front:
-  #   build: ./frontend
+  #   build:
+  #     context: ./frontend
   #   image: frontend
   #   container_name: front
   #   restart: always
@@ -24,7 +25,7 @@ services:
   #   container_name: back
   #   restart: always
   #   ports:
-  #     - "3030:3030"
+  #     - "3000:3000"
   #   depends_on:
   #     - db
   #   env_file:

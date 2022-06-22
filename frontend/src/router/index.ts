@@ -17,8 +17,7 @@ import { isLogged, getUserInfo } from "../components/FetchFunctions"
 import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";
 import FriendList from "../views/FriendList.vue";
-import UserInfo from "../views/UserInfo.vue";
-
+import RedirectTrick from "../components/RedirectTrick.vue";
 
 const routes = [
 	{
@@ -72,9 +71,17 @@ const routes = [
 		}
 	},
 	{
-		path: '/user/:id',
+		path: '/user/:username',
 		name: 'userInfo',
-		component: UserInfo,
+		component: UserPagev2,
+		beforeEnter: () => {
+			return store.getters.isConnected? true: "/login"
+		}
+	},
+	{
+		path: '/redirect',
+		name: 'redirect',
+		component: RedirectTrick,
 		beforeEnter: () => {
 			return store.getters.isConnected? true: "/login"
 		}
