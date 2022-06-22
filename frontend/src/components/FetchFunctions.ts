@@ -59,7 +59,18 @@ export async function getHistoryID(id: number) {
 	})
 }
 
-export async function updateUser(nick: string) {
+export async function updateUser(nick: string, oldnick: string | null) {
+
+
+	// better clean on server side
+	if (
+		!nick
+		|| nick === oldnick
+		|| nick.length > 15
+		|| nick.match(/^[a-z0-9]+$/i) == null) {
+		return false;
+	}
+	console.log('new nickname pass the tests');
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/settings", {
 		credentials: "include",
 		method: "PATCH",

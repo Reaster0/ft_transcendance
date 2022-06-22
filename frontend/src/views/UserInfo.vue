@@ -88,7 +88,8 @@ export default defineComponent ({
 		}
 
 		watch(nickname, async (newnick: any) => {
-			name_accepted.value = await updateUser(newnick) as any; //TODO check type
+			name_accepted.value = await updateUser(newnick, nickname.value) as boolean
+			console.log(nickname, ' ', name_accepted.value);
 		})
 
 		return {user,
