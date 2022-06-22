@@ -14,7 +14,7 @@
 					<v-icon>mdi-login</v-icon>
 				</v-btn>
 				<div v-else>
-					<v-btn class="Spotnik" to="/user" flat color="grey" align-end="true">
+					<v-btn class="Spotnik" flat color="grey" align-end="true" @click="redirectUserPage">
 						Account
 						<v-icon>mdi-login</v-icon>
 					</v-btn>
@@ -26,6 +26,7 @@
 <script lang="ts">
 import { useStore } from 'vuex'
 import { computed } from 'vue'
+import router from "../router/index" 
 
 export default {
 	setup() {
@@ -34,12 +35,16 @@ export default {
 			return store.getters.isConnected
 		})
 
+		function redirectUserPage() {
+			router.push('/redirect?' + new URLSearchParams({url: "/user"}))
+		}
+
 		async function logOut() {
 			await fetch(process.env.VUE_APP_BACKEND + "/users/logout", {credentials: "include", method: "PATCH"})
 			.then(store.commit('setConnected', [false, false]) as any)
 		}
 
-		return {isLog, logOut}
+		return {isLog, logOut, redirectUserPage}
 	}
 }
 </script>

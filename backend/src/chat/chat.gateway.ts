@@ -13,7 +13,6 @@ import { MessageService } from './services/message.service';
 import { FrontChannelI, FrontUserGlobalI, FrontUserChannelI } from './interfaces/front.interface';
 import * as bcrypt from 'bcrypt';
 import { Status } from '../users/enums/status.enum';
-import { ucs2 } from 'punycode';
 import { ChannelType } from 'src/users/enums/channelType.enum';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/chat' })
@@ -88,22 +87,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log('sending message');
     const channel = await this.chanServices.getChannelFromId(params.channelId);
     const user: RolesI = await this.chanServices.getUserOnChannel(channel, client.data.user.id);
-
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     let date = new Date;
-    if (user.muteDate >= date) return;
-
+    if (user.muteDate >= date) {
+      return;
+    }
     const message: MessageI = await this.messageServices.create({ channel, date, content: params.content, user: client.data.user });
     const originalMessage = message.content;
     const sender = message.user;
-
     const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
     for (const user of connectedUsers) {
       const blockedUser: number = user.blockedIds.find(element => element === sender.id)
-      if (blockedUser)
+      if (blockedUser) {
+        if (channel.type === ChannelType.PM) {
+          continue ;
+        }
         message.content = "... 🛑 ...";
-      else
+      }
+      else {
         message.content = originalMessage;
+      }
       const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
       this.server.to(user.chatSocket).emit('newMessage', { id: params.channelId, message: frontMessage });
     }
@@ -169,9 +174,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('blockUserControl')
   async blockUserControl(client: Socket, data: { targetId: number, block: boolean }): Promise<void>{
     const { targetId, block } = data;
-    const change = await this.userServices.updateBlockedUser(client.data.user, block, targetId);
+    const change = await this.userServices.updateBlockedUser(client.data.user.id, block, targetId);
     if (change) {
-      this.emitMyChannels(client);
       client.emit('blockChange', { targetId: targetId });
     }
   }

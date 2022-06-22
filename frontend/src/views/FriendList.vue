@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<v-row justify="end">
-				<v-col class="button_slick search_field" cols="4">
+				<v-col class="button_slick search_field" cols="5">
 					<v-text-field :error-messages="errorField" label="Add Friend" v-model="friendName"></v-text-field>
 					<div class="button_slick button_slide Spotnik" @click="addAFriend(friendName)">Add</div>
 				</v-col>
@@ -9,14 +9,14 @@
 		<v-row v-if="listFriends && userInfo" justify="center">
 			<v-col cols="10" v-for="(user, index) in listFriends.friends.names" :key="user.names">
 				<div class="overlay">
-						<v-img min-width="10%" max-width="15%" v-if="userInfo[user]" :src="userInfo[user].avatar"></v-img>
-						<h1 class="text">{{user}}</h1>
-						<v-spacer></v-spacer>
-						<h1 v-if="userInfo[user]" class="text">{{userInfo[user].eloScore}}📈</h1>
-						<v-spacer></v-spacer>
-						<h1 class="text">{{listFriends.friends.status[index]}}</h1>
-						<v-spacer></v-spacer>
-						<div class="button_slick button_slide Spotnik" @click="removeAFriend(user)">Remove</div>
+					<v-img class="clickable" min-width="15%" max-width="20%" v-if="userInfo[user]" :src="userInfo[user].avatar" @click="toUserPage(user)"></v-img>
+					<h1 class="text">{{user}}</h1>
+					<v-spacer></v-spacer>
+					<h1 v-if="userInfo[user]" class="text">{{userInfo[user].eloScore}}📈</h1>
+					<v-spacer></v-spacer>
+					<h1 class="text">{{listFriends.friends.status[index]}}</h1>
+					<v-spacer></v-spacer>
+					<div class="button_slick button_slide Spotnik" @click="removeAFriend(user)">Remove</div>
 				</div>
 			</v-col>
 		</v-row>
@@ -27,6 +27,7 @@
 import { onMounted } from "@vue/runtime-core"
 import { getFriendsList, addFriend, getUserInfos, removeFriend, getAvatarID } from "../components/FetchFunctions"
 import { ref, defineComponent } from "vue"
+import router from "../router/index"
 
 export default defineComponent ({
 	setup(){
@@ -74,26 +75,17 @@ export default defineComponent ({
 			refreshList()
 		}
 
-		return {listFriends, friendName, userInfo, addAFriend, removeAFriend, errorField}
+		function toUserPage(nickname: string){
+			router.push("/user/" + nickname)
+		}
+
+		return {listFriends, friendName, userInfo, addAFriend, removeAFriend, errorField, toUserPage}
 	}
 })
 </script>
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
-
-
-.overlay {
-  margin: 1em;
-  padding: 2em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(#00214A, 0.8);
-  border-radius: 3rem;
-  box-shadow: 0 0 0 8px rgba(#FF82F4, 0.2);
-  filter:  drop-shadow(0px 20px 10px rgba(0, 0, 0, 0.50));
-}
 
 .error_msg{
 	display: block;

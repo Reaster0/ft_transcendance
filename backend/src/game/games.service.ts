@@ -168,8 +168,6 @@ export class GamesService {
       padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) });
     server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
       paddle: this.getPaddlesFeatures(match)});
-    match.state = State.ONGOING;
-    this.listGamesToAll(watchers, matchs);
     let count = 3;
     const that = this;
     const countdown = setInterval(function () {
@@ -189,20 +187,21 @@ export class GamesService {
     const startTime = Date.now();
     let count = 0;
     server.to(match.matchId).emit('gameStarting');
+    match.state = State.ONGOING;
+    that.listGamesToAll(watchers, matchs);    
     match.players[0].lastAction = startTime;
     match.players[1].lastAction = startTime;
     const intervalId = setInterval(() => {
         that.checkPlayersPresents(server, match);
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
-          that.listGamesToAll(watchers, matchs);
           that.finishGame(server, match, matchs);
         } else if (match.state === State.SCORE) {
           count++;
           server.to(match.matchId).emit('gameUpdate', { ball: that.getBallFeatures(match),
             paddle: that.getPaddlesFeatures(match)});
           if (count === 300) {
-            match.state = State.ONGOING;    
+                match.state = State.ONGOING;    
           }
         } else if (match.state === State.PAUSED) {
           count++;
@@ -381,8 +380,8 @@ export class GamesService {
   }
 
   startWatchGame(client: Socket, match: Match) {
-    client.emit('beReady', { pos: 'left', opponent: match.players[1].user.nickname });
-    client.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
+    client.emit('beReady', { pos: match.players[0].user.nickname , opponent: match.players[1].user.nickname });
+    // client.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
     client.emit('dimensions', { ballRad: match.pong.ball.radius.toFixed(3),
       padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) });
     client.emit('score', { leftScore: match.players[0].score, rightScore: match.players[1].score });

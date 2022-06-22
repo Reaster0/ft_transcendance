@@ -557,10 +557,12 @@ export default defineComponent({
         }
         console.log('incoming message');
         currentChannel.value.messages.push(params.message);
-        if (params.message.userId != currentUser.id) {
+        if (params.message.userId != currentUser.id
+          && update.value.messages === true
+          && currentChannel.value.blocked === false) {
           currentChannel.value.notif = true;
+          isScrollAtBottom(null);
         }
-        isScrollAtBottom(null);
       })
 
       /* Search function responses */
@@ -794,7 +796,6 @@ export default defineComponent({
         showPasswordModal.value = true;
         return ;
       }
-      console.log(currentChannel.value);
       connection.value!.emit('joinChannel', {id: currentChannel.value.id,
          password: ''});
     }
@@ -871,7 +872,6 @@ export default defineComponent({
       } else {
         scrollTop = event.target.scrollTop;
       }
-      console.log(scrollTop);
       if (scrollTop >= -100) {
         if (currentChannel.value) {
           currentChannel.value.notif = false;
