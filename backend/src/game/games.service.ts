@@ -168,8 +168,6 @@ export class GamesService {
       padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) });
     server.to(match.matchId).emit('gameUpdate', { ball: this.getBallFeatures(match),
       paddle: this.getPaddlesFeatures(match)});
-    match.state = State.ONGOING;
-    this.listGamesToAll(watchers, matchs);
     let count = 3;
     const that = this;
     const countdown = setInterval(function () {
@@ -189,6 +187,8 @@ export class GamesService {
     const startTime = Date.now();
     let count = 0;
     server.to(match.matchId).emit('gameStarting');
+    match.state = State.ONGOING;
+    this.listGamesToAll(watchers, matchs);
     match.players[0].lastAction = startTime;
     match.players[1].lastAction = startTime;
     const intervalId = setInterval(() => {

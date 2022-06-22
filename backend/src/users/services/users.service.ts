@@ -230,20 +230,21 @@ export class UsersService {
     return users;
   }
 
-  async updateBlockedUser(user: User, block: boolean, targetId: number,): Promise<boolean> {
+  async updateBlockedUser(userId: number, block: boolean, targetId: number,): Promise<boolean> {
+    const currentUser = await this.userRepository.findOne(userId);
     const userToBlock = await this.userRepository.findOne(targetId);
     if (!userToBlock) { 
       return null;
     }
-    const userFound = user.blockedIds.find((element) => element === userToBlock.id);
+    const userFound = currentUser.blockedIds.find((element) => element === userToBlock.id);
     if (block === true && !userFound) {
-      user.blockedIds.push(userToBlock.id);
-      await this.userRepository.save(user);
+      currentUser.blockedIds.push(userToBlock.id);
+      await this.userRepository.save(currentUser);
       return true;
     } else if (block === false && userFound) {
-      const index = user.blockedIds.indexOf(userToBlock.id);
-      user.blockedIds.splice(index, 1);
-      await this.userRepository.save(user);
+      const index = currentUser.blockedIds.indexOf(userToBlock.id);
+      currentUser.blockedIds.splice(index, 1);
+      await this.userRepository.save(currentUser);
       return true;
     }
     return false;
