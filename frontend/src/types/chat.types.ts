@@ -23,6 +23,7 @@ export interface Channel {
     name: string;
 	type: ChannelType;
     avatar?: Blob | Uint8Array;
+    blocked?: boolean;
 }
 
 export interface UserGlobal {

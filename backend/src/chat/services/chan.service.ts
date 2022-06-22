@@ -33,7 +33,7 @@ export class ChanServices {
 		if (sameName) return {channel:null, error: 'This channel name is already taked'};
 
     channel.users = [creator];
-    channel.blocked = [];
+    channel.banned = [];
 		if (type === ChannelType.PROTECTED || password) {
 			const salt = await bcrypt.genSalt();
 			channel.password = await bcrypt.hash(password, salt);
@@ -46,22 +46,20 @@ export class ChanServices {
 	}
 
   async privateConversation(user1: User, user2: User) {
-
     const channel: ChannelI = {
-      name: user1.nickname + '/' + user2.nickname, // do not display
+      name: user1.id + '/' + user2.id,
       type: ChannelType.PM,
       password: '',
-      blocked: [],
+      banned: [],
       avatar: null,
       users: [user1, user2]
     }
-
     const newChannel = await this.chanRepository.save(channel);
-    //maybe dont need to add role for this channel ?
-    let role: RolesI = {userId: user1.id, role: ERoles.OWNER, muteDate: null, channel: newChannel};
+    let role: RolesI = {userId: user1.id, role: ERoles.USER, muteDate: null, channel: newChannel};
     await this.roleRepository.save(role);
-    role = {userId: user2.id, role: ERoles.OWNER, muteDate: null, channel: newChannel};
+    role = {userId: user2.id, role: ERoles.USER, muteDate: null, channel: newChannel};
     await this.roleRepository.save(role);
+    return newChannel;
   }
 
 	async deleteChannel(channel: ChannelI) {
@@ -132,7 +130,7 @@ export class ChanServices {
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
-
+    
     let channels = await query.getMany() as FrontChannelI[];
     return channels;
   }
@@ -165,7 +163,7 @@ export class ChanServices {
 
   async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
     const joinableList = await this.chanRepository.find({ //or findAndCount
-      select: ['id', 'name', 'type', 'blocked','avatar'],
+      select: ['id', 'name', 'type', 'banned','avatar'],
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
@@ -175,7 +173,7 @@ export class ChanServices {
 
     let res: FrontChannelI[] = [];
     for (const channel of joinableList) {
-      const ban = channel.blocked.indexOf(targetId)
+      const ban = channel.banned.indexOf(targetId)
       const joinned = userChannels.indexOf(channel.id) ;
       if (ban == -1 && joinned == -1) {
         res.push(channel);
@@ -226,7 +224,7 @@ export class ChanServices {
   async banUser(channelId: string, user: User): Promise<ChannelI> {
     let channel = await this.removeUserFromChan(channelId, user);
     if (!channel) {return null;} /* User was not in channel */
-    channel.blocked.push(user.id);
+    channel.banned.push(user.id);
     await this.chanRepository.save(channel);
     return channel;
   }
@@ -234,9 +232,9 @@ export class ChanServices {
   async unBanUser(channelId: string, userId: number) {
     let channel = await this.chanRepository.findOne(channelId);
     if (!channel) {return null;}
-    const index = channel.blocked.indexOf(userId);
+    const index = channel.banned.indexOf(userId);
     if (index == -1) { return null; }
-    channel.blocked.splice(index, 1);
+    channel.banned.splice(index, 1);
     await this.chanRepository.save(channel);
     return channel;
   }
