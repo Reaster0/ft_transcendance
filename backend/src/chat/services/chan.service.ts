@@ -48,7 +48,7 @@ export class ChanServices {
   async privateConversation(user1: User, user2: User) {
 
     const channel: ChannelI = {
-      name: user1.nickname + '/' + user2.nickname, // do not display
+      name: user1.id + '/' + user2.id,
       type: ChannelType.PM,
       password: '',
       blocked: [],
@@ -57,10 +57,9 @@ export class ChanServices {
     }
 
     const newChannel = await this.chanRepository.save(channel);
-    //maybe dont need to add role for this channel ?
-    let role: RolesI = {userId: user1.id, role: ERoles.OWNER, muteDate: null, channel: newChannel};
+    let role: RolesI = {userId: user1.id, role: ERoles.USER, muteDate: null, channel: newChannel};
     await this.roleRepository.save(role);
-    role = {userId: user2.id, role: ERoles.OWNER, muteDate: null, channel: newChannel};
+    role = {userId: user2.id, role: ERoles.USER, muteDate: null, channel: newChannel};
     await this.roleRepository.save(role);
   }
 
@@ -132,7 +131,7 @@ export class ChanServices {
       .leftJoin('channel.users', 'users')
       .where('users.id = :id', { id })
       .orderBy('channel.date', 'DESC');
-
+    
     let channels = await query.getMany() as FrontChannelI[];
     return channels;
   }

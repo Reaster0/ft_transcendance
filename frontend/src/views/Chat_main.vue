@@ -492,10 +492,22 @@ export default defineComponent({
         }
       })
 
-      connection.value!.on('channelList', function(params: Channel[]) {
+      connection.value!.on('channelList', async function(params: Channel[]) {
         console.log('list of joined channels received');
         userChannels.value.channels = params;
-        avatarToUrl();
+        await avatarToUrl();
+        for (let channel of userChannels.value.channels) {
+          if (channel.type === ChannelType.PM) {
+            let usersId = channel.name.split('/').map(Number);
+            if (usersId[0] === currentUser.id) {
+              channel.name = getUserName(usersId[1]);
+              channel.avatar = getUserAvatar(usersId[1]);
+            } else {
+              channel.name = getUserName(usersId[0]);
+              channel.avatar = getUserAvatar(usersId[0]);
+            }
+          }
+        }
         update.value.connected = true;
       })
 
@@ -808,7 +820,7 @@ export default defineComponent({
 
     /* Utilities function */
 
-    function avatarToUrl() {
+    async function avatarToUrl() {
       for (let channel of userChannels.value.channels) {
           if (channel.avatar && channel.type != ChannelType.PM
             && !/blob/.test(channel.avatar)) {
