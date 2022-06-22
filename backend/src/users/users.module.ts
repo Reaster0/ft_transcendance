@@ -8,6 +8,7 @@ import { AvatarsService } from 'src/users/services/avatars.service';
 import { Avatar } from './entities/avatar.entity';
 import { AuthModule } from '../auth/auth.module';
 import { ChatModule } from '../chat/chat.module';
+import { ChatGateway } from '../chat/chat.gateway';
 
 
 @Module({

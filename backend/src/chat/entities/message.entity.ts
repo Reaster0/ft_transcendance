@@ -1,14 +1,6 @@
 import { User } from '../../users/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable,
+  ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Channel } from './channel.entity';
 
 @Entity()
@@ -22,11 +14,6 @@ export class Message {
   @CreateDateColumn()
   date: Date;
 
-  /*
-  @UpdateDateColumn()
-  update_at: Date;
-*/
-
   /*-------------------------------------
         - Relations -
     --------------------------------------*/
@@ -38,9 +25,4 @@ export class Message {
   @ManyToOne(() => Channel, (channel) => channel.messages, { onDelete: 'CASCADE' })
   @JoinTable()
   channel: Channel;
-
-  /*
-	@Column('boolean', {default: false})
-	isChallenge: boolean;
-*/
 }

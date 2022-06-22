@@ -1,76 +1,79 @@
-import { Controller, Get, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Post, Query, Redirect, Req, Res, UseGuards } from "@nestjs/common";
 import { RequestUser } from "src/auth/interfaces/requestUser.interface";
-import { InviteDto } from "./chat.dto";
 import { ChanServices } from "./services/chan.service";
-import { UrlGeneratorService } from 'nestjs-url-generator';
-import console from "console";
+import { UrlGeneratorService, SignedUrlGuard} from 'nestjs-url-generator';
 import { AuthGuard } from "@nestjs/passport";
 import { AuthUser } from "src/users/guards/userAuth.guard";
-import { ChanUserService } from "./services/chanUser.service";
 import { UsersService } from "../users/services/users.service";
-import { ChannelI } from './interfaces/channel.interface';
+import { ChannelI } from './interfaces/back.interface';
+import { ChannelType } from "src/users/enums/channelType.enum";
+import { FrontChannelI } from "./interfaces/front.interface";
+import { User } from "src/users/entities/user.entity";
+import { ChatGateway } from "./chat.gateway";
+import { Response } from "express";
+import { use } from "passport";
 
 @Controller('chat') // localhost:3000/chat/....
 export class ChatController {
     constructor(
         private readonly chanServices: ChanServices,
         private readonly urlGeneratorService: UrlGeneratorService,
-        private readonly chanUserServices: ChanUserService,
         private readonly userService: UsersService,
+        private readonly chatGateway: ChatGateway, //try
     ) { }
 
     @Get('genJoinUrl')
-    async makeUrl(@Query() invite: InviteDto): Promise<string> {
-        console.log('generating url');
-        console.log(invite);
+    async makeUrl(@Query('chanId') channelId: string): Promise<string> {
+        //console.log('generating url');
+        //console.log(invite);
         const params = {
-            chanID: invite.chanID,
-            invitedUser: invite.invitedUser,
-            
+            chanId: channelId,
         };
-        const query = {
-            k: 'queryTest',
-        }
 
-        const res: string= this.urlGeneratorService.generateUrlFromController({
-            controller: ChatController,
+        let date = new Date();
+        const res: string = this.urlGeneratorService.signControllerUrl({ controller: ChatController,
             controllerMethod: ChatController.prototype.joinChannel,
-            query: query,
+            //query: query,
             params: params,
+            expirationDate: new Date(date.getTime() + 10 * 60000) //should be 10 minutes
           });
 
-          console.log(res);
           return (res);
         }
 
-        @Get('joinChannel/:id/:nickname')
-        @UseGuards(AuthGuard('jwt'), AuthUser) // try
-        async joinChannel(@Param('id') id: string, @Req() req: RequestUser): Promise<void> {
-        console.log('try to join channel whit link');
-        const channelFound = await this.chanServices.getChan(id);
-        if (!channelFound) {
-            console.log('channel whit id: ', id, ' not found' );
-            return ;
-        }
+        @Get('joinChannel/:chanId')
+        @UseGuards(AuthGuard('jwt'), AuthUser)
+        @UseGuards(SignedUrlGuard)
+        @Redirect('http://localhost:8080/thechat')
+        async joinChannel(@Param('chanId') id: string, @Req() req: RequestUser) {
         
-        //const messages = await this.messageServices.findMessagesForChannel(channelFound, client.data.user)
+        const channel = await this.chanServices.findChannelWithUsers(id);
+        if (!channel) {return {message:"channel do not exist", success: false};}
+        const user = req.user;
+        const already = await this.chanServices.getUserOnChannel(channel, user.id)
+        if (already) {return "already exist";}
 
-        await this.chanServices.pushUserToChan(channelFound, req.user);
-        await this.chanUserServices.addUserToChan(channelFound, req.user);
-        //this.server.to(req.user.chatSocket).emit('previousMessages', messages);
-        console.log(req.user, ' joined: ', channelFound.channelName);
+        const result = await this.chanServices.pushUserToChan(channel, user);
+        if (!result) {
+         return {message: "failed to push user to channel", success: false};
+        }
+        // so far the socket is null;
+        //await this.chatGateway.joinPrivateChan(user.chatSocket, user.id, channel);
+//        res.redirect(process.env.FRONTEND + 'thechat');
+        return {message: `you've join ${channel.name}`, success: true};
+
+
         //return 'lets join this private channel';
   }
 
   // test ----------------------------------------------------------------
   @Get('/channeltest')
   async createChannelTest() {
-    const creator = await this.userService.findUserById('1');
+    const creator = await this.userService.findUserById('2');
     const chan: ChannelI = {
-        channelName: "channeltest3",
-        owner: 1, //owner id
+        name: "channeltest3",
         password: '',
-        publicChannel: true,
+        type: ChannelType.PUBLIC
     };
     return await this.chanServices.createChannel(chan, creator);
   }
@@ -79,8 +82,13 @@ export class ChatController {
   async createMsgTest() {
   }
 
-  @Get('joinnableChannel')
-  async joinnableChannel(@Query() chanName: string): Promise<ChannelI[]> {
-    return await this.chanServices.filterJoinableChannel(chanName);
+  @Get('joinableChannel/:id')
+  async joinableChannel(@Param('id') id: number): Promise<FrontChannelI[]> {
+    return await this.chanServices.filterJoinableChannel(id);
+  }
+
+  @Get('findUser/:name')
+  async findUser(@Param('name') name: string): Promise<User[]> {
+    return await this.userService.filterUserByName(name);
   }
 }

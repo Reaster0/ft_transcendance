@@ -1,4 +1,5 @@
-import {createStore} from "vuex"
+import { createStore } from 'vuex';
+import { UserGlobal } from '../types/chat.types';
 
 const store = createStore({
 	state: {
@@ -14,8 +15,10 @@ const store = createStore({
 		// ----chat---- //
 		channels: [] as any[],
 		joinedChannel: false as boolean,
-		theSocketVal: null as any,
-		usersList: [] as any[],
+		socketVal: null as any,
+		userToManage: null as any,
+		currentChannelId: null as any,
+		currentChannelType: null as any,
 	},
 	getters: {
 		whoAmI:(state) => {
@@ -35,10 +38,16 @@ const store = createStore({
 			return state.joinedChannel;
 		},
 		getSocketVal:(state) => {
-			return state.theSocketVal;
+			return state.socketVal;
 		},
-		getUsersList:(state) => {
-			return state.usersList;
+		getUserToManage:(state) => {
+			return state.userToManage;
+		},
+		getCurrentChannelId:(state) => {
+			return state.currentChannelId;
+		},
+		getCurrentChannelType:(state) => {
+			return state.currentChannelType;
 		}
 	},
 	mutations: {
@@ -60,10 +69,16 @@ const store = createStore({
 			state.joinedChannel = thestatus;
 		},
 		setSocketVal(state, val) {
-			state.theSocketVal = val;
+			state.socketVal = val;
 		},
-		setUsersList(state, val) {
-			state.usersList = val;
+		setUserToManage(state, val) {
+			state.userToManage = val;
+		},
+		setCurrentChannelId(state, val) {
+			state.currentChannelId = val;
+		},
+		setCurrentChannelType(state, val) {
+			state.currentChannelType = val;
 		},
 	},
 	actions: {},

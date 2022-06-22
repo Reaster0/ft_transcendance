@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, StreamableFile, InternalServerErrorException,
-  Res, BadRequestException} from '@nestjs/common';
+  Res, BadRequestException, Inject, forwardRef} from '@nestjs/common';
 import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -10,7 +10,9 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
-//import { ChatGateway } from '../../chat/chat.gateway';
+import { ChatGateway } from '../../chat/chat.gateway';
+import { Socket } from 'socket.io';
+import { Channel } from 'src/chat/entities/channel.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,9 +20,10 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly avatarsService: AvatarsService,
-    private connection: Connection,
-    //private readonly chatGateway: ChatGateway,
-  ) { }
+    private readonly connection: Connection,
+    @Inject(forwardRef(() => ChatGateway))
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id);
@@ -92,9 +95,9 @@ export class UsersService {
     await this.userRepository.remove(user);
   }
 
-  async changeStatus(user: User, newStatus: Status): Promise<void> {
-    await this.userRepository.update(user.id, { status: newStatus });
-    //this.chatGateway.server.emit('changeUserStatus', { id: user.id, status: newStatus});
+  async changeStatus(user: User, newStatus: Status, chatSocketId: string | null): Promise<void> {
+    await this.userRepository.update(user.id, { status: newStatus, chatSocket: chatSocketId });
+    this.chatGateway.sendUsersList();
   }
 
   async modifyElo(user: User, opponentElo: number, userWon: boolean): Promise<void> {
@@ -222,35 +225,31 @@ export class UsersService {
   // for chat
   async getUsers(): Promise<User[]> {
     const users: User[] = await this.userRepository.find({
-      select: ['id', 'nickname', 'avatarId', 'status']
-    })
+      select: ['id', 'nickname', 'status']
+    });
     return users;
   }
 
-  async connectUserToChat(user: User, socketID: string) {
-    this.userRepository.update(user.id, { status: Status.ONLINE, chatSocket: socketID });
-  }
-
-  async disconectUserToChat(user: User) {
-    this.userRepository.update(user.id, { status: Status.OFFLINE, chatSocket: '' });
-  }
-
-
   //maybe us id insted of userToBlock
-  async updateBlockedUser(user: User, block: boolean, userToBlock: User,): Promise<User> {
-    const userFound = user.blockedUID.find((element) => element === userToBlock.id);
+  async updateBlockedUser(user: User, block: boolean, targetId: number,): Promise<User> {
+
+    const userToBlock = await this.userRepository.findOne(targetId);
+    if (!userToBlock) { return null; }
+
+    const userFound = user.blockedIds.find((element) => element === userToBlock.id);
     // userFound only if already in blocket list
 
     if (block === true && !userFound) {
-      user.blockedUID.push(userToBlock.id); // add it
-      await this.userRepository.save(user);
+      user.blockedIds.push(userToBlock.id); // add it
+      return await this.userRepository.save(user);
     }
+
     if (block === false && userFound) { // unblock
-      const index = user.blockedUID.indexOf(userToBlock.id);
-      user.blockedUID.splice(index, 1);
-      await this.userRepository.save(user);
+      const index = user.blockedIds.indexOf(userToBlock.id);
+      user.blockedIds.splice(index, 1);
+      return await this.userRepository.save(user);
     }
-    return user;
+    return null;
   }
 
   /*
@@ -312,7 +311,6 @@ export class UsersService {
   }
 
   async filterUserByName(name: string): Promise<User[]> {
-
     return this.userRepository.find({ //or findAndCount
       skip: 0,
       take: 10,
@@ -328,5 +326,25 @@ export class UsersService {
     const friend = user.friends.find(element => element === friendId);
 
     return (friend !== undefined);
+  }
+
+  async getUserChannels(userId: number): Promise<Channel[]> {
+    const user = await this.userRepository.findOne(userId, 
+      {
+        relations: ['channels']
+      });
+    if (!user) { return null; }
+    return user.channels;
+  }
+
+  async getUserChannelsId(userId: number): Promise<string[]> {
+    const channels = await this.getUserChannels(userId);
+    if (channels === null) { return null}
+
+    let result: string[] = [];
+    for (const chan of channels) {
+     result.push(chan.id);
+    }
+    return result;
   }
 }

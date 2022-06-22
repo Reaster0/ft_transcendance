@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
@@ -7,8 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { GamesModule } from './game/games.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 
 @Module({
   imports: [
@@ -30,6 +28,7 @@ import { join } from 'path';
         ENCRYPTION_IV_LENGTH: Joi.number().required(),
         ENCRYPTION_ALGORITHM: Joi.string().required(),
         DEFAULT_AVATAR: Joi.string().required(),
+        URLGENSECRET: Joi.string().required(),
         isGlobal: true,
       }),
     }),

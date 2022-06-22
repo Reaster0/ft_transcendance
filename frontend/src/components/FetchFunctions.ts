@@ -75,7 +75,6 @@ export async function updateUser(nick: string) {
 	})
 }
 
-// TODO please check type of file
 export async function uploadAvatar(file: any) {
 	const formData = new FormData()
 	formData.append('avatar', file.target.files[0])
@@ -134,4 +133,12 @@ export async function getUserInfos(nickName: string) {
 export async function isMyFriend(id : number) {
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/isMyFriend/" + id, {credentials: "include"})
 	.then(res => res.json())
+}
+
+export async function genJoinLink(channelId: string) {
+	return await fetch(process.env.VUE_APP_BACKEND + '/chat/genJoinUrl?' + new URLSearchParams({chanId: channelId}),
+	{
+		method: 'get',
+		credentials: 'include'
+	}).then(function(body){return body.text()});
 }

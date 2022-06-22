@@ -249,7 +249,7 @@ export class UsersController {
   logoutUser(@Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
     try {
       this.logger.log("Patch('logout') route called by user " + req.user.username + ' (username)');
-      this.usersService.changeStatus(req.user, Status.OFFLINE);
+      this.usersService.changeStatus(req.user, Status.OFFLINE, null);
       res.clearCookie('jwt');
     } catch (e) {
       throw e;

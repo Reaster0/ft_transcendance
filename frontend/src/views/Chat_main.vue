@@ -1,18 +1,27 @@
 <template>
-  <v-app>
+  <v-app id="chat">
     <v-container fluid v-if="update.connected">
       <v-row>
-
         <!-- ELEMENTS ON LEFT OF SCREEN -->
-        <v-col cols="auto" sm="3" class="border">
+        <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
-
-            <!-- SEARCH PANNEL -->
-            <!-- NB! When serach field will work on backen -
-            add onclick option calling method  -->
-            <div class="d-flex">
-              <v-text-field clearable label="Find user or group to chat"
-              placeholder="Search" height = "50px"></v-text-field>
+            <div id="joinableChannels" class="searchtool-one">
+              <h1 class="Spotnik"> Search channel </h1>
+              <v-selection @open="getJoinableChannels"
+                @option:selected="initDisplayChannel"
+                label="name"
+                :options="joinableChannels"
+                :value="{channel: chanJoinSelected, isMember: false}">
+              </v-selection>
+            </div>
+            
+            <div id="joinableUsers" class="searchtool-two">
+              <h4 class="Spotnik"> Search user </h4>
+              <v-selection @open="getConnectedUsers"
+                @option:selected="initDisplayChannel"
+                label="name"
+                :options="joinableChannels">
+              </v-selection>
             </div>
 
             <!-- CREATE NEW ROOM BUTTON -->
@@ -21,672 +30,682 @@
               <v-divider class="mx-2" vertical></v-divider>
               <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
             </v-btn>
-
+          
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
-          <div class="text-left">
-            <v-app>
-              <v-list>
-               <v-list-item-group> 
-                <template v-for="(item, index) in userChannels.channels">
-                  <v-subheader v-if="item.header" :key="item.header"
-                    v-text="item.header"></v-subheader>
-                  <v-divider v-else-if="item.divider" :key="index"
-                    :inset="item.inset"></v-divider>
-                  <v-list-item v-else :key="item.title">
-                    <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="displayChannel(item)"
-                      v-if="item.id != currentChannel.id">
-                        <v-list-item-avatar>
-                          <v-img v-if="item.avatar != null" src="item.avatar"
-                            min-width="50px" min-height="50px"></v-img>
-                          <v-avatar v-else color="blue" min-width="50px"
-                            min-height="50px">
-                            <v-icon color="white">mdi-duck</v-icon>
-                          </v-avatar>
-                        </v-list-item-avatar>
-                    </v-btn>
-                    <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      v-else>
-                      <v-badge bordered bottom color="green" dot offset-x="6"
-                        offset-y="34">
-                        <v-list-item-avatar v-if="item.avatar != null">
-                          <v-img src="item.avatar" min-width="50px"
-                            min-height="50px"></v-img>
-                        </v-list-item-avatar>
-                        <v-list-item-avatar v-else>
-                          <v-avatar color="blue" min-width="50px"
-                            min-height="50px">
-                            <v-icon color="white">mdi-duck</v-icon>
-                          </v-avatar>
-                        </v-list-item-avatar>
-                      </v-badge>
-                    </v-btn>
-                    <v-list-item-title class="offsetmess">{{ item.channelName }}
-                    </v-list-item-title>
-                  </v-list-item>
-                  <v-divider v-if="index < userChannels.channels.length"
-                    :key="index"></v-divider>
-                </template>
-                </v-list-item-group>
-              </v-list>
-            </v-app>
+          <div class="text-left overflow-y-auto margin-top"
+            style="max-height: calc(100vh - 50%);">
+            <v-list>
+              <template v-for="(item, index) in userChannels.channels">
+                <v-divider v-if="item.divider" :key="index"
+                  :inset="item.inset"></v-divider>
+                <v-list-item v-else :key="item.title">
+                  <v-btn elevation="0" min-height="50px"  max-width="50px"
+                    @click="initDisplayChannel(item, true)"
+                    v-if="item.id != currentChannel.id">
+                      <v-list-item-avatar>
+                        <v-img v-if="item.avatar != null" :src="item.avatar"
+                          min-width="50px" min-height="50px"
+                          transition="false" loading="lazy">
+                        </v-img>
+                        <v-avatar v-else color="blue" min-width="50px"
+                          min-height="50px">
+                          <v-icon color="white">mdi-duck</v-icon>
+                        </v-avatar>
+                      </v-list-item-avatar>
+                  </v-btn>
+                  <v-btn elevation="0" min-height="50px"  max-width="50px"
+                    v-else>
+                    <v-badge bordered bottom color="green" dot offset-x="6"
+                      offset-y="34">
+                      <v-list-item-avatar v-if="item.avatar != null">
+                        <v-img :src="item.avatar" min-width="50px"
+                          min-height="50px" transition="false" loading="lazy">
+                        </v-img>
+                      </v-list-item-avatar>
+                      <v-list-item-avatar v-else>
+                        <v-avatar color="blue" min-width="50px"
+                          min-height="50px">
+                          <v-icon color="white">mdi-duck</v-icon>
+                        </v-avatar>
+                      </v-list-item-avatar>
+                    </v-badge>
+                  </v-btn>
+                  <v-list-item-title class="offsetmess">{{ item.name }}
+                  </v-list-item-title>
+                </v-list-item>
+                <v-divider v-if="index < userChannels.channels.length"
+                  :key="index">
+                </v-divider>
+              </template>
+            </v-list>
           </div>
         </v-col>
 
-        <!-- ELEMENT ON CENTER OF SCREEN / CHANNEL DISPLAY -->
-        <v-col cols="auto" sm="6" class="border">
+        <!-- NO CHANNEL DISPLAYED -->
+        <v-col cols="auto" sm="9" class="border"
+          v-if="currentChannel.id === ''">
+          <v-app v-if="currentChannel.id === ''">
+              <h1 class="Spotnik textfullcenter" data-text="Select">
+                Select channel to display
+              </h1>
+          </v-app>
+        </v-col>
+
+        <!-- CHANNEL DISPLAY : CENTRAL ELEMENTS -->
+        <v-col cols="auto" sm="6" class="border" v-else>
           <v-app id="chatdisplay" v-if="update.messages && update.users
-            && currentChannel.name != ''" style="max-height: 600px;">
+            && currentChannel.name != ''
+            && currentChannel.role != Roles.NONMEMBER"
+            style="max-height: 600px;">
 
             <!-- MESSAGES DISPLAY -->
-            <!--<div id="chatdisplay">-->
-            <div class="specialscroll">
-              <div v-for="(msg, index) in currentChannel.messages.slice().reverse()" :key="index"
-                :class="['d-flex flex-row align-center my-2',
-                msg.creatorId == currentUser.id ? 'justify-end': null]">
+            <div class="specialscroll" @scroll="isScrollAtBottom">
+              <div v-for="(msg, index) in
+                currentChannel.messages.slice().reverse()"
+                :key="index" :class="['d-flex flex-row align-center my-2',
+                msg.userId == currentUser.id ? 'justify-end': null]">
                 <v-card class="d-flex-column" max-width="450px"
-                  v-if="msg.creatorId === currentUser.id" :key="index"
+                  v-if="msg.userId === currentUser.id"
                   color="rgb(0,0,255)" dark>
-                  <v-list-item>
-                    <v-list-item-content>
-                      <div class="mb-2" :style="{color: ' #ffffff'}">
-                        {{ msg.content }} </div>
-                      <v-list-item-subtitle :style="{color: ' #ffffff'}">
-                        {{ msg.date }} </v-list-item-subtitle>
-                    </v-list-item-content>
+                  <v-list-item class="user-message-container">
+                    <v-list-item-header>
+                      <v-list-item-title class="mb-2 message text-wrap">
+                        {{ msg.content }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle>
+                        {{ msg.date }}
+                      </v-list-item-subtitle>
+                    </v-list-item-header>
                   </v-list-item>
                 </v-card>
                 <v-btn elevation="0" min-height="50px"
                   max-width="50px">
-                  <v-badge bordered bottom :color="getUserColor(msg.creatorId)" dot offset-x="4"
-                    offset-y="10">
-                    <v-avatar class="mt-n4 " size="32" elevation="2">
-                      <img :src="getUserAvatar(msg.creatorId)" />
+                  <v-badge bordered bottom :color="getUserColor(msg.userId)" dot
+                    offset-x="4" offset-y="10">
+                    <v-avatar class="mt-n4" size="32" elevation="2">
+                      <img :src="getUserAvatar(msg.userId)"/>
                     </v-avatar>
                   </v-badge>
                 </v-btn>
-                <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.creatorId
-                  != currentUser.id" :key="index">   
-                  <v-list-item>
-                    <v-list-item-content>
-                      <v-list-item-title :style="{color: 'grey'}">{{ getUserName(msg.creatorId) }}</v-list-item-title>
-                      <div class="mb-2"> {{ msg.content }} </div>
-                      <v-list-item-subtitle> {{ msg.date }} </v-list-item-subtitle>
-                    </v-list-item-content>
+                <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
+                  != currentUser.id">   
+                  <v-list-item class="other-message-container">
+                    <v-list-item-header>
+                      <v-list-item-title class="mb-2 message text-wrap">
+                        {{ msg.content }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle>
+                        {{ msg.date }}
+                      </v-list-item-subtitle>
+                    </v-list-item-header>
                   </v-list-item>
                 </v-card >
               </div>
             </div>
 
-                      <!-- SEND MESSAGE -->
+            <!-- NO MESSAGE YET -->
+            <div v-if="currentChannel.messages.length === 0">
+              <h1 class="Spotnik textfullcenter" data-text="Start conversation">
+                Start conversation
+              </h1>  
+            </div>
+
+            <!-- SEND MESSAGE -->
             <div class="d-flex" overflow-hidden>
-              <v-text-field clearable class="messagefield" width="100%" 
-                label="Write a message" placeholder="Message"
-                @keyup.enter="sendingMessage(txt, currentChannel)" v-model="txt">
+              <v-text-field clearable class="messagefield" width="100%"
+                type="text" label="Write a message" v-model="messageText"
+                @keyup.enter="sendingMessage(currentChannel.id)">
               </v-text-field>
             </div>
+          </v-app>
 
           <!-- LOADING / NON SELECTED MESSAGES -->
+          <v-app v-else-if="currentChannel.id != ''
+            && currentChannel.role === Roles.NONMEMBER">
+            <h1 class="Spotnik textfullcenter" data-text="Non member">
+              You are not a room member
+            </h1>
           </v-app>
-          <v-app v-else-if="currentChannel.name != ''">
-            <h1 class="Spotnik text-center" data-text="Loading messages">Loading messages</h1>
+
+          <v-app v-else-if="currentChannel.id != ''">
+            <h1 class="Spotnik textfullcenter" data-text="Loading messages">
+              Loading messages
+            </h1>
           </v-app>
-          <v-app v-else>
-            <h1 class="Spotnik text-center" data-text="Select">Select channel to display</h1>
-          </v-app>
+
         </v-col>
 
-
-
-
-		<!-- info group / person -->
-		<v-col cols="auto" sm="3" class="border">
-      <div v-if="!chat_channel_isAdmin && !chat_person">
-        <v-card height="100%" class="text-center offsetphoto" shaped >
-            <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
-                  <v-avatar class="s" elevation="10" size="60px">
-                    <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
-                  </v-avatar>
-            </v-badge>
-              <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
-              <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
-        <div id="app" class="pt-6"> 
-        <!-- NB! Activate scenario "joinChannel" with MODAL WINDOW for PROTECTED on clink ! (how to get info about exact channel ? ) -->
-        <!-- NB! This we will uncomment when we will have identificator to TYPE or channels,
-        cause this condition is for PROTECTED (<div v-if="!isChannelJoined" && PROTECTED ID>) -->
-        <modale :revele="revele" :toggleModale="toggleModale"></modale>
-        <!-- <div v-if="!isChannelJoined">
-          <v-btn v-on:click="toggleModale" class="btn btn-success" elevation="2" width="100%">Join the chat room </v-btn>
-        </div> -->
-        <!-- NB! Activate scenario "joinChannel" in "getPassToJoin" on clink for PRIVATE and PUBLIC! 
-        (how to get info about exact channel ? ) -->
-				<v-btn v-if="!isChannelJoined" elevation="2" width="100%" @click="getPassToJoin">
-					Join the chat room
-				</v-btn>
-				<div v-else>
-					<v-btn elevation="2" width="100%">
-						Leave the chat room
-					</v-btn>
-					<v-btn color="red" @click="logOut" to="/">Logout</v-btn> // TODO logOut property doesn't exist ?
-				</div>
-        </div>
-
-      <!-- end of example display-->        
-
-        
-        <!-- TABS  -->
-        <div id="app" class="pt-6">
-          <v-tabs
-            fixed-tabs
-            v-model="tab"
-          >
-            <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
-            <v-tab
-              color="rgb(0,0,255)"
-              v-for="(item, index) in tabs_manager"
-              :class="{active: currentTab === index}"
-              @click="currentTab = index"
-              :key="item"
-            >
-              {{ item.tabs }}
-            </v-tab>
-          </v-tabs>
-          <v-tabs-items v-model="tab">
-            <v-card flat>            
-              <div v-show="currentTab === 0">
-                <!-- <v-list>
-                  <v-list-item-group v-model="selectedItem" >
-                    <template v-for="(item, index) in members">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-                    ></v-subheader>
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-                    ></v-divider>
-                
-                    <v-list-item
-                      v-else
-                      :key="item.title"
-                    >
-
-                      <v-btn elevation="0" min-height="50px" max-width="50px">
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar>
-                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                      </v-badge>
-                      </v-btn>
-                      <v-list-item-content>
-                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                      <v-divider
-                        v-if="index < members.length"
-                        :key="index"
-                      ></v-divider>
-                    </template>
-                  </v-list-item-group>
-                </v-list> -->
-              </div>
-              <div v-show="currentTab === 1">
-                <!-- <v-list>
-                  <v-list-item-group v-model="selectedItem" >
-                    <template v-for="(item, index) in admins">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-                    ></v-subheader>
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-                    ></v-divider>
-                
-                    <v-list-item
-                      v-else
-                      :key="item.title"
-                    >
-                      <v-btn elevation="0" min-height="50px" max-width="50px" >
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar>
-                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                      </v-badge>
-                      </v-btn>
-                      <v-list-item-content>
-                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                      <v-divider
-                        v-if="index < admins.length"
-                        :key="index"
-                      ></v-divider>
-                    </template>
-                  </v-list-item-group>
-                </v-list> -->
-              </div>
-            </v-card>
-          </v-tabs-items>
-          </div>
-        </v-card>
-      </div>
-      <div v-if="chat_channel_isAdmin && !chat_person">
-        <v-card height="100%" class="text-center offsetphoto" shaped >
-          <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
-                <v-avatar class="s" elevation="10" size="60px">
-                  <img src="http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg" width="70" height="70">
-                </v-avatar>
-          </v-badge>
-            <v-card-title class="layout justify-center">Equipe transcendance</v-card-title>
-            <v-card-subtitle class="layout justify-center">The best team</v-card-subtitle>
-      
-
-          <div id="app" class="pt-6">
-          <v-btn v-on:click="create" elevation="2" width="350px" color="red">
-            Leave the chat room
-          </v-btn>
-          </div>
-          <div id="app">
-          <v-btn :to="{ name: 'ChangeRoom' }" elevation="2" width="350px">
-            Room settings
-          </v-btn>
-          </div>
-
-      
-        <!-- TABS  -->
-        <div id="app" class="pt-6">
-          <v-tabs
-            fixed-tabs
-            v-model="tab"
-          >
-            <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
-            <v-tab
-              color="rgb(0,0,255)"
-              v-for="(item, index) in tabs_manager"
-              :class="{active: currentTab === index}"
-              @click="currentTab = index"
-              :key="item"
-            >
-              {{ item.tabs }}
-            </v-tab>
-          </v-tabs>
-          <v-tabs-items v-model="tab">
-            <v-card flat>            
-              <div v-show="currentTab === 0">
-                <v-list>
-                  <!-- <v-list-item-group v-model="selectedItem" > -->
-                  <v-list-item-group >
-                    <template v-for="(item, index) in members">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-                    ></v-subheader>
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-                    ></v-divider>
-                
-                    <v-list-item
-                      v-else
-                      :key="item.title"
-                    >
-                      <v-btn :to="{ name: 'ManageUsers' }"
-                        icon
-                        v-bind="attrs"
-                        v-on="on" 
-                        elevation="0"
-                      > // TODO attrs and on doesn't exist ?
-                        <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
-                      </v-btn>
-
-                      <v-btn elevation="0" min-height="50px" max-width="50px">
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar>
-                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                      </v-badge>
-                      </v-btn>
-                      <v-list-item-content>
-                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                      <v-divider
-                        v-if="index < members.length"
-                        :key="index"
-                      ></v-divider>
-                    </template>
-                  </v-list-item-group>
-                </v-list>
-              </div>
-              <div v-show="currentTab === 1">
-                <v-list>
-                  <!-- <v-list-item-group v-model="selectedItem" > -->
-                    <v-list-item-group>
-                    <template v-for="(item, index) in admins">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"
-                    ></v-subheader>
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"
-                    ></v-divider>
-                
-                    <v-list-item
-                      v-else
-                      :key="item.title"
-                    >
-                      <v-btn :to="{ name: 'ManageUsers' }"
-                        icon
-                        v-bind="attrs"
-                        v-on="on"
-                        elevation="0"
-                      > // TODO attrs and on doesn't exist ?
-                        <v-app-bar-nav-icon elevation="0"></v-app-bar-nav-icon>
-                      </v-btn>
-                      
-                      <v-btn elevation="0" min-height="50px" max-width="50px" >
-                      <v-badge bordered bottom color="green" dot offset-x="6" offset-y="34" >
-                      <v-list-item-avatar>
-                      <v-img :src="item.photo" min-width="50px" min-height="50px"></v-img>
-                      </v-list-item-avatar>
-                      </v-badge>
-                      </v-btn>
-                      <v-list-item-content>
-                      <v-list-item-title class="offsetmess">{{item.title}}</v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                      <v-divider
-                        v-if="index < admins.length"
-                        :key="index"
-                      ></v-divider>
-                    </template>
-                  </v-list-item-group>
-                </v-list>
-              </div>
-            </v-card>
-          </v-tabs-items>
-        </div>
-        </v-card>
-      </div>
-      <div v-else>
-         <v-card height="100%" class="text-center offsetphoto" shaped >
-             <v-badge bordered bottom color="green" dot offset-x="11" offset-y="13">
-                   <v-avatar class="s" elevation="10" size="60px">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg" width="70" height="70">
-                    </v-avatar>
-             </v-badge>
-                <v-card-title class="layout justify-center">anadege</v-card-title>
-                <v-card-subtitle class="layout justify-center">Teammate</v-card-subtitle>
+        <!-- INFOS ON CURRENT/SEARCHED CHAT -->
+        <v-col cols="auto" sm="3" class="border">
           
-      
-      <div id="app">
-        <v-app id="inspire" class="pt-6">
-          <v-btn v-on:click="blockAlert" elevation="2" width="350px">
-            Block this user
-          </v-btn>
-          <v-scale-transition>
-            <div v-if="!loading" class="text-center">
-            <v-btn color="rgb(0,0,255)" @click="loading = true" elevation="2" width="350px">
-              <div  :style="{color: ' #ffffff'}">
-                Invite to play together
-              </div>
-            </v-btn>
+          <!-- CHANNEL DESCRIPTION -->
+          <v-card height="100%" class="text-center offsetphoto" shaped
+            v-if="currentChannel.id != ''">
+            <div v-if="currentChannel.notif">
+              <v-badge avatar dark color="warning" bordered offset-x="50px"
+                offset-y="5px" content="!">
+                <v-avatar class="s" elevation="10" size="60px" color="blue">
+                  <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
+                    width="70" height="70">
+                  <v-icon v-else color="white">mdi-duck</v-icon>
+                </v-avatar>
+              </v-badge>
             </div>
-          </v-scale-transition>
-          <v-toolbar dense  color="rgba(0,0,0,0)">
-            <v-progress-linear
-              :active="loading"
-              :indeterminate="loading"
-              absolute
-              bottom
-              color="rgb(0,0,255)"
-            ></v-progress-linear>
-          </v-toolbar>
-        </v-app>
-      </div>
-      </v-card>
-      </div>
+            <div v-else>
+              <v-avatar class="s" elevation="10" size="60px" color="blue">
+                <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
+                  width="70" height="70">
+                <v-icon v-else color="white">mdi-duck</v-icon>
+              </v-avatar>
+            </div>
+            <v-card-title class="layout justify-center">
+              {{ currentChannel.name }}
+            </v-card-title>
+            <v-card-subtitle class="layout justify-center">
+              {{ currentChannel.description }}
+            </v-card-subtitle>
+            
+            <!-- CASE CHANNEL -->
+            <div id="channel" class="pt-6"
+              v-if="currentChannel.type != ChannelType.PM">
 
-  
+              <!-- SUBCASE CHANNEL NOT JOINED -->
+              <div v-if="currentChannel.role === Roles.NONMEMBER">
+                <v-btn elevation="2" class="my-2" width="80%"
+                  @click="joinChannel">
+                  Join the chat room
+                </v-btn>
+                <password-modal :showPasswordModal="showPasswordModal"
+                  :togglePasswordModal="togglePasswordModal"
+                  @password="joinProtectedChannel">
+                </password-modal>
+              </div>
+
+              <!-- SUBCASE CHANNEL JOINED -->
+              <div v-else>
+                <v-btn class="my-1" elevation="2" width="80%" color="warning"
+                  @click="leaveChannel">
+                  Leave the chat room
+                </v-btn>
+                <div v-if="currentChannel.type === ChannelType.PRIVATE">
+                <v-btn class="my-1" elevation="2" width="80%" color="success"
+                  @click="genJoinUrl(currentChannel.id)">
+                  Generate invitation link
+                </v-btn>
+                </div>
+                <div v-if="currentChannel.role === Roles.OWNER">
+                  <v-btn class="my-1" @click="goToRoomSettings" elevation="2"
+                    width="80%">
+                    Room settings
+                  </v-btn>
+                </div>
+                <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
+
+                <!-- INFOS ABOUT CHANNEL USERS  -->
+                <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
+                  <v-tabs fixed-tabs>
+                    <v-tab color="rgb(0,0,255)"
+                      v-for="(item, index) in channelManager.title"
+                      :class="{active: channelManager.displayIndex === index}"
+                      @click="channelManager.displayIndex = index" :key="item">
+                      {{ channelManager.title[index] }}
+                    </v-tab>
+                  </v-tabs>
+                  <!-- DISPLAY MEMBERS -->
+                  <v-card flat class="overflow-y-auto">       
+                    <div v-if="channelManager.displayIndex === 0">
+                      <v-list>
+                        <template v-for="(item, index) in
+                          channelManager.members">
+                          <v-divider v-if="item.divider" :key="index"
+                            :inset="item.inset"></v-divider>
+                          <v-list-item v-else :key="item.title">
+                            <!-- MANAGE USER BUTTON IF ADMIN -->
+                            <div v-if="(currentChannel.role === Roles.ADMIN 
+                              || currentChannel.role === Roles.OWNER)
+                              && item.id != currentUser.id
+                              && item.role != Roles.OWNER">
+                              <v-btn @click="goToManageUser(item)" icon
+                                elevation="0">
+                                <v-app-bar-nav-icon elevation="0">
+                                </v-app-bar-nav-icon>
+                              </v-btn>
+                            </div>
+                            <v-btn elevation="0" min-height="50px"
+                              max-width="50px">
+                              <v-badge bordered bottom
+                                :color="getUserColor(item.id)"
+                                dot offset-x="6" offset-y="34" >
+                                <v-list-item-avatar>
+                                  <v-img :src="getUserAvatar(item.id)"
+                                    min-width="50px" min-height="50px">
+                                  </v-img>
+                                </v-list-item-avatar>
+                              </v-badge>
+                            </v-btn>
+                            <v-list-item-title class="offsetmess">
+                              {{ getUserName(item.id) }}
+                            </v-list-item-title>
+                          </v-list-item>
+                          <v-divider v-if="index <
+                            channelManager.members.length" :key="index">
+                          </v-divider>
+                        </template>
+                      </v-list>
+                    </div>
+                    <!-- DISPLAY ADMINS -->
+                    <div v-show="channelManager.displayIndex === 1">
+                      <v-list>
+                        <template v-for="(item, index) in
+                          channelManager.admins">
+                          <v-divider v-if="item.divider" :key="index"
+                            :inset="item.inset">
+                          </v-divider>
+                          <v-list-item v-else :key="item.title">
+                            <!-- MANAGE USER BUTTON IF ADMIN -->
+                            <div v-if="(currentChannel.role === Roles.ADMIN 
+                              || currentChannel.role === Roles.OWNER)
+                              && item.id != currentUser.id
+                              && item.role != Roles.OWNER">
+                              <v-btn @click="goToManageUser(item)" icon
+                                elevation="0">
+                                <v-app-bar-nav-icon elevation="0">
+                                </v-app-bar-nav-icon>
+                              </v-btn>
+                            </div>
+                            <v-btn elevation="0" min-height="50px"
+                              max-width="50px" >
+                              <v-badge bordered bottom
+                                :color="getUserColor(item.id)"
+                                dot offset-x="6" offset-y="34" >
+                                <v-list-item-avatar>
+                                  <v-img :src="getUserAvatar(item.id)"
+                                    min-width="50px" min-height="50px">
+                                  </v-img>
+                                </v-list-item-avatar>
+                              </v-badge>
+                            </v-btn>
+                            <v-list-item-title class="offsetmess">
+                              {{ getUserName(item.id) }}
+                            </v-list-item-title>
+                          </v-list-item>
+                          <v-divider v-if="index <
+                            channelManager.admins.length" :key="index">
+                          </v-divider>
+                        </template>
+                      </v-list>
+                    </div>
+                  </v-card>
+                </div>
+              </div>
+            </div>
+
+            <!-- CASE PRIVATE MESSAGE -->
+            <div id="privatemessage" v-else>
+              <v-app id="subprivatemessage" class="pt-6">
+                <div v-if="currentChannel.role === Roles.NONMEMBER">
+                  <v-btn @click="joinPrivateConversation(currentChannel.id)" elevation="2" class="my-2"
+                    width="80%">
+                    Start conversation
+                  </v-btn>
+                </div>
+                <div v-if="!currentChannel.blocked">
+                  <v-btn @click="blockUser(parseInt(currentChannel.id), true)" elevation="2"
+                    class="my-2" width="80%" color="warning">
+                    Block this user
+                  </v-btn>
+                </div>
+                <div v-else>
+                  <v-btn @click="blockUser(parseInt(currentChannel.id), false)" elevation="2"
+                    class="my-2" width="80%" color="success">
+                    Unblock this user
+                  </v-btn>
+                </div>
+                <div v-if="currentChannel.role != Roles.NONMEMBER
+                  && !currentChannel.blocked
+                  && !game.request" class="text-center">
+                  <v-btn color="rgb(0,0,255)" @click="waitingGame()"
+                  class="my-2" elevation="2" width="80%">
+                    <div  :style="{color: ' #ffffff'}">
+                      Invite to play together
+                    </div>
+                  </v-btn>
+                </div>
+                <div v-if="!game.response" class="text-center">
+                  <p>No response from user</p>
+                </div>
+                <v-toolbar dense  color="rgba(0,0,0,0)">
+                  <v-progress-linear :active="game.request"
+                    :indeterminate="game.request" absolute bottom
+                    color="rgb(0,0,255)">
+                  </v-progress-linear>
+                </v-toolbar>
+              </v-app>
+            </div>
+          </v-card>  
+          <game-modal :showGameModal="showGameModal"
+            :toggleGameModal="toggleGameModal"
+            :inviter="game.inviter"
+            @responseGame="responseGame">
+          </game-modal>
         </v-col>
-        
       </v-row>
+    </v-container>
 
-    </v-container>
     <v-container fluid v-else>
-			<h1 class="Spotnik text-center" data-text="Loading">Loading</h1>
+			<h1 class="Spotnik textfullcenter" data-text="Loading">Loading</h1>
     </v-container>
-    <!--<v-container fluid v-else>
-      <h1>Loading...</h1>
-    </v-container>-->
 
   </v-app>
 </template>
 
 <script lang="ts">
-/*
-document.getElementByClass(dans une div, tous la meme classe/ nom de classe).scrollTo(0, document.getElementByClass()) = 
-*/
+
 import { onMounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
-import { ref, defineComponent, reactive } from 'vue'
-import TheModale from "./Chat_modale.vue";
+import { ref, defineComponent } from 'vue'
+import vSelect from "vue-select";
+import PasswordModal from "./Chat_passwordmodal.vue";
+import GameModal from "./Chat_gamemodal.vue";
 import { onBeforeRouteLeave } from 'vue-router';
-import leaveChat from '../helper';
-import { Message, User } from '../types/chat.types';
+import { leaveChat } from '../helper';
+import { Status, Message, UserChannel, Channel, ChannelType,
+  Roles } from '../types/chat.types';
+import { getAvatarID, genJoinLink } from '../components/FetchFunctions';
+import "vue-select/dist/vue-select.css";
+import router from "../router/index";
 
 export default defineComponent({
   name: "ChatMain",
   components: {
-    'modale': TheModale
+    'password-modal': PasswordModal,
+    'game-modal': GameModal,
+    'v-selection': vSelect,
   },
-  data: () => ({
-      // chat_channel_isAdmin - variable that made to check if the user is admin of current chat
-      // accordind to this info we change the interface
-      // for the moment we change the value manualy, but we should get it from backend
-      
-      //chat_channel_isAdmin: true as boolean,
-      // chat_person is indicator that now user communicate not with a channel, but with another user
-      // accordind to this info we change the interface
-      // for the moment we change the value manualy, but we should get it from backend
-
-      //chat_person: false as boolean,
-      revele: false,
-      //fav: true as boolean,
-      //menu: false as boolean,
-      //currentTab: 0 as number,
-      loading: false as boolean,
-      //tab: null as null | any,
-
-      //tabs_manager: [
-      //  {tabs: 'Members',},
-      //  {tabs: 'Administrators',}
-      //] as any,
-
-      // members and admins are here only as an example of the design:
-      // they dont content the read data. The real data we will receive
-      // from backend ib the dame format (list of dictionaries (each channel has its dictionary))
-      
-      //members: [
-      //{   
-      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-      //  title: "abaudot",
-      //},
-      //] as any,
-      //admins: [
-      //{   
-      //  photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1KsZg3MKYqvpcToJi_jSPryQtPRNekrGvfQ&usqp=CAU",
-      //  title: "abaudot",
-      //},
-      //] as any,
-      // txt is a variable made to save CURRENT message that user is GOING TO send
-      // with this we will emit this data to backend
-
-      //txt: '',
-      //userBanned: false,
-      //userMuted: false,
-      //banDate: new Date,
-      //muteDate: new Date,
-      // Not - used vars that we can need
-      // Comment for Aimé: what was the idea ?
-
-      //newChannel: {
-      //  name:'',
-      //  public: true,
-      //  password: '',
-      //  members: [],
-      //  admins: [],
-      //  },
-
-      // Not - used vars that we can need
-      // Comment for Aimé: this one we realy need, but now we just can know 
-      // if the channel is public ot not
-
-      //protectByPassword: false,
-      //channelSettings: {
-      //  password: '',
-      //  applyPassword: false,
-      //  members: [],
-      //},
-  }),
-  //methods: {
-  //  toggleModale: function() {
-  //    this.revele = !this.revele;
-  //  },
-  //  // blockAlert activated after pushing button "Block this user"
-  //  // its, of course, temporary solution cause we need to clock for real
-  //  // when user block another user - he cant see the messages anymore
-  //  blockAlert: function (event : any) // TODO check event tupe 
-  //  {
-  //    if (event) 
-  //    {
-  //      alert("WE NEED TO BLOCK THIS USER")
-  //    }
-  //  },
-  //},
-  // this is needed to limit (3000 ms) loading process after pushing bitton "Invite to play togetrer"
-  // made show on template the animation "while waiting"
-  //watch: {
-  //  loading (val: number) {
-  //    if (!val) return
-  //    setTimeout(() => (this.loading = false), 3000)
-  //  },
-  //},
 	setup() {
+
 		const connection = ref<null | any>(null);
     const store = useStore() as Store<any>;
     const currentUser = useStore().getters.whoAmI as any;
-    let isChannelJoined = store.getters.isChannelJoined as boolean;
-    let userChannels = reactive({ channels: [] as any[] });
-    let update = reactive({ connected: false as boolean, users: false as boolean,
+    let usersList = ref<any>(null);
+    let userChannels = ref({ channels: [] as any[] });
+    let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
-    let currentChannel = reactive({ name: '' as string, id: '' as string,
-      messages: [] as Message[], users: [] as User[] });
-    //let txt = ref<string>('');
+    let currentChannel = ref({ name: '' as string, id: '' as string,
+      type: ChannelType.PUBLIC as ChannelType, 
+      messages: [] as Message[], users: [] as UserChannel[],
+      role: Roles.NONMEMBER as Roles, avatar: null as null | string,
+      notif: false as boolean, description: '' as string, 
+      blocked: false as boolean });
+    let channelManager = ref({title: ['all members', 'admins'] as string[],
+      members: [] as any[], admins: [] as any[],
+      displayIndex: 0 as number });
+    let messageText = ref<string>('');
+    let searchRequest = ref<string>('');
+    let joinableChannels = ref<Channel[]>([]);
+    let showPasswordModal = ref<boolean>(false);
+    let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
+    let game = ref({ request: false as boolean, response: true as boolean,
+      inviter: '' as string });
+    let chanJoinSelected = {name: 'enter channer'} as Channel;
+    let confirm =  0 as number;
 
-		onMounted(async() => {
-			console.log(document.cookie.toString());
-			try {
-        connection.value = store.getters.getSocketVal;
-        if (connection.value === null) {
-          connection.value = io('http://:3000/chat',{
-            transportOptions: {
-              polling: { extraHeaders: { auth: document.cookie} },
-            },
-          })
-          store.commit('setSocketVal' , connection.value);
-          console.log("starting connection to websocket");
-        } else {
-          update.connected = true;
-          connection.value!.emit('emitMyChannels');
-        }
-			} catch (error) {
-				console.log("the error is:" + error)
-			}
-
-      connection.value!.on('connectedToChat', function() {
-        console.log('connectedToChat: ' + update.connected);
-      })
-
-      connection.value!.on('usersList', function(params: any) {
-        console.log('receive new users list');
-        store.commit('setUsersList', params);
-        if (!update.connected) {
-          connection.value!.emit('emitMyChannels');
-        }
-      })
-
-      connection.value!.on('channelList', function(params: any) {
-        console.log('list of joined channels received');
-        userChannels.channels = params;
-        console.log(params);
-        update.connected = true;
-      })
-
-      connection.value!.on('channelUsers', function(params: { id: string, users: any[] }) {
-        if (params.id != currentChannel.id) {
-          console.log('error of channel correspondance inside channelUsers');
-        }
-        console.log('receive users from channel ' + currentChannel.name);
-        currentChannel.users = params.users;
-        currentChannel.users = [{ id: 1, name: 'User1', role: 'admin', status:'ONLINE', avatar:'http://ic.pics.livejournal.com/alexpobezinsky/34184740/751173/751173_original.jpg'},
-        { id: 2, name: 'User2', role: '', status:'OFFLINE', avatar:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Wildlife_at_Maasai_Mara_%28Lion%29.jpg/1200px-Wildlife_at_Maasai_Mara_%28Lion%29.jpg'}];
-        update.users = true;
-        //console.log(params.users);
-      })
-
-      connection.value!.on('channelMessages', function(params: { id: string, messages: any[] }) {
-        if (params.id != currentChannel.id) {
-          console.log('Error of channel correspondance inside channelMessages');
-        }
-        console.log('receive messages from channel ' + currentChannel.name);
-        //currentChannel.messages = params.messages;
-        currentChannel.messages = [{ content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'},
-        { content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'},
-        { content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'},
-        { content: 'Hello', creatorId: 1, date: '19:45'}, { content: 'How are you ?', creatorId: 2, date: '12:38'}, {content : 'Fine and you ?', creatorId: 1, date: '14:12'}];
-        update.messages = true;
-        //console.log(params.messages);
-      })
-		})
-
-		onBeforeRouteLeave( function(to: any, from: any, next: any) {
+		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(socket, to, next, store);
     })
 
-    function displayChannel(channel: any) {
-      currentChannel.name = channel.channelName;
-      currentChannel.id = channel.id;
-      console.log('ask for ' + channel.channelName + ' users and messages');
-      update.messages = false;
-      update.users = false;
-      connection.value.emit('getChannelUsers', { id: channel.id });
-      connection.value.emit('getChannelMessages', { id: channel.id });
+		onMounted(async() => {
+			try {
+        connection.value = store.getters.getSocketVal;
+        if (connection.value === null) {
+          connection.value = io(window.location.protocol + '//' +
+            window.location.hostname + ':3000/chat',{
+            transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          store.commit('setSocketVal' , connection.value);
+          store.commit('setUserToManage' , null);
+          store.commit('setCurrentChannelId' , null);
+          store.commit('setCurrentChannelType', null);
+          console.log("starting connection to websocket");
+        } else {
+          connection.value!.emit('getUsersList');
+        }
+			} catch (error) {
+				console.log("the error is:" + error)
+			}
+
+      connection.value!.on('usersList', async function(params: any) {
+        console.log('receive new users list');
+        for (let user of params) {
+          user.avatar = await getAvatarID(user.id) as any; 
+        }
+        usersList.value = params;
+        if (!update.value.connected) {
+          connection.value!.emit('emitMyChannels');
+        }
+      })
+
+      connection.value!.on('channelList', function(params: Channel[]) {
+        console.log('list of joined channels received');
+        userChannels.value.channels = params;
+        avatarToUrl();
+        update.value.connected = true;
+      })
+
+      connection.value!.on('joinableChannels', function(params: Channel[]) {
+        joinableChannels.value = params;
+        console.log(joinableChannels.value);
+      })
+
+      connection.value!.on('channelUsers',
+        async function(params: { id: string, users: any[] }) {
+        if (!currentChannel.value || params.id != currentChannel.value.id) {
+          console.log('error of channel correspondance inside channelUsers '
+            + params.id + ' vs '+ currentChannel.value.id);
+          return;
+        }
+        console.log('receive users from channel ' + currentChannel.value.name);
+        currentChannel.value.users = params.users;
+        await setChannelManager();
+        update.value.users = true;
+      })
+
+      connection.value!.on('channelMessages',
+        function(params: { id: string, messages: Message[] }) {
+        if (params.id != currentChannel.value.id) {
+          console.log('error of channel correspondance inside channelMessages '
+            + params.id + ' vs '+ currentChannel.value.id);
+          return;
+        }
+        console.log('receive messages from channel ' + currentChannel.value.name);
+        currentChannel.value.messages = params.messages;
+        update.value.messages = true;
+      })
+
+      connection.value!.on('connectedUsers', async function(params: any ) {
+        console.log('receive connectedUsers');
+        joinableChannels.value = [];
+        for (let user of params) {
+          let avatar = await getUserAvatar(user.id);
+          joinableChannels.value.push({ id: user.id, name: user.nickname, 
+            type: ChannelType.PM, avatar: avatar });
+        }
+        console.log(joinableChannels.value);
+      })
+
+      connection.value!.on('joinAccepted', function(params: { id: string }){
+        if (currentChannel.value.id != params.id) {
+          console.log('error in correspondance join channel');
+          return;
+        }
+        alert('Welcome to ' + currentChannel.value.name + ' !');
+        displayMemberChannel();
+      })
+
+      connection.value!.on('banned', function(){
+        alert('You are banned from ' + currentChannel.value.name + ' !');
+      })
+
+      connection.value!.on('wrongPassword', function(){
+        alert('You entered the wrong password for '
+          + currentChannel.value.name);
+      })
+
+      connection.value!.on('newMessage',
+        function(params: {id: string, message: Message }) {
+        if (params.id != currentChannel.value.id) {
+          console.log('receive messageText from non current');
+          return ;
+        }
+        console.log('incoming message');
+        currentChannel.value.messages.push(params.message);
+        if (params.message.userId != currentUser.id) {
+          currentChannel.value.notif = true;
+        }
+      })
+
+      connection.value!.on('leftChannel', function(params: { id: string }) {
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('successfully left channel ' + currentChannel.value.name);
+        initDisplayChannel(currentChannel.value, false);
+        connection.value!.emit('emitMyChannels');
+      })
+
+      connection.value!.on('userLeftChannel', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          return ;
+        }
+        console.log('one user left channel ' + currentChannel.value.name);
+        connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      })
+
+      connection.value!.on('channelDestruction', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          connection.value!.emit('emitMyChannels');
+          return ;
+        }
+        console.log('destruction of channel ' + currentChannel.value.name);
+        alert('Channel ' + currentChannel.value.name
+          + ' is being erased by it\'s owner!');
+        router.push('/thechat');
+      })
+
+      connection.value!.on('isBlocked', function (params: boolean) {
+        currentChannel.value.blocked = params;
+      }) 
+
+      connection.value!.on('gameInvitation', function(params: { id: number }) {
+        //TODO
+        game.value.inviter = getUserName(params.id);
+        showGameModal.value = true;
+      })
+		})
+
+    /* Functions for channel display and management */
+
+    function initDisplayChannel(channel: any, isMember: boolean) {
+      confirm = 0;
+      currentChannel.value.name = channel.name;
+      currentChannel.value.id = channel.id;
+      currentChannel.value.avatar = channel.avatar;
+      currentChannel.value.notif = false;
+      currentChannel.value.type = channel.type;
+
+      currentChannel.value.blocked = false; // TODO modify accordingly
+      if (channel.type === 3) {
+        connection.value!.emit('isUserBlocked', channel.id); // or maby use a route
+      }
+
+      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
+      currentChannel.value.description = channelTypes[channel.type];
+      currentChannel.value.messages = [];
+      currentChannel.value.users = [];
+      channelManager.value.admins = [];
+      channelManager.value.members = [];
+      channelManager.value.displayIndex = 0;
+      currentChannel.value.role = Roles.NONMEMBER;
+      console.log('display ' + currentChannel.value.name + ' join interface');
+      update.value.messages = false;
+      update.value.users = false;
+        if (isMember) {
+          return displayMemberChannel();
+        }
     }
 
+    function displayMemberChannel() {
+      console.log('ask for '
+        + currentChannel.value.name + ' users and messages');
+      update.value.messages = false;
+      update.value.users = false;
+      connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      connection.value.emit('getChannelMessages', { id: currentChannel.value.id });
+    }
+
+    async function setChannelManager() {
+      let members = currentChannel.value.users as UserChannel[];
+      let admins = [] as UserChannel[];
+      if (currentChannel.value.users === []) {
+        console.log('error in retrieving channels users');
+        return ;
+      }
+      for (let user of currentChannel.value.users) {
+        if (user.role === Roles.ADMIN || user.role === Roles.OWNER) {
+          admins.push(user);
+        }
+        if (user.id === currentUser.id) {
+          currentChannel.value.role = user.role;
+        }
+      }
+
+      channelManager.value.displayIndex = 0;
+      channelManager.value.members = members;
+      channelManager.value.admins = admins;
+    }
+
+    /* Functions for getting informations about users */
+
     function getUserName(userId: number) {
-      if (!store.getters.getUsersList) {
+      if (usersList.value === null) {
         console.log('Error when retrieving users');
         return;
       }
-      for (let user of store.getters.getUsersList) {
+      for (let user of usersList.value) {
         if (user.id === userId) {
-          return user.name;
+          return user.nickname;
         }
       }
-      console.log('Something went wrong: User id ' + userId + ' not found in channel ' + currentChannel.name);
+      console.log('Something went wrong: User id ' + userId +
+        ' not found in channel ' + currentChannel.value.name);
     }
 
     function getUserAvatar(userId: number) {
-      if (!store.getters.getUsersList) {
+      if (usersList.value === null) {
         console.log('Error when retrieving users');
         return;
       }
-      for (let user of store.getters.getUsersList) {
+      for (let user of usersList.value) {
         if (user.id === userId) {
           return user.avatar;
         }
       }
       console.log('Something went wrong: User id ' + userId + ' not found');
     }
-    
+
     function getUserStatus(userId: number) {
-      if (!store.getters.getUsersList) {
+      if (!usersList.value) {
         console.log('Error when retrieving user avatar');
         return;
       }
-      for (let user of store.getters.getUsersList) {
+      for (let user of usersList.value) {
         if (user.id === userId) {
           return user.status;
         }
@@ -695,67 +714,189 @@ export default defineComponent({
     }
 
     function getUserColor(userId: number) {
-      const status = getUserStatus(userId);
-      if (status === 'online')
+      const status = getUserStatus(userId) as Status;
+      if (status === Status.ONLINE)
         return "green";
-      else if (status === 'playing')
+      else if (status === Status.PLAYING)
         return "yellow";
       return "grey";
     }
 
-		function sendingMessage(content: string, channel: any) {
-      // NB! Need to be done
-      console.log(content, channel);
-      if (!content)
+    /* Function for search pannel */
+
+    function getJoinableChannels() {
+      connection.value!.emit('getJoinableChannels', currentUser.id);
+    }
+
+    function getConnectedUsers() {
+      connection.value!.emit('getConnectedUsers');
+    }
+
+		function sendingMessage(channelId: string) {
+      if (!messageText.value || messageText.value === '')
         return ;
-      connection.value.emit('message', {content, channel});
-		} 
+      connection.value.emit('message', {'channelId': channelId,
+        'content': messageText.value });
+      messageText.value = '';
+    }
 
-      // function joinChannel(id)
-      // {
-      //   store.commit('setChannelJoinedStatus' , true);
-      //   connection.value.emit('joinChannel', id);
-      // }
+    /* Functions for channels actions */
 
-      // function leaveChannel(id)
-      // {
-      //   store.commit('setChannelJoinedStatus' , false);
-      //   connection.value.emit('leaveChannel', id);
-      // }
-        
-      //function getPassToJoin() {
-        // this function is for protected channels (see the specification)
-        // as a parameter we will reseve info about the channel, our goal is to chack the password
-        // for now it will just open modal window
-      //}
+    function joinChannel() {
+      console.log('join channel', currentChannel.value.name);
+      if (currentChannel.value.type === ChannelType.PROTECTED) {
+        showPasswordModal.value = true;
+        return ;
+      }
+      console.log(currentChannel.value);
+      connection.value!.emit('joinChannel', {id: currentChannel.value.id,
+         password: ''});
+    }
 
-      // 		// for bloking or unblocking  a user:
-      // 		// - blockUser{ user: User, block: boolean } // true => block false => unblock
-      // 		function blockUser(user, block)
-      // 		{
-      // 			console.log("before blockUser");
-      // 			connection.value.emit('blockUser', user, block);
-      // 			console.log("after blockUser");
-      // 		}
+    function joinProtectedChannel(password: string) {
+      console.log('join channel ' + currentChannel.value.name +
+        ' with password: ' + password);
+      if (password === '') {
+        alert('Password entered is empty. Please retry.');
+        return;
+      }
+      showPasswordModal.value = false;
+      connection.value!.emit('joinChannel', {id: currentChannel.value.id,
+         password: password});
+    }
 
-		return { sendingMessage, isChannelJoined, update, 
-      userChannels, displayChannel, currentChannel, currentUser, getUserName,
-      getUserAvatar, getUserStatus, getUserColor }
+    function joinPrivateConversation(targetId: string) {
+      console.log('join conversation ' + targetId);
+      connection.value!.emit('CreatePrivateConversation', targetId);
+    }
 
+    function blockUser(targetId: number, block: boolean) {
+      connection.value!.emit('blockUser', {targetId, block});
+    }
+
+    function unblockUser() {
+      //TODO
+    }
+
+    function leaveChannel() {
+      console.log('leave channel ' + currentChannel.value.name);
+      if (currentChannel.value.role === Roles.OWNER && confirm === 0) {
+        confirm++;
+        alert('\tYou\'re the channel owner: It will be erased.\nPlease click another time on \'Leave Channel\' to confirm.');
+        return;
+      }
+      confirm = 0;
+      connection.value!.emit('leaveChannel', { id: currentChannel.value.id });
+    }
+
+    /* Functions for game invitation system */
+
+    function waitingGame() {
+      game.value.request = true;
+      // TODO send game request
+      setTimeout(() => (
+        game.value.request = false,
+        game.value.response = false
+        ), 10000);
+    }
+
+    function responseGame(responseGame: true) {
+      console.log('game response ' + responseGame);
+      showGameModal.value = false;    
+      // TODO emit answer  
+    }
+
+    /* Utilities function */
+
+    function avatarToUrl() {
+      for (let channel of userChannels.value.channels) {
+          if (channel.avatar && channel.type != ChannelType.PM
+            && !/blob/.test(channel.avatar)) {
+            let blob = new Blob([channel.avatar]) as Blob;
+            channel.avatar = URL.createObjectURL(blob);
+        }
+      }
+    }
+
+    function isScrollAtBottom(event: any) {
+      const { scrollTop } = event.target;
+      if (scrollTop === 0) {
+        if (currentChannel.value) {
+          currentChannel.value.notif = false;
+        }
+      }
+    }
+
+    function togglePasswordModal() {
+      showPasswordModal.value = false;
+    }
+
+    function toggleGameModal() {
+      showGameModal.value = false;
+    }
+    
+   function dropdownShouldOpen(VueSelect:any) {
+      return VueSelect.search.length !== 0 && VueSelect.open
+    }
+
+    async function genJoinUrl(channelId: string) {
+      console.log('gen ' + channelId);
+      const res = await genJoinLink(channelId);
+      alert('invitation link: ' + res);
+    }
+
+    /* Sub routes functions */
+
+    function goToManageUser(user: UserChannel) {
+      let userToManage = null as any;
+      for (let globalUser of usersList.value) {
+        if (globalUser.id === user.id) {
+          userToManage = globalUser;
+          break;
+        }
+      }
+      userToManage.role = user.role;
+      store.commit('setCurrentChannelId', currentChannel.value.id);
+      store.commit('setUserToManage', userToManage);
+      router.push('/mu');
+    }
+
+    function goToRoomSettings() {
+      store.commit('setCurrentChannelId', currentChannel.value.id);
+      store.commit('setCurrentChannelType', currentChannel.value.type);
+      router.push('/roomsettings');
+    }
+
+		return { update, messageText, userChannels, displayMemberChannel,
+      currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
+      getUserColor, sendingMessage, searchRequest, joinableChannels,
+      avatarToUrl, isScrollAtBottom, ChannelType, togglePasswordModal,
+      showPasswordModal, joinChannel, joinProtectedChannel, Roles, waitingGame,
+      game, blockUser, unblockUser, leaveChannel, initDisplayChannel,
+      dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
+      toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
+      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation }
 	},
 })
 </script>
 
-
 <style scoped>
-.border 
-{
+.searchtool-one {
+  padding-bottom: 2%;
+}
+.searchtool-two {
+  padding-bottom: 10%;
+}
+
+.border {
   border-right: 0.5px solid rgb(196, 192, 207);
 }
+
 .spacebottom {
   padding-top: 20px;
   padding-bottom: 24px;
 }
+
 .spacetop {
   padding-top: 20px;
   padding-bottom: 20px;
@@ -776,14 +917,49 @@ export default defineComponent({
 
 .messagefield{
   width:100%;
-  /* position: absolute; */
-  /* bottom: 0px; */
+}
+
+.margin-top {
+  margin-top: 6%;
 }
 
 .specialscroll {
   overflow: auto;
   display: flex;
   flex-direction:column-reverse;
+  height: 78%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  margin-top: 5%;
+  margin-bottom: 2%;
 }
 
+.textfullcenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);  
+}
+
+.message {
+  word-wrap: break-word;
+}
+
+.user-message-container {
+  max-width: 100%;
+  color: #ffffff;
+}
+
+.other-message-container {
+  max-width:100%;
+}
+
+.message-name {
+  color: grey;
+}
+
+.notification {
+  color: red;
+}
 </style>

@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Req } from '@nestjs/common';
+import { HttpException, forwardRef, Inject, Injectable, Req } from '@nestjs/common';
 import { Response } from 'express';
 import { authenticator } from 'otplib';
 import { CreateUserDto } from 'src/users/user.dto';
@@ -14,6 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   //    constructor(private readonly jwtService: JwtService) {}
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
   ) {}

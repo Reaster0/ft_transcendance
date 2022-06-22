@@ -40,7 +40,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('User not retrieved');
         return client.disconnect();
       }
-      await this.usersService.changeStatus(user, Status.PLAYING);
+      await this.usersService.changeStatus(user, Status.PLAYING, null);
       client.data.user = user;
       this.logger.log('User connected: ' + user.nickname);
       return client.emit('connectedToGame'); // maybe emit user ?
@@ -53,7 +53,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.logger.log('Disconnection');
     if (client.data.user) {
       this.logger.log('User leaving: ' + client.data.user.username);
-      await this.usersService.changeStatus(client.data.user, Status.OFFLINE);
+      await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
       if (this.gamesService.isWaiting(client, queue) === true) {
         const index = queue.indexOf(client);
         queue.splice(index, 1);

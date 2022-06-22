@@ -13,9 +13,9 @@ export class CreateChannelDto {
 export class InviteDto {
     @IsString()
     @IsNotEmpty()
-    readonly chanID: string
+    readonly chanId: string
 
     @IsString()
     @IsNotEmpty()
-    readonly invitedUser: string
+    readonly invitedUserId: string
 }

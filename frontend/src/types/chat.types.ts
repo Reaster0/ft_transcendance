@@ -1,112 +1,44 @@
 export enum Status {
-	OFFLINE = 'Offline',
-	ONLINE = 'Online',
-	PLAYING = 'In Game',
+    ONLINE = 'online',
+    OFFLINE = 'offline',
+    PLAYING = 'playing',
+}
+  
+export enum ChannelType {
+    PUBLIC = 0,
+    PRIVATE = 1,
+    PROTECTED = 2,
+    PM = 3,
 }
 
-//export interface UserI {
-//    id: number,
-//    nickname: string,
-//    status: UserStatus,
-//}
-
-//export class User implements UserI{
-//    id = 0;
-//    nickname = '';
-//    status =  UserStatus.OFFLINE;
-//}
-
-//export interface ChannelI {
-
-//	id: string,
-//	channelName: string,
-//	date: Date,
-//	update_at: Date,
-//	owner: number, //id or nickname ?
-//	publicChannel: boolean,
-//	password: string,
-//	adminUsers: string[],
-//    // -- relations //
-//	users: User[],
-//	chanUsers: JoinnedUserI[],
-//	messages: MessageI[],
-//}
-
-//export class Channel implements ChannelI {
-
-//	id = '';
-//	channelName = '';
-//	date = new Date();
-//	update_at = new Date();
-//	owner = 0; // id
-//	publicChannel = true;
-//	password = '';
-//	adminUsers = [];
-//    // --- relations //
-//	users = [];
-//	chanUsers = [];
-//	messages = [];
-//}
-
-export interface JoinnedUserI {
-	id: string;
-	socketID: string;
-	user: User;
-	chan: Channel;
-}
-
-//export class JoinnedUser implements JoinnedUserI {
-//	id = '';
-//	socketID = '';
-//	user =  new User;
-//	chan = new Channel;
-//}
-
-//export interface MessageI {
-//	id: number
-//	content: string;
-//	date: Date;
-//	update_at: Date;
-// // relation //
-//	user: User;
-//	channel: Channel;
-//}
-
-//export class Message implements MessageI {
-//	id = 0;
-//	content = '';
-//	date = new Date;
-//	update_at = new Date;
-
-//	user = new User;
-//	channel = new Channel;
-//}
-
-//export class newChannel {
-//  name: string = '';
-//  public: boolean = true;
-//  password: string = '';
-//  members: User[] = [];
-//  admin: User[] = []; 
-//}
-
-export interface User {
-	id : number;
-	name: string;
-	avatar: any;
-	status: string;
-	role: string;
-}
-
-export interface Message {
-	content: string;
-	date: string;
-	creatorId: number;
+export enum Roles {
+    OWNER = 0,
+    ADMIN = 1,
+    USER = 2,
+    NONMEMBER = 3
 }
 
 export interface Channel {
-	id: number;
-	name: string;
-	users: User[];
-	messages: Message[];
+    id: string;
+    name: string;
+	type: ChannelType;
+    avatar?: Blob | Uint8Array;
+}
+
+export interface UserGlobal {
+    id: number;
+    name: string;
+	avatar: Blob;
+	status: Status;
+}
+
+export interface UserChannel {
+	id : number;
+	role: Roles;
+}
+
+export interface Message {
+    content: string;
+    userId: number;
+    date: any;
 }
