@@ -11,7 +11,6 @@ import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Avatar } from '../entities/avatar.entity';
 import { ChatGateway } from '../../chat/chat.gateway';
-import { Socket } from 'socket.io';
 import { Channel } from 'src/chat/entities/channel.entity';
 
 @Injectable()
@@ -238,7 +237,7 @@ export class UsersService {
     return users;
   }
 
-  async updateBlockedUser(userId: number, block: boolean, targetId: number,): Promise<boolean> {
+  async updateBlockedUser(userId: number, block: boolean, targetId: number): Promise<boolean> {
     const currentUser = await this.userRepository.findOne(userId);
     const userToBlock = await this.userRepository.findOne(targetId);
     if (!userToBlock) { 
