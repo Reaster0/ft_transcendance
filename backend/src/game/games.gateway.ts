@@ -234,6 +234,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       if (match.state != State.ONGOING && match.state != State.SCORE) {
         return;
       }
+      this.gamesService.startWatchGame(client, match);
       watchers.splice(index, 1);
       client.join(matchId);
     } catch {

@@ -16,7 +16,7 @@
             </div>
             
             <div id="joinableUsers" class="searchtool-two">
-              <h4 class="Spotnik"> Search user </h4>
+              <h4 class="Spotnik"> Search connected user </h4>
               <v-selection @open="getConnectedUsers"
                 @option:selected="initDisplayChannel"
                 label="name"
@@ -97,11 +97,12 @@
         <v-col cols="auto" sm="6" class="border" v-else>
           <v-app id="chatdisplay" v-if="update.messages && update.users
             && currentChannel.name != ''
-            && currentChannel.role != Roles.NONMEMBER"
+            && currentChannel.role != Roles.NONMEMBER
+            && currentChannel.blocked === false"
             style="max-height: 600px;">
 
             <!-- MESSAGES DISPLAY -->
-            <div class="specialscroll" @scroll="isScrollAtBottom">
+            <div id="messagedisplay" class="specialscroll" @scroll="isScrollAtBottom">
               <div v-for="(msg, index) in
                 currentChannel.messages.slice().reverse()"
                 :key="index" :class="['d-flex flex-row align-center my-2',
@@ -169,11 +170,18 @@
             </h1>
           </v-app>
 
+          <v-app v-else-if="currentChannel.blocked === true">
+            <h1 class="Spotnik textfullcenter" data-text="Blocked user">
+              You blocked this user
+            </h1>
+          </v-app>  
+
           <v-app v-else-if="currentChannel.id != ''">
             <h1 class="Spotnik textfullcenter" data-text="Loading messages">
               Loading messages
             </h1>
           </v-app>
+
 
         </v-col>
 
@@ -352,13 +360,13 @@
                   </v-btn>
                 </div>
                 <div v-if="!currentChannel.blocked">
-                  <v-btn @click="blockUser(parseInt(currentChannel.id), true)" elevation="2"
+                  <v-btn @click="blockUserControl(true)" elevation="2"
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
                 </div>
                 <div v-else>
-                  <v-btn @click="blockUser(parseInt(currentChannel.id), false)" elevation="2"
+                  <v-btn @click="blockUserControl(false)" elevation="2"
                     class="my-2" width="80%" color="success">
                     Unblock this user
                   </v-btn>
@@ -481,6 +489,8 @@ export default defineComponent({
 				console.log("the error is:" + error)
 			}
 
+      /* Function to receive users and channels data */
+
       connection.value!.on('usersList', async function(params: any) {
         console.log('receive new users list');
         for (let user of params) {
@@ -507,13 +517,11 @@ export default defineComponent({
               channel.avatar = getUserAvatar(usersId[0]);
             }
           }
+          if (currentChannel.value.id === channel.id) {
+            initDisplayChannel(channel, true);
+          }
         }
         update.value.connected = true;
-      })
-
-      connection.value!.on('joinableChannels', function(params: Channel[]) {
-        joinableChannels.value = params;
-        console.log(joinableChannels.value);
       })
 
       connection.value!.on('channelUsers',
@@ -541,35 +549,6 @@ export default defineComponent({
         update.value.messages = true;
       })
 
-      connection.value!.on('connectedUsers', async function(params: any ) {
-        console.log('receive connectedUsers');
-        joinableChannels.value = [];
-        for (let user of params) {
-          let avatar = await getUserAvatar(user.id);
-          joinableChannels.value.push({ id: user.id, name: user.nickname, 
-            type: ChannelType.PM, avatar: avatar });
-        }
-        console.log(joinableChannels.value);
-      })
-
-      connection.value!.on('joinAccepted', function(params: { id: string }){
-        if (currentChannel.value.id != params.id) {
-          console.log('error in correspondance join channel');
-          return;
-        }
-        alert('Welcome to ' + currentChannel.value.name + ' !');
-        displayMemberChannel();
-      })
-
-      connection.value!.on('banned', function(){
-        alert('You are banned from ' + currentChannel.value.name + ' !');
-      })
-
-      connection.value!.on('wrongPassword', function(){
-        alert('You entered the wrong password for '
-          + currentChannel.value.name);
-      })
-
       connection.value!.on('newMessage',
         function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
@@ -581,23 +560,74 @@ export default defineComponent({
         if (params.message.userId != currentUser.id) {
           currentChannel.value.notif = true;
         }
+        isScrollAtBottom(null);
+      })
+
+      /* Search function responses */
+
+      connection.value!.on('connectedUsers', async function(params: any ) {
+        console.log('receive connectedUsers');
+        joinableChannels.value = [];
+        for (let user of params) {
+          let avatar = await getUserAvatar(user.id);
+          joinableChannels.value.push({ id: user.id, name: user.nickname, 
+            type: ChannelType.PM, avatar: avatar });
+        }
+        console.log(joinableChannels.value);
+      })
+
+      connection.value!.on('joinableChannels', function(params: Channel[]) {
+        joinableChannels.value = params;
+      })
+
+      /* Channel management responses */
+
+      connection.value!.on('joinAccepted', function(params: { id: string, isPm: boolean }) {
+        connection.value!.emit('emitMyChannels');
+        if (params.isPm === false && currentChannel.value.id != params.id) {
+          return ;
+        } else if (params.isPm === false) {
+          alert('Welcome to ' + currentChannel.value.name + ' !');
+        } else {
+          currentChannel.value.id = params.id;
+          alert('You just been added to a new private discussion.');
+        }
+      })
+
+      connection.value!.on('youAreBanned', function(){
+        alert('You are banned from ' + currentChannel.value.name + ' !');
+      })
+
+      connection.value!.on('wrongPassword', function(){
+        alert('You entered the wrong password for '
+          + currentChannel.value.name);
       })
 
       connection.value!.on('leftChannel', function(params: { id: string }) {
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        console.log('successfully left channel ' + currentChannel.value.name);
         initDisplayChannel(currentChannel.value, false);
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('userLeftChannel', function (params: {id: string }){
+      /* Modification of channels */
+
+      connection.value!.on('userChannelModif', function (params: {id: string }){
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        console.log('one user left channel ' + currentChannel.value.name);
+        console.log('modification in user list of channel ' + currentChannel.value.name);
         connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+      })
+
+      connection.value!.on('channelEdited', function (params: {id: string }){
+        if (currentChannel.value.id != params.id) {
+          connection.value!.emit('emitMyChannels');
+          return ;
+        }
+        console.log('modification in current channel ' + currentChannel.value.name);
+        connection.value!.emit('emitMyChannels');
       })
 
       connection.value!.on('channelDestruction', function (params: {id: string }){
@@ -611,9 +641,16 @@ export default defineComponent({
         router.push('/thechat');
       })
 
-      connection.value!.on('isBlocked', function (params: boolean) {
-        currentChannel.value.blocked = params;
-      }) 
+      /* Private conversation responses */
+
+      connection.value!.on('blockChange', function(params: { targetId: number }) {
+        if (currentChannel.value.type === ChannelType.PM
+          && currentChannel.value.users.map(user => user.id)
+          .indexOf(params.targetId) !== -1) {
+            currentChannel.value.blocked = !currentChannel.value.blocked;
+          }
+        displayMemberChannel();
+      })
 
       connection.value!.on('gameInvitation', function(params: { id: number }) {
         //TODO
@@ -631,12 +668,7 @@ export default defineComponent({
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
-
-      currentChannel.value.blocked = false; // TODO modify accordingly
-      if (channel.type === 3) {
-        connection.value!.emit('isUserBlocked', channel.id); // or maby use a route
-      }
-
+      currentChannel.value.blocked = channel.blocked;
       const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
       currentChannel.value.description = channelTypes[channel.type];
       currentChannel.value.messages = [];
@@ -659,7 +691,9 @@ export default defineComponent({
       update.value.messages = false;
       update.value.users = false;
       connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
-      connection.value.emit('getChannelMessages', { id: currentChannel.value.id });
+      if (currentChannel.value.blocked === false) {
+        connection.value.emit('getChannelMessages', { id: currentChannel.value.id });
+      }
     }
 
     async function setChannelManager() {
@@ -779,15 +813,15 @@ export default defineComponent({
 
     function joinPrivateConversation(targetId: string) {
       console.log('join conversation ' + targetId);
-      connection.value!.emit('CreatePrivateConversation', targetId);
+      connection.value!.emit('createPrivateConversation', targetId);
     }
 
-    function blockUser(targetId: number, block: boolean) {
-      connection.value!.emit('blockUser', {targetId, block});
-    }
-
-    function unblockUser() {
-      //TODO
+    function blockUserControl(block: boolean) {
+      let targetId = currentChannel.value.users[0].id;
+      if (currentChannel.value.users[0].id === currentUser.id) {
+        targetId = currentChannel.value.users[1].id;
+      }
+      connection.value!.emit('blockUserControl', { targetId: targetId, block: block });
     }
 
     function leaveChannel() {
@@ -831,8 +865,14 @@ export default defineComponent({
     }
 
     function isScrollAtBottom(event: any) {
-      const { scrollTop } = event.target;
-      if (scrollTop === 0) {
+      let scrollTop = 0;
+      if (event === null && document.querySelector("#messagedisplay") !== null) {
+        scrollTop = document.querySelector("#messagedisplay")!.scrollTop;
+      } else {
+        scrollTop = event.target.scrollTop;
+      }
+      console.log(scrollTop);
+      if (scrollTop >= -100) {
         if (currentChannel.value) {
           currentChannel.value.notif = false;
         }
@@ -852,7 +892,6 @@ export default defineComponent({
     }
 
     async function genJoinUrl(channelId: string) {
-      console.log('gen ' + channelId);
       const res = await genJoinLink(channelId);
       alert('invitation link: ' + res);
     }
@@ -884,7 +923,7 @@ export default defineComponent({
       getUserColor, sendingMessage, searchRequest, joinableChannels,
       avatarToUrl, isScrollAtBottom, ChannelType, togglePasswordModal,
       showPasswordModal, joinChannel, joinProtectedChannel, Roles, waitingGame,
-      game, blockUser, unblockUser, leaveChannel, initDisplayChannel,
+      game, blockUserControl, leaveChannel, initDisplayChannel,
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
       genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation }
