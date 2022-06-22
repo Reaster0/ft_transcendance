@@ -37,52 +37,48 @@
           <div class="text-left overflow-y-auto margin-top"
             style="max-height: calc(100vh - 50%);">
             <v-list>
-              <v-list-item-group> 
-                <template v-for="(item, index) in userChannels.channels">
-                  <v-subheader v-if="item.header" :key="item.header"
-                    v-text="item.header"></v-subheader>
-                  <v-divider v-else-if="item.divider" :key="index"
-                    :inset="item.inset"></v-divider>
-                  <v-list-item v-else :key="item.title">
-                    <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      @click="initDisplayChannel(item, true)"
-                      v-if="item.id != currentChannel.id">
-                        <v-list-item-avatar>
-                          <v-img v-if="item.avatar != null" :src="item.avatar"
-                            min-width="50px" min-height="50px"
-                            transition="false" loading="lazy">
-                          </v-img>
-                          <v-avatar v-else color="blue" min-width="50px"
-                            min-height="50px">
-                            <v-icon color="white">mdi-duck</v-icon>
-                          </v-avatar>
-                        </v-list-item-avatar>
-                    </v-btn>
-                    <v-btn elevation="0" min-height="50px"  max-width="50px"
-                      v-else>
-                      <v-badge bordered bottom color="green" dot offset-x="6"
-                        offset-y="34">
-                        <v-list-item-avatar v-if="item.avatar != null">
-                          <v-img :src="item.avatar" min-width="50px"
-                            min-height="50px" transition="false" loading="lazy">
-                          </v-img>
-                        </v-list-item-avatar>
-                        <v-list-item-avatar v-else>
-                          <v-avatar color="blue" min-width="50px"
-                            min-height="50px">
-                            <v-icon color="white">mdi-duck</v-icon>
-                          </v-avatar>
-                        </v-list-item-avatar>
-                      </v-badge>
-                    </v-btn>
-                    <v-list-item-title class="offsetmess">{{ item.name }}
-                    </v-list-item-title>
-                  </v-list-item>
-                  <v-divider v-if="index < userChannels.channels.length"
-                    :key="index">
-                  </v-divider>
-                </template>
-              </v-list-item-group>
+              <template v-for="(item, index) in userChannels.channels">
+                <v-divider v-if="item.divider" :key="index"
+                  :inset="item.inset"></v-divider>
+                <v-list-item v-else :key="item.title">
+                  <v-btn elevation="0" min-height="50px"  max-width="50px"
+                    @click="initDisplayChannel(item, true)"
+                    v-if="item.id != currentChannel.id">
+                      <v-list-item-avatar>
+                        <v-img v-if="item.avatar != null" :src="item.avatar"
+                          min-width="50px" min-height="50px"
+                          transition="false" loading="lazy">
+                        </v-img>
+                        <v-avatar v-else color="blue" min-width="50px"
+                          min-height="50px">
+                          <v-icon color="white">mdi-duck</v-icon>
+                        </v-avatar>
+                      </v-list-item-avatar>
+                  </v-btn>
+                  <v-btn elevation="0" min-height="50px"  max-width="50px"
+                    v-else>
+                    <v-badge bordered bottom color="green" dot offset-x="6"
+                      offset-y="34">
+                      <v-list-item-avatar v-if="item.avatar != null">
+                        <v-img :src="item.avatar" min-width="50px"
+                          min-height="50px" transition="false" loading="lazy">
+                        </v-img>
+                      </v-list-item-avatar>
+                      <v-list-item-avatar v-else>
+                        <v-avatar color="blue" min-width="50px"
+                          min-height="50px">
+                          <v-icon color="white">mdi-duck</v-icon>
+                        </v-avatar>
+                      </v-list-item-avatar>
+                    </v-badge>
+                  </v-btn>
+                  <v-list-item-title class="offsetmess">{{ item.name }}
+                  </v-list-item-title>
+                </v-list-item>
+                <v-divider v-if="index < userChannels.channels.length"
+                  :key="index">
+                </v-divider>
+              </template>
             </v-list>
           </div>
         </v-col>
@@ -113,13 +109,15 @@
                 <v-card class="d-flex-column" max-width="450px"
                   v-if="msg.userId === currentUser.id"
                   color="rgb(0,0,255)" dark>
-                  <v-list-item>
-                    <v-list-item-content class="user-message-container">
-                      <div class="mb-2 message">
-                        {{ msg.content }} </div>
+                  <v-list-item class="user-message-container">
+                    <v-list-item-header>
+                      <v-list-item-title class="mb-2 message text-wrap">
+                        {{ msg.content }}
+                      </v-list-item-title>
                       <v-list-item-subtitle>
-                        {{ msg.date }} </v-list-item-subtitle>
-                    </v-list-item-content>
+                        {{ msg.date }}
+                      </v-list-item-subtitle>
+                    </v-list-item-header>
                   </v-list-item>
                 </v-card>
                 <v-btn elevation="0" min-height="50px"
@@ -133,18 +131,15 @@
                 </v-btn>
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
                   != currentUser.id">   
-                  <v-list-item>
-                    <v-list-item-content class="other-message-container">
-                      <v-list-item-title class="message-name">
-                        {{ getUserName(msg.userId) }}
-                      </v-list-item-title>
-                      <div class="mb-2 message">
+                  <v-list-item class="other-message-container">
+                    <v-list-item-header>
+                      <v-list-item-title class="mb-2 message text-wrap">
                         {{ msg.content }}
-                      </div>
+                      </v-list-item-title>
                       <v-list-item-subtitle>
                         {{ msg.date }}
                       </v-list-item-subtitle>
-                    </v-list-item-content>
+                    </v-list-item-header>
                   </v-list-item>
                 </v-card >
               </div>
@@ -251,7 +246,6 @@
                 <!-- INFOS ABOUT CHANNEL USERS  -->
                 <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
                   <v-tabs fixed-tabs>
-                    <v-tabs-slider color="rgb(0,0,255)"></v-tabs-slider>
                     <v-tab color="rgb(0,0,255)"
                       v-for="(item, index) in channelManager.title"
                       :class="{active: channelManager.displayIndex === index}"
@@ -260,105 +254,90 @@
                     </v-tab>
                   </v-tabs>
                   <!-- DISPLAY MEMBERS -->
-                  <v-tabs-items>
-                    <v-card flat class="overflow-y-auto">       
-                      <div v-if="channelManager.displayIndex === 0">
-                        <v-list>
-                          <v-list-item-group>
-                            <template v-for="(item, index) in
-                              channelManager.members">
-                              <v-subheader v-if="item.header" :key="item.header"
-                                v-text="item.header"></v-subheader>
-                              <v-divider v-else-if="item.divider" :key="index"
-                                :inset="item.inset"></v-divider>
-                              <v-list-item v-else :key="item.title">
-                                <!-- MANAGE USER BUTTON IF ADMIN -->
-                                <div v-if="(currentChannel.role === Roles.ADMIN 
-                                  || currentChannel.role === Roles.OWNER)
-                                  && item.id != currentUser.id
-                                  && item.role != Roles.OWNER">
-                                  <v-btn @click="goToManageUser(item)" icon
-                                    elevation="0">
-                                    <v-app-bar-nav-icon elevation="0">
-                                    </v-app-bar-nav-icon>
-                                  </v-btn>
-                                </div>
-                                <v-btn elevation="0" min-height="50px"
-                                  max-width="50px">
-                                  <v-badge bordered bottom
-                                    :color="getUserColor(item.id)"
-                                    dot offset-x="6" offset-y="34" >
-                                    <v-list-item-avatar>
-                                      <v-img :src="getUserAvatar(item.id)"
-                                        min-width="50px" min-height="50px">
-                                      </v-img>
-                                    </v-list-item-avatar>
-                                  </v-badge>
-                                </v-btn>
-                                <v-list-item-content>
-                                  <v-list-item-title class="offsetmess">
-                                    {{ getUserName(item.id) }}
-                                  </v-list-item-title>
-                                </v-list-item-content>
-                              </v-list-item>
-                              <v-divider v-if="index <
-                                channelManager.members.length" :key="index">
-                              </v-divider>
-                            </template>
-                          </v-list-item-group>
-                        </v-list>
-                      </div>
-                      <!-- DISPLAY ADMINS -->
-                      <div v-show="channelManager.displayIndex === 1">
-                        <v-list>
-                          <v-list-item-group>
-                            <template v-for="(item, index) in
-                              channelManager.admins">
-                              <v-subheader v-if="item.header" :key="item.header" 
-                                v-text="item.header">
-                              </v-subheader>
-                              <v-divider v-else-if="item.divider" :key="index"
-                                :inset="item.inset">
-                              </v-divider>
-                              <v-list-item v-else :key="item.title">
-                                <!-- MANAGE USER BUTTON IF ADMIN -->
-                                <div v-if="(currentChannel.role === Roles.ADMIN 
-                                  || currentChannel.role === Roles.OWNER)
-                                  && item.id != currentUser.id
-                                  && item.role != Roles.OWNER">
-                                  <v-btn @click="goToManageUser(item)" icon
-                                    elevation="0">
-                                    <v-app-bar-nav-icon elevation="0">
-                                    </v-app-bar-nav-icon>
-                                  </v-btn>
-                                </div>
-                                <v-btn elevation="0" min-height="50px"
-                                  max-width="50px" >
-                                  <v-badge bordered bottom
-                                    :color="getUserColor(item.id)"
-                                    dot offset-x="6" offset-y="34" >
-                                    <v-list-item-avatar>
-                                      <v-img :src="getUserAvatar(item.id)"
-                                        min-width="50px" min-height="50px">
-                                      </v-img>
-                                    </v-list-item-avatar>
-                                  </v-badge>
-                                </v-btn>
-                                <v-list-item-content>
-                                  <v-list-item-title class="offsetmess">
-                                    {{ getUserName(item.id) }}
-                                  </v-list-item-title>
-                                </v-list-item-content>
-                              </v-list-item>
-                              <v-divider v-if="index <
-                                channelManager.admins.length" :key="index">
-                              </v-divider>
-                            </template>
-                          </v-list-item-group>
-                        </v-list>
-                      </div>
-                    </v-card>
-                  </v-tabs-items>
+                  <v-card flat class="overflow-y-auto">       
+                    <div v-if="channelManager.displayIndex === 0">
+                      <v-list>
+                        <template v-for="(item, index) in
+                          channelManager.members">
+                          <v-divider v-if="item.divider" :key="index"
+                            :inset="item.inset"></v-divider>
+                          <v-list-item v-else :key="item.title">
+                            <!-- MANAGE USER BUTTON IF ADMIN -->
+                            <div v-if="(currentChannel.role === Roles.ADMIN 
+                              || currentChannel.role === Roles.OWNER)
+                              && item.id != currentUser.id
+                              && item.role != Roles.OWNER">
+                              <v-btn @click="goToManageUser(item)" icon
+                                elevation="0">
+                                <v-app-bar-nav-icon elevation="0">
+                                </v-app-bar-nav-icon>
+                              </v-btn>
+                            </div>
+                            <v-btn elevation="0" min-height="50px"
+                              max-width="50px">
+                              <v-badge bordered bottom
+                                :color="getUserColor(item.id)"
+                                dot offset-x="6" offset-y="34" >
+                                <v-list-item-avatar>
+                                  <v-img :src="getUserAvatar(item.id)"
+                                    min-width="50px" min-height="50px">
+                                  </v-img>
+                                </v-list-item-avatar>
+                              </v-badge>
+                            </v-btn>
+                            <v-list-item-title class="offsetmess">
+                              {{ getUserName(item.id) }}
+                            </v-list-item-title>
+                          </v-list-item>
+                          <v-divider v-if="index <
+                            channelManager.members.length" :key="index">
+                          </v-divider>
+                        </template>
+                      </v-list>
+                    </div>
+                    <!-- DISPLAY ADMINS -->
+                    <div v-show="channelManager.displayIndex === 1">
+                      <v-list>
+                        <template v-for="(item, index) in
+                          channelManager.admins">
+                          <v-divider v-if="item.divider" :key="index"
+                            :inset="item.inset">
+                          </v-divider>
+                          <v-list-item v-else :key="item.title">
+                            <!-- MANAGE USER BUTTON IF ADMIN -->
+                            <div v-if="(currentChannel.role === Roles.ADMIN 
+                              || currentChannel.role === Roles.OWNER)
+                              && item.id != currentUser.id
+                              && item.role != Roles.OWNER">
+                              <v-btn @click="goToManageUser(item)" icon
+                                elevation="0">
+                                <v-app-bar-nav-icon elevation="0">
+                                </v-app-bar-nav-icon>
+                              </v-btn>
+                            </div>
+                            <v-btn elevation="0" min-height="50px"
+                              max-width="50px" >
+                              <v-badge bordered bottom
+                                :color="getUserColor(item.id)"
+                                dot offset-x="6" offset-y="34" >
+                                <v-list-item-avatar>
+                                  <v-img :src="getUserAvatar(item.id)"
+                                    min-width="50px" min-height="50px">
+                                  </v-img>
+                                </v-list-item-avatar>
+                              </v-badge>
+                            </v-btn>
+                            <v-list-item-title class="offsetmess">
+                              {{ getUserName(item.id) }}
+                            </v-list-item-title>
+                          </v-list-item>
+                          <v-divider v-if="index <
+                            channelManager.admins.length" :key="index">
+                          </v-divider>
+                        </template>
+                      </v-list>
+                    </div>
+                  </v-card>
                 </div>
               </div>
             </div>
