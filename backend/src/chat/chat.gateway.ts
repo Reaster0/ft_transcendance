@@ -100,12 +100,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
     for (const user of connectedUsers) {
       const blockedUser: number = user.blockedIds.find(element => element === sender.id)
-      if (blockedUser)
+      if (blockedUser) {
+        if (channel.type === ChannelType.PM) {
+          continue ;
+        }
         message.content = "... 🛑 ...";
-      else
+      }
+      else {
         message.content = originalMessage;
+      }
       const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
-      console.log('send to ' + user.chatSocket);
       this.server.to(user.chatSocket).emit('newMessage', { id: params.channelId, message: frontMessage });
     }
   }
@@ -172,7 +176,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     const { targetId, block } = data;
     const change = await this.userServices.updateBlockedUser(client.data.user.id, block, targetId);
     if (change) {
-      this.emitMyChannels(client);
       client.emit('blockChange', { targetId: targetId });
     }
   }

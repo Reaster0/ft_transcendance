@@ -557,7 +557,9 @@ export default defineComponent({
         }
         console.log('incoming message');
         currentChannel.value.messages.push(params.message);
-        if (params.message.userId != currentUser.id) {
+        if (params.message.userId != currentUser.id
+          && update.value.messages === true
+          && currentChannel.value.blocked === false) {
           currentChannel.value.notif = true;
           isScrollAtBottom(null);
         }
