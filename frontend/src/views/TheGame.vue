@@ -41,7 +41,7 @@
 	<!-- game watching -->
 	<div v-if="route.query.watch">
 		<v-row justify="center" v-if="!matchesList">
-			<div class="button_slick button_slide big_button Spotnik" @click="WatchGame">Matches List</div>
+			<div class="button_slick button_slide big_button Spotnik" @click="WatchGame">See Matches List</div>
 		</v-row>
 		<v-row>
 			<v-col v-for="(matches) in matchesList" :key="matches">
