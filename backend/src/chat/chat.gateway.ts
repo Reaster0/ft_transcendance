@@ -39,7 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
       await this.userServices.changeStatus(client.data.user, Status.ONLINE, client.id);
-      this.logger.log(`Client connected: ${client.id}`);
+      this.logger.log(`Client connected: ${client.data.user.username}`);
     } catch {
       this.logger.log('Failed to retrieve user from client');
       return client.disconnect();
@@ -52,9 +52,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     if (!client.data.user) {
       return client.disconnect();
     }
+    this.logger.log(`Client disconnected: ${client.data.user.username}`);
     await this.userServices.changeStatus(client.data.user, Status.OFFLINE, null);
     client.disconnect();
-    this.logger.log(`Client disconnected: ${client}`);
   }
 
   /*********** .  . Create Channel **************** */
@@ -191,10 +191,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /********************* Block user *********************/
   //@UseGuards(AuthChat)
   @SubscribeMessage('blockUser')
-  async blockOrDefiUser(client: Socket, data: {targetId: number, block: boolean}): Promise<void>{
+  async blockUserControl(client: Socket, data: {targetId: number, block: boolean}): Promise<void>{
     const { targetId, block } = data;
     const userUpdate = await this.userServices.updateBlockedUser(client.data.user, block, targetId);
-    this.logger.log(`${client.data.user} block ${userUpdate.nickname}`);
     // emit result
   }
 

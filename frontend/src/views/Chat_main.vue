@@ -352,13 +352,13 @@
                   </v-btn>
                 </div>
                 <div v-if="!currentChannel.blocked">
-                  <v-btn @click="blockUser(parseInt(currentChannel.id), true)" elevation="2"
+                  <v-btn @click="blockUserControl(true)" elevation="2"
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
                 </div>
                 <div v-else>
-                  <v-btn @click="blockUser(parseInt(currentChannel.id), false)" elevation="2"
+                  <v-btn @click="blockUserControl(false)" elevation="2"
                     class="my-2" width="80%" color="success">
                     Unblock this user
                   </v-btn>
@@ -782,12 +782,12 @@ export default defineComponent({
       connection.value!.emit('CreatePrivateConversation', targetId);
     }
 
-    function blockUser(targetId: number, block: boolean) {
-      connection.value!.emit('blockUser', {targetId, block});
-    }
-
-    function unblockUser() {
-      //TODO
+    function blockUserControl(block: boolean) {
+      let targetId = currentChannel.value.users[0].id;
+      if (currentChannel.value.users[0].id === currentUser.id) {
+        targetId = currentChannel.value.users[1].id;
+      }
+      connection.value!.emit('blockUser', { targetId: targetId, block: block });
     }
 
     function leaveChannel() {
@@ -884,7 +884,7 @@ export default defineComponent({
       getUserColor, sendingMessage, searchRequest, joinableChannels,
       avatarToUrl, isScrollAtBottom, ChannelType, togglePasswordModal,
       showPasswordModal, joinChannel, joinProtectedChannel, Roles, waitingGame,
-      game, blockUser, unblockUser, leaveChannel, initDisplayChannel,
+      game, blockUserControl, leaveChannel, initDisplayChannel,
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
       genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation }

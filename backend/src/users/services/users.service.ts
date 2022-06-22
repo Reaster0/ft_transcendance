@@ -232,19 +232,15 @@ export class UsersService {
 
   //maybe us id insted of userToBlock
   async updateBlockedUser(user: User, block: boolean, targetId: number,): Promise<User> {
-
     const userToBlock = await this.userRepository.findOne(targetId);
-    if (!userToBlock) { return null; }
-
-    const userFound = user.blockedIds.find((element) => element === userToBlock.id);
-    // userFound only if already in blocket list
-
-    if (block === true && !userFound) {
-      user.blockedIds.push(userToBlock.id); // add it
-      return await this.userRepository.save(user);
+    if (!userToBlock) { 
+      return null;
     }
-
-    if (block === false && userFound) { // unblock
+    const userFound = user.blockedIds.find((element) => element === userToBlock.id);
+    if (block === true && !userFound) {
+      user.blockedIds.push(userToBlock.id);
+      return await this.userRepository.save(user);
+    } else if (block === false && userFound) {
       const index = user.blockedIds.indexOf(userToBlock.id);
       user.blockedIds.splice(index, 1);
       return await this.userRepository.save(user);
