@@ -192,7 +192,7 @@ export class GamesService {
     match.players[0].lastAction = startTime;
     match.players[1].lastAction = startTime;
     const intervalId = setInterval(() => {
-        //that.checkPlayersPresents(server, match);
+        that.checkPlayersPresents(server, match);
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
           that.finishGame(server, match, matchs);
@@ -200,8 +200,9 @@ export class GamesService {
           count++;
           server.to(match.matchId).emit('gameUpdate', { ball: that.getBallFeatures(match),
             paddle: that.getPaddlesFeatures(match)});
-        //   if (count === 300) {
-        //   }
+          if (count === 300) {
+                match.state = State.ONGOING;    
+          }
         } else if (match.state === State.PAUSED) {
           count++;
           if (count === 3500) { // a little over 10 sec
