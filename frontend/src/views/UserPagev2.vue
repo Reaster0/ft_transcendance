@@ -92,7 +92,7 @@ export default defineComponent ({
 		}
 
 		watch(nickname, async (newnick: any) => {
-			name_accepted.value = await updateUser(newnick) as any; 
+			name_accepted.value = await updateUser(newnick, user.value.nickname) as any; 
 		})
 
 		return {user,
