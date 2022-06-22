@@ -646,15 +646,11 @@ export default defineComponent({
       /* Private conversation responses */
 
       connection.value!.on('blockChange', function(params: { targetId: number }) {
-        //console.log('block change: ' + currentChannel.value.blocked);
-        //connection.value!.emit('emitMyChannels');
-        //void params;
         if (currentChannel.value.type === ChannelType.PM
           && currentChannel.value.users.map(user => user.id)
           .indexOf(params.targetId) !== -1) {
             currentChannel.value.blocked = !currentChannel.value.blocked;
           }
-        console.log('block change: ' + currentChannel.value.blocked);
         displayMemberChannel();
       })
 
@@ -675,7 +671,6 @@ export default defineComponent({
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
       currentChannel.value.blocked = channel.blocked;
-      console.log('channel block: ' + channel.blocked);
       const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
       currentChannel.value.description = channelTypes[channel.type];
       currentChannel.value.messages = [];
@@ -698,7 +693,6 @@ export default defineComponent({
       update.value.messages = false;
       update.value.users = false;
       connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
-      console.log('in display:' + currentChannel.value.blocked);
       if (currentChannel.value.blocked === false) {
         connection.value.emit('getChannelMessages', { id: currentChannel.value.id });
       }
@@ -802,7 +796,6 @@ export default defineComponent({
         showPasswordModal.value = true;
         return ;
       }
-      console.log(currentChannel.value);
       connection.value!.emit('joinChannel', {id: currentChannel.value.id,
          password: ''});
     }
@@ -829,7 +822,6 @@ export default defineComponent({
       if (currentChannel.value.users[0].id === currentUser.id) {
         targetId = currentChannel.value.users[1].id;
       }
-      console.log('block: ' + block);
       connection.value!.emit('blockUserControl', { targetId: targetId, block: block });
     }
 
@@ -880,7 +872,6 @@ export default defineComponent({
       } else {
         scrollTop = event.target.scrollTop;
       }
-      console.log(scrollTop);
       if (scrollTop >= -100) {
         if (currentChannel.value) {
           currentChannel.value.notif = false;
