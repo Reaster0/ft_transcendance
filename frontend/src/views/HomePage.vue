@@ -5,7 +5,7 @@
 		<v-row>
 			<v-col align="center">
 				<h1 class="text">The</h1>
-				<h1 class="text glitch" data-text="Future">Game</h1>
+				<h1 class="text">Game</h1>
 				<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
 					<h1 class="text rainbow">Play</h1>
 				</v-btn>
