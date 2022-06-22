@@ -29,9 +29,9 @@ export class Channel {
   @Column('text', { default: '' })
   password: string;
 
-  @ApiProperty({ type: Number, description: 'array of blocked User id' })
+  @ApiProperty({ type: Number, description: 'array of banned User id' })
   @Column({ type: 'int', array: true, default: {} })
-  blocked: number[];
+  banned: number[];
 
   @Column({ type: 'bytea', nullable: true })
   @ApiProperty({ type: Buffer, description: "avatar buffer for chat" })

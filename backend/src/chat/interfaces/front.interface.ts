@@ -5,6 +5,7 @@ export class FrontChannelI {
     name: string;
     type: number;
     avatar?: Uint8Array;
+    blocked?: boolean;
 }
 
 export class FrontUserGlobalI {

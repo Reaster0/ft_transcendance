@@ -230,8 +230,7 @@ export class UsersService {
     return users;
   }
 
-  //maybe us id insted of userToBlock
-  async updateBlockedUser(user: User, block: boolean, targetId: number,): Promise<User> {
+  async updateBlockedUser(user: User, block: boolean, targetId: number,): Promise<boolean> {
     const userToBlock = await this.userRepository.findOne(targetId);
     if (!userToBlock) { 
       return null;
@@ -239,13 +238,15 @@ export class UsersService {
     const userFound = user.blockedIds.find((element) => element === userToBlock.id);
     if (block === true && !userFound) {
       user.blockedIds.push(userToBlock.id);
-      return await this.userRepository.save(user);
+      await this.userRepository.save(user);
+      return true;
     } else if (block === false && userFound) {
       const index = user.blockedIds.indexOf(userToBlock.id);
       user.blockedIds.splice(index, 1);
-      return await this.userRepository.save(user);
+      await this.userRepository.save(user);
+      return true;
     }
-    return null;
+    return false;
   }
 
   /*
