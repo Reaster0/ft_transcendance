@@ -17,10 +17,8 @@ export class MessageService {
     return this.messageRepository.save(this.messageRepository.create(message));
   }
 
-  async findMessagesForChannel(
-    channelId: string,
-    user: User,
-  ): Promise<FrontMessageI[]> {
+  async findMessagesForChannel(channelId: string, user: User)
+    : Promise<FrontMessageI[]> {
     const query = this.messageRepository
       .createQueryBuilder('message')
       .leftJoin('message.channel', 'channel')
@@ -30,15 +28,13 @@ export class MessageService {
       .orderBy('message.date', 'ASC');
 
     const messagesFound: MessageI[] = await query.getMany();
-
     const updateMessageFound: FrontMessageI[] = [];
-
     for (var message of messagesFound) {
-      const blocked: number = user.blockedIds.find(
-        (element) => element === message.user.id,
-      );
-      if (blocked)
+      const blocked: number = user.blockedIds
+        .find((element) => element === message.user.id);
+      if (blocked) {
         message.content = '... 🛑 ...';
+      }
       const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
       updateMessageFound.push(frontMessage);
     }
