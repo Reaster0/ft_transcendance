@@ -137,8 +137,7 @@ export default defineComponent ({
 		}
 
 		watch(nickname, async (newnick: any) => {
-			if (!route.value.params.username)
-				name_accepted.value = await updateUser(newnick) as boolean
+			name_accepted.value = await updateUser(newnick, user.value.nickname) as any; 
 		})
 
 		return {user,
