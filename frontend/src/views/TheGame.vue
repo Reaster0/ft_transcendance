@@ -88,7 +88,7 @@ export default defineComponent ({
 		const searchingGame = ref<boolean>(false);
 		const fatalError = ref<boolean>(false);
 		const gameData = ref<any>({
-			pos: "" as string,
+			pos: "" as string, //can be "left" or "right" OR the name of the left player if watching 
 			opponent: "" as string,
 			ball: {x: 0 as number, y: 0 as number, radius: 10 as number},
 			paddle:{ width: 5 as number, height: 15 as number},
@@ -301,12 +301,16 @@ export default defineComponent ({
 				ctx!.fillText(winText, 0.2 * canvas!.width, 0.5 * canvas!.height);
 			}
 			if (showInfo){
+				console.log(showInfo)
 				if (gameData.value.pos == "left")
 					ctx!.drawImage(document.getElementById('left_arrow') as HTMLCanvasElement, 0.2 * canvas!.width, 0.35 * canvas!.height, 0.15 * canvas!.width, 0.25 * canvas!.height)
-				else
+				else if (gameData.value.pos == "right")
 					ctx!.drawImage(document.getElementById('right_arrow') as HTMLCanvasElement, 0.6 * canvas!.width, 0.35 * canvas!.height, 0.15 * canvas!.width, 0.25 * canvas!.height)
 				ctx!.font = canvas!.width/4 + "%" + " Spotnik"
-				ctx!.fillText("VS " + gameData.value.opponent, 0.35 * canvas!.width, 0.9 * canvas!.height);
+				if (gameData.value.pos != "left" && gameData.value.pos != "right")
+					ctx!.fillText(gameData.value.pos + " VS " + gameData.value.opponent, 0.25 * canvas!.width, 0.9 * canvas!.height);
+				else
+					ctx!.fillText("VS " + gameData.value.opponent, 0.35 * canvas!.width, 0.9 * canvas!.height);
 			}
 		}
 
