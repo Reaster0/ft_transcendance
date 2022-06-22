@@ -45,6 +45,25 @@ export class ChanServices {
     return {channel: newChannel.name, error: ''};
 	}
 
+  async privateConversation(user1: User, user2: User) {
+
+    const channel: ChannelI = {
+      name: user1.nickname + '/' + user2.nickname, // do not display
+      type: ChannelType.PM,
+      password: '',
+      blocked: [],
+      avatar: null,
+      users: [user1, user2]
+    }
+
+    const newChannel = await this.chanRepository.save(channel);
+    //maybe dont need to add role for this channel ?
+    let role: RolesI = {userId: user1.id, role: ERoles.OWNER, muteDate: null, channel: newChannel};
+    await this.roleRepository.save(role);
+    role = {userId: user2.id, role: ERoles.OWNER, muteDate: null, channel: newChannel};
+    await this.roleRepository.save(role);
+  }
+
 	async deleteChannel(channel: ChannelI) {
     const channelFound: Channel = await this.chanRepository.findOne(channel.id);
     if (channelFound) {
@@ -88,18 +107,20 @@ export class ChanServices {
     return update;
   }
 
-  async updateChannel(channel: ChannelI, info: any): Promise<Boolean> {
-		const { addPassword, password, removePassword } = info;
+  async updateChannel(channel: ChannelI, info: {type: ChannelType, password: string, avatar: Buffer}): Promise<Boolean> {
+		const { type, password, avatar } = info;
 
-    if (addPassword && password) {
+    
+    channel.type = type;
+    if (type === ChannelType.PROTECTED) {
       if (/^([a-zA-Z0-9]+)$/.test(password) === false)
         return false;
       const salt = await bcrypt.genSalt();
       channel.password = await bcrypt.hash(password, salt);
-    }
-    if (removePassword)
-      channel.password = '';
+    } else { channel.password = ''; }
     
+    if (avatar)
+      channel.avatar = avatar;
     await this.chanRepository.save(channel);
   return true;
   }
