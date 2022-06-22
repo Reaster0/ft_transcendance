@@ -39,13 +39,13 @@
 	</div>
 
 	<!-- game watching -->
-	<div v-if="route.query.watch">
+	<div v-if="!gameStarted && route.query.watch">
 		<v-row justify="center" v-if="!matchesList">
 			<div class="button_slick button_slide big_button Spotnik" @click="WatchGame">See Matches List</div>
 		</v-row>
 		<v-row>
 			<v-col v-for="(matches) in matchesList" :key="matches">
-				<div class="button_slide overlay custom_offset">
+				<div class="button_slide overlay custom_offset" @click="FollowGame(matches.matchId)">
 					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
 					<div class="big_text text_custom">{{matches.leftPlayer}}</div>
 					<v-spacer></v-spacer>
@@ -189,6 +189,7 @@ export default defineComponent ({
 				matchesList.value = {
 					...matchesList.value,
 					[params.matchId]: {
+						matchId: params.matchId,
 						leftPlayer: params.leftPlayer,
 						rightPlayer: params.rightPlayer,
 						avatarLeft: await getAvatarID(leftInfo.id!),
@@ -234,6 +235,11 @@ export default defineComponent ({
 			else
 				window.clearInterval(framesId!)
 		})
+
+		function FollowGame(id: number){
+			console.log(id)
+			gameSocket.value!.emit('followGame', id);
+		}
 
 		onBeforeRouteLeave(() => {
 			// const answer = window.confirm("Are you sure you want to leave the game?")
@@ -334,7 +340,8 @@ export default defineComponent ({
 		ballSpeed,
 		WatchGame,
 		route,
-		matchesList}
+		matchesList,
+		FollowGame,}
 	},
 })
 </script>
@@ -382,11 +389,6 @@ h1 {
 <style scoped>
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
 
-
-.big_button {  
-  margin: 180px auto 0 auto;
-}
-
 .custom_offset {
   margin-top: 80px;
 }
@@ -400,6 +402,10 @@ h1 {
 .text_custom {
 	font-family: 'Rajdhani', sans-serif;
 	color: #04BBEC;
+}
+
+.big_button {  
+  margin: 180px auto 0 auto;
 }
 
 </style>
