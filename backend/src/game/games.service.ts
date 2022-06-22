@@ -381,14 +381,10 @@ export class GamesService {
   }
 
   startWatchGame(client: Socket, match: Match) {
-    client.emit('matchState', { leftPlayer: match.players[0].user.nickname, 
-      rightPlayer: match.players[1].user.nickname,
-      leftScore: match.players[0].score,
-      rightScore: match.players[1].score, 
-      ballRad: match.pong.ball.radius.toFixed(3),
-      padLength: match.pong.paddleL.length.toFixed(3),
-      padWidth: match.pong.paddleL.width.toFixed(3),
-      ball: this.getBallFeatures(match),
-      paddle: this.getPaddlesFeatures(match)});
+    client.emit('beReady', { pos: 'left', opponent: match.players[1].user.nickname });
+    client.emit('beReady', { pos: 'right', opponent: match.players[0].user.nickname });
+    client.emit('dimensions', { ballRad: match.pong.ball.radius.toFixed(3),
+      padLength: match.pong.paddleL.length.toFixed(3), padWidth: match.pong.paddleL.width.toFixed(3) });
+    client.emit('score', { leftScore: match.players[0].score, rightScore: match.players[1].score });
   }
 }
