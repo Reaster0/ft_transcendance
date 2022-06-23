@@ -47,9 +47,11 @@ export class ChanServices {
 
   async privateConversation(user1: User, user2: User) {
     try {
-      let name = user1.id + '/' + user2.id;
+      let name: string;
       if (user2.id < user1.id) {
         name = user2.id + '/' + user1.id;      
+      } else {
+        name = user1.id + '/' + user2.id;
       }
       const channel: ChannelI = {
         name: name,
@@ -262,5 +264,13 @@ export class ChanServices {
     if (!user) {return null;}
     user.role = ERoles.ADMIN;
     return await this.roleRepository.save(user);
+  }
+
+  async isOwner(channelId: string, userId: number): Promise<boolean> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) { return false; }
+
+    const chanUser = await this.getUserOnChannel(channel, userId);
+    return (chanUser.role === ERoles.OWNER)
   }
 }
