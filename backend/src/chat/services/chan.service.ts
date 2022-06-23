@@ -271,6 +271,7 @@ export class ChanServices {
     if (!channel) { return false; }
 
     const chanUser = await this.getUserOnChannel(channel, userId);
+    if (!chanUser) { return false; }
     return (chanUser.role === ERoles.OWNER)
   }
 }
