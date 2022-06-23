@@ -65,7 +65,7 @@
 
                     <div>
                     <p align="left" class="font-weight-black offsetmess">
-                      Set this user as admin of the chat
+                      Set this user as admin of the chat (definitive !)
                     </p>
                     </div>
                     <v-list-item>

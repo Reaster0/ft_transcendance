@@ -1,7 +1,7 @@
 import { Inject, forwardRef, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Brackets, Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Roles } from '../entities/role.entity';
 import { ChannelI, RolesI } from '../interfaces/back.interface';
@@ -86,8 +86,6 @@ export class ChanServices {
 
   async pushUserToChan(channel: ChannelI, user: User){
     (channel.users).push(user);
-//    await this.chanRepository.update(channel.id, channel);
-//  update dont work
     await this.chanRepository.save(channel);
     const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel}
     await this.roleRepository.save(newUser);
@@ -212,7 +210,7 @@ export class ChanServices {
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
     const channel = await this.chanRepository.findOne(channelId);
     const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
-    const muteDate = new Date(new Date().getTime() + 10 * 60000) // 10 minutes
+    const muteDate = new Date(new Date().getTime() + time * 60000);
     chanUser.muteDate = muteDate;
     return this.roleRepository.save(chanUser);
 }
