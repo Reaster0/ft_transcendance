@@ -72,28 +72,12 @@ import router from "../router/index";
 
 export default defineComponent({
   name: "NewRoom",
-  data() {
-    return {
-      name: '' as string,
-      password: '' as string
-    }
-  },
-  methods: {
-    handleSubmit(): void {
-      const data = {
-        name: this.name,
-        password: this.password,
-      } as {name : string, password : string };
-      console.log(data);
-      console.log("submitted");
-    }
-  },
   setup () {
     let store = useStore() as Store<any>;
     let socketVal = store.getters.getSocketVal;
     let forceLeave = false;
 
-    onBeforeRouteLeave( function(to: any, from: any, next: any) {
+    onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(forceLeave, socket, to, next, store);

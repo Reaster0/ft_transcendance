@@ -358,6 +358,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         client.emit('alreadyInPm', { name: user2.nickname });
       }
     } catch (e) {
+      client.disconnect();
       this.logger.log(e);
     }
   }
