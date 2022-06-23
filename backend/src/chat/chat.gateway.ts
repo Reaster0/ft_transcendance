@@ -328,12 +328,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('createPrivateConversation')
   async privateConversation(client: Socket, targetId: string) {
-    console.log('creating conversation ', targetId);
-
-    const user1 = client.data.user;
-    const user2 = await this.userServices.findUserById(targetId);
-    const channel = await this.chanServices.privateConversation(user1, user2);
-    client.emit('joinAccepted', { id: channel.id, isPm: true });
-    this.server.to(user2.chatSocket).emit('joinAccepted', { id: channel.id, isPm: true });
+    try {
+      const user1 = client.data.user;
+      const user2 = await this.userServices.findUserById(targetId);
+      const channel = await this.chanServices.privateConversation(user1, user2);
+      if (channel != null) {
+        client.emit('joinAccepted', { id: channel.id, isPm: true });
+        this.server.to(user2.chatSocket).emit('joinAccepted', { id: channel.id, isPm: true });
+      } else {
+        client.emit('alreadyInPm', { name: user2.nickname });
+      }
+    } catch (e) {
+      this.logger.log(e);
+    }
   }
 }

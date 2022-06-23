@@ -596,6 +596,11 @@ export default defineComponent({
         }
       })
 
+      connection.value!.on('alreadyInPm', function(params: { name: string }){
+        alert('You already have an ongoing conversation with ' + params.name + '.');
+      })
+
+
       connection.value!.on('youAreBanned', function(){
         alert('You are banned from ' + currentChannel.value.name + ' !');
       })

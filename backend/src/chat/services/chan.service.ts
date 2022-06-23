@@ -46,20 +46,28 @@ export class ChanServices {
 	}
 
   async privateConversation(user1: User, user2: User) {
-    const channel: ChannelI = {
-      name: user1.id + '/' + user2.id,
-      type: ChannelType.PM,
-      password: '',
-      banned: [],
-      avatar: null,
-      users: [user1, user2]
+    try {
+      let name = user1.id + '/' + user2.id;
+      if (user2.id < user1.id) {
+        name = user2.id + '/' + user1.id;      
+      }
+      const channel: ChannelI = {
+        name: name,
+        type: ChannelType.PM,
+        password: '',
+        banned: [],
+        avatar: null,
+        users: [user1, user2]
+      }
+      const newChannel = await this.chanRepository.save(channel);
+      let role: RolesI = {userId: user1.id, role: ERoles.USER, muteDate: null, channel: newChannel};
+      await this.roleRepository.save(role);
+      role = {userId: user2.id, role: ERoles.USER, muteDate: null, channel: newChannel};
+      await this.roleRepository.save(role);
+      return newChannel;
+    } catch (e) {
+      return null;
     }
-    const newChannel = await this.chanRepository.save(channel);
-    let role: RolesI = {userId: user1.id, role: ERoles.USER, muteDate: null, channel: newChannel};
-    await this.roleRepository.save(role);
-    role = {userId: user2.id, role: ERoles.USER, muteDate: null, channel: newChannel};
-    await this.roleRepository.save(role);
-    return newChannel;
   }
 
 	async deleteChannel(channel: ChannelI) {
@@ -139,7 +147,6 @@ export class ChanServices {
     const channel = await this.chanRepository.findOne(channelID, { relations: ['channelUsers'] });
     return channel.channelUsers;
   }
-
 
   async getChannelFromId(channelID: string): Promise<Channel> {
     return this.chanRepository.findOne(channelID);
