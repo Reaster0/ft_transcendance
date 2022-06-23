@@ -364,18 +364,24 @@
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
+                  <v-btn @click="TODO" elevation="2" class="my-1" width="80%">
+                    Go to user page
+                  </v-btn>
                 </div>
                 <div v-else>
                   <v-btn @click="blockUserControl(false)" elevation="2"
-                    class="my-2" width="80%" color="success">
+                    class="my-1" width="80%" color="success">
                     Unblock this user
                   </v-btn>
+                </div>
+                <div>
+                  <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
                 </div>
                 <div v-if="currentChannel.role != Roles.NONMEMBER
                   && !currentChannel.blocked
                   && !game.request" class="text-center">
                   <v-btn color="rgb(0,0,255)" @click="waitingGame()"
-                  class="my-2" elevation="2" width="80%">
+                  class="my-1" elevation="2" width="80%">
                     <div  :style="{color: ' #ffffff'}">
                       Invite to play together
                     </div>
@@ -463,6 +469,7 @@ export default defineComponent({
     let forceLeave = false as boolean;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      connection.value!.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(forceLeave, socket, to, next, store);
@@ -633,14 +640,12 @@ export default defineComponent({
         if (currentChannel.value.id != params.id) {
           return ;
         }
+        console.log('MODIF');
         connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
       })
 
       connection.value!.on('channelEdited', function (params: {id: string }){
-        if (currentChannel.value.id != params.id) {
-          connection.value!.emit('emitMyChannels');
-          return ;
-        }
+        void params.id;
         connection.value!.emit('emitMyChannels');
       })
 

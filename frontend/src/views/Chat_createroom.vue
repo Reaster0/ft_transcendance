@@ -77,12 +77,6 @@ export default defineComponent({
     let socketVal = store.getters.getSocketVal;
     let forceLeave = false;
 
-    onBeforeRouteLeave(function(to: any, from: any, next: any) {
-      void from;
-      const socket = store.getters.getSocketVal;
-      leaveChat(forceLeave, socket, to, next, store);
-    })
-
     onMounted(() => {
       try {
         console.log('socket val: ' + socketVal);
@@ -106,6 +100,13 @@ export default defineComponent({
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
       })
+    })
+
+    onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
     onUnmounted(async() => {

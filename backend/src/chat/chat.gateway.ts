@@ -142,6 +142,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
   }
 
+  async emitChannelModif(channelId: string) {
+    const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
+    for (const user of connectedUsers) {
+      console.log(user.chatSocket);
+      this.server.to(user.chatSocket).emit('userChannelModif', { id: channelId });
+    }
+  }
+
   /********************* Leave Channel ********************/
   // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')

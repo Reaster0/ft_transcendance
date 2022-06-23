@@ -51,6 +51,10 @@
                           v-model="mute"
                           color="blue"
                         ></v-switch>
+                        <v-text-field
+                          label="Outlined"
+                          outlined
+                        ></v-text-field>
                       </v-list-item-action>
                       <br>
                     </v-list-item>
@@ -148,6 +152,7 @@ export default defineComponent ({
     })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {  
+      socketVal.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(forceLeave, socket, to, next, store);

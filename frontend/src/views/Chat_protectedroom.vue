@@ -82,6 +82,7 @@ export default defineComponent ({
     let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(forceLeave, socket, to, next, store);
