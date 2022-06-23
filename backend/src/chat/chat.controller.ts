@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, Redirect, Req, Res, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Post, Query, Redirect, Req, Res, UseFilters, UseGuards } from "@nestjs/common";
 import { RequestUser } from "src/auth/interfaces/requestUser.interface";
 import { ChanServices } from "./services/chan.service";
 import { UrlGeneratorService, SignedUrlGuard} from 'nestjs-url-generator';
@@ -10,10 +10,10 @@ import { ChannelType } from "src/users/enums/channelType.enum";
 import { FrontChannelI } from "./interfaces/front.interface";
 import { User } from "src/users/entities/user.entity";
 import { ChatGateway } from "./chat.gateway";
-import { Response } from "express";
-import { use } from "passport";
+import { UrlGeneratorFilter } from './url-generator-filter';
 
-@Controller('chat') // localhost:3000/chat/....
+@Controller('chat')
+@UseFilters(UrlGeneratorFilter)
 export class ChatController {
   constructor(
       private readonly chanServices: ChanServices,
@@ -31,7 +31,7 @@ export class ChatController {
     const res: string = this.urlGeneratorService.signControllerUrl({ controller: ChatController,
         controllerMethod: ChatController.prototype.joinChannel,
         params: params,
-        expirationDate: new Date(date.getTime() + 10 * 60000) //should be 10 minutes
+        expirationDate: new Date(date.getTime() + 10 * 60000),
       });
       return (res);
   }
@@ -57,7 +57,6 @@ export class ChatController {
     this.chatGateway.emitChannelModif(channel.id);
   }
 
-  // test ----------------------------------------------------------------
   @Get('/channeltest')
   async createChannelTest() {
     const creator = await this.userService.findUserById('2');

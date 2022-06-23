@@ -2,10 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import NotFound from '../views/NotFound.vue'
 import LoginPage from "../views/LoginPage.vue";
-// import UserPage from "../views/UserPage.vue";
 import TwoAuth from "../views/TwoAuthPage.vue";
 import TheGame from "../views/TheGame.vue";
-// import EditUser from "../views/EditUser.vue";
 import Chat from "../views/Chat_main.vue";
 import NewRoom from "../views/Chat_createroom.vue";
 import NewRoomPublic from "../views/Chat_publicroom.vue";
@@ -18,6 +16,7 @@ import store from "../store/index"
 import UserPagev2 from "../views/UserPagev2.vue";
 import FriendList from "../views/FriendList.vue";
 import RedirectTrick from "../components/RedirectTrick.vue";
+import ForbiddenRes from '../views/ForbiddenRes.vue';
 
 const routes = [
 	{
@@ -37,6 +36,11 @@ const routes = [
 		path: '/:catchAll(.*)',
 		name: "404",
 		component: NotFound,
+	},
+	{
+		path: '/forbiddenres',
+		name: "403",
+		component: ForbiddenRes,
 	},
 	{
 		path: '/user',
