@@ -634,6 +634,20 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
+      connection.value!.on('muted', function(params: { channelId: string, time: number }) {
+        if (params.channelId === currentChannel.value.id) {
+          alert('You have been muted from ' + currentChannel.value.name
+            + ' for ' + params.time + ' minutes.');
+        }
+      })
+
+      connection.value!.on('youAreMuted', function(params: { channelId: string, limitdate: string }) {
+        if (params.channelId === currentChannel.value.id) {
+          alert('You are muted from ' + currentChannel.value.name
+            + ' until ' + params.limitdate + '.');
+        }
+      })
+
       /* Modification of channels */
 
       connection.value!.on('userChannelModif', function (params: {id: string }){
@@ -678,6 +692,7 @@ export default defineComponent({
         game.value.inviter = getUserName(params.id);
         showGameModal.value = true;
       })
+
 		})
 
     onUnmounted(async() => {
