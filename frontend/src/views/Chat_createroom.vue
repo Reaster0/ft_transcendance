@@ -66,6 +66,9 @@ import { defineComponent } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { Store, useStore } from 'vuex';
 import { leaveChat } from '../helper';
+import { onMounted } from "@vue/runtime-core"
+import io from 'socket.io-client';
+import router from "../router/index";
 
 export default defineComponent({
   name: "NewRoom",
@@ -87,11 +90,36 @@ export default defineComponent({
   },
   setup () {
     let store = useStore() as Store<any>;
+    let socketVal = store.getters.getSocketVal;
+    let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
+    })
+
+    onMounted(() => {
+      try {
+        if (!socketVal) {
+          const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+            transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie} },
+            },
+          })
+          store.commit('setSocketVal' , connection);
+          console.log("starting connection to websocket");
+          socketVal = store.getters.getSocketVal;
+        }
+      } catch (error) {
+        console.log("the error is:" + error)
+      }
+
+      socketVal.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
     })
   }
 })

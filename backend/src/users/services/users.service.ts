@@ -212,7 +212,6 @@ export class UsersService {
     return res;
   }
 
-  //why by nickname and not by id ?
   async getPartialUserInfo(nickname: string): Promise<Partial<User>> {
     const user = await this.userRepository.findOne({ nickname: nickname });
     if (!user) {
@@ -229,7 +228,6 @@ export class UsersService {
     return connectedUser;
   }
 
-  // for chat
   async getUsers(): Promise<User[]> {
     const users: User[] = await this.userRepository.find({
       select: ['id', 'nickname', 'status']
@@ -256,20 +254,6 @@ export class UsersService {
     }
     return false;
   }
-
-  /*
-  async getChannels(id: number) {
-    console.log('test for user');
-    const user = await this.userRepository.findOne(
-      id,
-      { relations: ['channels'] }
-    )
-
-    if (!user) { console.log('bad id')};
-    console.log(user);
-    return user.channels;
-  }
-  */
 
   async getGameHistory(id: number): Promise<{}> {
     const user = await this.userRepository.findOne(id, { relations: ['gamesWon', 'gamesLost', 'gamesWon.looser', 'gamesLost.winner'] });
@@ -324,7 +308,6 @@ export class UsersService {
       where: [{ nickname: Like(`%${name}%`) }]
     })
   }
-
 
   isMyFriend(user: User, friendId: number): boolean {
 

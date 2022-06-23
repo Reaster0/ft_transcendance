@@ -460,11 +460,12 @@ export default defineComponent({
       inviter: '' as string });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
     let confirm =  0 as number;
+    let forceLeave = false as boolean;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
 		onMounted(async() => {
@@ -489,6 +490,12 @@ export default defineComponent({
 				console.log("the error is:" + error)
 			}
 
+      connection.value!.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
+
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
@@ -508,6 +515,7 @@ export default defineComponent({
         await avatarToUrl();
         for (let channel of userChannels.value.channels) {
           if (channel.type === ChannelType.PM) {
+            console.log('HERE');
             let usersId = channel.name.split('/').map(Number);
             if (usersId[0] === currentUser.id) {
               channel.name = getUserName(usersId[1]);

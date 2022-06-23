@@ -274,7 +274,7 @@ export class GamesService {
       const history = await this.registerGameHistory(match);
       await this.modifyPlayersElo(history.winner, history.looser);
     } catch {
-      throw new Error('Something went wrong with game history database.');
+      console.log('Something went wrong with game history database.');
     }
     matchs.delete(match.matchId);
   }
