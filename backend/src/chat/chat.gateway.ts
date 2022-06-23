@@ -217,7 +217,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const {channelId, targetId, time} = data;
       if ((await this.chanServices.isAdmin(channelId, client.data.user.id)) === false) {
         return ;
-      } else if ((await this.chanServices.isOwner(channelId, client.data.user.id)) === true) {
+      } else if ((await this.chanServices.isOwner(channelId, targetId)) === true) {
         return ;
       }
       await this.chanServices.muteUser(channelId, targetId, time);
