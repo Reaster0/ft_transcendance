@@ -639,15 +639,18 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('channelDestruction', function (params: {id: string }){
+      connection.value!.on('channelDestruction', function (params: {id: string }){          
+        connection.value!.emit('emitMyChannels');
         if (currentChannel.value.id != params.id) {
-          connection.value!.emit('emitMyChannels');
           return ;
         }
         console.log('destruction of channel ' + currentChannel.value.name);
         alert('Channel ' + currentChannel.value.name
           + ' is being erased by it\'s owner!');
-        router.push('/thechat');
+        currentChannel.value.id = '';
+        currentChannel.value.name = '';
+        update.value.messages = false;
+        update.value.users = false;
       })
 
       /* Private conversation responses */

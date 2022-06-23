@@ -14,6 +14,21 @@
 				</v-btn>
 			</v-col>
 		</v-row>
+
+     <div class="position-relative position-relative-example">
+    <div class="position-absolute bottom-0 start-0">
+      <h1 class="text">coucou</h1>
+    </div>
+    <div class="position-absolute top-0 start-0">
+       <h1 class="text">coucou</h1>
+    </div>
+    <div class="position-absolute top-50 start-50">
+      <h1 class="text">coucou</h1>
+    </div>
+    </div>
+    <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
+    <h1 class="text">text</h1>
+    </div>
 	</v-container>
 </template>
 

@@ -78,13 +78,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     return true;
   }
 
-  /************* . . Delete Channel **************** */
-  @SubscribeMessage('deleteChannel')
-  async onDeleteChannel(client: Socket, channel: ChannelI) {
-    await this.chanServices.deleteChannel(channel);
-    // TODO emit channel destruction
-    this.logger.log(`delete Channel: ${channel.name}`);
-  }
 
   @SubscribeMessage('message')
   async onSendMessage(client: Socket, params: { channelId: string, content: string}) {
@@ -153,13 +146,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   // @UseGuards(AuthChat)
   @SubscribeMessage('leaveChannel')
   async handleLeaveChannel(client: Socket, params: { id: string }) {
-    await this.chanServices.removeUserFromChan(params.id, client.data.user);
-    //await this.chanServices.unmuteUser(channel.id, client.data.user);
-    this.logger.log(`${client.data.user.username} leave a channel`);
-    client.emit('leftChannel', { id: params.id });
-    const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.id);
-    for (const user of connectedUsers) {
-      this.server.to(user.chatSocket).emit('userChannelModif', { id: params.id });
+    try {
+      if ((await this.chanServices.isOwner(params.id, client.data.user.id)) === true) {
+        const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.id);
+        for (const user of connectedUsers) {
+          this.server.to(user.chatSocket).emit('channelDestruction', { id: params.id });
+        }
+        this.chanServices.deleteChannel(client.data.user.id, params.id);
+      } else {
+        await this.chanServices.removeUserFromChan(params.id, client.data.user);
+        this.logger.log(`${client.data.user.username} leave a channel`);
+        client.emit('leftChannel', { id: params.id });
+        const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.id);
+        for (const user of connectedUsers) {
+          this.server.to(user.chatSocket).emit('userChannelModif', { id: params.id });
+        }
+      }
+    } catch (e) {
+      this.logger.log(e);
     }
   }
 
@@ -307,20 +311,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.logger.log('retrieving Joinable Channels');
       const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
       client.emit('joinableChannels', channels);
-    } catch (e) {
-      client.disconnect();
-      this.logger.log(e);
-    }
-  }
-
-  @SubscribeMessage('getFindUser')
-  async findUser(client: Socket, name: string) {
-    try {
-      const users = await this.userServices.filterUserByName(name) as any;
-      for (let user of users) {
-        user.avatar =  user.id;
-      }
-      client.emit('findUser', users);
     } catch (e) {
       client.disconnect();
       this.logger.log(e);
