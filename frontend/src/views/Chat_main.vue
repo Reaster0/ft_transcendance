@@ -608,19 +608,6 @@ export default defineComponent({
         alert('You already have an ongoing conversation with ' + params.name + '.');
       })
 
-
-      connection.value!.on('youAreBanned', function(){
-        alert('You are banned from ' + currentChannel.value.name + ' !');
-      })
-
-      connection.value!.on('newlyBanned', function(params: { id: string, name: string }){
-        connection.value!.emit('emitMyChannels');
-        if (currentChannel.value.id === params.id) {
-          initDisplayChannel(currentChannel.value, false);
-        }
-        alert('You are banned from ' + params.name + ' !');
-      })
-
       connection.value!.on('wrongPassword', function(){
         alert('You entered the wrong password for '
           + currentChannel.value.name);
@@ -632,6 +619,20 @@ export default defineComponent({
         }
         initDisplayChannel(currentChannel.value, false);
         connection.value!.emit('emitMyChannels');
+      })
+
+      /* Status management function & warning */
+
+      connection.value!.on('youAreBanned', function(){
+        alert('You are banned from ' + currentChannel.value.name + ' !');
+      })
+
+      connection.value!.on('newlyBanned', function(params: { id: string, name: string }){
+        connection.value!.emit('emitMyChannels');
+        if (currentChannel.value.id === params.id) {
+          initDisplayChannel(currentChannel.value, false);
+        }
+        alert('You are banned from ' + params.name + ' !');
       })
 
       connection.value!.on('muted', function(params: { channelId: string, time: number }) {
