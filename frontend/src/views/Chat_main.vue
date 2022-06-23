@@ -500,25 +500,20 @@ export default defineComponent({
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
-        console.log('receive new users list');
-        console.log(params);
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
         usersList.value = params;
         if (!update.value.connected) {
-          console.log('EHRE');
           connection.value!.emit('emitMyChannels');
         }
       })
 
       connection.value!.on('channelList', async function(params: Channel[]) {
-        console.log('list of joined channels received');
         userChannels.value.channels = params;
         await avatarToUrl();
         for (let channel of userChannels.value.channels) {
           if (channel.type === ChannelType.PM) {
-            console.log('HERE');
             let usersId = channel.name.split('/').map(Number);
             if (usersId[0] === currentUser.id) {
               channel.name = getUserName(usersId[1]);
@@ -542,7 +537,6 @@ export default defineComponent({
             + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
-        console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
         await setChannelManager();
         update.value.users = true;
@@ -555,7 +549,6 @@ export default defineComponent({
             + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
-        console.log('receive messages from channel ' + currentChannel.value.name);
         currentChannel.value.messages = params.messages;
         update.value.messages = true;
       })
@@ -566,7 +559,6 @@ export default defineComponent({
           console.log('receive messageText from non current');
           return ;
         }
-        console.log('incoming message');
         currentChannel.value.messages.push(params.message);
         if (params.message.userId != currentUser.id
           && update.value.messages === true
@@ -579,7 +571,6 @@ export default defineComponent({
       /* Search function responses */
 
       connection.value!.on('connectedUsers', async function(params: any ) {
-        console.log('receive connectedUsers');
         joinableChannels.value = [];
         for (let user of params) {
           let avatar = await getUserAvatar(user.id);

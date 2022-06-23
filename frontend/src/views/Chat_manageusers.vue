@@ -98,7 +98,7 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import { defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat } from "../helper";
@@ -151,6 +151,10 @@ export default defineComponent ({
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(forceLeave, socket, to, next, store);
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
     })
 
     function manageUser() {

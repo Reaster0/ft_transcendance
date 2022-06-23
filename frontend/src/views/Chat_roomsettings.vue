@@ -91,7 +91,7 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import { defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat, imgToBuffer } from '../helper';
@@ -137,6 +137,10 @@ export default defineComponent ({
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
       })
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
     })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
