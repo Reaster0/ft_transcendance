@@ -70,7 +70,7 @@ export class ChanServices {
     }
   }
 
-	async deleteChannel(channel: ChannelI) {
+	async deleteChannel(userId: number, channel: ChannelI) {
     const channelFound: Channel = await this.chanRepository.findOne(channel.id);
     if (channelFound) {
       try {
@@ -169,15 +169,15 @@ export class ChanServices {
   }
 
   async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
-    const joinableList = await this.chanRepository.find({ //or findAndCount
+    const joinableList = await this.chanRepository.find({
       select: ['id', 'name', 'type', 'banned','avatar'],
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
-
     const userChannels = await this.userServices.getUserChannelsId(targetId);
-    if (userChannels == null) {return []};
-
+    if (userChannels == null) {
+      return []
+    };
     let res: FrontChannelI[] = [];
     for (const channel of joinableList) {
       const ban = channel.banned.indexOf(targetId)
@@ -211,7 +211,6 @@ export class ChanServices {
   }
 
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
-
     const channel = await this.chanRepository.findOne(channelId);
     const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
     const muteDate = new Date(new Date().getTime() + 10 * 60000) // 10 minutes
@@ -251,14 +250,17 @@ export class ChanServices {
     remember to test that !
   */
   async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
-    return this.roleRepository.findOne({channel, userId});
+    return this.roleRepository.findOne({ channel, userId });
   }
 
   async addAdmin(chanelId: string, userId: number): Promise<Roles> {
     const channel = await this.chanRepository.findOne(chanelId);
     let user = await this.roleRepository.findOne({channel, userId});
-    if (!user) {return null;}
+    if (!user) {
+      return null;
+    }
     user.role = ERoles.ADMIN;
     return await this.roleRepository.save(user);
   }
+
 }
