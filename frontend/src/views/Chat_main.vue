@@ -648,13 +648,18 @@ export default defineComponent({
         }
       })
 
+      connection.value!.on('newlyAdmin', function(params: { channelId: string }){
+        if (params.channelId === currentChannel.value.id) {
+          alert('You are now an admin of ' + currentChannel.value.name + '.');
+        }        
+      })
+
       /* Modification of channels */
 
       connection.value!.on('userChannelModif', function (params: {id: string }){
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        console.log('MODIF');
         connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
       })
 

@@ -217,6 +217,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const {channelId, targetId, time} = data;
       if ((await this.chanServices.isAdmin(channelId, client.data.user.id)) === false) {
         return ;
+      } else if ((await this.chanServices.isOwner(channelId, client.data.user.id)) === true) {
+        return ;
       }
       await this.chanServices.muteUser(channelId, targetId, time);
       const user = await this.userServices.findUserById(targetId);
@@ -232,6 +234,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     try {
       const {channelId, userId} = data;
       if ((await this.chanServices.isAdmin(channelId, client.data.user.id)) === false) {
+        return ;
+      } else if ((await this.chanServices.isOwner(channelId, userId)) === true) {
         return ;
       }
       const user = await this.userServices.findUserById(userId + '');
@@ -251,12 +255,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('giveAdminRights')
   async handleGiveAdminRights(client: Socket, data: any): Promise<void> {
-    const {channelId, userId} = data;
-    const res = await this.chanServices.addAdmin(channelId, userId);
-    if (!res)
-      return; //emit error to client
-    //const channelUsers: RolesI[] = await this.chanServices.getChannelUsers(channelId);
-    //emit status chante to userId.chatSocket.... but a bit expensive
+    try {
+      const {channelId, userId} = data;
+      if ((await this.chanServices.isAdmin(channelId, client.data.user.id)) === false) {
+        return ;
+      } 
+      const res = await this.chanServices.addAdmin(channelId, userId);
+      if (!res) {
+        return;
+      }
+      const user = await this.userServices.findUserById(userId);
+      this.server.to(user.chatSocket).emit('newlyAdmin', { channelId: channelId });
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
+      for (const coUser of connectedUsers) {
+        this.server.to(coUser.chatSocket).emit('userChannelModif', { id: channelId });
+      }
+    } catch (e) {
+      this.logger.log(e);
+    }
 
   }
 
