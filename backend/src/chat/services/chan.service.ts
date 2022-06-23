@@ -111,7 +111,6 @@ export class ChanServices {
     } catch (err) {
       console.log(err);
     }
-    console.log('remove user from channel');
     return update;
   }
 
@@ -174,7 +173,6 @@ export class ChanServices {
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
-    const channels = await this.chanRepository.find();
     const userChannels = await this.userServices.getUserChannelsId(targetId);
     if (userChannels == null) {
       return []
@@ -276,5 +274,17 @@ export class ChanServices {
       return false;
     }
     return (chanUser.role === ERoles.OWNER);
+  }
+
+  async isAdmin(channelId: string, userId: number): Promise<boolean> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {
+      return false;
+    }
+    const chanUser = await this.getUserOnChannel(channel, userId);
+    if (!chanUser) {
+      return false;
+    }
+    return (chanUser.role === ERoles.OWNER || chanUser.role === ERoles.ADMIN);
   }
 }

@@ -471,7 +471,6 @@ export default defineComponent({
 		onMounted(async() => {
 			try {
         connection.value = store.getters.getSocketVal;
-        console.log('connection: ' + connection.value);
         if (connection.value === null) {
           connection.value = io(window.location.protocol + '//' +
             window.location.hostname + ':3000/chat',{
@@ -607,6 +606,14 @@ export default defineComponent({
         alert('You are banned from ' + currentChannel.value.name + ' !');
       })
 
+      connection.value!.on('newlyBanned', function(params: { id: string, name: string }){
+        connection.value!.emit('emitMyChannels');
+        if (currentChannel.value.id === params.id) {
+          initDisplayChannel(currentChannel.value, false);
+        }
+        alert('You are banned from ' + params.name + ' !');
+      })
+
       connection.value!.on('wrongPassword', function(){
         alert('You entered the wrong password for '
           + currentChannel.value.name);
@@ -626,7 +633,6 @@ export default defineComponent({
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        console.log('modification in user list of channel ' + currentChannel.value.name);
         connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
       })
 
@@ -635,7 +641,6 @@ export default defineComponent({
           connection.value!.emit('emitMyChannels');
           return ;
         }
-        console.log('modification in current channel ' + currentChannel.value.name);
         connection.value!.emit('emitMyChannels');
       })
 
@@ -644,7 +649,6 @@ export default defineComponent({
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        console.log('destruction of channel ' + currentChannel.value.name);
         alert('Channel ' + currentChannel.value.name
           + ' is being erased by it\'s owner!');
         currentChannel.value.id = '';
@@ -690,6 +694,7 @@ export default defineComponent({
       connection.value!.removeAllListeners('joinAccepted');
       connection.value!.removeAllListeners('blockChange');
       connection.value!.removeAllListeners('gameInvitation');
+      connection.value!.removeAllListeners('newlyBanned');
     })
 
     /* Functions for channel display and management */

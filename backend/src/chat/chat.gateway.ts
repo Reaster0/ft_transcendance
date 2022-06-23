@@ -207,23 +207,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /* dose back check the right for calling this socket route or front end ensure this ? */
   @SubscribeMessage('banUser')
   async banUser(client: Socket, data: any): Promise<void> {
-    const {channelId, userId} = data;
-    const user = await this.userServices.findUserById(userId + '');
-    if (!user) return ;
-    const channel = await this.chanServices.banUser(channelId, user);
-    client.emit('UserBanned', `you have banned ${user.username} from ${channel.name}`);
-    this.server.to(user.chatSocket).emit('banned', `you have been banned from ${channel.name}`);
-  }
-  
-  @SubscribeMessage('unBanUser')
-  async unBanUser(client: Socket, data: any): Promise<void> {
-    const {channelId, userId} = data;
-    const user = await this.userServices.findUserById(userId + '');
-    if (!user) return ;
-    const channel = await this.chanServices.unBanUser(channelId, userId);
-    if (!channel) { return ; }
-    client.emit('UserUnbanned', `you have unbanned ${user.username} from ${channel.name}`);
-    this.server.to(user.chatSocket).emit('unBanned', `you have been unbanned from ${channel.name}`);
+    try {
+      const {channelId, userId} = data;
+      if ((await this.chanServices.isAdmin(channelId, client.data.user.id)) === false) {
+        return ;
+      }
+      const user = await this.userServices.findUserById(userId + '');
+      if (!user) {
+        return ;
+      }
+      const channel = await this.chanServices.banUser(channelId, user);
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
+      for (const coUser of connectedUsers) {
+        this.server.to(coUser.chatSocket).emit('userChannelModif', { id: channelId });
+      }
+      this.server.to(user.chatSocket).emit('newlyBanned', { id: channelId, name: channel.name });
+    } catch (e) {
+      this.logger.log(e);
+    }
   }
 
   @SubscribeMessage('giveAdminRights')
