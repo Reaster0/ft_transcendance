@@ -364,8 +364,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.logger.log(e);
     }
   }
-  @SubscribeMessage('isOwner')
-  async isOwner(client: Socket, channelId: string) {
-    const chanUser = await this.chanServices.getUserOnChannel()
-  }
 }

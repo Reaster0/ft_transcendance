@@ -6,9 +6,9 @@
         <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
             <div id="joinableChannels" class="searchtool-one">
-              <h1 class="Spotnik"> Search channel </h1>
               <v-selection @open="getJoinableChannels"
                 @option:selected="initDisplayChannel"
+                placeholder="Search channels"
                 label="name"
                 :options="joinableChannels"
                 :value="{channel: chanJoinSelected, isMember: false}">
@@ -16,9 +16,9 @@
             </div>
             
             <div id="joinableUsers" class="searchtool-two">
-              <h4 class="Spotnik"> Search connected user </h4>
               <v-selection @open="getConnectedUsers"
                 @option:selected="initDisplayChannel"
+                placeholder="Search connected users"
                 label="name"
                 :options="joinableChannels">
               </v-selection>
