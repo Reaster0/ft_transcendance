@@ -107,7 +107,6 @@ export class ChanServices {
 
   async updateChannel(channel: ChannelI, info: {type: ChannelType, password: string, avatar: Buffer}): Promise<Boolean> {
 		const { type, password, avatar } = info;
-
     
     channel.type = type;
     if (type === ChannelType.PROTECTED) {
@@ -163,11 +162,14 @@ export class ChanServices {
 
   async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
     const joinableList = await this.chanRepository.find({ //or findAndCount
-      select: ['id', 'name', 'type', 'banned','avatar'],
+      select: ['id', 'name', 'type', 'banned'],
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
 
+    console.log(joinableList);
+    const channels = await this.chanRepository.find();
+    console.log(channels);
     const userChannels = await this.userServices.getUserChannelsId(targetId);
     if (userChannels == null) {return []};
 

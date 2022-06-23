@@ -140,7 +140,10 @@ export default defineComponent ({
 
     function changeRoomSettings() {
       const array = ['public', 'private', 'protected'];
-      newType.value = array.indexOf(newType.value);
+      if (newType.value == null)
+        newType.value = channelType;
+      else
+        newType.value = array.indexOf(newType.value);
       if (newType.value === ChannelType.PROTECTED && password.value === '') {
         alert('Password can\'t be empty.');
         return ;

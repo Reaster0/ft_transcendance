@@ -303,6 +303,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     client.emit('joinableChannels', channels); // only for client
   }
 
+  /* usage ?
   @SubscribeMessage('getFindUser')
   async findUser(client: Socket, name: string) {
     const users = await this.userServices.filterUserByName(name) as any;
@@ -311,6 +312,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
     client.emit('findUser', users);
   }
+  */
 
   @SubscribeMessage('getConnectedUsers')
   async getConnectedUsers(client: Socket) {
