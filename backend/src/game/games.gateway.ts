@@ -51,27 +51,31 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async handleDisconnect(client: Socket) {
     this.logger.log('Disconnection');
-    if (client.data.user) {
-      this.logger.log('User leaving: ' + client.data.user.username);
-      await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
-      if (this.gamesService.isWaiting(client, queue) === true) {
-        const index = queue.indexOf(client);
-        queue.splice(index, 1);
-      } else if (this.gamesService.isPlaying(client, matchs) === true) {
-        const match = this.gamesService.getMatch(client, matchs);
-        match.state = State.FINISHED;
-        const opponent = this.gamesService.getOpponent(client, match);
-        if (opponent && opponent.socket && opponent.socket.connected === true) {
-          opponent.socket.emit('opponentDisconnected');
+    try {
+      if (client.data.user) {
+        this.logger.log('User leaving: ' + client.data.user.username);
+        await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
+        if (this.gamesService.isWaiting(client, queue) === true) {
+          const index = queue.indexOf(client);
+          queue.splice(index, 1);
+        } else if (this.gamesService.isPlaying(client, matchs) === true) {
+          const match = this.gamesService.getMatch(client, matchs);
+          match.state = State.FINISHED;
+          const opponent = this.gamesService.getOpponent(client, match);
+          if (opponent && opponent.socket && opponent.socket.connected === true) {
+            opponent.socket.emit('opponentDisconnected');
+          }
+          match.winner = opponent;
+          this.gamesService.finishGame(this.server, match, matchs);
+        } else if (this.gamesService.wantToWatch(client, watchers) === true) {
+          const index = watchers.indexOf(client);
+          watchers.splice(index, 1);
         }
-        match.winner = opponent;
-        this.gamesService.finishGame(this.server, match, matchs);
-      } else if (this.gamesService.wantToWatch(client, watchers) === true) {
-        const index = watchers.indexOf(client);
-        watchers.splice(index, 1);
       }
+    } catch (e) {
+      this.logger.log(e);
     }
-    return client.disconnect();
+    client.disconnect();
   }
 
   @SubscribeMessage('joinGame')

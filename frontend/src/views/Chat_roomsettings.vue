@@ -110,6 +110,7 @@ export default defineComponent ({
     let newType = ref<any>(null);
     let password = ref<string>('');
     let file = ref<any>(null);
+    let forceLeave = false;
 
     onMounted(async() => {
       try {
@@ -130,12 +131,18 @@ export default defineComponent ({
       } catch (error) {
         console.log("the error is:" + error)
       }
+
+      socketVal.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
     })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
     function changeRoomSettings() {

@@ -62,6 +62,8 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat, verifyChannelName, imgToBuffer } from "../helper";
 import io from 'socket.io-client';
 import { ChannelType } from '../types/chat.types';
+import router from "../router/index";
+
 
 export default defineComponent ({
   name: "NewRoomPrivate",
@@ -71,11 +73,12 @@ export default defineComponent ({
     let name = ref<string>('');
     let file = ref<any>(null);
     let created = ref<boolean>(false);
+    let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
     onMounted(() =>{
@@ -93,6 +96,12 @@ export default defineComponent ({
       } catch (error) {
         console.log("the error is:" + error)
       }
+
+      socketVal.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
 
       socketVal.on("channelCreated", function(channel: string) {
         if (channel === name.value) {

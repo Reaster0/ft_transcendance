@@ -48,12 +48,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /******* Disconection ********/
   @SubscribeMessage('disconnect')
   async handleDisconnect(client: Socket) {
-    if (!client.data.user) {
-      return client.disconnect();
+    try {
+      if (!client.data.user) {
+        return client.disconnect();
+      }
+      this.logger.log(`Client disconnected: ${client.data.user.username}`);
+      await this.userServices.changeStatus(client.data.user, Status.OFFLINE, null);
+    } catch (e) {
+      this.logger.log(e);
+      client.disconnect();
     }
-    this.logger.log(`Client disconnected: ${client.data.user.username}`);
-    await this.userServices.changeStatus(client.data.user, Status.OFFLINE, null);
-    client.disconnect();
   }
 
   /*********** .  . Create Channel **************** */
@@ -237,6 +241,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('getUsersList')
   async sendUsersListToOne(client: Socket) {
+    console.log('here');
     const users = await this.userServices.getUsers();
     client.emit('usersList', users);    
   }
@@ -298,44 +303,65 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   // add banned logic into this
   @SubscribeMessage('getJoinableChannels')
   async getJoinableChannels(client: Socket, targetId: number) {
-    this.logger.log('retrieving Joinable Channels');
-    const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
-    client.emit('joinableChannels', channels); // only for client
+    try {
+      this.logger.log('retrieving Joinable Channels');
+      const channels: FrontChannelI[] = await this.chanServices.filterJoinableChannel(targetId);
+      client.emit('joinableChannels', channels);
+    } catch (e) {
+      client.disconnect();
+      this.logger.log(e);
+    }
   }
 
   /* usage ?
   @SubscribeMessage('getFindUser')
   async findUser(client: Socket, name: string) {
-    const users = await this.userServices.filterUserByName(name) as any;
-    for (let user of users) {
-      user.avatar =  user.id;
+    try {
+      const users = await this.userServices.filterUserByName(name) as any;
+      for (let user of users) {
+        user.avatar =  user.id;
+      }
+      client.emit('findUser', users);
+    } catch (e) {
+      client.disconnect();
+      this.logger.log(e);
     }
-    client.emit('findUser', users);
   }
   */
 
   @SubscribeMessage('getConnectedUsers')
   async getConnectedUsers(client: Socket) {
-    this.logger.log('retriving connected users');
-    let connectedUsers = await this.userServices.getConnectedUsers();
-    const clientId = client.data.user.id;
-    for (const [i, value] of connectedUsers.entries()) {
-      if (value.id === clientId) {
-        connectedUsers.splice(i, 1);
-        break ;
-      }
-  }
-    client.emit('connectedUsers', connectedUsers);
+    try {
+      let connectedUsers = await this.userServices.getConnectedUsers();
+      const clientId = client.data.user.id;
+      for (const [i, value] of connectedUsers.entries()) {
+        if (value.id === clientId) {
+          connectedUsers.splice(i, 1);
+          break ;
+        }
+    }
+      client.emit('connectedUsers', connectedUsers);
+    } catch(e) {
+      client.disconnect();
+      this.logger.log(e);
+    } 
   }
 
   @SubscribeMessage('createPrivateConversation')
   async privateConversation(client: Socket, targetId: string) {
-    console.log('creating conversation ', targetId);
-
-    const user1 = client.data.user;
-    const user2 = await this.userServices.findUserById(targetId);
-    const channel = await this.chanServices.privateConversation(user1, user2);
-    client.emit('joinAccepted', { id: channel.id, isPm: true });
-    this.server.to(user2.chatSocket).emit('joinAccepted', { id: channel.id, isPm: true });
+    try {
+      const user1 = client.data.user;
+      const user2 = await this.userServices.findUserById(targetId);
+      const channel = await this.chanServices.privateConversation(user1, user2);
+      if (channel != null) {
+        client.emit('joinAccepted', { id: channel.id, isPm: true });
+        this.server.to(user2.chatSocket).emit('joinAccepted', { id: channel.id, isPm: true });
+      } else {
+        client.emit('alreadyInPm', { name: user2.nickname });
+      }
+    } catch (e) {
+      client.disconnect();
+      this.logger.log(e);
+    }
   }
 }
