@@ -2,7 +2,7 @@
   <v-app >
     <v-container fluid>
       <div v-if="!created">
-        <v-form @submit.prevent="submitIt(name, file)">
+        <v-form @submit.prevent="submitIt(name)">
 
           <v-toolbar dark color="rgb(0,0,255)">
             <v-btn to="/newroom" icon dark>
