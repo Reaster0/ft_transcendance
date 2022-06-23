@@ -42,7 +42,7 @@
 
                     <div>
                     <p align="left" class="font-weight-black offsetmess">
-                      Mute this user for 30 days
+                      Mute this user for a set time
                     </p>
                     </div>
                     <v-list-item>
@@ -51,11 +51,15 @@
                           v-model="mute"
                           color="blue"
                         ></v-switch>
+                        </v-list-item-action>
                         <v-text-field
-                          label="Outlined"
+                          hint="a valid number"
+                          label="Time in minutes"
                           outlined
+                          class="time"
+                          v-model="time"
+                          clearable
                         ></v-text-field>
-                      </v-list-item-action>
                       <br>
                     </v-list-item>
 
@@ -121,6 +125,7 @@ export default defineComponent ({
     let mute = ref<boolean>(false);
     let admin = ref<boolean>(false);
     let ok = ref<boolean>(false);
+    let time = ref<string>('');
     let forceLeave = false;
 
     onMounted(async() => {
@@ -171,16 +176,21 @@ export default defineComponent ({
         socketVal.emit('banUser',
           { channelId: channelId, userId: userToManage.value.id});
       } else if (mute.value) {
+        let min = Number(time.value);
+        if (isNaN(min) === true || Number.isInteger(min) === false || min <= 0) {
+          alert('The mute time must be a valid number for minutes representation !');
+          return;
+        }
         socketVal.emit('muteUser',
-          { channelId: channelId, targetId: userToManage.value.id});        
-      } else {
+          { channelId: channelId, targetId: userToManage.value.id, time: min });        
+      } else if (admin.value) {
         socketVal.emit('giveAdminRights',
           { channelId: channelId, userId: userToManage.value.id});
       }
       router.push('/thechat');
     }
 
-    return { userToManage, ban, mute, admin, manageUser, ok };
+    return { userToManage, ban, mute, admin, manageUser, ok, time };
   }
 });
 </script>
@@ -214,6 +224,11 @@ export default defineComponent ({
 
 .row>.col {
   flex-basis: auto;
+}
+
+.time {
+  padding-left: 56px;
+  max-width: 220px;
 }
 
 </style>
