@@ -84,7 +84,9 @@ export default defineComponent({
 
     onMounted(() => {
       try {
+        console.log(socketVal);
         if (!socketVal) {
+          console.log('new connection !');
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },

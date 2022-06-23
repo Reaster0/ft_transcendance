@@ -411,7 +411,7 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { ref, defineComponent } from 'vue'
@@ -471,6 +471,7 @@ export default defineComponent({
 		onMounted(async() => {
 			try {
         connection.value = store.getters.getSocketVal;
+        console.log('connection: ' + connection.value);
         if (connection.value === null) {
           connection.value = io(window.location.protocol + '//' +
             window.location.hostname + ':3000/chat',{
@@ -500,11 +501,13 @@ export default defineComponent({
 
       connection.value!.on('usersList', async function(params: any) {
         console.log('receive new users list');
+        console.log(params);
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
         usersList.value = params;
         if (!update.value.connected) {
+          console.log('EHRE');
           connection.value!.emit('emitMyChannels');
         }
       })
@@ -673,6 +676,27 @@ export default defineComponent({
         showGameModal.value = true;
       })
 		})
+
+    onUnmounted(async() => {
+      connection.value!.removeAllListeners('wrongPassword');
+      connection.value!.removeAllListeners('alreadyInPm');
+      connection.value!.removeAllListeners('youAreBanned');
+      connection.value!.removeAllListeners('userChannelModif');
+      connection.value!.removeAllListeners('usersList');
+      connection.value!.removeAllListeners('channelEdited');
+      connection.value!.removeAllListeners('leftChannel');
+      connection.value!.removeAllListeners('disconnect');
+      connection.value!.removeAllListeners('channelDestruction');
+      connection.value!.removeAllListeners('channelList');
+      connection.value!.removeAllListeners('channelUsers');
+      connection.value!.removeAllListeners('channelMessages');
+      connection.value!.removeAllListeners('newMessage');
+      connection.value!.removeAllListeners('connectedUsers');
+      connection.value!.removeAllListeners('joinableChannels');
+      connection.value!.removeAllListeners('joinAccepted');
+      connection.value!.removeAllListeners('blockChange');
+      connection.value!.removeAllListeners('gameInvitation');
+    })
 
     /* Functions for channel display and management */
 
