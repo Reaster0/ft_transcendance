@@ -42,7 +42,6 @@ export default defineComponent ({
 		async function submitCode() {
 			codeAccepted.value = await submit2FaCode(TwoFACode!.value as string)
 			if (codeAccepted.value){
-				// useStore().
 				router.push({path: '/user'})
 			}
 		}

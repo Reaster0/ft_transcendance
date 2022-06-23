@@ -1,9 +1,10 @@
 import { Store } from 'vuex';
 
 function leaveChat(forceLeave: boolean, socket: any, to: any, next: any, store: Store<any>) {
-	if (to.name === 'Chat' || to.name === 'NewRoom' || to.name === 'PublicRoom'
-		|| to.name === 'PrivateRoom' || to.name === 'ProtectedRoom'
-		|| to.name === 'ChangeRoom' || to.name === 'ManageUsers') {
+	if (forceLeave === false && (to.name === 'Chat' || to.name === 'NewRoom'
+		|| to.name === 'PublicRoom' || to.name === 'PrivateRoom'
+		|| to.name === 'ProtectedRoom' || to.name === 'ChangeRoom'
+		|| to.name === 'ManageUsers')) {
 			next(true);
 			return;
 	}
@@ -13,7 +14,9 @@ function leaveChat(forceLeave: boolean, socket: any, to: any, next: any, store: 
 	}
 	if (answer === true || forceLeave === true) {
 		console.log('disconnection from chat');
-		socket.disconnect();
+		if (forceLeave === false) {
+			socket.disconnect();
+		}
 		store.commit('setSocketVal' , null);
 		store.commit('setUserToManage' , null);
 		store.commit('setCurrentChannelId' , null);

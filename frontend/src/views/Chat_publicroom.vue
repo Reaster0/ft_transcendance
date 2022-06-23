@@ -2,7 +2,7 @@
   <v-app >
     <v-container fluid>
       <div v-if="!created">
-        <v-form @submit.prevent="submitIt(name, file)">
+        <v-form @submit.prevent="submitIt(name)">
 
           <v-toolbar dark color="rgb(0,0,255)">
             <v-btn to="/newroom" icon dark>
@@ -57,7 +57,7 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core";
+import { onMounted, onUnmounted } from "@vue/runtime-core";
 import { defineComponent, reactive, ref } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from "vue-router";
@@ -77,6 +77,7 @@ export default defineComponent({
     let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
       leaveChat(forceLeave, socket, to, next, store);
@@ -84,7 +85,9 @@ export default defineComponent({
 
     onMounted(() => {
       try {
+        console.log(socketVal);
         if (!socketVal) {
+          console.log('new connection !');
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
@@ -113,6 +116,12 @@ export default defineComponent({
       socketVal.on("errorChannelCreation", function(reason: string) {
         alert("Channel creation failed: " + reason);
       })
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
+      socketVal.removeAllListeners('channelCreated');
+      socketVal.removeAllListeners('errorChannelCreation');
     })
 
     async function previewFiles(event: any) {

@@ -72,8 +72,8 @@ export class ChanServices {
     }
   }
 
-	async deleteChannel(channel: ChannelI) {
-    const channelFound: Channel = await this.chanRepository.findOne(channel.id);
+	async deleteChannel(userId: number, channelId: string) {
+    const channelFound: Channel = await this.chanRepository.findOne(channelId);
     if (channelFound) {
       try {
         await this.chanRepository.delete(channelFound.id);
@@ -111,13 +111,11 @@ export class ChanServices {
     } catch (err) {
       console.log(err);
     }
-    console.log('remove user from channel');
     return update;
   }
 
   async updateChannel(channel: ChannelI, info: {type: ChannelType, password: string, avatar: Buffer}): Promise<Boolean> {
 		const { type, password, avatar } = info;
-    
     channel.type = type;
     if (type === ChannelType.PROTECTED) {
       if (/^([a-zA-Z0-9]+)$/.test(password) === false)
@@ -170,18 +168,15 @@ export class ChanServices {
   }
 
   async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
-    const joinableList = await this.chanRepository.find({ //or findAndCount
+    const joinableList = await this.chanRepository.find({
       select: ['id', 'name', 'type', 'banned'],
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
-
-    console.log(joinableList);
-    const channels = await this.chanRepository.find();
-    console.log(channels);
     const userChannels = await this.userServices.getUserChannelsId(targetId);
-    if (userChannels == null) {return []};
-
+    if (userChannels == null) {
+      return []
+    };
     let res: FrontChannelI[] = [];
     for (const channel of joinableList) {
       const ban = channel.banned.indexOf(targetId)
@@ -215,7 +210,6 @@ export class ChanServices {
   }
 
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
-
     const channel = await this.chanRepository.findOne(channelId);
     const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
     const muteDate = new Date(new Date().getTime() + 10 * 60000) // 10 minutes
@@ -234,7 +228,9 @@ export class ChanServices {
 
   async banUser(channelId: string, user: User): Promise<ChannelI> {
     let channel = await this.removeUserFromChan(channelId, user);
-    if (!channel) {return null;} /* User was not in channel */
+    if (!channel) {
+      return null;
+    }
     channel.banned.push(user.id);
     await this.chanRepository.save(channel);
     return channel;
@@ -242,36 +238,53 @@ export class ChanServices {
 
   async unBanUser(channelId: string, userId: number) {
     let channel = await this.chanRepository.findOne(channelId);
-    if (!channel) {return null;}
+    if (!channel) {
+      return null;
+    }
     const index = channel.banned.indexOf(userId);
-    if (index == -1) { return null; }
+    if (index == -1) {
+      return null;
+    }
     channel.banned.splice(index, 1);
     await this.chanRepository.save(channel);
     return channel;
   }
 
-  /*
-    I belive that the request to channelRepository is not necessary, it should be able to retrive the User only whit the channelId
-    remember to test that !
-  */
   async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
-    return this.roleRepository.findOne({channel, userId});
+    return this.roleRepository.findOne({ channel, userId });
   }
 
   async addAdmin(chanelId: string, userId: number): Promise<Roles> {
     const channel = await this.chanRepository.findOne(chanelId);
     let user = await this.roleRepository.findOne({channel, userId});
-    if (!user) {return null;}
+    if (!user) {
+      return null;
+    }
     user.role = ERoles.ADMIN;
     return await this.roleRepository.save(user);
   }
 
   async isOwner(channelId: string, userId: number): Promise<boolean> {
     const channel = await this.chanRepository.findOne(channelId);
-    if (!channel) { return false; }
-
+    if (!channel) {
+      return false;
+    }
     const chanUser = await this.getUserOnChannel(channel, userId);
-    if (!chanUser) { return false; }
-    return (chanUser.role === ERoles.OWNER)
+    if (!chanUser) {
+      return false;
+    }
+    return (chanUser.role === ERoles.OWNER);
+  }
+
+  async isAdmin(channelId: string, userId: number): Promise<boolean> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {
+      return false;
+    }
+    const chanUser = await this.getUserOnChannel(channel, userId);
+    if (!chanUser) {
+      return false;
+    }
+    return (chanUser.role === ERoles.OWNER || chanUser.role === ERoles.ADMIN);
   }
 }

@@ -67,7 +67,7 @@ export default defineComponent ({
       if (user.id == currentUser.id)
         router.push("/user")
       else
-        router.push("/stalkUser?id=" + user.id);
+        router.push("/user/" + user.nickname);
     }
 
 		return { goToWatch, usersList, getUsersList, goToUserPage };

@@ -66,7 +66,7 @@ import { defineComponent } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { Store, useStore } from 'vuex';
 import { leaveChat } from '../helper';
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import router from "../router/index";
 
@@ -77,15 +77,11 @@ export default defineComponent({
     let socketVal = store.getters.getSocketVal;
     let forceLeave = false;
 
-    onBeforeRouteLeave(function(to: any, from: any, next: any) {
-      void from;
-      const socket = store.getters.getSocketVal;
-      leaveChat(forceLeave, socket, to, next, store);
-    })
-
     onMounted(() => {
       try {
+        console.log('socket val: ' + socketVal);
         if (!socketVal) {
+          console.log('new connection !');
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
@@ -104,6 +100,17 @@ export default defineComponent({
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
       })
+    })
+
+    onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
+      void from;
+      const socket = store.getters.getSocketVal;
+      leaveChat(forceLeave, socket, to, next, store);
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
     })
   }
 })

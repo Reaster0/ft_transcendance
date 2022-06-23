@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { INestApplication } from '@nestjs/common';
 
+
 async function startServerCI(app: INestApplication) {
   const promise = app.listen(3000);
   if (process.env.MODE === 'CI') {
