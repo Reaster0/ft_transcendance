@@ -34,13 +34,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async handleConnection(client: Socket) {
     try {
-      this.logger.log('Connection establishing');
+      this.logger.log('Connection establishing for game');
       const user = await this.authService.getUserBySocket(client);
       if (!user) {
         this.logger.log('User not retrieved');
         return client.disconnect();
       }
-      await this.usersService.changeStatus(user, Status.PLAYING, null);
       client.data.user = user;
       this.logger.log('User connected: ' + user.nickname);
       return client.emit('connectedToGame'); // maybe emit user ?
@@ -50,7 +49,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   async handleDisconnect(client: Socket) {
-    this.logger.log('Disconnection');
+    this.logger.log('Disconnection from game');
     try {
       if (client.data.user) {
         this.logger.log('User leaving: ' + client.data.user.username);
@@ -79,11 +78,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('joinGame')
-  handleJoinGame(client: Socket, data: { ballSize: string, ballSpeed: string }) {
+  async handleJoinGame(client: Socket, data: { ballSize: string, ballSpeed: string }) {
     try {
       if (!client.data.user) {
         return client.disconnect();
       }
+      await this.usersService.changeStatus(client.data.user, Status.PLAYING, null);
       if (this.gamesService.isWaiting(client, queue) === true ||
           this.gamesService.isPlaying(client, matchs) === true) {
         return;
@@ -113,7 +113,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('invitToGame')
-  handleInvitToGame(client: Socket, opponent: Socket, data: { ballSize: string, ballSpeed: string }) {
+  async handleInvitToGame(client: Socket, opponent: Socket, data: { ballSize: string, ballSpeed: string }) {
     try {
       if (!client.data.user || !opponent.data.user) {
         opponent.emit('error');
@@ -126,6 +126,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         || this.gamesService.isPlaying(opponent, matchs) === true) {
         return;
       }
+      await this.usersService.changeStatus(client.data.user, Status.PLAYING, null);
       if (!data.ballSize || !data.ballSpeed) {
         client.emit('FeaturesIncorrect');
         return;
@@ -202,7 +203,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('watchGame')
-  handleWatchGame(client: Socket) {
+  async handleWatchGame(client: Socket) {
     try {
       if (!client.data.user) {
         return client.disconnect();
@@ -213,6 +214,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       ) {
         return;
       }
+      await this.usersService.changeStatus(client.data.user, Status.PLAYING, null);
       watchers.push(client);
       this.gamesService.listGamesToOne(client, matchs);
     } catch {

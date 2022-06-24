@@ -294,9 +294,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('getUsersList')
   async sendUsersListToOne(client: Socket) {
-    console.log('here');
     const users = await this.userServices.getUsers();
-    client.emit('usersList', users);    
   }
 
   /******* Emit service ********/
@@ -384,4 +382,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       this.logger.log(e);
     } 
   }
+
+  /*** Game invitation system ***/
+  @SubscribeMessage('sendGameInvit')
+  async handleSendGameInvit(client: Socket, params: { channelId: string }) {
+    const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
+    if (socket === null) { 
+      client.emit('userAbsent');
+      return;
+    }
+    this.server.to(socket).emit('gameInvitation', { id: client.data.user.id });
+  } 
 }

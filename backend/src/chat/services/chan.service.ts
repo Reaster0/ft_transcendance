@@ -207,6 +207,19 @@ export class ChanServices {
     return (res);
   }
 
+  async retrieveOtherSocket(toPassId: number, channelId: string) {
+    const member: ChannelI = await this.chanRepository.findOne({
+      where: {id: channelId},
+      relations: ['users'],
+    });
+    for (const user of member.users) {
+      if (user.id != toPassId) {
+        return user.chatSocket;
+      }
+    }
+    return (null);
+  }
+
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
     const channel = await this.chanRepository.findOne(channelId);
     const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });

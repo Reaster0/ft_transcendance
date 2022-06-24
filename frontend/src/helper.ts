@@ -17,7 +17,7 @@ function leaveChat(forceLeave: boolean, socket: any, to: any, next: any, store: 
 		if (forceLeave === false) {
 			socket.disconnect();
 		}
-		store.commit('setSocketVal' , null);
+		store.commit('setChatSocket' , null);
 		store.commit('setUserToManage' , null);
 		store.commit('setCurrentChannelId' , null);
 		next(true);

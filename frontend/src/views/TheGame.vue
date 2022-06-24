@@ -76,12 +76,14 @@ import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { getAvatarID, getUserInfos } from "../components/FetchFunctions"
+import { useStore, Store } from "vuex";
 
 export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
 	setup() {
+    	const store = useStore() as Store<any>;
 		const gameSocket = ref< any | null>(null);
 		const matchesList = ref< any | null>(null);
 		const matchId = ref<string | null>(null);
@@ -109,12 +111,15 @@ export default defineComponent ({
 
 		onMounted(async() =>{
 			try {
-				gameSocket.value = io('http://:3000/game',{
-					transportOptions: {
-					polling: { extraHeaders: { auth: document.cookie }},
-					withCredentials: true
-				}});
-				console.log("starting connection to websocket");
+				gameSocket.value = store.getters.getGameSocket;
+				if (gameSocket.value === null) {
+					gameSocket.value = io('http://:3000/game',{
+						transportOptions: {
+						polling: { extraHeaders: { auth: document.cookie }},
+						withCredentials: true
+					}});
+					console.log("starting connection to game websocket");
+				}
 			} catch (error) {
 				console.log("the error is:" + error);
 			}

@@ -69,56 +69,56 @@ export default defineComponent ({
   name: "NewRoomPrivate",
   setup() {
     const store = reactive(useStore() as Store<any>);
-    let socketVal = store.getters.getSocketVal;
+    let chatSocket = store.getters.getChatSocket;
     let name = ref<string>('');
     let file = ref<any>(null);
     let created = ref<boolean>(false);
     let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
       void from;
-      const socket = store.getters.getSocketVal;
+      const socket = store.getters.getChatSocket;
       leaveChat(forceLeave, socket, to, next, store);
     })
 
     onMounted(() =>{
       try {
-        if (!socketVal) {
+        if (!chatSocket) {
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
-          store.commit('setSocketVal' , connection);
+          store.commit('setChatSocket' , connection);
           console.log("starting connection to websocket");
-          socketVal = store.getters.getSocketVal;
+          chatSocket = store.getters.getChatSocket;
         }
       } catch (error) {
         console.log("the error is:" + error)
       }
 
-      socketVal.on('disconnect', function() {
+      chatSocket.on('disconnect', function() {
         forceLeave = true;
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
       })
 
-      socketVal.on("channelCreated", function(channel: string) {
+      chatSocket.on("channelCreated", function(channel: string) {
         if (channel === name.value) {
           created.value = true;
         }
       })
 
-      socketVal.on("errorChannelCreation", function(reason: string) {
+      chatSocket.on("errorChannelCreation", function(reason: string) {
         alert("Channel creation failed: " + reason);
       })
     })
 
     onUnmounted(async() => {
-      socketVal.removeAllListeners('disconnect');
-      socketVal.removeAllListeners('channelCreated');
-      socketVal.removeAllListeners('errorChannelCreation');
+      chatSocket.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('channelCreated');
+      chatSocket.removeAllListeners('errorChannelCreation');
     })
 
     async function previewFiles(event: any) {
@@ -129,7 +129,7 @@ export default defineComponent ({
       if (verifyChannelName(name) === false) {
         return ;
       }
-      socketVal.emit('createChannel', { name: name, password: '', type: ChannelType.PRIVATE, avatar: file });   
+      chatSocket.emit('createChannel', { name: name, password: '', type: ChannelType.PRIVATE, avatar: file });   
     }
 
     return { submitIt, created, previewFiles, name, file }
