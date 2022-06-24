@@ -993,7 +993,8 @@ export default defineComponent({
       game, blockUserControl, leaveChannel, initDisplayChannel,
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
-      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation, goToUserPage }
+      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation,
+      goToUserPage }
 	},
 })
 </script>
