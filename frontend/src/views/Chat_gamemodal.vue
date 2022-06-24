@@ -4,7 +4,7 @@
     <div class="modale card">
       <v-card>
         <v-card-title>
-          <span class="text-h5">Game invitation from {{ inviter }}</span>
+          <span class="text-h5">Game invitation from {{ inviterName }}</span>
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -26,11 +26,11 @@ import { defineComponent } from 'vue';
 
 export default defineComponent ({
   name: "GameModal",
-  props: ["showGameModal", "toggleGameModal", "inviter"],
+  props: ["showGameModal", "toggleGameModal", "inviterName"],
   setup(props, { emit }) {
 
     function respondToGame() {
-      emit('responseGame', true);
+      emit('response', true);
     }
 
     return { respondToGame };

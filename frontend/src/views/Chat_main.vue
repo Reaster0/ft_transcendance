@@ -404,7 +404,7 @@
           <game-modal :showGameModal="showGameModal"
             :toggleGameModal="toggleGameModal"
             :inviter="getUserName(game.inviter)"
-            @responseGame="responseGame">
+            @response="responseGame">
           </game-modal>
         </v-col>
       </v-row>
@@ -721,13 +721,14 @@ export default defineComponent({
         game.value.absent = true;
       })
 
-      connection.value!.on('gameAccepted', function(params: { inviter: number, socket: any }) {
+      connection.value!.on('gameAccepted', function(params: { inviter: number, socketId: any }) {
         if (params.inviter != currentUser.id) {
           return ;
         }
+        forceLeave = true;
         game.value.togame = true;
         store.commit('setGameSocket', game.value.socket);
-        store.commit('setOpponentSocket', params.socket);
+        store.commit('setOpponentSocketId', params.socketId);
         router.push('/game');
       })
 
@@ -983,7 +984,10 @@ export default defineComponent({
       }
     }
 
-    function responseGame() {
+    function responseGame(response: boolean) {
+      if (response === false) {
+        return ;
+      }
       showGameModal.value = false;
       if (game.value.socket === null) {
         game.value.socket = io('http://:3000/game',
@@ -991,9 +995,8 @@ export default defineComponent({
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
-      }    
-      connection.value!
-        .emit('acceptGame', { inviter: game.value.inviter, socket: game.value.socket })
+      }
+      connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
       store.commit('setGameSocket', game.value.socket);
       forceLeave = true;
       router.push('/game');

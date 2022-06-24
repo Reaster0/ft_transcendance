@@ -413,14 +413,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
   } 
 
-  @SubscribeMessage('acceptGame')
-  async handleAcceptGame(client: Socket, params: { inviter: number, socket: any}) {
+  @SubscribeMessage('acceptGameInvit')
+  async handleAcceptGameInvit(client: Socket, params: { inviter: number, socketId: any}) {
     try {
       const user = await this.userServices.findUserById('' + params.inviter);
       if (!user || user.chatSocket === null) {
         return ;
       }
-      this.server.to(user.chatSocket).emit('gameAccepted', { inviter: params.inviter, socket: params.socket });
+      this.server.to(user.chatSocket).emit('gameAccepted', { inviter: params.inviter, socketId: params.socketId });
     } catch (e) {
       this.logger.log(e);
     }
