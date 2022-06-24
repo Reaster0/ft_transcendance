@@ -81,6 +81,19 @@ export class UsersController {
     }
   }
 
+  @Get('getUsers')
+  @UseGuards(AuthGuard('jwt'), AuthUser)
+  /** Swagger **/
+  @ApiOperation({ summary: 'Get list of all registred user' })
+  async getUsersForSearch(): Promise<User[]> {
+    try {
+      const users : User[] = await this.usersService.findAll();
+      return users;
+    } catch (e) {
+      throw e;
+    }
+  }
+
   @Get('isMyFriend/:id')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   isMyfriend(@Req() req: RequestUser, @Param('id', ParseIntPipe) id: number): boolean {

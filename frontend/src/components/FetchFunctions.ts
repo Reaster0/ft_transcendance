@@ -1,5 +1,6 @@
 //all functions here return the results or NULL
 
+///mmmh redness
 export async function isLogged() {
 	console.log("check if user is logged")
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/logged", {credentials: "include"})
@@ -152,4 +153,9 @@ export async function genJoinLink(channelId: string) {
 		method: 'get',
 		credentials: 'include'
 	}).then(function(body){return body.text()});
+}
+
+export async function getUsers() {
+	return await fetch(process.env.VUE_APP_BACKEND + "/users/getUsers", { method: "GET", credentials: "include"})
+	.then(res => res.json())
 }
