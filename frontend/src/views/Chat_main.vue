@@ -475,6 +475,10 @@ export default defineComponent({
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       connection.value!.removeAllListeners('disconnect');
+      if (game.value.request === true && forceLeave === false) {
+        alert('Wait for end of game request to leave page.');
+        return ;
+      }
       void from;
       const socket = store.getters.getChatSocket;
       leaveChat(forceLeave, socket, to, next, store);
@@ -510,6 +514,7 @@ export default defineComponent({
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
+        console.log('get user list');
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
@@ -522,6 +527,7 @@ export default defineComponent({
       connection.value!.on('channelList', async function(params: Channel[]) {
         userChannels.value.channels = params;
         await avatarToUrl();
+        console.log('getchannellist');
         for (let channel of userChannels.value.channels) {
           if (channel.type === ChannelType.PM) {
             let usersId = channel.name.split('/').map(Number);
@@ -700,12 +706,29 @@ export default defineComponent({
       /* Game invitation system */
 
       connection.value!.on('gameInvitation', function(params: { id: number }) {
-        game.value.inviter = params.id;
-        showGameModal.value = true;
+        if (showGameModal.value === false && game.value.request === false) {
+          game.value.inviter = params.id;
+          showGameModal.value = true;
+        }
+      })
+
+      connection.value!.on('endGameInvit', function(params: { id: number }) {
+        showGameModal.value = false;
+        alert('You missed a game invitation from '+ getUserName(params.id));
       })
 
       connection.value!.on('userAbsent', function() {
         game.value.absent = true;
+      })
+
+      connection.value!.on('gameAccepted', function(params: { inviter: number, socket: any }) {
+        if (params.inviter != currentUser.id) {
+          return ;
+        }
+        game.value.togame = true;
+        store.commit('setGameSocket', game.value.socket);
+        store.commit('setOpponentSocket', params.socket);
+        router.push('/game');
       })
 
 		})
@@ -728,14 +751,24 @@ export default defineComponent({
       connection.value!.removeAllListeners('joinableChannels');
       connection.value!.removeAllListeners('joinAccepted');
       connection.value!.removeAllListeners('blockChange');
-      connection.value!.removeAllListeners('gameInvitation');
       connection.value!.removeAllListeners('newlyBanned');
+      connection.value!.removeAllListeners('newlyAdmin');
+      connection.value!.removeAllListeners('muted');
+      connection.value!.removeAllListeners('youAreMuted');
+      connection.value!.removeAllListeners('userAbsent');
+      connection.value!.removeAllListeners('gameInvitation');
+      connection.value!.removeAllListeners('endGameInvit');
+      connection.value!.removeAllListeners('gameAccepted');
     })
 
     /* Functions for channel display and management */
 
     function initDisplayChannel(channel: any, isMember: boolean) {
       confirm = 0;
+      if (game.value.request === true) {
+        alert('Wait for end of game request before changing channel');
+        return ;
+      }
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
@@ -759,8 +792,10 @@ export default defineComponent({
     }
 
     function displayMemberChannel() {
-      console.log('ask for '
-        + currentChannel.value.name + ' users and messages');
+      if (game.value.request === true) {
+        alert('Wait for end of game request before changing channel');
+        return ;
+      }
       update.value.messages = false;
       update.value.users = false;
       connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
@@ -923,14 +958,20 @@ export default defineComponent({
       const intervalId = setInterval(() => {
         if (game.value.togame === true) {
           goToGame();
-        } else if (game.value.absent === true) {
-          clearInterval(intervalId);
-        }
-        if (count === 100) {
+        } else if (game.value.absent === true || count === 100) {
+          if (count === 100) {
+            game.value.response = false;
+          }
+          noResponse();
           clearInterval(intervalId);
         }
         count++;
       }, 100);
+
+    }
+
+    function noResponse() {
+      connection.value!.emit('endGameInvit', { channelId: currentChannel.value.id });
       game.value.socket.disconnect();
       game.value.request = false;
       game.value.socket = null;
@@ -955,7 +996,7 @@ export default defineComponent({
         .emit('acceptGame', { inviter: game.value.inviter, socket: game.value.socket })
       store.commit('setGameSocket', game.value.socket);
       forceLeave = true;
-      router.push('/thegame');
+      router.push('/game');
     }
 
     function goToGame() {

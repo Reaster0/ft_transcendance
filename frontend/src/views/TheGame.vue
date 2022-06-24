@@ -83,7 +83,7 @@ export default defineComponent ({
 		ParticlesBg
 	},
 	setup() {
-    	const store = useStore() as Store<any>;
+		const store = useStore() as Store<any>;
 		const gameSocket = ref< any | null>(null);
 		const matchesList = ref< any | null>(null);
 		const matchId = ref<string | null>(null);

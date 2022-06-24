@@ -295,6 +295,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('getUsersList')
   async sendUsersListToOne(client: Socket) {
     const users = await this.userServices.getUsers();
+    client.emit('usersList', users);
   }
 
   /******* Emit service ********/
@@ -384,13 +385,45 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   }
 
   /*** Game invitation system ***/
+
   @SubscribeMessage('sendGameInvit')
   async handleSendGameInvit(client: Socket, params: { channelId: string }) {
-    const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
-    if (socket === null) { 
-      client.emit('userAbsent');
-      return;
+    try {
+      const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
+      if (socket === null) { 
+        client.emit('userAbsent');
+        return;
+      }
+      this.server.to(socket).emit('gameInvitation', { id: client.data.user.id });
+    } catch (e) {
+      this.logger.log(e);
     }
-    this.server.to(socket).emit('gameInvitation', { id: client.data.user.id });
   } 
+
+  @SubscribeMessage('endGameInvit')
+  async handleEndGameInvit(client: Socket, params: { channelId: string }) {
+    try {
+      const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
+      if (socket === null) { 
+        return;
+      }
+      this.server.to(socket).emit('endGameInvit', { id: client.data.user.id });
+    } catch (e) {
+      this.logger.log(e);
+    }
+  } 
+
+  @SubscribeMessage('acceptGame')
+  async handleAcceptGame(client: Socket, params: { inviter: number, socket: any}) {
+    try {
+      const user = await this.userServices.findUserById('' + params.inviter);
+      if (!user || user.chatSocket === null) {
+        return ;
+      }
+      this.server.to(user.chatSocket).emit('gameAccepted', { inviter: params.inviter, socket: params.socket });
+    } catch (e) {
+      this.logger.log(e);
+    }
+
+  }
 }
