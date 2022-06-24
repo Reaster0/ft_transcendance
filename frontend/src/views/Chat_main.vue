@@ -1,5 +1,5 @@
 <template>
-  <v-app id="chat" class="body">
+  <v-app id="chat">
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
@@ -34,7 +34,7 @@
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top"
-            style="max-height: calc(100vh - 50%);">
+            style="max-height: calc(100vh - 40%);">
             <v-list>
               <template v-for="(item, index) in userChannels.channels">
                 <v-divider v-if="item.divider" :key="index"
@@ -1000,13 +1000,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.searchtool-one {
-  padding-bottom: 2%;
-}
-.searchtool-two {
-  padding-bottom: 10%;
-}
-
 .border {
   border-right: 0.5px solid rgb(196, 192, 207);
 }
