@@ -76,12 +76,16 @@ import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { getAvatarID, getUserInfos } from "../components/FetchFunctions"
+import { useStore, Store } from "vuex";
+import router from "../router/index";
+
 
 export default defineComponent ({
 	components: {
 		ParticlesBg
 	},
 	setup() {
+		const store = useStore() as Store<any>;
 		const gameSocket = ref< any | null>(null);
 		const matchesList = ref< any | null>(null);
 		const matchId = ref<string | null>(null);
@@ -109,12 +113,24 @@ export default defineComponent ({
 
 		onMounted(async() =>{
 			try {
-				gameSocket.value = io('http://:3000/game',{
-					transportOptions: {
-					polling: { extraHeaders: { auth: document.cookie }},
-					withCredentials: true
-				}});
-				console.log("starting connection to websocket");
+				gameSocket.value = store.getters.getGameSocket;
+				if (gameSocket.value === null) {
+					gameSocket.value = io('http://:3000/game',{
+						transportOptions: {
+						polling: { extraHeaders: { auth: document.cookie }},
+						withCredentials: true
+					}});
+					console.log("starting connection to game websocket");
+				} else {
+					const opponentId = store.getters.getOpponentSocketId;
+					if (opponentId !== null) {
+						console.log('GO INVIT');
+						gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
+					}
+					searchingGame.value = true;
+					store.commit('setGameSocket', null);
+					store.commit('setOpponentSocketId', null);
+				}
 			} catch (error) {
 				console.log("the error is:" + error);
 			}
@@ -179,7 +195,7 @@ export default defineComponent ({
 			})
 
 			gameSocket.value!.on('requestError', () =>{
-				console.log("requestError")
+				gameSocket.value!.disconnect();
 			})
 
 			gameSocket.value!.on('ongoingGame', async (params: { matchId: number, leftPlayer: string, rightPlayer: string }) =>{
@@ -217,6 +233,16 @@ export default defineComponent ({
 				fatalError.value = true
 			}
 			
+			gameSocket.value!.on('disconnect', () => {
+				alert('Something went wrong. You\'ll be disconnected from game.');
+				router.push('/');
+			})
+
+			gameSocket.value!.on('opponentDisconnected', () => {
+				alert('Your opponent disconnected.');
+				router.push('/');
+			})
+
 			window.addEventListener('resize', resizeCanvas);
 		})
 

@@ -74,28 +74,25 @@ export default defineComponent({
   name: "NewRoom",
   setup () {
     let store = useStore() as Store<any>;
-    let socketVal = store.getters.getSocketVal;
+    let chatSocket = store.getters.getChatSocket;
     let forceLeave = false;
 
     onMounted(() => {
       try {
-        console.log('socket val: ' + socketVal);
-        if (!socketVal) {
-          console.log('new connection !');
+        if (!chatSocket) {
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
-          store.commit('setSocketVal' , connection);
-          console.log("starting connection to websocket");
-          socketVal = store.getters.getSocketVal;
+          store.commit('setChatSocket' , connection);
+          chatSocket = store.getters.getChatSocket;
         }
       } catch (error) {
         console.log("the error is:" + error)
       }
 
-      socketVal.on('disconnect', function() {
+      chatSocket.on('disconnect', function() {
         forceLeave = true;
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
@@ -103,14 +100,14 @@ export default defineComponent({
     })
 
     onBeforeRouteLeave(function(to: any, from: any, next: any) {
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
       void from;
-      const socket = store.getters.getSocketVal;
+      const socket = store.getters.getChatSocket;
       leaveChat(forceLeave, socket, to, next, store);
     })
 
     onUnmounted(async() => {
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
     })
   }
 })

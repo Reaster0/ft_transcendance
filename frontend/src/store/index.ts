@@ -15,7 +15,9 @@ const store = createStore({
 		// ----chat---- //
 		channels: [] as any[],
 		joinedChannel: false as boolean,
-		socketVal: null as any,
+		chatSocket: null as any,
+		gameSocket: null as any,
+		opponentSocketId: null as any,
 		userToManage: null as any,
 		currentChannelId: null as any,
 		currentChannelType: null as any,
@@ -37,8 +39,14 @@ const store = createStore({
 		isChannelJoined:(state) => {
 			return state.joinedChannel;
 		},
-		getSocketVal:(state) => {
-			return state.socketVal;
+		getChatSocket:(state) => {
+			return state.chatSocket;
+		},
+		getGameSocket:(state) => {
+			return state.gameSocket;
+		},
+		getOpponentSocketId:(state) => {
+			return state.opponentSocketId;
 		},
 		getUserToManage:(state) => {
 			return state.userToManage;
@@ -68,8 +76,14 @@ const store = createStore({
 		setChannelJoinedStatus(state, thestatus) {
 			state.joinedChannel = thestatus;
 		},
-		setSocketVal(state, val) {
-			state.socketVal = val;
+		setChatSocket(state, val) {
+			state.chatSocket = val;
+		},
+		setGameSocket(state, val) {
+			state.gameSocket = val;
+		},
+		setOpponentSocketId(state, val) {
+			state.opponentSocketId = val;
 		},
 		setUserToManage(state, val) {
 			state.userToManage = val;

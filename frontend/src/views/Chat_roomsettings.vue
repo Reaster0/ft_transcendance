@@ -106,7 +106,7 @@ export default defineComponent ({
     let store = useStore() as Store<any>;
     let channelId = store.getters.getCurrentChannelId;
     let channelType = store.getters.getCurrentChannelType;
-    let socketVal = store.getters.getSocketVal;
+    let chatSocket = store.getters.getChatSocket;
     let newType = ref<any>(null);
     let password = ref<string>('');
     let file = ref<any>(null);
@@ -118,21 +118,21 @@ export default defineComponent ({
           alert('Something went wrong. Redirect to chat.');
           router.push('/thechat');
           return ;
-        } else if (!socketVal) {
+        } else if (!chatSocket) {
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
-          store.commit('setSocketVal' , connection);
+          store.commit('setChatSocket' , connection);
           console.log("starting connection to websocket");
-          socketVal = store.getters.getSocketVal;
+          chatSocket = store.getters.getChatSocket;
         }
       } catch (error) {
         console.log("the error is:" + error)
       }
 
-      socketVal.on('disconnect', function() {
+      chatSocket.on('disconnect', function() {
         forceLeave = true;
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
@@ -140,13 +140,13 @@ export default defineComponent ({
     })
 
     onUnmounted(async() => {
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
     })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
       void from;
-      const socket = store.getters.getSocketVal;
+      const socket = store.getters.getChatSocket;
       leaveChat(forceLeave, socket, to, next, store);
     })
 
@@ -168,7 +168,7 @@ export default defineComponent ({
       if (newType.value != ChannelType.PROTECTED) {
         password.value = '';
       }
-      socketVal.emit('editChannel',
+      chatSocket.emit('editChannel',
         { channelId: channelId, type: newType.value, password: password.value,
         avatar: file.value});
       router.push('/thechat');

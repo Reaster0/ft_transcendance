@@ -120,7 +120,7 @@ export default defineComponent ({
     let store = useStore() as Store<any>;
     let channelId = store.getters.getCurrentChannelId;
     let userToManage = ref<any>(store.getters.getUserToManage);
-    let socketVal = store.getters.getSocketVal;
+    let chatSocket = store.getters.getChatSocket;
     let ban = ref<boolean>(false);
     let mute = ref<boolean>(false);
     let admin = ref<boolean>(false);
@@ -134,22 +134,22 @@ export default defineComponent ({
           alert('Something went wrong. Redirect to chat.');
           router.push('/thechat');
           return ;
-        } else if (!socketVal) {
+        } else if (!chatSocket) {
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
-          store.commit('setSocketVal' , connection);
+          store.commit('setChatSocket' , connection);
           console.log("starting connection to websocket");
-          socketVal = store.getters.getSocketVal;
+          chatSocket = store.getters.getChatSocket;
         }
         ok.value = true;
       } catch (error) {
         console.log("the error is:" + error)
       }
 
-      socketVal.on('disconnect', function() {
+      chatSocket.on('disconnect', function() {
         forceLeave = true;
         alert('Something went wrong. You\'ve been disconnected from chat.');
         router.push('/');
@@ -157,14 +157,14 @@ export default defineComponent ({
     })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {  
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
       void from;
-      const socket = store.getters.getSocketVal;
+      const socket = store.getters.getChatSocket;
       leaveChat(forceLeave, socket, to, next, store);
     })
 
     onUnmounted(async() => {
-      socketVal.removeAllListeners('disconnect');
+      chatSocket.removeAllListeners('disconnect');
     })
 
     function manageUser() {
@@ -173,7 +173,7 @@ export default defineComponent ({
         return;
       }
       if (ban.value) {
-        socketVal.emit('banUser',
+        chatSocket.emit('banUser',
           { channelId: channelId, userId: userToManage.value.id});
       } else if (mute.value) {
         let min = Number(time.value);
@@ -181,10 +181,10 @@ export default defineComponent ({
           alert('The mute time must be a valid number for minutes representation !');
           return;
         }
-        socketVal.emit('muteUser',
+        chatSocket.emit('muteUser',
           { channelId: channelId, targetId: userToManage.value.id, time: min });        
       } else if (admin.value) {
-        socketVal.emit('giveAdminRights',
+        chatSocket.emit('giveAdminRights',
           { channelId: channelId, userId: userToManage.value.id});
       }
       router.push('/thechat');

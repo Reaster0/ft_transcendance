@@ -389,6 +389,9 @@
                 <div v-if="!game.response" class="text-center">
                   <p>No response from user</p>
                 </div>
+                <div v-else-if="game.absent" class="text-center">
+                  <p>User is absent from chat</p>
+                </div>
                 <v-toolbar dense  color="rgba(0,0,0,0)">
                   <v-progress-linear :active="game.request"
                     :indeterminate="game.request" absolute bottom
@@ -400,8 +403,8 @@
           </v-card>  
           <game-modal :showGameModal="showGameModal"
             :toggleGameModal="toggleGameModal"
-            :inviter="game.inviter"
-            @responseGame="responseGame">
+            :inviter="getUserName(game.inviter)"
+            @response="responseGame">
           </game-modal>
         </v-col>
       </v-row>
@@ -464,33 +467,37 @@ export default defineComponent({
     let showPasswordModal = ref<boolean>(false);
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
-      inviter: '' as string });
+      inviter: null as any, socket: null as any, absent: false as boolean, 
+      togame: false as boolean });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
     let confirm =  0 as number;
     let forceLeave = false as boolean;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
       connection.value!.removeAllListeners('disconnect');
+      if (game.value.request === true && forceLeave === false) {
+        alert('Wait for end of game request to leave page.');
+        return ;
+      }
       void from;
-      const socket = store.getters.getSocketVal;
+      const socket = store.getters.getChatSocket;
       leaveChat(forceLeave, socket, to, next, store);
     })
 
 		onMounted(async() => {
 			try {
-        connection.value = store.getters.getSocketVal;
+        connection.value = store.getters.getChatSocket;
         if (connection.value === null) {
-          connection.value = io(window.location.protocol + '//' +
-            window.location.hostname + ':3000/chat',{
-            transportOptions: {
+          connection.value = io(window.location.protocol + '//:3000/chat',
+          { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
           })
-          store.commit('setSocketVal' , connection.value);
+          store.commit('setChatSocket' , connection.value);
           store.commit('setUserToManage' , null);
           store.commit('setCurrentChannelId' , null);
           store.commit('setCurrentChannelType', null);
-          console.log("starting connection to websocket");
+          console.log("starting connection to chat websocket");
         } else {
           connection.value!.emit('getUsersList');
         }
@@ -507,6 +514,7 @@ export default defineComponent({
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
+        console.log('get user list');
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
@@ -519,6 +527,7 @@ export default defineComponent({
       connection.value!.on('channelList', async function(params: Channel[]) {
         userChannels.value.channels = params;
         await avatarToUrl();
+        console.log('getchannellist');
         for (let channel of userChannels.value.channels) {
           if (channel.type === ChannelType.PM) {
             let usersId = channel.name.split('/').map(Number);
@@ -694,10 +703,33 @@ export default defineComponent({
         displayMemberChannel();
       })
 
+      /* Game invitation system */
+
       connection.value!.on('gameInvitation', function(params: { id: number }) {
-        //TODO
-        game.value.inviter = getUserName(params.id);
-        showGameModal.value = true;
+        if (showGameModal.value === false && game.value.request === false) {
+          game.value.inviter = params.id;
+          showGameModal.value = true;
+        }
+      })
+
+      connection.value!.on('endGameInvit', function(params: { id: number }) {
+        showGameModal.value = false;
+        alert('You missed or refused a game invitation from '+ getUserName(params.id));
+      })
+
+      connection.value!.on('userAbsent', function() {
+        game.value.absent = true;
+      })
+
+      connection.value!.on('gameAccepted', function(params: { inviter: number, socketId: any }) {
+        if (params.inviter != currentUser.id) {
+          return ;
+        }
+        forceLeave = true;
+        game.value.togame = true;
+        store.commit('setGameSocket', game.value.socket);
+        store.commit('setOpponentSocketId', params.socketId);
+        router.push('/game');
       })
 
 		})
@@ -720,14 +752,24 @@ export default defineComponent({
       connection.value!.removeAllListeners('joinableChannels');
       connection.value!.removeAllListeners('joinAccepted');
       connection.value!.removeAllListeners('blockChange');
-      connection.value!.removeAllListeners('gameInvitation');
       connection.value!.removeAllListeners('newlyBanned');
+      connection.value!.removeAllListeners('newlyAdmin');
+      connection.value!.removeAllListeners('muted');
+      connection.value!.removeAllListeners('youAreMuted');
+      connection.value!.removeAllListeners('userAbsent');
+      connection.value!.removeAllListeners('gameInvitation');
+      connection.value!.removeAllListeners('endGameInvit');
+      connection.value!.removeAllListeners('gameAccepted');
     })
 
     /* Functions for channel display and management */
 
     function initDisplayChannel(channel: any, isMember: boolean) {
       confirm = 0;
+      if (game.value.request === true) {
+        alert('Wait for end of game request before changing channel');
+        return ;
+      }
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
@@ -751,8 +793,10 @@ export default defineComponent({
     }
 
     function displayMemberChannel() {
-      console.log('ask for '
-        + currentChannel.value.name + ' users and messages');
+      if (game.value.request === true) {
+        alert('Wait for end of game request before changing channel');
+        return ;
+      }
       update.value.messages = false;
       update.value.users = false;
       connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
@@ -903,17 +947,64 @@ export default defineComponent({
 
     function waitingGame() {
       game.value.request = true;
-      // TODO send game request
-      setTimeout(() => (
-        game.value.request = false,
-        game.value.response = false
-        ), 10000);
+      if (game.value.socket === null) {
+        game.value.socket = io('http://:3000/game',
+          { transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie }},
+              withCredentials: true
+          }});
+        game.value!.socket.emit('fromChat');
+      }
+      connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
+      let count = 0;
+      const intervalId = setInterval(() => {
+        if (game.value.togame === true) {
+          goToGame();
+        } else if (game.value.absent === true || count === 100) {
+          if (count === 100) {
+            game.value.response = false;
+          }
+          noResponse();
+          clearInterval(intervalId);
+        }
+        count++;
+      }, 100);
+
     }
 
-    function responseGame(responseGame: true) {
-      console.log('game response ' + responseGame);
-      showGameModal.value = false;    
-      // TODO emit answer  
+    function noResponse() {
+      connection.value!.emit('endGameInvit', { channelId: currentChannel.value.id });
+      game.value.socket.disconnect();
+      game.value.request = false;
+      game.value.socket = null;
+      if (game.value.absent === true || game.value.response === false) {
+        setTimeout(() => {
+          game.value.response = true;
+          game.value.absent = false;
+        }, 10000);
+      }
+    }
+
+    function responseGame(response: boolean) {
+      if (response === false) {
+        return ;
+      }
+      showGameModal.value = false;
+      if (game.value.socket === null) {
+        game.value.socket = io('http://:3000/game',
+          { transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie }},
+              withCredentials: true
+          }});
+      }
+      connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
+      store.commit('setGameSocket', game.value.socket);
+      forceLeave = true;
+      router.push('/game');
+    }
+
+    function goToGame() {
+
     }
 
     /* Utilities function */
