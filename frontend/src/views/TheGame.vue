@@ -240,8 +240,7 @@ export default defineComponent ({
 
 			gameSocket.value!.on('opponentDisconnected', () => {
 				alert('Your opponent disconnected.');
-				gameStarted.value = false;
-				// TODO please check value to modify
+				router.push('/');
 			})
 
 			window.addEventListener('resize', resizeCanvas);
