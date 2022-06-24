@@ -113,11 +113,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('invitToGame')
-  async handleInvitToGame(client: Socket, opponent: Socket, data: { ballSize: string, ballSpeed: string }) {
+  async handleInvitToGame(client: Socket, data : { opponentSocketId: string, ballSize: string, ballSpeed: string }) {
     try {
+      const allSockets = await this.server.fetchSockets();
+      let opponent = null;
+      for (let socket of allSockets) {
+        if (socket.data.id === data.opponentSocketId) {
+          opponent = socket;
+        }
+      }
       if (!client.data.user || !opponent.data.user) {
-        opponent.emit('error');
-        client.emit('error');
         opponent.disconnect();
         client.disconnect();
         return;
@@ -127,6 +132,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       await this.usersService.changeStatus(client.data.user, Status.PLAYING, null);
+      await this.usersService.changeStatus(opponent.data.user, Status.PLAYING, null);
       if (!data.ballSize || !data.ballSpeed) {
         client.emit('FeaturesIncorrect');
         return;
@@ -151,7 +157,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       this.gamesService.sendToPlayers(newMatch, 'foundMatch', newMatch.matchId);
       this.gamesService.waitForPlayers(this.server, newMatch, matchs);
     } catch {
-      return client.disconnect();
+      client.disconnect();
     }
   }
 
