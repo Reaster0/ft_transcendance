@@ -1,29 +1,25 @@
 <template>
 	<v-container>
-    <v-row>
-        <v-col cols="auto" sm="3" class="border">
-        <div id='test' class="searchtool-one">
-          <v-selection @open="getUsersList"
-                @option:selected="goToUserPage"
-                class="style-chooser"
-                label="nickname"
-                placeholder=" Users "
-                :options="usersList"
-          ></v-selection>
-        </div>
-      </v-col>
-    </v-row>
+    <div class="selection">
+    <v-selection @open="getUsersList"
+      @option:selected="goToUserPage"
+      class="style-chooser"
+      label="nickname"
+      max-width="50px"
+      placeholder=" Users list "
+      :options="usersList"
+    ></v-selection>
+    </div>
 		<particles-bg type="cobweb" :bg="true" />
 		<v-img :aspect-ratio="16/9" height="500" src="../assets/42_Logo.svg"/>
 		<v-row>
 			<v-col align="center">
-				<h1 class="text">The</h1>
-				<h1 class="text">Game</h1>
-				<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(255, 0, 0)" to="/game">
-					<h1 class="text rainbow">Play</h1>
+				<h1 class="text">The Game</h1>
+				<v-btn elevation="24" outlined rounded min-height="100" class="ml-10" min-width="200" color="rgb(255, 0, 0)" to="/game">
+					<h1 class="text rainbow">Play it</h1>
 				</v-btn>
-				<v-btn elevation="24" outlined rounded min-height="100" min-width="200" color="rgb(0, 0, 255)" to="/game?watch=true">
-					<h1 class="text rainbow">Watch</h1>
+				<v-btn elevation="24" outlined rounded min-height="100" class="ml-10" min-width="200" color="rgb(0, 0, 255)" to="/game?watch=true">
+					<h1 class="text rainbow">Watch it</h1>
 				</v-btn>
 			</v-col>
 		</v-row>
@@ -149,17 +145,10 @@ text-shadow: 0.04em 0.04em #fc0049,
 </style>
 
 <style type="css">
-.searchtool-one {
-  padding-bottom: 2%;
+.selection {
   position: absolute;
   width: 200px;
-  height: 200px;
-  left:10px;
-  top:10px;
 }
-</style>
-
-<style>
 .style-chooser .vs__search::placeholder,
 .style-chooser .vs__dropdown-toggle,
 .style-chooser .vs__dropdown-menu {

@@ -5,37 +5,36 @@
         <!-- ELEMENTS ON LEFT OF SCREEN -->
         <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
-            <div id="joinableChannels" class="searchtool-one">
-              <v-selection @open="getJoinableChannels"
-                @option:selected="initDisplayChannel"
-                placeholder="Search channels"
-                label="name"
-                :options="joinableChannels"
-                :value="{channel: chanJoinSelected, isMember: false}">
-              </v-selection>
-            </div>
-            
-            <div id="joinableUsers" class="searchtool-two">
-              <v-selection @open="getConnectedUsers"
-                @option:selected="initDisplayChannel"
-                placeholder="Search connected users"
-                label="name"
-                :options="joinableChannels">
-              </v-selection>
-            </div>
+            <!-- SEARCH TOOLS -->
+            <v-selection @open="getJoinableChannels"
+              @option:selected="initDisplayChannel"
+              class="mb-4"
+              placeholder="Search channels"
+              label="name"
+              :options="joinableChannels"
+              :value="{channel: chanJoinSelected, isMember: false}">
+            </v-selection>
+            <v-selection @open="getConnectedUsers"
+              class="my-4"
+              @option:selected="initDisplayChannel"
+              placeholder="Search connected users"
+              label="name"
+              :options="joinableChannels">
+            </v-selection>
 
             <!-- CREATE NEW ROOM BUTTON -->
-            <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%">
+            <v-btn :to="{ name: 'NewRoom' }" elevation="2" width="100%"
+              class="my-4">
               Create chat room
-              <v-divider class="mx-2" vertical></v-divider>
-              <v-icon color="rgb(0,0,255)" > mdi-plus </v-icon>
+              <v-divider class="mx-4" vertical></v-divider>
+              <v-icon color="rgb(0,0,255)"> mdi-plus </v-icon>
             </v-btn>
           
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
           <div class="text-left overflow-y-auto margin-top"
-            style="max-height: calc(100vh - 50%);">
+            style="max-height: calc(100vh - 40%);">
             <v-list>
               <template v-for="(item, index) in userChannels.channels">
                 <v-divider v-if="item.divider" :key="index"
@@ -51,7 +50,7 @@
                         </v-img>
                         <v-avatar v-else color="blue" min-width="50px"
                           min-height="50px">
-                          <v-icon color="white">mdi-duck</v-icon>
+                          <v-icon color="white">mdi-cat</v-icon>
                         </v-avatar>
                       </v-list-item-avatar>
                   </v-btn>
@@ -67,7 +66,7 @@
                       <v-list-item-avatar v-else>
                         <v-avatar color="blue" min-width="50px"
                           min-height="50px">
-                          <v-icon color="white">mdi-duck</v-icon>
+                          <v-icon color="white">mdi-cat</v-icon>
                         </v-avatar>
                       </v-list-item-avatar>
                     </v-badge>
@@ -87,9 +86,9 @@
         <v-col cols="auto" sm="9" class="border"
           v-if="currentChannel.id === ''">
           <v-app v-if="currentChannel.id === ''">
-              <h1 class="Spotnik textfullcenter" data-text="Select">
+              <p class="textfullcenter font-weight-light" data-text="Select">
                 Select channel to display
-              </h1>
+              </p>
           </v-app>
         </v-col>
 
@@ -148,9 +147,9 @@
 
             <!-- NO MESSAGE YET -->
             <div v-if="currentChannel.messages.length === 0">
-              <h1 class="Spotnik textfullcenter" data-text="Start conversation">
+              <p class="textfullcenter font-weight-light" data-text="Start conversation">
                 Start conversation
-              </h1>  
+              </p>  
             </div>
 
             <!-- SEND MESSAGE -->
@@ -165,21 +164,21 @@
           <!-- LOADING / NON SELECTED MESSAGES -->
           <v-app v-else-if="currentChannel.id != ''
             && currentChannel.role === Roles.NONMEMBER">
-            <h1 class="Spotnik textfullcenter" data-text="Non member">
+            <p class="textfullcenter font-weight-light" data-text="Non member">
               You are not a room member
-            </h1>
+            </p>
           </v-app>
 
           <v-app v-else-if="currentChannel.blocked === true">
-            <h1 class="Spotnik textfullcenter" data-text="Blocked user">
+            <p class="textfullcenter font-weight-light" data-text="Blocked user">
               You blocked this user
-            </h1>
+            </p>
           </v-app>  
 
           <v-app v-else-if="currentChannel.id != ''">
-            <h1 class="Spotnik textfullcenter" data-text="Loading messages">
+            <p class="textfullcenter font-weight-light" data-text="Loading messages">
               Loading messages
-            </h1>
+            </p>
           </v-app>
 
 
@@ -197,7 +196,7 @@
                 <v-avatar class="s" elevation="10" size="60px" color="blue">
                   <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
                     width="70" height="70">
-                  <v-icon v-else color="white">mdi-duck</v-icon>
+                  <v-icon v-else color="white">mdi-cat</v-icon>
                 </v-avatar>
               </v-badge>
             </div>
@@ -205,7 +204,7 @@
               <v-avatar class="s" elevation="10" size="60px" color="blue">
                 <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
                   width="70" height="70">
-                <v-icon v-else color="white">mdi-duck</v-icon>
+                <v-icon v-else color="white">mdi-cat</v-icon>
               </v-avatar>
             </div>
             <v-card-title class="layout justify-center">
@@ -364,7 +363,7 @@
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
-                  <v-btn @click="goToUserPage(currentChannel.name)" elevation="2" class="my-1" width="80%">
+                  <v-btn @click="goToUserPage" elevation="2" class="my-1" width="80%">
                     Go to user page
                   </v-btn>
                 </div>
@@ -409,7 +408,9 @@
     </v-container>
 
     <v-container fluid v-else>
-			<h1 class="Spotnik textfullcenter" data-text="Loading">Loading</h1>
+			<p class="textfullcenter font-weight-light" data-text="Loading">
+        Loading
+      </p>
     </v-container>
 
   </v-app>
@@ -980,8 +981,8 @@ export default defineComponent({
       router.push('/roomsettings');
     }
 
-    function goToUserPage( nickname: string ) {
-        router.push("/user/" + nickname);
+    function goToUserPage() {
+        router.push("/user/" + currentChannel.value.name);
     }
 
 		return { update, messageText, userChannels, displayMemberChannel,
@@ -992,19 +993,13 @@ export default defineComponent({
       game, blockUserControl, leaveChannel, initDisplayChannel,
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
-      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation, goToUserPage }
+      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation,
+      goToUserPage }
 	},
 })
 </script>
 
 <style scoped>
-.searchtool-one {
-  padding-bottom: 2%;
-}
-.searchtool-two {
-  padding-bottom: 10%;
-}
-
 .border {
   border-right: 0.5px solid rgb(196, 192, 207);
 }
@@ -1057,6 +1052,7 @@ export default defineComponent({
   left: 50%;
   margin-right: -50%;
   transform: translate(-50%, -50%);  
+  font-size: 1.2em;
 }
 
 .message {
