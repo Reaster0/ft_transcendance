@@ -14,6 +14,7 @@ const queue: Array<Socket> = []; // Array of clients waiting for opponent
 const features: Array<Features> = []; // Array of features for ball size and speed
 const matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
 const watchers: Array<Socket> = []; // Array of clients waiting to 
+const fromChat: Array<string> = [];
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/game'})
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
@@ -42,7 +43,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
       client.data.user = user;
       this.logger.log('User connected: ' + user.nickname);
-      return client.emit('connectedToGame'); // maybe emit user ?
+      return client.emit('connectedToGame');
     } catch {
       return client.disconnect();
     }
@@ -53,7 +54,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     try {
       if (client.data.user) {
         this.logger.log('User leaving: ' + client.data.user.username);
-        await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
+        if (fromChat.indexOf(client.id) === -1) {
+          await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
+        }
         if (this.gamesService.isWaiting(client, queue) === true) {
           const index = queue.indexOf(client);
           queue.splice(index, 1);
@@ -112,9 +115,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  @SubscribeMessage('fromChat')
+  handleFromChat(client: Socket) {
+    try {
+      if (!client.data.user) {
+        return client.disconnect();
+      }
+      fromChat.push(client.id);
+    } catch {
+      return client.disconnect();
+    }
+  }   
+
   @SubscribeMessage('invitToGame')
   async handleInvitToGame(client: Socket, data : { opponentSocketId: string, ballSize: string, ballSpeed: string }) {
     try {
+      const index = fromChat.indexOf(client.id);
+      fromChat.splice(index, 1);
       const allSockets = await this.server.fetchSockets();
       let opponent = null;
       for (let socket of allSockets) {

@@ -714,7 +714,7 @@ export default defineComponent({
 
       connection.value!.on('endGameInvit', function(params: { id: number }) {
         showGameModal.value = false;
-        alert('You missed a game invitation from '+ getUserName(params.id));
+        alert('You missed or refused a game invitation from '+ getUserName(params.id));
       })
 
       connection.value!.on('userAbsent', function() {
@@ -952,7 +952,8 @@ export default defineComponent({
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
-          }})
+          }});
+        game.value!.socket.emit('fromChat');
       }
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
       let count = 0;
