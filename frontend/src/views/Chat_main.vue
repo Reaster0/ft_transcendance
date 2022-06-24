@@ -6,20 +6,22 @@
         <v-col cols="auto" sm="3" class="border" style="height: calc(100vh - 52px);">
           <v-col>
             <div id="joinableChannels" class="searchtool-one">
-              <h1 class="Spotnik"> Search channel </h1>
+              <!--<h1 class="Spotnik"> Search channel </h1>-->
               <v-selection @open="getJoinableChannels"
                 @option:selected="initDisplayChannel"
                 label="name"
+                placeholder="search channel"
                 :options="joinableChannels"
                 :value="{channel: chanJoinSelected, isMember: false}">
               </v-selection>
             </div>
             
             <div id="joinableUsers" class="searchtool-two">
-              <h4 class="Spotnik"> Search connected user </h4>
+              <!--<h4 class="Spotnik"> Search connected user </h4>-->
               <v-selection @open="getConnectedUsers"
                 @option:selected="initDisplayChannel"
                 label="name"
+                placeholder="search connected user"
                 :options="joinableChannels">
               </v-selection>
             </div>
@@ -51,7 +53,7 @@
                         </v-img>
                         <v-avatar v-else color="blue" min-width="50px"
                           min-height="50px">
-                          <v-icon color="white">mdi-duck</v-icon>
+                          <v-icon color="white">mdi-cat</v-icon>
                         </v-avatar>
                       </v-list-item-avatar>
                   </v-btn>
@@ -67,7 +69,7 @@
                       <v-list-item-avatar v-else>
                         <v-avatar color="blue" min-width="50px"
                           min-height="50px">
-                          <v-icon color="white">mdi-duck</v-icon>
+                          <v-icon color="white">mdi-cat</v-icon>
                         </v-avatar>
                       </v-list-item-avatar>
                     </v-badge>
@@ -87,9 +89,9 @@
         <v-col cols="auto" sm="9" class="border"
           v-if="currentChannel.id === ''">
           <v-app v-if="currentChannel.id === ''">
-              <h1 class="Spotnik textfullcenter" data-text="Select">
+              <p class="textfullcenter font-weight-light" data-text="Select">
                 Select channel to display
-              </h1>
+              </p>
           </v-app>
         </v-col>
 
@@ -148,9 +150,9 @@
 
             <!-- NO MESSAGE YET -->
             <div v-if="currentChannel.messages.length === 0">
-              <h1 class="Spotnik textfullcenter" data-text="Start conversation">
+              <p class="textfullcenter font-weight-light" data-text="Start conversation">
                 Start conversation
-              </h1>  
+              </p>  
             </div>
 
             <!-- SEND MESSAGE -->
@@ -165,21 +167,21 @@
           <!-- LOADING / NON SELECTED MESSAGES -->
           <v-app v-else-if="currentChannel.id != ''
             && currentChannel.role === Roles.NONMEMBER">
-            <h1 class="Spotnik textfullcenter" data-text="Non member">
+            <p class="textfullcenter font-weight-light" data-text="Non member">
               You are not a room member
-            </h1>
+            </p>
           </v-app>
 
           <v-app v-else-if="currentChannel.blocked === true">
-            <h1 class="Spotnik textfullcenter" data-text="Blocked user">
+            <p class="textfullcenter font-weight-light" data-text="Blocked user">
               You blocked this user
-            </h1>
+            </p>
           </v-app>  
 
           <v-app v-else-if="currentChannel.id != ''">
-            <h1 class="Spotnik textfullcenter" data-text="Loading messages">
+            <p class="textfullcenter font-weight-light" data-text="Loading messages">
               Loading messages
-            </h1>
+            </p>
           </v-app>
 
 
@@ -197,7 +199,7 @@
                 <v-avatar class="s" elevation="10" size="60px" color="blue">
                   <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
                     width="70" height="70">
-                  <v-icon v-else color="white">mdi-duck</v-icon>
+                  <v-icon v-else color="white">mdi-cat</v-icon>
                 </v-avatar>
               </v-badge>
             </div>
@@ -205,7 +207,7 @@
               <v-avatar class="s" elevation="10" size="60px" color="blue">
                 <img v-if="currentChannel.avatar" :src="currentChannel.avatar"
                   width="70" height="70">
-                <v-icon v-else color="white">mdi-duck</v-icon>
+                <v-icon v-else color="white">mdi-cat</v-icon>
               </v-avatar>
             </div>
             <v-card-title class="layout justify-center">
@@ -409,7 +411,9 @@
     </v-container>
 
     <v-container fluid v-else>
-			<h1 class="Spotnik textfullcenter" data-text="Loading">Loading</h1>
+			<p class="textfullcenter font-weight-light" data-text="Loading">
+        Loading
+      </p>
     </v-container>
 
   </v-app>
@@ -1053,6 +1057,7 @@ export default defineComponent({
   left: 50%;
   margin-right: -50%;
   transform: translate(-50%, -50%);  
+  font-size: 1.2em;
 }
 
 .message {
