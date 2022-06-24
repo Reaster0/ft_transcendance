@@ -1,7 +1,7 @@
 import { Inject, forwardRef, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Brackets, Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Channel } from '../entities/channel.entity';
 import { Roles } from '../entities/role.entity';
 import { ChannelI, RolesI } from '../interfaces/back.interface';
@@ -46,24 +46,34 @@ export class ChanServices {
 	}
 
   async privateConversation(user1: User, user2: User) {
-    const channel: ChannelI = {
-      name: user1.id + '/' + user2.id,
-      type: ChannelType.PM,
-      password: '',
-      banned: [],
-      avatar: null,
-      users: [user1, user2]
+    try {
+      let name: string;
+      if (user2.id < user1.id) {
+        name = user2.id + '/' + user1.id;      
+      } else {
+        name = user1.id + '/' + user2.id;
+      }
+      const channel: ChannelI = {
+        name: name,
+        type: ChannelType.PM,
+        password: '',
+        banned: [],
+        avatar: null,
+        users: [user1, user2]
+      }
+      const newChannel = await this.chanRepository.save(channel);
+      let role: RolesI = {userId: user1.id, role: ERoles.USER, muteDate: null, channel: newChannel};
+      await this.roleRepository.save(role);
+      role = {userId: user2.id, role: ERoles.USER, muteDate: null, channel: newChannel};
+      await this.roleRepository.save(role);
+      return newChannel;
+    } catch (e) {
+      return null;
     }
-    const newChannel = await this.chanRepository.save(channel);
-    let role: RolesI = {userId: user1.id, role: ERoles.USER, muteDate: null, channel: newChannel};
-    await this.roleRepository.save(role);
-    role = {userId: user2.id, role: ERoles.USER, muteDate: null, channel: newChannel};
-    await this.roleRepository.save(role);
-    return newChannel;
   }
 
-	async deleteChannel(channel: ChannelI) {
-    const channelFound: Channel = await this.chanRepository.findOne(channel.id);
+	async deleteChannel(userId: number, channelId: string) {
+    const channelFound: Channel = await this.chanRepository.findOne(channelId);
     if (channelFound) {
       try {
         await this.chanRepository.delete(channelFound.id);
@@ -76,8 +86,6 @@ export class ChanServices {
 
   async pushUserToChan(channel: ChannelI, user: User){
     (channel.users).push(user);
-//    await this.chanRepository.update(channel.id, channel);
-//  update dont work
     await this.chanRepository.save(channel);
     const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel}
     await this.roleRepository.save(newUser);
@@ -101,14 +109,11 @@ export class ChanServices {
     } catch (err) {
       console.log(err);
     }
-    console.log('remove user from channel');
     return update;
   }
 
   async updateChannel(channel: ChannelI, info: {type: ChannelType, password: string, avatar: Buffer}): Promise<Boolean> {
 		const { type, password, avatar } = info;
-
-    
     channel.type = type;
     if (type === ChannelType.PROTECTED) {
       if (/^([a-zA-Z0-9]+)$/.test(password) === false)
@@ -140,7 +145,6 @@ export class ChanServices {
     return channel.channelUsers;
   }
 
-
   async getChannelFromId(channelID: string): Promise<Channel> {
     return this.chanRepository.findOne(channelID);
   }
@@ -162,15 +166,15 @@ export class ChanServices {
   }
 
   async filterJoinableChannel(targetId: number): Promise<FrontChannelI[]> {
-    const joinableList = await this.chanRepository.find({ //or findAndCount
-      select: ['id', 'name', 'type', 'banned','avatar'],
+    const joinableList = await this.chanRepository.find({
+      select: ['id', 'name', 'type', 'banned'],
       where: [ {type: ChannelType.PUBLIC}, {type: ChannelType.PROTECTED} ],
       order: {name: "ASC"},
     })
-
     const userChannels = await this.userServices.getUserChannelsId(targetId);
-    if (userChannels == null) {return []};
-
+    if (userChannels == null) {
+      return []
+    };
     let res: FrontChannelI[] = [];
     for (const channel of joinableList) {
       const ban = channel.banned.indexOf(targetId)
@@ -204,10 +208,9 @@ export class ChanServices {
   }
 
   async muteUser(channelId: string, targetId: number, time: number): Promise<Roles> {
-
     const channel = await this.chanRepository.findOne(channelId);
     const chanUser = await this.roleRepository.findOne({ where: { channel, userId: targetId} });
-    const muteDate = new Date(new Date().getTime() + 10 * 60000) // 10 minutes
+    const muteDate = new Date(new Date().getTime() + time * 60000);
     chanUser.muteDate = muteDate;
     return this.roleRepository.save(chanUser);
 }
@@ -223,7 +226,9 @@ export class ChanServices {
 
   async banUser(channelId: string, user: User): Promise<ChannelI> {
     let channel = await this.removeUserFromChan(channelId, user);
-    if (!channel) {return null;} /* User was not in channel */
+    if (!channel) {
+      return null;
+    }
     channel.banned.push(user.id);
     await this.chanRepository.save(channel);
     return channel;
@@ -231,27 +236,53 @@ export class ChanServices {
 
   async unBanUser(channelId: string, userId: number) {
     let channel = await this.chanRepository.findOne(channelId);
-    if (!channel) {return null;}
+    if (!channel) {
+      return null;
+    }
     const index = channel.banned.indexOf(userId);
-    if (index == -1) { return null; }
+    if (index == -1) {
+      return null;
+    }
     channel.banned.splice(index, 1);
     await this.chanRepository.save(channel);
     return channel;
   }
 
-  /*
-    I belive that the request to channelRepository is not necessary, it should be able to retrive the User only whit the channelId
-    remember to test that !
-  */
   async getUserOnChannel(channel: ChannelI, userId: number): Promise<Roles> {
-    return this.roleRepository.findOne({channel, userId});
+    return this.roleRepository.findOne({ channel, userId });
   }
 
   async addAdmin(chanelId: string, userId: number): Promise<Roles> {
     const channel = await this.chanRepository.findOne(chanelId);
     let user = await this.roleRepository.findOne({channel, userId});
-    if (!user) {return null;}
+    if (!user) {
+      return null;
+    }
     user.role = ERoles.ADMIN;
     return await this.roleRepository.save(user);
+  }
+
+  async isOwner(channelId: string, userId: number): Promise<boolean> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {
+      return false;
+    }
+    const chanUser = await this.getUserOnChannel(channel, userId);
+    if (!chanUser) {
+      return false;
+    }
+    return (chanUser.role === ERoles.OWNER);
+  }
+
+  async isAdmin(channelId: string, userId: number): Promise<boolean> {
+    const channel = await this.chanRepository.findOne(channelId);
+    if (!channel) {
+      return false;
+    }
+    const chanUser = await this.getUserOnChannel(channel, userId);
+    if (!chanUser) {
+      return false;
+    }
+    return (chanUser.role === ERoles.OWNER || chanUser.role === ERoles.ADMIN);
   }
 }

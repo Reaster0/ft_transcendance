@@ -91,7 +91,7 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import { defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat, imgToBuffer } from '../helper';
@@ -110,6 +110,7 @@ export default defineComponent ({
     let newType = ref<any>(null);
     let password = ref<string>('');
     let file = ref<any>(null);
+    let forceLeave = false;
 
     onMounted(async() => {
       try {
@@ -130,17 +131,31 @@ export default defineComponent ({
       } catch (error) {
         console.log("the error is:" + error)
       }
+
+      socketVal.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
     })
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
     function changeRoomSettings() {
       const array = ['public', 'private', 'protected'];
-      newType.value = array.indexOf(newType.value);
+      if (newType.value == null)
+        newType.value = channelType;
+      else
+        newType.value = array.indexOf(newType.value);
       if (newType.value === ChannelType.PROTECTED && password.value === '') {
         alert('Password can\'t be empty.');
         return ;

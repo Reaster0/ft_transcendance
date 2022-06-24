@@ -1,16 +1,22 @@
 import { Store } from 'vuex';
 
-function leaveChat(socket: any, to: any, next: any, store: Store<any>) {
-	if (to.name === 'Chat' || to.name === 'NewRoom' || to.name === 'PublicRoom'
-		|| to.name === 'PrivateRoom' || to.name === 'ProtectedRoom'
-		|| to.name === 'ChangeRoom' || to.name === 'ManageUsers') {
+function leaveChat(forceLeave: boolean, socket: any, to: any, next: any, store: Store<any>) {
+	if (forceLeave === false && (to.name === 'Chat' || to.name === 'NewRoom'
+		|| to.name === 'PublicRoom' || to.name === 'PrivateRoom'
+		|| to.name === 'ProtectedRoom' || to.name === 'ChangeRoom'
+		|| to.name === 'ManageUsers')) {
 			next(true);
 			return;
 	}
-	const answer = window.confirm("Are you sure you want to leave the chat ?")
-	if (answer) {
-			console.log('disconnection from chat');
-		socket.disconnect();
+	let answer = false;
+	if (forceLeave === false) {
+		answer = window.confirm("Are you sure you want to leave the chat ?");
+	}
+	if (answer === true || forceLeave === true) {
+		console.log('disconnection from chat');
+		if (forceLeave === false) {
+			socket.disconnect();
+		}
 		store.commit('setSocketVal' , null);
 		store.commit('setUserToManage' , null);
 		store.commit('setCurrentChannelId' , null);

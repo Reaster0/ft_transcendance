@@ -1,4 +1,4 @@
-For the database, you need to set :
+# For the database, you need to set :
 
 DATABASE_USER: Name of DB user
 DATABASE_PASSWORD: A password for DB user
@@ -7,26 +7,31 @@ DATABASE_PORT: DB port (5432 for example)
 DATABASE_HOST: Your DB host (localhost by default)
 
 
-For 42 passport and authentification system :
+# For 42 passport and authentification system :
 
 CLIENT_ID: Given by 42 through their API generation
-CLIENT_SECRE: Same
+CLIENT_SECRET: Same
 CALLBACK_URL: The url for authentication callback
 JWT_SECRET: A secret sentence for generating tokens
 JWT_EXPIRATION_TIME: Tokens expiration time in seconds
 
 
-For 2FA secret encryption :
+# For 2FA secret encryption :
 
 ENCRYPTION_KEY: A sentence of size 32 char (256 bit) used for encryption
 ENCRYPTION_IV_LENGTH: Length for encryption intialization vector (16 by default) 
 ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
  
-For avatar :
+# For avatar :
+
 DEFAULT_AVATAR: Avatar set by default, please be careful to add a supplementary
 '../' before your path as it'll be called from inside backend folder.
 
+# For the Frontend :
 
-For the Frontend :
-.env file inside the frontend dir :
-VUE_APP_BACKEND: ip:port of the backend
+VUE_APP_BACKEND: 'http://IP:PORT' of backend
+FRONTEND: 'http://IP:PORT' of frontend
+
+# Others :
+APPNAME: Choosen name for app
+URLGENSECRET: A random sentence of 16-32 chars

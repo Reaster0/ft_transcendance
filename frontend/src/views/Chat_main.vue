@@ -364,18 +364,24 @@
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
+                  <v-btn @click="TODO" elevation="2" class="my-1" width="80%">
+                    Go to user page
+                  </v-btn>
                 </div>
                 <div v-else>
                   <v-btn @click="blockUserControl(false)" elevation="2"
-                    class="my-2" width="80%" color="success">
+                    class="my-1" width="80%" color="success">
                     Unblock this user
                   </v-btn>
+                </div>
+                <div>
+                  <v-btn class="my-1" width="80%" to="/">Return to home</v-btn>
                 </div>
                 <div v-if="currentChannel.role != Roles.NONMEMBER
                   && !currentChannel.blocked
                   && !game.request" class="text-center">
                   <v-btn color="rgb(0,0,255)" @click="waitingGame()"
-                  class="my-2" elevation="2" width="80%">
+                  class="my-1" elevation="2" width="80%">
                     <div  :style="{color: ' #ffffff'}">
                       Invite to play together
                     </div>
@@ -411,7 +417,7 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import io from 'socket.io-client';
 import { useStore, Store } from "vuex";
 import { ref, defineComponent } from 'vue'
@@ -460,11 +466,13 @@ export default defineComponent({
       inviter: '' as string });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
     let confirm =  0 as number;
+    let forceLeave = false as boolean;
 
 		onBeforeRouteLeave(function(to: any, from: any, next: any) {
+      connection.value!.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
 		onMounted(async() => {
@@ -489,10 +497,15 @@ export default defineComponent({
 				console.log("the error is:" + error)
 			}
 
+      connection.value!.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
+
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
-        console.log('receive new users list');
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
@@ -503,7 +516,6 @@ export default defineComponent({
       })
 
       connection.value!.on('channelList', async function(params: Channel[]) {
-        console.log('list of joined channels received');
         userChannels.value.channels = params;
         await avatarToUrl();
         for (let channel of userChannels.value.channels) {
@@ -531,7 +543,6 @@ export default defineComponent({
             + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
-        console.log('receive users from channel ' + currentChannel.value.name);
         currentChannel.value.users = params.users;
         await setChannelManager();
         update.value.users = true;
@@ -544,7 +555,6 @@ export default defineComponent({
             + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
-        console.log('receive messages from channel ' + currentChannel.value.name);
         currentChannel.value.messages = params.messages;
         update.value.messages = true;
       })
@@ -555,7 +565,6 @@ export default defineComponent({
           console.log('receive messageText from non current');
           return ;
         }
-        console.log('incoming message');
         currentChannel.value.messages.push(params.message);
         if (params.message.userId != currentUser.id
           && update.value.messages === true
@@ -568,7 +577,6 @@ export default defineComponent({
       /* Search function responses */
 
       connection.value!.on('connectedUsers', async function(params: any ) {
-        console.log('receive connectedUsers');
         joinableChannels.value = [];
         for (let user of params) {
           let avatar = await getUserAvatar(user.id);
@@ -596,8 +604,8 @@ export default defineComponent({
         }
       })
 
-      connection.value!.on('youAreBanned', function(){
-        alert('You are banned from ' + currentChannel.value.name + ' !');
+      connection.value!.on('alreadyInPm', function(params: { name: string }){
+        alert('You already have an ongoing conversation with ' + params.name + '.');
       })
 
       connection.value!.on('wrongPassword', function(){
@@ -613,34 +621,65 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
+      /* Status management function & warning */
+
+      connection.value!.on('youAreBanned', function(){
+        alert('You are banned from ' + currentChannel.value.name + ' !');
+      })
+
+      connection.value!.on('newlyBanned', function(params: { id: string, name: string }){
+        connection.value!.emit('emitMyChannels');
+        if (currentChannel.value.id === params.id) {
+          initDisplayChannel(currentChannel.value, false);
+        }
+        alert('You are banned from ' + params.name + ' !');
+      })
+
+      connection.value!.on('muted', function(params: { channelId: string, time: number }) {
+        if (params.channelId === currentChannel.value.id) {
+          alert('You have been muted from ' + currentChannel.value.name
+            + ' for ' + params.time + ' minutes.');
+        }
+      })
+
+      connection.value!.on('youAreMuted', function(params: { channelId: string, limitdate: string }) {
+        if (params.channelId === currentChannel.value.id) {
+          alert('You are muted from ' + currentChannel.value.name
+            + ' until ' + params.limitdate + '.');
+        }
+      })
+
+      connection.value!.on('newlyAdmin', function(params: { channelId: string }){
+        if (params.channelId === currentChannel.value.id) {
+          alert('You are now an admin of ' + currentChannel.value.name + '.');
+        }        
+      })
+
       /* Modification of channels */
 
       connection.value!.on('userChannelModif', function (params: {id: string }){
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        console.log('modification in user list of channel ' + currentChannel.value.name);
         connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
       })
 
       connection.value!.on('channelEdited', function (params: {id: string }){
-        if (currentChannel.value.id != params.id) {
-          connection.value!.emit('emitMyChannels');
-          return ;
-        }
-        console.log('modification in current channel ' + currentChannel.value.name);
+        void params.id;
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('channelDestruction', function (params: {id: string }){
+      connection.value!.on('channelDestruction', function (params: {id: string }){          
+        connection.value!.emit('emitMyChannels');
         if (currentChannel.value.id != params.id) {
-          connection.value!.emit('emitMyChannels');
           return ;
         }
-        console.log('destruction of channel ' + currentChannel.value.name);
         alert('Channel ' + currentChannel.value.name
           + ' is being erased by it\'s owner!');
-        router.push('/thechat');
+        currentChannel.value.id = '';
+        currentChannel.value.name = '';
+        update.value.messages = false;
+        update.value.users = false;
       })
 
       /* Private conversation responses */
@@ -659,7 +698,30 @@ export default defineComponent({
         game.value.inviter = getUserName(params.id);
         showGameModal.value = true;
       })
+
 		})
+
+    onUnmounted(async() => {
+      connection.value!.removeAllListeners('wrongPassword');
+      connection.value!.removeAllListeners('alreadyInPm');
+      connection.value!.removeAllListeners('youAreBanned');
+      connection.value!.removeAllListeners('userChannelModif');
+      connection.value!.removeAllListeners('usersList');
+      connection.value!.removeAllListeners('channelEdited');
+      connection.value!.removeAllListeners('leftChannel');
+      connection.value!.removeAllListeners('disconnect');
+      connection.value!.removeAllListeners('channelDestruction');
+      connection.value!.removeAllListeners('channelList');
+      connection.value!.removeAllListeners('channelUsers');
+      connection.value!.removeAllListeners('channelMessages');
+      connection.value!.removeAllListeners('newMessage');
+      connection.value!.removeAllListeners('connectedUsers');
+      connection.value!.removeAllListeners('joinableChannels');
+      connection.value!.removeAllListeners('joinAccepted');
+      connection.value!.removeAllListeners('blockChange');
+      connection.value!.removeAllListeners('gameInvitation');
+      connection.value!.removeAllListeners('newlyBanned');
+    })
 
     /* Functions for channel display and management */
 

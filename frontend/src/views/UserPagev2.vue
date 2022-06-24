@@ -124,7 +124,8 @@ export default defineComponent ({
 			router.push('/redirect?' + new URLSearchParams({url: ("/user/" + username)}))
 		}
 
-		async function addMyFriend(nickname: string) {
+		async function addMyFriend(nickname: string | null) {
+			if (nickname == null) {return;}
 			await addFriend(nickname)
 			isFriend.value = true
 		}

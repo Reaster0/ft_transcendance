@@ -61,12 +61,13 @@
 
 
 <script lang="ts">
-import { onMounted } from "@vue/runtime-core"
+import { onMounted, onUnmounted } from "@vue/runtime-core"
 import { useStore, Store } from "vuex";
 import { reactive, defineComponent, ref } from "vue";
 import { onBeforeRouteLeave } from 'vue-router';
 import { leaveChat, verifyChannelName, imgToBuffer } from '../helper';
 import io from 'socket.io-client';
+import router from "../router/index";
 import { ChannelType } from '../types/chat.types';
 
 export default defineComponent ({
@@ -78,11 +79,13 @@ export default defineComponent ({
     let password = ref<string>('');
     let file = ref<any>(null);
     let created = ref<boolean>(false);
+    let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
     onMounted(() => {
@@ -101,6 +104,12 @@ export default defineComponent ({
         console.log("the error is:" + error)
       }
 
+      socketVal.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
+
       socketVal.on("channelCreated", function(channel: string) {
         if (channel === name.value) {
           created.value = true;
@@ -110,6 +119,12 @@ export default defineComponent ({
       socketVal.on("errorChannelCreation", function(reason: string) {
         alert("Channel creation failed: " + reason);
       })
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
+      socketVal.removeAllListeners('channelCreated');
+      socketVal.removeAllListeners('errorChannelCreation');
     })
 
     async function previewFiles(event: any) {

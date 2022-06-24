@@ -1,6 +1,9 @@
 <template>
 	<v-row justify="center">
-		<h1 class="field_slick big_button">Error 404 page not found</h1>
+    <div class="field_slick big_button">
+      <h1>Error 403 forbidden resource</h1>
+      <p>If you used a link, it may be too old or invalid</p>
+    </div>
 	</v-row>
 </template>
 

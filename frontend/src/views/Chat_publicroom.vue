@@ -2,7 +2,7 @@
   <v-app >
     <v-container fluid>
       <div v-if="!created">
-        <v-form @submit.prevent="submitIt(name, file)">
+        <v-form @submit.prevent="submitIt(name)">
 
           <v-toolbar dark color="rgb(0,0,255)">
             <v-btn to="/newroom" icon dark>
@@ -57,11 +57,12 @@
 
 <script lang="ts">
 
-import { onMounted } from "@vue/runtime-core";
+import { onMounted, onUnmounted } from "@vue/runtime-core";
 import { defineComponent, reactive, ref } from "vue";
 import { useStore, Store } from "vuex";
 import { onBeforeRouteLeave } from "vue-router";
 import { ChannelType } from '../types/chat.types';
+import router from "../router/index";
 import { leaveChat, verifyChannelName, imgToBuffer } from '../helper';
 import io from 'socket.io-client';
 
@@ -73,16 +74,20 @@ export default defineComponent({
     let name = ref<string>('');
     let file = ref<any>(null);
     let created = ref<boolean>(false);
+    let forceLeave = false;
 
     onBeforeRouteLeave( function(to: any, from: any, next: any) {
+      socketVal.removeAllListeners('disconnect');
       void from;
       const socket = store.getters.getSocketVal;
-      leaveChat(socket, to, next, store);
+      leaveChat(forceLeave, socket, to, next, store);
     })
 
     onMounted(() => {
       try {
+        console.log(socketVal);
         if (!socketVal) {
+          console.log('new connection !');
           const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
@@ -96,6 +101,12 @@ export default defineComponent({
         console.log("the error is:" + error)
       }
 
+      socketVal.on('disconnect', function() {
+        forceLeave = true;
+        alert('Something went wrong. You\'ve been disconnected from chat.');
+        router.push('/');
+      })
+
       socketVal.on("channelCreated", function(channel: string) {
         if (channel === name.value) {
           created.value = true;
@@ -105,6 +116,12 @@ export default defineComponent({
       socketVal.on("errorChannelCreation", function(reason: string) {
         alert("Channel creation failed: " + reason);
       })
+    })
+
+    onUnmounted(async() => {
+      socketVal.removeAllListeners('disconnect');
+      socketVal.removeAllListeners('channelCreated');
+      socketVal.removeAllListeners('errorChannelCreation');
     })
 
     async function previewFiles(event: any) {
