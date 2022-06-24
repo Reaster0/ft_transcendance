@@ -245,6 +245,29 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  @SubscribeMessage('getMatchByUser')
+  async handleGetMatchByUser(client: Socket, data: { playerName: string }) {
+    try {
+      if (!client.data.user) {
+        return client.disconnect();
+      }
+      if (
+        this.gamesService.isWaiting(client, queue) === true ||
+        this.gamesService.isPlaying(client, matchs) === true
+      ) {
+        return;
+      }
+      const matchId = this.gamesService.findMatchIdByPlayer(client, matchs, data.playerName);
+      if (matchId === null) { 
+        client.emit('notAvailable', { player: data.playerName });
+        return ;
+      }
+      client.emit('matchId', { matchId: matchId });
+    } catch {
+      return client.disconnect();
+    }    
+  }
+
   @SubscribeMessage('followGame')
   handleFollowGame(client: Socket, matchId: string) {
     try {
