@@ -1,5 +1,18 @@
 <template>
 	<v-container>
+    <v-row>
+        <v-col cols="auto" sm="3" class="border">
+        <div id='test' class="searchtool-one">
+          <v-selection @open="getUsersList"
+                @option:selected="goToUserPage"
+                class="style-chooser"
+                label="nickname"
+                placeholder=" Users "
+                :options="usersList"
+          ></v-selection>
+        </div>
+      </v-col>
+    </v-row>
 		<particles-bg type="cobweb" :bg="true" />
 		<v-img :aspect-ratio="16/9" height="500" src="../assets/42_Logo.svg"/>
 		<v-row>
@@ -15,20 +28,7 @@
 			</v-col>
 		</v-row>
 
-     <div class="position-relative position-relative-example">
-    <div class="position-absolute bottom-0 start-0">
-      <h1 class="text">coucou</h1>
-    </div>
-    <div class="position-absolute top-0 start-0">
-       <h1 class="text">coucou</h1>
-    </div>
-    <div class="position-absolute top-50 start-50">
-      <h1 class="text">coucou</h1>
-    </div>
-    </div>
-    <div id="app" class="pt-6 overflow-y-auto" style="max-height: calc(100vh - 80%);">
-    <h1 class="text">text</h1>
-    </div>
+
 	</v-container>
 </template>
 
@@ -37,14 +37,20 @@ import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/pa
 import { useStore } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { isLogged } from "../components/FetchFunctions"
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import router from "../router/index"
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+import { getUsers } from "../components/FetchFunctions"
 
 export default defineComponent ({
 	components: {
-		ParticlesBg
+		ParticlesBg,
+    'v-selection': vSelect,
 	},
 	setup(){
+    let usersList = ref<any[]>([]);
+    const currentUser = useStore().getters.whoAmI as any;
 		onMounted(async() => {
 		useStore().commit('setConnected' , await isLogged())
 		})
@@ -53,7 +59,18 @@ export default defineComponent ({
 			router.push("/game?watch=true")
 		}
 
-		return { goToWatch }
+    async function getUsersList(){
+      usersList.value = await getUsers();
+    }
+
+    function goToUserPage(user: {id: number, nickname: string}) {
+      if (user.id == currentUser.id)
+        router.push("/user")
+      else
+        router.push("/user/" + user.nickname);
+    }
+
+		return { goToWatch, usersList, getUsersList, goToUserPage };
 	}
 })
 </script>
@@ -129,4 +146,43 @@ text-shadow: 0.04em 0.04em #fc0049,
   animation:noise-anim-2 3s infinite linear alternate-reverse;
 }
 
+</style>
+
+<style type="css">
+.searchtool-one {
+  padding-bottom: 2%;
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  left:10px;
+  top:10px;
+}
+</style>
+
+<style>
+.style-chooser .vs__search::placeholder,
+.style-chooser .vs__dropdown-toggle,
+.style-chooser .vs__dropdown-menu {
+  border: 3px double #EA25B5;
+  color: #f6edf5;
+  text-transform: full-size-kana;
+  font-variant: small-caps;
+
+  --vs-dropdown-color: #27a455 ;
+  --vs-dropdown-option-color: #cc99cd;
+  --vs-dropdown-bg: none;
+
+   --vs-selected-bg: #04BBEC;
+  --vs-selected-color: #FF82F4;
+
+  --vs-search-input-color: #FF82F4;
+
+  --vs-dropdown-option--active-bg: #0D3F7C;
+  --vs-dropdown-option--active-color: #eeeeee;
+}
+
+.style-chooser .vs__clear,
+.style-chooser .vs__open-indicator {
+  fill: #394066;
+}
 </style>

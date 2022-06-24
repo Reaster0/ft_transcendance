@@ -8,6 +8,7 @@
             <div id="joinableChannels" class="searchtool-one">
               <v-selection @open="getJoinableChannels"
                 @option:selected="initDisplayChannel"
+                placeholder="Search channels"
                 label="name"
                 placeholder="search channel"
                 :options="joinableChannels"
@@ -18,6 +19,7 @@
             <div id="joinableUsers" class="searchtool-two">
               <v-selection @open="getConnectedUsers"
                 @option:selected="initDisplayChannel"
+                placeholder="Search connected users"
                 label="name"
                 placeholder="search connected user"
                 :options="joinableChannels">
@@ -364,7 +366,7 @@
                     class="my-2" width="80%" color="warning">
                     Block this user
                   </v-btn>
-                  <v-btn @click="TODO" elevation="2" class="my-1" width="80%">
+                  <v-btn @click="goToUserPage(currentChannel.name)" elevation="2" class="my-1" width="80%">
                     Go to user page
                   </v-btn>
                 </div>
@@ -982,6 +984,10 @@ export default defineComponent({
       router.push('/roomsettings');
     }
 
+    function goToUserPage( nickname: string ) {
+        router.push("/user/" + nickname);
+    }
+
 		return { update, messageText, userChannels, displayMemberChannel,
       currentChannel, currentUser, getUserName, getUserAvatar, getUserStatus,
       getUserColor, sendingMessage, searchRequest, joinableChannels,
@@ -990,7 +996,7 @@ export default defineComponent({
       game, blockUserControl, leaveChannel, initDisplayChannel,
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
-      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation }
+      genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation, goToUserPage }
 	},
 })
 </script>

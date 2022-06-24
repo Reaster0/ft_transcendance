@@ -335,4 +335,9 @@ export class UsersService {
     }
     return result;
   }
+
+  async findAll(): Promise<User[]> {
+    const users = await this.userRepository.find({select: ['id', 'nickname']});
+    return users;
+  }
 }

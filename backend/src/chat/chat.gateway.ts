@@ -93,6 +93,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         return ;
       }
     }
+    // how this is supposed to happen ? : with the link for private channels....
     const index = channelFound.banned.indexOf(client.data.user.id);
     if (index !== -1) {
       client.emit('youAreBanned');
