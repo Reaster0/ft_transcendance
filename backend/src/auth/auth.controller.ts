@@ -89,8 +89,8 @@ export class AuthController {
     this.logger.log('disable2FA');
     const payload : JwtPayload = {username: req.user['username'], twoFA: false};
     const jwtToken: string = this.jwtService.sign(payload);
-    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' });
     this.authService.disableTwoFA(req.user);
+    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' });
     return true;
   }
   
