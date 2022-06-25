@@ -41,10 +41,10 @@
 	<!-- game watching -->
 	<div v-if="!gameStarted && route.query.watch">
 		<v-row justify="center">
-			<div class="button_slick big_button Spotnik" v-if="!matchesList && !route.query.matchid">There Is Not A Single Matches Right Now</div>
+			<div class="button_slick big_button Spotnik" v-if="!matchesList && !route.query.matchid && !route.query.user">There Is Not A Single Matches Right Now</div>
 			<div class="button_slick big_button Spotnik" v-if="route.query.matchid && match404">This Match Dosent Exist</div>
 		</v-row>
-		<v-row v-if="!route.query.matchid">
+		<v-row v-if="!route.query.matchid && route.query.user">
 			<v-col v-for="(matches) in matchesList" :key="matches">
 				<div class="button_slide overlay custom_offset" @click="goToFollowGame(matches.matchId)">
 					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
@@ -259,7 +259,20 @@ export default defineComponent ({
 				router.push('/');
 			})
 
+			gameSocket.value!.on('matchId', (matchId: number) => {
+				console.log("matchid")
+				router.push('/game?watch=true&matchid=' + matchId);
+			})
+
+			gameSocket.value!.on('notAvailable', () => {
+				console.log("notavailable fatal error")
+				match404.value = true
+			})
+
 			window.addEventListener('resize', resizeCanvas);
+
+			if (route.query.user)
+				gameSocket.value!.emit('getMatchByUser', route.query.user)
 
 			if (route.query.watch)
 				setTimeout(function () {WatchGame()}, 600)
