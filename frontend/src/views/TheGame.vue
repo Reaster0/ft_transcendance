@@ -122,14 +122,21 @@ export default defineComponent ({
 					}});
 					console.log("starting connection to game websocket");
 				} else {
-					const opponentId = store.getters.getOpponentSocketId;
-					if (opponentId !== null) {
-						console.log('GO INVIT');
-						gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
+					const matchIdToWatch = store.getters.getWatchGame;
+					if (matchIdToWatch === null) {
+						const opponentId = store.getters.getOpponentSocketId;
+						if (opponentId !== null) {
+							console.log('GO INVIT');
+							gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
+						}
+						searchingGame.value = true;
+					} else {
+						// TODO put logic to access watch game views
+						// TODO gameSocket.value.emit('followGame', matchIdToWatch)
 					}
-					searchingGame.value = true;
 					store.commit('setGameSocket', null);
 					store.commit('setOpponentSocketId', null);
+					store.commit('setMatchId', null); // Set to null to avoid later problem
 				}
 			} catch (error) {
 				console.log("the error is:" + error);

@@ -18,6 +18,7 @@ const store = createStore({
 		chatSocket: null as any,
 		gameSocket: null as any,
 		opponentSocketId: null as any,
+		watchGame: null as any,
 		userToManage: null as any,
 		currentChannelId: null as any,
 		currentChannelType: null as any,
@@ -47,6 +48,9 @@ const store = createStore({
 		},
 		getOpponentSocketId:(state) => {
 			return state.opponentSocketId;
+		},
+		getWatchGame:(state) => {
+			return state.watchGame;
 		},
 		getUserToManage:(state) => {
 			return state.userToManage;
@@ -84,6 +88,9 @@ const store = createStore({
 		},
 		setOpponentSocketId(state, val) {
 			state.opponentSocketId = val;
+		},
+		setWatchGame(state, val) {
+			state.watchGame = val;
 		},
 		setUserToManage(state, val) {
 			state.userToManage = val;
