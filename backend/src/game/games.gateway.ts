@@ -251,6 +251,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       if (!client.data.user) {
         return client.disconnect();
       }
+      console.log('data: ' + data.playerName);
       if (
         this.gamesService.isWaiting(client, queue) === true ||
         this.gamesService.isPlaying(client, matchs) === true
