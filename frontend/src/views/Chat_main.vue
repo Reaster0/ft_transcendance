@@ -548,12 +548,10 @@ export default defineComponent({
               channel.name = getUserName(usersId[1]);
               channel.avatar = getUserAvatar(usersId[1]);
               game.value.ingame = getUserStatus(usersId[1]) === Status.PLAYING ? true : false;
-              console.log(game.value.ingame);
             } else {
               channel.name = getUserName(usersId[0]);
               channel.avatar = getUserAvatar(usersId[0]);
               game.value.ingame = getUserStatus(usersId[0]) === Status.PLAYING ? true : false;
-              console.log(game.value.ingame);
             }
           }
           if (currentChannel.value.id === channel.id) {
@@ -616,7 +614,6 @@ export default defineComponent({
           joinableChannels.value.push({ id: user.id, name: user.nickname, 
             type: ChannelType.PM, avatar: avatar });
         }
-        console.log(joinableChannels.value);
       })
 
       connection.value!.on('joinableChannels', function(params: Channel[]) {
@@ -819,6 +816,9 @@ export default defineComponent({
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.type = channel.type;
+      currentChannel.value.blocked = channel.blocked;
+      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
+      currentChannel.value.description = channelTypes[channel.type];
     }
 
     function displayMemberChannel() {
