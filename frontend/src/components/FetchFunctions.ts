@@ -109,6 +109,7 @@ export async function getFriendsList() {
 }
 
 export async function addFriend(nickName: string) {
+	console.log(nickName);
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/addFriend", {
 		credentials: "include",
 		method: "PATCH",
@@ -158,4 +159,11 @@ export async function genJoinLink(channelId: string) {
 export async function getUsers() {
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/getUsers", { method: "GET", credentials: "include"})
 	.then(res => res.json())
+}
+
+export async function disableTwoFA() {
+	return await fetch(process.env.VUE_APP_BACKEND + "/auth/disableTwoFA", {
+		credentials: "include",
+		method: "PATCH"
+	})
 }

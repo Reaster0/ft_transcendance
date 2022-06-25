@@ -55,7 +55,7 @@ export class AuthService {
   }
 
   async disableTwoFA(user: User): Promise<void> {
-    if (user.is2FAEnabled) return;
+    if (!user.is2FAEnabled) return;
     this.userService.disableTwoFA(user.id);
   }
 
