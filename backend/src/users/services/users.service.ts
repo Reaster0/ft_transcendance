@@ -313,7 +313,7 @@ export class UsersService {
 
     const friend = user.friends.find(element => element === friendId);
 
-    return (friend !== undefined);
+    return (typeof(friend) !== undefined);
   }
 
   async getUserChannels(userId: number): Promise<Channel[]> {
