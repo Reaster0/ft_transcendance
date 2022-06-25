@@ -272,7 +272,7 @@ export default defineComponent ({
 			window.addEventListener('resize', resizeCanvas);
 
 			if (route.query.user)
-				gameSocket.value!.emit('getMatchByUser', route.query.user)
+				gameSocket.value!.emit('getMatchByUser', {playerName: route.query.user})
 
 			if (route.query.watch)
 				setTimeout(function () {WatchGame()}, 600)
