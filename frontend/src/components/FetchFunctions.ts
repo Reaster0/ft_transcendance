@@ -159,3 +159,10 @@ export async function getUsers() {
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/getUsers", { method: "GET", credentials: "include"})
 	.then(res => res.json())
 }
+
+export async function disableTwoFA() {
+	return await fetch(process.env.VUE_APP_BACKEND + "/auth/disableTwoFA", {
+		credentials: "include",
+		method: "PATCH"
+	})
+}

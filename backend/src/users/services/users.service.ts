@@ -217,7 +217,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('No user found');
     }
-    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id };
+    return { nickname: user.nickname, eloScore: user.eloScore, id: user.id, status: user.status };
   }
 
   async getConnectedUsers(): Promise<User[]> {
