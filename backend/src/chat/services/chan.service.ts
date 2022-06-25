@@ -83,9 +83,19 @@ export class ChanServices {
       }
     }
   }
+  async saveNewDate(channel: Channel, date: Date) {
+    channel.date = date;
+    try {
+    this.chanRepository.save(channel);
+    } catch(e) {
+        throw new InternalServerErrorException('failed to save channel');
+    }
+  }
 
   async pushUserToChan(channel: ChannelI, user: User){
     (channel.users).push(user);
+    channel.date = new Date;
+
     await this.chanRepository.save(channel);
     const newUser: RolesI = {userId: user.id, role: ERoles.USER, muteDate: null, channel}
     await this.roleRepository.save(newUser);

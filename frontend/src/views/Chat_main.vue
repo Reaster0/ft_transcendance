@@ -133,6 +133,9 @@
                   != currentUser.id">   
                   <v-list-item class="other-message-container">
                     <v-list-item-header>
+                      <v-list-item-subtitle>
+                        {{ getUserName(msg.userId) }}
+                      </v-list-item-subtitle>
                       <v-list-item-title class="mb-2 message text-wrap">
                         {{ msg.content }}
                       </v-list-item-title>
@@ -378,8 +381,18 @@
                 </div>
                 <div v-if="currentChannel.role != Roles.NONMEMBER
                   && !currentChannel.blocked
+                  && game.ingame" class="text-center">
+                  <v-btn @click="watchUserGame"
+                  class="my-1" elevation="2" width="80%" color="primary">
+                    <div>
+                      Watch game
+                    </div>
+                  </v-btn>
+                </div>
+                <div v-else-if="currentChannel.role != Roles.NONMEMBER
+                  && !currentChannel.blocked
                   && !game.request" class="text-center">
-                  <v-btn color="rgb(0,0,255)" @click="waitingGame()"
+                  <v-btn color="rgb(0,0,255)" @click="waitingGame"
                   class="my-1" elevation="2" width="80%">
                     <div  :style="{color: ' #ffffff'}">
                       Invite to play together
@@ -468,7 +481,7 @@ export default defineComponent({
     let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: null as any, socket: null as any, absent: false as boolean, 
-      togame: false as boolean });
+      togame: false as boolean, ingame: false as boolean });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
     let confirm =  0 as number;
     let forceLeave = false as boolean;
@@ -519,7 +532,7 @@ export default defineComponent({
           user.avatar = await getAvatarID(user.id) as any; 
         }
         usersList.value = params;
-        if (!update.value.connected) {
+        if (!update.value.connected || currentChannel.value.type === ChannelType.PM) {
           connection.value!.emit('emitMyChannels');
         }
       })
@@ -527,16 +540,19 @@ export default defineComponent({
       connection.value!.on('channelList', async function(params: Channel[]) {
         userChannels.value.channels = params;
         await avatarToUrl();
-        console.log('getchannellist');
         for (let channel of userChannels.value.channels) {
           if (channel.type === ChannelType.PM) {
             let usersId = channel.name.split('/').map(Number);
             if (usersId[0] === currentUser.id) {
               channel.name = getUserName(usersId[1]);
               channel.avatar = getUserAvatar(usersId[1]);
+              game.value.ingame = getUserStatus(usersId[1]) === Status.PLAYING ? true : false;
+              console.log(game.value.ingame);
             } else {
               channel.name = getUserName(usersId[0]);
               channel.avatar = getUserAvatar(usersId[0]);
+              game.value.ingame = getUserStatus(usersId[0]) === Status.PLAYING ? true : false;
+              console.log(game.value.ingame);
             }
           }
           if (currentChannel.value.id === channel.id) {
@@ -729,7 +745,6 @@ export default defineComponent({
         game.value.togame = true;
         store.commit('setGameSocket', game.value.socket);
         store.commit('setOpponentSocketId', params.socketId);
-        router.push('/game');
       })
 
 		})
@@ -839,7 +854,7 @@ export default defineComponent({
         }
       }
       console.log('Something went wrong: User id ' + userId +
-        ' not found in channel ' + currentChannel.value.name);
+        ' for name not found in channel ' + currentChannel.value.name);
     }
 
     function getUserAvatar(userId: number) {
@@ -959,13 +974,14 @@ export default defineComponent({
       let count = 0;
       const intervalId = setInterval(() => {
         if (game.value.togame === true) {
+          clearInterval(intervalId);
           goToGame();
         } else if (game.value.absent === true || count === 100) {
           if (count === 100) {
             game.value.response = false;
           }
-          noResponse();
           clearInterval(intervalId);
+          noResponse();
         }
         count++;
       }, 100);
@@ -1004,7 +1020,35 @@ export default defineComponent({
     }
 
     function goToGame() {
+        router.push('/game');
+    }
 
+    /* Watch game system */
+
+    function watchUserGame() {
+      if (game.value.socket === null) {
+        game.value.socket = io('http://:3000/game',
+          { transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie }},
+              withCredentials: true
+          }});
+        game.value!.socket.emit('fromChat');
+      }
+      game.value.socket.on('notAvailable', function(params: { player: string }) {
+        alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
+        game.value.socket.disconnect();
+        game.value.socket.removeAllListeners('notAvailable');
+        game.value.socket.removeAllListeners('matchId');
+      });
+      game.value.socket.on('matchId', function(params: { matchId: string }) {
+        game.value.socket.removeAllListeners('notAvailable');
+        game.value.socket.removeAllListeners('matchId');
+        store.commit('setGameSocket', game.value.socket);
+        store.commit('setWatchGame', params.matchId);
+        forceLeave = true;
+        router.push('/game');
+      })
+      game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
     }
 
     /* Utilities function */
@@ -1085,7 +1129,7 @@ export default defineComponent({
       dropdownShouldOpen, getJoinableChannels, channelManager, showGameModal,
       toggleGameModal, responseGame, getConnectedUsers, chanJoinSelected,
       genJoinUrl, goToManageUser, goToRoomSettings, joinPrivateConversation,
-      goToUserPage }
+      goToUserPage, watchUserGame }
 	},
 })
 </script>
