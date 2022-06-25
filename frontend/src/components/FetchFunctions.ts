@@ -109,6 +109,7 @@ export async function getFriendsList() {
 }
 
 export async function addFriend(nickName: string) {
+	console.log(nickName);
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/addFriend", {
 		credentials: "include",
 		method: "PATCH",

@@ -19,7 +19,7 @@
 							<h1 class="overflow-x-auto">{{user.status}}</h1>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
-							<div v-if="route.params.username && !isFriend" class="button_slick button_slide Spotnik" @click="addMyFriend(nickname)">Add Friend</div>
+							<div v-if="route.params.username && !isFriend" class="button_slick button_slide Spotnik" @click="addMyFriend(user.nickname ,nickname)">Add Friend</div>
 							<div v-if="route.params.username && isFriend" class="button_slick Spotnik">Added as friend</div>
 						</v-col>
 						<v-col v-else align="center">
@@ -130,8 +130,11 @@ export default defineComponent ({
 			router.push('/redirect?' + new URLSearchParams({url: ("/user/" + username)}))
 		}
 
-		async function addMyFriend(nickname: string | null) {
-			if (nickname == null) {return;}
+		async function addMyFriend(myName: string, nickname: string | null) {
+			if (nickname == null
+			|| nickname === ""
+			|| myName === nickname !
+			) { return; }
 			await addFriend(nickname)
 			isFriend.value = true
 		}

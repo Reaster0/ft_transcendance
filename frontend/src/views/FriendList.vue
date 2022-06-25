@@ -3,7 +3,7 @@
 		<v-row justify="end">
 				<v-col class="button_slick search_field" cols="5">
 					<v-text-field :error-messages="errorField" label="Add Friend" v-model="friendName"></v-text-field>
-					<div class="button_slick button_slide Spotnik" @click="addAFriend(friendName)">Add</div>
+					<div class="button_slick button_slide Spotnik" @click="addAFriend(user.nickname, friendName)">Add</div>
 				</v-col>
 		</v-row>
 		<v-row v-if="listFriends && userInfo" justify="center">
@@ -28,13 +28,15 @@ import { onMounted } from "@vue/runtime-core"
 import { getFriendsList, addFriend, getUserInfos, removeFriend, getAvatarID } from "../components/FetchFunctions"
 import { ref, defineComponent } from "vue"
 import router from "../router/index"
+import { useStore } from "vuex"
 
 export default defineComponent ({
 	setup(){
 		const listFriends = ref<null | any>(null);
 		const friendName = ref<string>("");
 		const userInfo = ref<any | null>(null);
-		const errorField = ref("")
+		const errorField = ref("");
+		const user = useStore().getters.whoAmI as any;
 
 		onMounted(async () =>{
 			refreshList()
@@ -57,7 +59,12 @@ export default defineComponent ({
 			}
 		}
 
-		async function addAFriend(nickname: string){
+		async function addAFriend(myName: string, nickname: string){
+			if (nickname == null
+			|| nickname == ""
+			|| myName === nickname !
+			) { return; }
+
 			const ret = await addFriend(nickname)
 			if (ret == 200){
 				refreshList()
@@ -79,7 +86,7 @@ export default defineComponent ({
 			router.push("/user/" + nickname)
 		}
 
-		return {listFriends, friendName, userInfo, addAFriend, removeAFriend, errorField, toUserPage}
+		return {listFriends, friendName, userInfo, addAFriend, removeAFriend, errorField, toUserPage, user}
 	}
 })
 </script>
