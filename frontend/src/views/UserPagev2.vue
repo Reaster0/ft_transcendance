@@ -16,9 +16,10 @@
 							<v-img :src="avatar" max-width="300px"/>
 							<h1 class="overflow-x-auto">{{nickname}}</h1>
 							<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
+							<h1 class="overflow-x-auto">{{user.status}}</h1>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
-							<div v-if="route.params.username && !isFriend" class="button_slick button_slide Spotnik" @click="addMyFriend(nickname)">Add Friend</div>
+							<div v-if="route.params.username && !isFriend" class="button_slick button_slide Spotnik" @click="addMyFriend(user.nickname ,nickname)">Add Friend</div>
 							<div v-if="route.params.username && isFriend" class="button_slick Spotnik">Added as friend</div>
 						</v-col>
 						<v-col v-else align="center">
@@ -30,7 +31,7 @@
 								<h1 v-if="!name_accepted" class="error_msg Spotnik">Choose another nickname</h1>
 							</div>
 							<div v-if="user && !user.is2FAEnabled" class="button_slick button_slide center Spotnik" @click="redirTwoAuth">Enable Two Factor Auth</div>
-							<div v-else class="field_slick center Spotnik">Two Factor Auth Enabled</div>
+							<div v-else class="button_slick button_slide center Spotnik" @click="disable2FA">Disable Two Factor Auth</div>
 							<div class="button_slick button_slide big_button Spotnik" @click="edit = !edit">Go Back</div>
 						</v-col>
 					</div>
@@ -64,7 +65,7 @@ import { useRoute } from "vue-router"
 import { useStore, Store } from "vuex"
 import { onMounted } from "@vue/runtime-core"
 import { ref, watch, defineComponent } from "vue"
-import { getAvatarID, getHistoryID } from "../components/FetchFunctions"
+import { getAvatarID, getHistoryID, disableTwoFA } from "../components/FetchFunctions"
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { updateUser, uploadAvatar, getUserInfos, isMyFriend, addFriend } from "../components/FetchFunctions"
 import router from '../router/index'
@@ -112,6 +113,11 @@ export default defineComponent ({
 			document.getElementById("upload")!.click()
 		}
 
+		async function disable2FA() {
+			await disableTwoFA()
+			user.value.is2FAEnabled = false
+		}
+
 		function redirTwoAuth() {
 			router.push('/2auth')
 		}
@@ -124,8 +130,11 @@ export default defineComponent ({
 			router.push('/redirect?' + new URLSearchParams({url: ("/user/" + username)}))
 		}
 
-		async function addMyFriend(nickname: string | null) {
-			if (nickname == null) {return;}
+		async function addMyFriend(myName: string, nickname: string | null) {
+			if (nickname == null
+			|| nickname === ""
+			|| myName === nickname !
+			) { return; }
 			await addFriend(nickname)
 			isFriend.value = true
 		}
@@ -156,7 +165,8 @@ export default defineComponent ({
 		userSearch,
 		goSearchUser,
 		isFriend,
-		addMyFriend}
+		addMyFriend,
+		disable2FA}
 	}
 })
 </script>

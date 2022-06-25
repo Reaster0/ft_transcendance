@@ -54,6 +54,11 @@ export class AuthService {
     this.userService.enableTwoFA(user.id);
   }
 
+  async disableTwoFA(user: User): Promise<void> {
+    if (!user.is2FAEnabled) return;
+    this.userService.disableTwoFA(user.id);
+  }
+
   async getUserBySocket(client: Socket): Promise<User> {
     const cookie = String(client.handshake.headers.auth);
     if (!cookie) throw new HttpException('cookie absent', 401);

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, UnauthorizedException,
-  UseGuards, Logger, ConsoleLogger } from '@nestjs/common';
+  UseGuards, Logger, ConsoleLogger, Patch } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OauthGard42Guard } from './guards/oauth-gard42.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -79,4 +79,19 @@ export class AuthController {
     this.authService.enableTwoFA(req.user);
     return true;
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('disableTwoFA')
+  async disable2FA(
+    @Req() req: RequestUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<boolean> {
+    this.logger.log('disable2FA');
+    const payload : JwtPayload = {username: req.user['username'], twoFA: false};
+    const jwtToken: string = this.jwtService.sign(payload);
+    this.authService.disableTwoFA(req.user);
+    res.cookie('jwt', jwtToken, { httpOnly: false, sameSite: 'strict' });
+    return true;
+  }
+  
 }
