@@ -14,7 +14,7 @@
 				<v-row justify="center">
 					<div v-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
 					<div v-else-if="!matchId" class="button_slick big_button Spotnik">Searching A Game</div>
-					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found!</div>
+					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found</div>
 				</v-row>
 			</v-container>
 		</div>
@@ -40,10 +40,11 @@
 
 	<!-- game watching -->
 	<div v-if="!gameStarted && route.query.watch">
-		<v-row justify="center" v-if="!matchesList">
-			<div class="button_slick button_slide big_button Spotnik" @click="WatchGame">See Matches List</div>
+		<v-row justify="center">
+			<div class="button_slick big_button Spotnik" v-if="!matchesList && !route.query.matchid">There Is Not A Single Matches Right Now</div>
+			<div class="button_slick big_button Spotnik" v-if="route.query.matchid && match404">This Match Dosent Exist</div>
 		</v-row>
-		<v-row>
+		<v-row v-if="!route.query.matchid">
 			<v-col v-for="(matches) in matchesList" :key="matches">
 				<div class="button_slide overlay custom_offset" @click="goToFollowGame(matches.matchId)">
 					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
@@ -110,6 +111,7 @@ export default defineComponent ({
 		const ballSpeed = ref<string>("NORMAL");
 		const ballSize = ref<string>("NORMAL");
 		const route: any = useRoute()
+		const match404 = ref<boolean>(false);
 
 		onMounted(async() =>{
 			try {
@@ -197,8 +199,10 @@ export default defineComponent ({
 				gameData.value.winner = params.winner;
 				if (params.winner != gameData.value.opponent)
 					winText = "well done neo keep dreaming";
-				else
+				else if (!route.query.watch)
 					winText = "wake up neo stop loosing";
+				else
+					winText = params.winner + " has won";
 			})
 
 			gameSocket.value!.on('requestError', () =>{
@@ -228,19 +232,20 @@ export default defineComponent ({
 
 			gameSocket.value!.on('endList', () =>{
 				console.log("end list")
-
 				if (route.query.matchid)
-					setTimeout(function () {gameSocket.value!.emit('followGame', route.query.matchid)}, 1500)
-					//remove the setTimeout when the request followGame dosen't stop the connection without watchGame prior
+				{
+					gameSocket.value!.emit('followGame', route.query.matchid)
+					match404.value = true;
+				}
 			})
 
 			gameSocket.value!.onopen = (event: Event) => {
-				console.log(event)
+				console.log("event: " + event)
 				console.log("connected to the server")
 			}
 
 			gameSocket.value!.onclose = (event: Event) => {
-				console.log(event)
+				console.log("event close: " + event)
 				fatalError.value = true
 			}
 			
@@ -256,8 +261,8 @@ export default defineComponent ({
 
 			window.addEventListener('resize', resizeCanvas);
 
-			if (route.query.matchid)
-			setTimeout(function () {WatchGame()}, 500)
+			if (route.query.watch)
+				setTimeout(function () {WatchGame()}, 600)
 		})
 
 		watch(gameStarted, (gameChange) =>{
@@ -331,10 +336,12 @@ export default defineComponent ({
 			ctx!.fillStyle = '#00ff00'
 			ctx!.fillRect(gameData.value.paddleL.x * canvas!.width, gameData.value.paddleL.y * canvas!.height, gameData.value.paddle.width * canvas!.width, gameData.value.paddle.height * canvas!.height)
 			ctx!.fillRect(gameData.value.paddleR.x * canvas!.width, gameData.value.paddleR.y * canvas!.height, gameData.value.paddle.width * canvas!.width, gameData.value.paddle.height * canvas!.height)
-			ctx!.beginPath()
-			ctx!.arc(gameData.value.ball.x * canvas!.width,gameData.value.ball.y * canvas!.height, gameData.value.ball.radius * canvas!.height, 0, Math.PI*2, false)
-			ctx!.closePath()
-			ctx!.fill()
+			if (!winText){
+				ctx!.beginPath()
+				ctx!.arc(gameData.value.ball.x * canvas!.width,gameData.value.ball.y * canvas!.height, gameData.value.ball.radius * canvas!.height, 0, Math.PI*2, false)
+				ctx!.closePath()
+				ctx!.fill()
+			}
 			ctx!.font = canvas!.width/3 + "%" + " Monospace"
 			ctx!.fillText(gameData.value.score.leftScore.toString(), 0.4 * canvas!.width, 0.1 * canvas!.height);
 			ctx!.fillText(gameData.value.score.rightScore.toString(), 0.6 * canvas!.width, 0.1 * canvas!.height);
@@ -345,7 +352,6 @@ export default defineComponent ({
 				ctx!.fillText(winText, 0.2 * canvas!.width, 0.5 * canvas!.height);
 			}
 			if (showInfo){
-				console.log(showInfo)
 				if (gameData.value.pos == "left")
 					ctx!.drawImage(document.getElementById('left_arrow') as HTMLCanvasElement, 0.2 * canvas!.width, 0.35 * canvas!.height, 0.15 * canvas!.width, 0.25 * canvas!.height)
 				else if (gameData.value.pos == "right")
@@ -392,7 +398,8 @@ export default defineComponent ({
 		route,
 		matchesList,
 		FollowGame,
-		goToFollowGame}
+		goToFollowGame,
+		match404}
 	},
 })
 </script>
