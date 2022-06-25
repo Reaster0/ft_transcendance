@@ -5,6 +5,7 @@ import { ERoles } from 'src/users/enums/roles.enum';
 export interface ChannelI {
   id?: string;
   name?: string;
+  date?: Date;
   users?: User[];
   banned?: number[];
   password?: string;
