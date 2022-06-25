@@ -45,7 +45,7 @@
 		</v-row>
 		<v-row>
 			<v-col v-for="(matches) in matchesList" :key="matches">
-				<div class="button_slide overlay custom_offset" @click="FollowGame(matches.matchId)">
+				<div class="button_slide overlay custom_offset" @click="goToFollowGame(matches.matchId)">
 					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
 					<div class="big_text text_custom">{{matches.leftPlayer}}</div>
 					<v-spacer></v-spacer>
@@ -76,7 +76,7 @@ import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { getAvatarID, getUserInfos } from "../components/FetchFunctions"
-import { useStore, Store } from "vuex";
+// import { useStore, Store } from "vuex";
 import router from "../router/index";
 
 
@@ -85,7 +85,7 @@ export default defineComponent ({
 		ParticlesBg
 	},
 	setup() {
-		const store = useStore() as Store<any>;
+		// const store = useStore() as Store<any>;
 		const gameSocket = ref< any | null>(null);
 		const matchesList = ref< any | null>(null);
 		const matchId = ref<string | null>(null);
@@ -113,31 +113,31 @@ export default defineComponent ({
 
 		onMounted(async() =>{
 			try {
-				gameSocket.value = store.getters.getGameSocket;
-				if (gameSocket.value === null) {
+				// gameSocket.value = store.getters.getGameSocket;
+				// if (gameSocket.value === null) {
 					gameSocket.value = io('http://:3000/game',{
 						transportOptions: {
 						polling: { extraHeaders: { auth: document.cookie }},
 						withCredentials: true
 					}});
 					console.log("starting connection to game websocket");
-				} else {
-					const matchIdToWatch = store.getters.getWatchGame;
-					if (matchIdToWatch === null) {
-						const opponentId = store.getters.getOpponentSocketId;
-						if (opponentId !== null) {
-							console.log('GO INVIT');
-							gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
-						}
-						searchingGame.value = true;
-					} else {
+				// } else {
+					// const matchIdToWatch = store.getters.getWatchGame;
+					// if (matchIdToWatch === null) {
+					// 	const opponentId = store.getters.getOpponentSocketId;
+					// 	if (opponentId !== null) {
+					// 		console.log('GO INVIT');
+					// 		gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
+					// 	}
+					// 	searchingGame.value = true;
+					// } else {
 						// TODO put logic to access watch game views
 						// TODO gameSocket.value.emit('followGame', matchIdToWatch)
-					}
-					store.commit('setGameSocket', null);
-					store.commit('setOpponentSocketId', null);
-					store.commit('setMatchId', null); // Set to null to avoid later problem
-				}
+					// }
+					// store.commit('setGameSocket', null);
+					// store.commit('setOpponentSocketId', null);
+					// store.commit('setMatchId', null); // Set to null to avoid later problem
+				// }
 			} catch (error) {
 				console.log("the error is:" + error);
 			}
@@ -228,6 +228,10 @@ export default defineComponent ({
 
 			gameSocket.value!.on('endList', () =>{
 				console.log("end list")
+
+				if (route.query.matchid)
+					setTimeout(function () {gameSocket.value!.emit('followGame', route.query.matchid)}, 1500)
+					//remove the setTimeout when the request followGame dosen't stop the connection without watchGame prior
 			})
 
 			gameSocket.value!.onopen = (event: Event) => {
@@ -251,6 +255,9 @@ export default defineComponent ({
 			})
 
 			window.addEventListener('resize', resizeCanvas);
+
+			if (route.query.matchid)
+			setTimeout(function () {WatchGame()}, 500)
 		})
 
 		watch(gameStarted, (gameChange) =>{
@@ -270,8 +277,12 @@ export default defineComponent ({
 		})
 
 		function FollowGame(id: number){
-			console.log(id)
+			console.log("FollowGame")
 			gameSocket.value!.emit('followGame', id);
+		}
+
+		function goToFollowGame(id: number){
+			router.push('/redirect?' + new URLSearchParams({url: ('/game?watch=true&matchid=' + id)}))
 		}
 
 		onBeforeRouteLeave(() => {
@@ -292,7 +303,7 @@ export default defineComponent ({
 
 		function WatchGame(){
 			console.log("watchGame")
-			gameSocket.value.emit('watchGame', {})
+			gameSocket.value!.emit('watchGame', {})
 		}
 
 		function Play(){
@@ -353,13 +364,15 @@ export default defineComponent ({
 			{
 				keyCode: 87,
 				success: () => {
-					gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
+					if (!route.query.watch)
+						gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
 				},
 			},
 			{
 				keyCode: 83,
 				success: () => {
-					gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
+					if (!route.query.watch)
+						gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
 				},
 			},
 		]
@@ -378,7 +391,8 @@ export default defineComponent ({
 		WatchGame,
 		route,
 		matchesList,
-		FollowGame,}
+		FollowGame,
+		goToFollowGame}
 	},
 })
 </script>
