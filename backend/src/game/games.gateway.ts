@@ -283,7 +283,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       const match = matchs.get(matchId);
-      if (match.state != State.ONGOING && match.state != State.SCORE) {
+      if (match === undefined || match.state != State.ONGOING && match.state != State.SCORE) {
         return;
       }
       this.gamesService.startWatchGame(client, match);
