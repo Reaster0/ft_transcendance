@@ -1,5 +1,6 @@
 <template>
-  <v-app id="chat">
+  <v-app id="chat" v-cloak>
+    <div v-cloak>
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
@@ -428,7 +429,7 @@
         Loading
       </p>
     </v-container>
-
+    </div>
   </v-app>
 </template>
 
@@ -556,7 +557,7 @@ export default defineComponent({
             }
           }
           if (currentChannel.value.id === channel.id) {
-            initDisplayChannel(channel, true);
+            reDisplayChannel(channel);
           }
         }
         update.value.connected = true;
@@ -598,6 +599,12 @@ export default defineComponent({
           currentChannel.value.notif = true;
           isScrollAtBottom(null);
         }
+        const index = (userChannels.value.channels).map(channel => channel.id).indexOf(params.id);
+        if(index === -1) {
+          return ;
+        }
+        const chanToMove = (userChannels.value.channels).splice(index, 1)[0];
+        (userChannels.value.channels).splice(0, 0, chanToMove);        
       })
 
       /* Search function responses */
@@ -805,6 +812,13 @@ export default defineComponent({
         if (isMember) {
           return displayMemberChannel();
         }
+    }
+
+    function reDisplayChannel(channel: any) {
+      currentChannel.value.name = channel.name;
+      currentChannel.value.id = channel.id;
+      currentChannel.value.avatar = channel.avatar;
+      currentChannel.value.type = channel.type;
     }
 
     function displayMemberChannel() {
