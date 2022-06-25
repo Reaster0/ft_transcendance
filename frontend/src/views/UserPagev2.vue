@@ -16,7 +16,7 @@
 							<v-img :src="avatar" max-width="300px"/>
 							<h1 class="overflow-x-auto">{{nickname}}</h1>
 							<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
-							<h1 class="button_slick rainbow" data-text="playing" v-if="user.status == 'playing'" @click="goSeeMatch">{{user.status}}</h1>
+							<h1 class="button_slick rainbow" data-text="playing" v-if="user.status == 'playing'" @click="goSeeMatch(user.nickname)">{{user.status}}</h1>
 							<h1 v-else>{{user.status}}</h1>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
@@ -132,7 +132,7 @@ export default defineComponent ({
 		}
 
 		function goSeeMatch(username: string) {
-			router.push('/game?watch=true&matchid=')
+			router.push('/game?watch=true&user=' + username)
 		}
 
 		async function addMyFriend(myName: string, nickname: string | null) {
