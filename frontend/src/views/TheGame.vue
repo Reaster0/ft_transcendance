@@ -42,7 +42,7 @@
 	<div v-if="!gameStarted && route.query.watch">
 		<v-row justify="center">
 			<div class="button_slick big_button Spotnik" v-if="!matchesList && !route.query.matchid && !route.query.user">There Is Not A Single Matches Right Now</div>
-			<div class="button_slick big_button Spotnik" v-if="route.query.matchid && match404">This Match Dosent Exist</div>
+			<div class="button_slick big_button Spotnik" v-if="match404">This Match Dosent Exist</div>
 		</v-row>
 		<v-row v-if="!route.query.matchid && route.query.user">
 			<v-col v-for="(matches) in matchesList" :key="matches">
@@ -259,20 +259,21 @@ export default defineComponent ({
 				router.push('/');
 			})
 
-			gameSocket.value!.on('matchId', (matchId: number) => {
+			gameSocket.value!.on('matchId', (matchId: {matchId : number, leftPlayer: string, rightPlayer: string}) => {
 				console.log("matchid")
-				router.push('redirect?' + new URLSearchParams({url: ('/game?watch=true&matchid=' + matchId)}));
+				console.log(matchId)
+				router.push('redirect?' + new URLSearchParams({url: ('/game?watch=true&matchid=' + matchId.matchId)}));
 			})
 
 			gameSocket.value!.on('notAvailable', () => {
-				console.log("notavailable fatal error")
+				console.log("notavailable")
 				match404.value = true
 			})
 
 			window.addEventListener('resize', resizeCanvas);
 
 			if (route.query.user)
-				gameSocket.value!.emit('getMatchByUser', {playerName: route.query.user})
+				setTimeout(function () {gameSocket.value!.emit('getMatchByUser', {playerName: route.query.user})}, 600)
 
 			if (route.query.watch)
 				setTimeout(function () {WatchGame()}, 600)
