@@ -261,7 +261,7 @@ export default defineComponent ({
 
 			gameSocket.value!.on('matchId', (matchId: number) => {
 				console.log("matchid")
-				router.push('/game?watch=true&matchid=' + matchId);
+				router.push('redirect?' + new URLSearchParams({url: ('/game?watch=true&matchid=' + matchId)}));
 			})
 
 			gameSocket.value!.on('notAvailable', () => {
