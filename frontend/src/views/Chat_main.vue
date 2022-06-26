@@ -544,15 +544,10 @@ export default defineComponent({
         for (let channel of userChannels.value.channels) {
           if (channel.type === ChannelType.PM) {
             let usersId = channel.name.split('/').map(Number);
-            if (usersId[0] === currentUser.id) {
-              channel.name = getUserName(usersId[1]);
-              channel.avatar = getUserAvatar(usersId[1]);
-              game.value.ingame = getUserStatus(usersId[1]) === Status.PLAYING ? true : false;
-            } else {
-              channel.name = getUserName(usersId[0]);
-              channel.avatar = getUserAvatar(usersId[0]);
-              game.value.ingame = getUserStatus(usersId[0]) === Status.PLAYING ? true : false;
-            }
+            const i: number= +(usersId[0] === currentUser.id);
+              channel.name = getUserName(usersId[i]);
+              channel.avatar = getUserAvatar(usersId[i]);
+              game.value.ingame = getUserStatus(usersId[i]) === Status.PLAYING ? true : false;
           }
           if (currentChannel.value.id === channel.id) {
             reDisplayChannel(channel);
@@ -602,7 +597,7 @@ export default defineComponent({
           return ;
         }
         const chanToMove = (userChannels.value.channels).splice(index, 1)[0];
-        (userChannels.value.channels).splice(0, 0, chanToMove);        
+        (userChannels.value.channels).unshift(chanToMove);
       })
 
       /* Search function responses */
