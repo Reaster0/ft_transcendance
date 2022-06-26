@@ -96,7 +96,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       const feature = this.gamesService.validFeatures(data.ballSize, data.ballSpeed);
-      if (feature === undefined) {
+      if (feature === null) {
         client.emit('FeaturesIncorrect');
         return;
       }
@@ -155,7 +155,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       const feature = this.gamesService.validFeatures(data.ballSize, data.ballSpeed);
-      if (feature === undefined) {
+      if (feature === null) {
         client.emit('FeaturesIncorrect');
         return;
       }
@@ -184,7 +184,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const match = matchs.get(matchId);
       if (!client.data.user) {
         return client.disconnect();
-      } else if (match == undefined) {
+      } else if (typeof(match) === undefined) {
         client.emit('requestError');
         return;
       }
@@ -215,7 +215,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return client.disconnect();
       }
       const match = matchs.get(data.matchId);
-      if (match == undefined) {
+      if (typeof(match) === undefined) {
         client.emit('requestError');
         return;
       }

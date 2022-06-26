@@ -54,7 +54,7 @@ export class GamesService {
         }
       }
     }
-    return undefined;
+    return null;
   }
 
   getOpponent(client: Socket, match: Match): Player {
@@ -63,7 +63,7 @@ export class GamesService {
         return player;
       }
     }
-    return undefined;
+    return null;
   }
 
   wantToWatch(client: Socket, watchers: Array<Socket>) {
@@ -357,9 +357,9 @@ export class GamesService {
 
   validFeatures(ballSize: string, ballSpeed: string): Features {
     if (ballSize != 'SMALL' && ballSize != 'NORMAL' && ballSize != 'BIG') {
-      return undefined;
+      return null;
     } else if (ballSpeed != 'SLOW' && ballSpeed != 'NORMAL' && ballSpeed != 'FAST') {
-      return undefined;
+      return null;
     }
     const features: Features = { ballSize: ballSize, ballSpeed: ballSpeed };
     return features;

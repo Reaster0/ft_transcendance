@@ -1,5 +1,6 @@
 <template>
-  <v-app id="chat">
+  <v-app id="chat" v-cloak>
+    <div v-cloak>
     <v-container fluid v-if="update.connected">
       <v-row>
         <!-- ELEMENTS ON LEFT OF SCREEN -->
@@ -428,7 +429,7 @@
         Loading
       </p>
     </v-container>
-
+    </div>
   </v-app>
 </template>
 
@@ -547,16 +548,14 @@ export default defineComponent({
               channel.name = getUserName(usersId[1]);
               channel.avatar = getUserAvatar(usersId[1]);
               game.value.ingame = getUserStatus(usersId[1]) === Status.PLAYING ? true : false;
-              console.log(game.value.ingame);
             } else {
               channel.name = getUserName(usersId[0]);
               channel.avatar = getUserAvatar(usersId[0]);
               game.value.ingame = getUserStatus(usersId[0]) === Status.PLAYING ? true : false;
-              console.log(game.value.ingame);
             }
           }
           if (currentChannel.value.id === channel.id) {
-            initDisplayChannel(channel, true);
+            reDisplayChannel(channel);
           }
         }
         update.value.connected = true;
@@ -598,6 +597,12 @@ export default defineComponent({
           currentChannel.value.notif = true;
           isScrollAtBottom(null);
         }
+        const index = (userChannels.value.channels).map(channel => channel.id).indexOf(params.id);
+        if(index === -1) {
+          return ;
+        }
+        const chanToMove = (userChannels.value.channels).splice(index, 1)[0];
+        (userChannels.value.channels).splice(0, 0, chanToMove);        
       })
 
       /* Search function responses */
@@ -609,7 +614,6 @@ export default defineComponent({
           joinableChannels.value.push({ id: user.id, name: user.nickname, 
             type: ChannelType.PM, avatar: avatar });
         }
-        console.log(joinableChannels.value);
       })
 
       connection.value!.on('joinableChannels', function(params: Channel[]) {
@@ -805,6 +809,16 @@ export default defineComponent({
         if (isMember) {
           return displayMemberChannel();
         }
+    }
+
+    function reDisplayChannel(channel: any) {
+      currentChannel.value.name = channel.name;
+      currentChannel.value.id = channel.id;
+      currentChannel.value.avatar = channel.avatar;
+      currentChannel.value.type = channel.type;
+      currentChannel.value.blocked = channel.blocked;
+      const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
+      currentChannel.value.description = channelTypes[channel.type];
     }
 
     function displayMemberChannel() {
