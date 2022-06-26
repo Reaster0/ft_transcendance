@@ -16,7 +16,8 @@
 							<v-img :src="avatar" max-width="300px"/>
 							<h1 class="overflow-x-auto">{{nickname}}</h1>
 							<h1 class="overflow-x-auto">{{user.eloScore}}📈</h1>
-							<h1 class="overflow-x-auto">{{user.status}}</h1>
+							<h1 class="button_slick rainbow" data-text="playing" v-if="user.status == 'playing'" @click="goSeeMatch(user.nickname)">{{user.status}}</h1>
+							<h1 v-else>{{user.status}}</h1>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="edit = !edit">Edit</div>
 							<div v-if="!route.params.username" class="button_slick button_slide Spotnik" @click="redirFriends">Friends</div>
 							<div v-if="route.params.username && !isFriend" class="button_slick button_slide Spotnik" @click="addMyFriend(user.nickname ,nickname)">Add Friend</div>
@@ -126,8 +127,12 @@ export default defineComponent ({
 			router.push('/user/friends')
 		}
 
-		async function goSearchUser(username: string) {
+		function goSearchUser(username: string) {
 			router.push('/redirect?' + new URLSearchParams({url: ("/user/" + username)}))
+		}
+
+		function goSeeMatch(username: string) {
+			router.push('/game?watch=true&user=' + username)
 		}
 
 		async function addMyFriend(myName: string, nickname: string | null) {
@@ -166,13 +171,25 @@ export default defineComponent ({
 		goSearchUser,
 		isFriend,
 		addMyFriend,
-		disable2FA}
+		disable2FA,
+		goSeeMatch}
 	}
 })
 </script>
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300&display=swap');
+
+
+.rainbow:hover {
+cursor: pointer;
+transition: text-shadow 1s;
+text-shadow: 0.04em 0.04em #fc0049,
+        0.08em 0.08em #fe8f01,
+        0.12em 0.12em #fdf21f,
+        0.16em 0.16em #3fdf4b,
+        0.2em 0.2em #3462fe;
+}
 
 .width-force {
 	width: 200px;

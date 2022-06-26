@@ -56,6 +56,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('User leaving: ' + client.data.user.username);
         if (fromChat.indexOf(client.id) === -1) {
           await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
+        } else {
+          const index = fromChat.indexOf(client.id);
+          fromChat.splice(index, 1);
         }
         if (this.gamesService.isWaiting(client, queue) === true) {
           const index = queue.indexOf(client);
@@ -106,7 +109,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const matchId = uuid();
         const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2), features.splice(0, 2));
         matchs.set(matchId, newMatch);
-        console.log('here');
         this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
       }
@@ -181,6 +183,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('acceptGame')
   handleAcceptGame(client: Socket, matchId: string) {
     try {
+      const index = fromChat.indexOf(client.id);
+      if (index != -1) {
+        fromChat.splice(index, 1);
+      }
       const match = matchs.get(matchId);
       if (!client.data.user) {
         return client.disconnect();
@@ -283,7 +289,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       const match = matchs.get(matchId);
-      if (match.state != State.ONGOING && match.state != State.SCORE) {
+      if (typeof(match) === undefined || (match.state != State.ONGOING && match.state != State.SCORE)) {
         return;
       }
       this.gamesService.startWatchGame(client, match);

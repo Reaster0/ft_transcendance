@@ -12,9 +12,10 @@
 		<div v-if="!fatalError">
 			<v-container>
 				<v-row justify="center">
-					<div v-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
+					<div v-if="waitForChatOpponent" class="button_slick button_slide big_button Spotnik">Wait for opponent to join game</div>
+					<div v-else-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
 					<div v-else-if="!matchId" class="button_slick big_button Spotnik">Searching A Game</div>
-					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found!</div>
+					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found</div>
 				</v-row>
 			</v-container>
 		</div>
@@ -40,12 +41,13 @@
 
 	<!-- game watching -->
 	<div v-if="!gameStarted && route.query.watch">
-		<v-row justify="center" v-if="!matchesList">
-			<div class="button_slick button_slide big_button Spotnik" @click="WatchGame">See Matches List</div>
+		<v-row justify="center">
+			<div class="button_slick big_button Spotnik" v-if="!matchesList && !route.query.matchid && !route.query.user">There Is Not A Single Matches Right Now</div>
+			<div class="button_slick big_button Spotnik" v-if="match404">This Match Dosent Exist</div>
 		</v-row>
-		<v-row>
+		<v-row v-if="!route.query.matchid && route.query.user">
 			<v-col v-for="(matches) in matchesList" :key="matches">
-				<div class="button_slide overlay custom_offset" @click="FollowGame(matches.matchId)">
+				<div class="button_slide overlay custom_offset" @click="goToFollowGame(matches.matchId)">
 					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
 					<div class="big_text text_custom">{{matches.leftPlayer}}</div>
 					<v-spacer></v-spacer>
@@ -110,9 +112,11 @@ export default defineComponent ({
 		const ballSpeed = ref<string>("NORMAL");
 		const ballSize = ref<string>("NORMAL");
 		const route: any = useRoute()
+		const match404 = ref<boolean>(false);
+		let waitForChatOpponent = ref<boolean>(false);
 
 		onMounted(async() =>{
-			try {
+			try {		
 				gameSocket.value = store.getters.getGameSocket;
 				if (gameSocket.value === null) {
 					gameSocket.value = io('http://:3000/game',{
@@ -122,21 +126,27 @@ export default defineComponent ({
 					}});
 					console.log("starting connection to game websocket");
 				} else {
-					const matchIdToWatch = store.getters.getWatchGame;
-					if (matchIdToWatch === null) {
+					if (store.getters.getWatchGame === false) {
 						const opponentId = store.getters.getOpponentSocketId;
+						waitForChatOpponent.value = true;
+						searchingGame.value = true
 						if (opponentId !== null) {
-							console.log('GO INVIT');
 							gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
+						} else {
+							setTimeout(() => {
+								if (waitForChatOpponent.value === true) {
+									waitForChatOpponent.value = false;
+									searchingGame.value = false;
+									alert('Your opponent never joined game.');
+									gameSocket.value.disconnect(); // Necessary to delete socket from 'fromChat' array inside back
+									router.push('/'); // Because we disconnected
+								}
+							}, 10 * 1000);
 						}
-						searchingGame.value = true;
-					} else {
-						// TODO put logic to access watch game views
-						// TODO gameSocket.value.emit('followGame', matchIdToWatch)
 					}
 					store.commit('setGameSocket', null);
 					store.commit('setOpponentSocketId', null);
-					store.commit('setMatchId', null); // Set to null to avoid later problem
+					store.commit('setWatchGame', false);
 				}
 			} catch (error) {
 				console.log("the error is:" + error);
@@ -147,6 +157,9 @@ export default defineComponent ({
 			})
 
 			gameSocket.value!.on('foundMatch', (res: string) =>{
+				if (waitForChatOpponent.value === true) {
+					waitForChatOpponent.value = false;
+				}
 				matchId.value = res;
 				console.log("found match:" + JSON.stringify(res));
 				if (!res)
@@ -197,8 +210,10 @@ export default defineComponent ({
 				gameData.value.winner = params.winner;
 				if (params.winner != gameData.value.opponent)
 					winText = "well done neo keep dreaming";
-				else
+				else if (!route.query.watch)
 					winText = "wake up neo stop loosing";
+				else
+					winText = params.winner + " has won";
 			})
 
 			gameSocket.value!.on('requestError', () =>{
@@ -228,15 +243,20 @@ export default defineComponent ({
 
 			gameSocket.value!.on('endList', () =>{
 				console.log("end list")
+				if (route.query.matchid)
+				{
+					gameSocket.value!.emit('followGame', route.query.matchid)
+					match404.value = true;
+				}
 			})
 
 			gameSocket.value!.onopen = (event: Event) => {
-				console.log(event)
+				console.log("event: " + event)
 				console.log("connected to the server")
 			}
 
 			gameSocket.value!.onclose = (event: Event) => {
-				console.log(event)
+				console.log("event close: " + event)
 				fatalError.value = true
 			}
 			
@@ -250,7 +270,24 @@ export default defineComponent ({
 				router.push('/');
 			})
 
+			gameSocket.value!.on('matchId', (matchId: {matchId : number, leftPlayer: string, rightPlayer: string}) => {
+				console.log("matchid")
+				console.log(matchId)
+				router.push('redirect?' + new URLSearchParams({url: ('/game?watch=true&matchid=' + matchId.matchId)}));
+			})
+
+			gameSocket.value!.on('notAvailable', () => {
+				console.log("notavailable")
+				match404.value = true
+			})
+
 			window.addEventListener('resize', resizeCanvas);
+
+			if (route.query.user)
+				setTimeout(function () {gameSocket.value!.emit('getMatchByUser', {playerName: route.query.user})}, 600)
+
+			if (route.query.watch)
+				setTimeout(function () {WatchGame()}, 600)
 		})
 
 		watch(gameStarted, (gameChange) =>{
@@ -270,17 +307,16 @@ export default defineComponent ({
 		})
 
 		function FollowGame(id: number){
-			console.log(id)
+			console.log("FollowGame")
 			gameSocket.value!.emit('followGame', id);
 		}
 
+		function goToFollowGame(id: number){
+			router.push('/redirect?' + new URLSearchParams({url: ('/game?watch=true&matchid=' + id)}))
+		}
+
 		onBeforeRouteLeave(() => {
-			// const answer = window.confirm("Are you sure you want to leave the game?")
-			// if (answer){
-				gameSocket.value.disconnect()
-			// 	return true
-			// }
-			// return false
+			gameSocket.value.disconnect()
 		})
 
 		function resizeCanvas(){
@@ -292,7 +328,7 @@ export default defineComponent ({
 
 		function WatchGame(){
 			console.log("watchGame")
-			gameSocket.value.emit('watchGame', {})
+			gameSocket.value!.emit('watchGame', {})
 		}
 
 		function Play(){
@@ -320,10 +356,12 @@ export default defineComponent ({
 			ctx!.fillStyle = '#00ff00'
 			ctx!.fillRect(gameData.value.paddleL.x * canvas!.width, gameData.value.paddleL.y * canvas!.height, gameData.value.paddle.width * canvas!.width, gameData.value.paddle.height * canvas!.height)
 			ctx!.fillRect(gameData.value.paddleR.x * canvas!.width, gameData.value.paddleR.y * canvas!.height, gameData.value.paddle.width * canvas!.width, gameData.value.paddle.height * canvas!.height)
-			ctx!.beginPath()
-			ctx!.arc(gameData.value.ball.x * canvas!.width,gameData.value.ball.y * canvas!.height, gameData.value.ball.radius * canvas!.height, 0, Math.PI*2, false)
-			ctx!.closePath()
-			ctx!.fill()
+			if (!winText){
+				ctx!.beginPath()
+				ctx!.arc(gameData.value.ball.x * canvas!.width,gameData.value.ball.y * canvas!.height, gameData.value.ball.radius * canvas!.height, 0, Math.PI*2, false)
+				ctx!.closePath()
+				ctx!.fill()
+			}
 			ctx!.font = canvas!.width/3 + "%" + " Monospace"
 			ctx!.fillText(gameData.value.score.leftScore.toString(), 0.4 * canvas!.width, 0.1 * canvas!.height);
 			ctx!.fillText(gameData.value.score.rightScore.toString(), 0.6 * canvas!.width, 0.1 * canvas!.height);
@@ -334,7 +372,6 @@ export default defineComponent ({
 				ctx!.fillText(winText, 0.2 * canvas!.width, 0.5 * canvas!.height);
 			}
 			if (showInfo){
-				console.log(showInfo)
 				if (gameData.value.pos == "left")
 					ctx!.drawImage(document.getElementById('left_arrow') as HTMLCanvasElement, 0.2 * canvas!.width, 0.35 * canvas!.height, 0.15 * canvas!.width, 0.25 * canvas!.height)
 				else if (gameData.value.pos == "right")
@@ -353,13 +390,15 @@ export default defineComponent ({
 			{
 				keyCode: 87,
 				success: () => {
-					gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
+					if (!route.query.watch)
+						gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "UP"})
 				},
 			},
 			{
 				keyCode: 83,
 				success: () => {
-					gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
+					if (!route.query.watch)
+						gameSocket.value.emit('gameInput', {matchId: matchId.value, input: "DOWN"})
 				},
 			},
 		]
@@ -378,7 +417,10 @@ export default defineComponent ({
 		WatchGame,
 		route,
 		matchesList,
-		FollowGame,}
+		FollowGame,
+		goToFollowGame,
+		match404,
+		waitForChatOpponent}
 	},
 })
 </script>

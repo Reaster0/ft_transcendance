@@ -18,7 +18,7 @@ const store = createStore({
 		chatSocket: null as any,
 		gameSocket: null as any,
 		opponentSocketId: null as any,
-		watchGame: null as any,
+		watchGame: false as boolean,
 		userToManage: null as any,
 		currentChannelId: null as any,
 		currentChannelType: null as any,

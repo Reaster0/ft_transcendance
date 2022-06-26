@@ -49,11 +49,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('disconnect')
   async handleDisconnect(client: Socket) {
     try {
+      await this.userServices.changeStatus(client.data.user, Status.OFFLINE, null);
       if (!client.data.user) {
         return client.disconnect();
       }
       this.logger.log(`Client disconnected: ${client.data.user.username}`);
-      await this.userServices.changeStatus(client.data.user, Status.OFFLINE, null);
     } catch (e) {
       this.logger.log(e);
       client.disconnect();

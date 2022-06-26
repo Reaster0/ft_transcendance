@@ -311,8 +311,8 @@ export class GamesService {
   async registerGameHistory(match: Match) {
     const winnerUser = match.winner.user;
     const winnerScore = match.winner.score;
-    let looserUser = undefined;
-    let looserScore = undefined;
+    let looserUser = null;
+    let looserScore = null;
     if (winnerUser.id === match.players[0].user.id) {
       looserUser = match.players[1].user;
       looserScore = match.players[1].score;

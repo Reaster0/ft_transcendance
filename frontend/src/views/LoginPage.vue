@@ -41,7 +41,6 @@ export default defineComponent ({
 		async function submitCode() {
 			if(await submit2FaCode(inputCode.value as string))			{
 				store.commit('setNeed2FA', false)
-				// store.commit('setUser', await getUserInfo())
 				router.push('/user')
 			}
 		}

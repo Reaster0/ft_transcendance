@@ -479,7 +479,7 @@ export default defineComponent({
     let searchRequest = ref<string>('');
     let joinableChannels = ref<Channel[]>([]);
     let showPasswordModal = ref<boolean>(false);
-    let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
+    let showGameModal = ref<boolean>(false);
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: null as any, socket: null as any, absent: false as boolean, 
       togame: false as boolean, ingame: false as boolean });
@@ -528,7 +528,6 @@ export default defineComponent({
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
-        console.log('get user list');
         for (let user of params) {
           user.avatar = await getAvatarID(user.id) as any; 
         }
@@ -559,8 +558,6 @@ export default defineComponent({
       connection.value!.on('channelUsers',
         async function(params: { id: string, users: any[] }) {
         if (!currentChannel.value || params.id != currentChannel.value.id) {
-          console.log('error of channel correspondance inside channelUsers '
-            + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         currentChannel.value.users = params.users;
@@ -571,8 +568,6 @@ export default defineComponent({
       connection.value!.on('channelMessages',
         function(params: { id: string, messages: Message[] }) {
         if (params.id != currentChannel.value.id) {
-          console.log('error of channel correspondance inside channelMessages '
-            + params.id + ' vs '+ currentChannel.value.id);
           return;
         }
         currentChannel.value.messages = params.messages;
@@ -582,7 +577,6 @@ export default defineComponent({
       connection.value!.on('newMessage',
         function(params: {id: string, message: Message }) {
         if (params.id != currentChannel.value.id) {
-          console.log('receive messageText from non current');
           return ;
         }
         currentChannel.value.messages.push(params.message);
@@ -627,6 +621,7 @@ export default defineComponent({
           currentChannel.value.id = params.id;
           alert('You just been added to a new private discussion.');
         }
+        displayMemberChannel();
       })
 
       connection.value!.on('alreadyInPm', function(params: { name: string }){
@@ -729,6 +724,12 @@ export default defineComponent({
 
       connection.value!.on('endGameInvit', function(params: { id: number }) {
         showGameModal.value = false;
+        try {
+          game.value.socket.disconnect();
+          game.value.socket = null;
+        } catch {
+          game.value.socket = null;
+        }
         alert('You missed or refused a game invitation from '+ getUserName(params.id));
       })
 
@@ -798,7 +799,6 @@ export default defineComponent({
       channelManager.value.members = [];
       channelManager.value.displayIndex = 0;
       currentChannel.value.role = Roles.NONMEMBER;
-      console.log('display ' + currentChannel.value.name + ' join interface');
       update.value.messages = false;
       update.value.users = false;
         if (isMember) {
@@ -833,7 +833,6 @@ export default defineComponent({
       let members = currentChannel.value.users as UserChannel[];
       let admins = [] as UserChannel[];
       if (currentChannel.value.users === []) {
-        console.log('error in retrieving channels users');
         return ;
       }
       for (let user of currentChannel.value.users) {
@@ -854,7 +853,6 @@ export default defineComponent({
 
     function getUserName(userId: number) {
       if (usersList.value === null) {
-        console.log('Error when retrieving users');
         return;
       }
       for (let user of usersList.value) {
@@ -862,13 +860,10 @@ export default defineComponent({
           return user.nickname;
         }
       }
-      console.log('Something went wrong: User id ' + userId +
-        ' for name not found in channel ' + currentChannel.value.name);
     }
 
     function getUserAvatar(userId: number) {
       if (usersList.value === null) {
-        console.log('Error when retrieving users');
         return;
       }
       for (let user of usersList.value) {
@@ -876,12 +871,10 @@ export default defineComponent({
           return user.avatar;
         }
       }
-      console.log('Something went wrong: User id ' + userId + ' not found');
     }
 
     function getUserStatus(userId: number) {
       if (!usersList.value) {
-        console.log('Error when retrieving user avatar');
         return;
       }
       for (let user of usersList.value) {
@@ -889,7 +882,6 @@ export default defineComponent({
           return user.status;
         }
       }
-      console.log('Something went wrong: User id ' + userId + ' not found');
     }
 
     function getUserColor(userId: number) {
@@ -922,7 +914,6 @@ export default defineComponent({
     /* Functions for channels actions */
 
     function joinChannel() {
-      console.log('join channel', currentChannel.value.name);
       if (currentChannel.value.type === ChannelType.PROTECTED) {
         showPasswordModal.value = true;
         return ;
@@ -932,8 +923,6 @@ export default defineComponent({
     }
 
     function joinProtectedChannel(password: string) {
-      console.log('join channel ' + currentChannel.value.name +
-        ' with password: ' + password);
       if (password === '') {
         alert('Password entered is empty. Please retry.');
         return;
@@ -944,7 +933,6 @@ export default defineComponent({
     }
 
     function joinPrivateConversation(targetId: string) {
-      console.log('join conversation ' + targetId);
       connection.value!.emit('createPrivateConversation', targetId);
     }
 
@@ -957,7 +945,6 @@ export default defineComponent({
     }
 
     function leaveChannel() {
-      console.log('leave channel ' + currentChannel.value.name);
       if (currentChannel.value.role === Roles.OWNER && confirm === 0) {
         confirm++;
         alert('\tYou\'re the channel owner: It will be erased.\nPlease click another time on \'Leave Channel\' to confirm.');
@@ -971,18 +958,22 @@ export default defineComponent({
 
     function waitingGame() {
       game.value.request = true;
+      game.value.togame = false;
       if (game.value.socket === null) {
         game.value.socket = io('http://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
-        game.value!.socket.emit('fromChat');
+        game.value!.socket.on('connectedToGame', function() {
+          game.value!.socket.emit('fromChat');
+        })
       }
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
       let count = 0;
       const intervalId = setInterval(() => {
         if (game.value.togame === true) {
+          game.value.togame = false;
           clearInterval(intervalId);
           goToGame();
         } else if (game.value.absent === true || count === 100) {
@@ -1029,7 +1020,8 @@ export default defineComponent({
     }
 
     function goToGame() {
-        router.push('/game');
+      game.value.socket = null;
+      router.push('/game');
     }
 
     /* Watch game system */
@@ -1041,23 +1033,28 @@ export default defineComponent({
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
-        game.value!.socket.emit('fromChat');
       }
       game.value.socket.on('notAvailable', function(params: { player: string }) {
         alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
         game.value.socket.disconnect();
+        game.value.socket = null;
         game.value.socket.removeAllListeners('notAvailable');
         game.value.socket.removeAllListeners('matchId');
+        game.value.socket.removeAllListeners('connectedToGame');
       });
       game.value.socket.on('matchId', function(params: { matchId: string }) {
         game.value.socket.removeAllListeners('notAvailable');
         game.value.socket.removeAllListeners('matchId');
+        game.value.socket.removeAllListeners('connectedToGame');
         store.commit('setGameSocket', game.value.socket);
-        store.commit('setWatchGame', params.matchId);
+        store.commit('setWatchGame', true);
         forceLeave = true;
-        router.push('/game');
+        game.value.socket = null;
+        router.push('/game?watch=true&matchid=' + params.matchId);
       })
-      game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
+      game.value.socket.on('connectedToGame', function() {
+        game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
+      })
     }
 
     /* Utilities function */
@@ -1126,7 +1123,7 @@ export default defineComponent({
     }
 
     function goToUserPage() {
-        router.push("/user/" + currentChannel.value.name);
+      router.push("/user/" + currentChannel.value.name);
     }
 
 		return { update, messageText, userChannels, displayMemberChannel,

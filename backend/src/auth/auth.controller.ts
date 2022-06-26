@@ -49,7 +49,7 @@ export class AuthController {
     if (!first)
       res.redirect(process.env.FRONTEND + '/login');
     else
-      res.redirect(process.env.FRONTEND + '/login/user?first=true');
+      res.redirect(process.env.FRONTEND + '/user?first=true');
   }
 
   @ApiOperation({ summary: 'Code authentication - Secret' })
