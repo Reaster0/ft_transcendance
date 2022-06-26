@@ -45,7 +45,7 @@
 			<div class="button_slick big_button Spotnik" v-if="!matchesList && !route.query.matchid && !route.query.user">There Is Not A Single Matches Right Now</div>
 			<div class="button_slick big_button Spotnik" v-if="match404">This Match Dosent Exist</div>
 		</v-row>
-		<v-row v-if="!route.query.matchid && route.query.user">
+		<v-row v-if="!route.query.matchid && !route.query.user">
 			<v-col v-for="(matches) in matchesList" :key="matches">
 				<div class="button_slide overlay custom_offset" @click="goToFollowGame(matches.matchId)">
 					<v-img min-width="15%" max-width="20%" :src="matches.avatarLeft"/>
