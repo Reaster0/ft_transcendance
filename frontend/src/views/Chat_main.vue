@@ -969,6 +969,7 @@ export default defineComponent({
           game.value!.socket.emit('fromChat');
         })
       }
+      game.value!.socket.removeAllListeners('connectedToGame');
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
       let count = 0;
       const intervalId = setInterval(() => {
