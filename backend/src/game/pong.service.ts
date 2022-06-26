@@ -78,7 +78,7 @@ export class PongService {
       ball.pos.y = field.width - field.offset + ball.vel.y - ball.radius;
     }
     let collision = false;
-    let paddle = undefined;
+    let paddle = null;
     if ((ball.pos.x - ball.radius) <= (field.offset + pong.paddleL.length)) {
       collision = this.checkCollision(ball, pong.paddleL);
       paddle = pong.paddleL;

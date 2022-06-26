@@ -479,7 +479,7 @@ export default defineComponent({
     let searchRequest = ref<string>('');
     let joinableChannels = ref<Channel[]>([]);
     let showPasswordModal = ref<boolean>(false);
-    let showGameModal = ref<boolean>(false); //TODO set to true when game invitation is received
+    let showGameModal = ref<boolean>(false);
     let game = ref({ request: false as boolean, response: true as boolean,
       inviter: null as any, socket: null as any, absent: false as boolean, 
       togame: false as boolean, ingame: false as boolean });
@@ -1053,9 +1053,9 @@ export default defineComponent({
         game.value.socket.removeAllListeners('notAvailable');
         game.value.socket.removeAllListeners('matchId');
         store.commit('setGameSocket', game.value.socket);
-        store.commit('setWatchGame', params.matchId);
+        store.commit('setWatchGame', true);
         forceLeave = true;
-        router.push('/game');
+        router.push('/game?watch=true&matchid=' + params.matchId);
       })
       game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
     }

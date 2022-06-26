@@ -12,7 +12,8 @@
 		<div v-if="!fatalError">
 			<v-container>
 				<v-row justify="center">
-					<div v-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
+					<div v-if="waitForChatOpponent" class="button_slick button_slide big_button Spotnik">Wait for opponent to join game</div>
+					<div v-else-if="!searchingGame" class="button_slick button_slide big_button Spotnik" @click="Play">SearchGame</div>
 					<div v-else-if="!matchId" class="button_slick big_button Spotnik">Searching A Game</div>
 					<div v-else class="button_slide button_slick big_button Spotnik" @click="AcceptGame">A Game Has Been Found</div>
 				</v-row>
@@ -77,7 +78,7 @@ import { useKeypress } from "vue3-keypress";
 import { onBeforeRouteLeave } from 'vue-router';
 import { ParticlesBg } from "particles-bg-vue"; //https://github.com/lindelof/particles-bg-vue
 import { getAvatarID, getUserInfos } from "../components/FetchFunctions"
-// import { useStore, Store } from "vuex";
+import { useStore, Store } from "vuex";
 import router from "../router/index";
 
 
@@ -86,7 +87,7 @@ export default defineComponent ({
 		ParticlesBg
 	},
 	setup() {
-		// const store = useStore() as Store<any>;
+		const store = useStore() as Store<any>;
 		const gameSocket = ref< any | null>(null);
 		const matchesList = ref< any | null>(null);
 		const matchId = ref<string | null>(null);
@@ -112,34 +113,38 @@ export default defineComponent ({
 		const ballSize = ref<string>("NORMAL");
 		const route: any = useRoute()
 		const match404 = ref<boolean>(false);
+		let waitForChatOpponent = ref<boolean>(false);
 
 		onMounted(async() =>{
-			try {
-				// gameSocket.value = store.getters.getGameSocket;
-				// if (gameSocket.value === null) {
+			try {		
+				gameSocket.value = store.getters.getGameSocket;
+				if (gameSocket.value === null) {
 					gameSocket.value = io('http://:3000/game',{
 						transportOptions: {
 						polling: { extraHeaders: { auth: document.cookie }},
 						withCredentials: true
 					}});
 					console.log("starting connection to game websocket");
-				// } else {
-					// const matchIdToWatch = store.getters.getWatchGame;
-					// if (matchIdToWatch === null) {
-					// 	const opponentId = store.getters.getOpponentSocketId;
-					// 	if (opponentId !== null) {
-					// 		console.log('GO INVIT');
-					// 		gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
-					// 	}
-					// 	searchingGame.value = true;
-					// } else {
-						// TODO put logic to access watch game views
-						// TODO gameSocket.value.emit('followGame', matchIdToWatch)
-					// }
-					// store.commit('setGameSocket', null);
-					// store.commit('setOpponentSocketId', null);
-					// store.commit('setMatchId', null); // Set to null to avoid later problem
-				// }
+				} else {
+					if (store.getters.getWatchGame === false) {
+						const opponentId = store.getters.getOpponentSocketId;
+						waitForChatOpponent.value = true;
+						searchingGame.value = true
+						if (opponentId !== null) {
+							gameSocket.value!.emit('invitToGame', { opponentSocketId: opponentId, ballSize: 'NORMAL', ballSpeed: 'NORMAL' });
+						} else {
+							setTimeout(() => {
+								if (waitForChatOpponent.value === true) {
+									alert('Your opponent never joined game.');
+									router.push('/');
+								}
+							}, 30 * 1000);
+						}
+					}
+					store.commit('setGameSocket', null);
+					store.commit('setOpponentSocketId', null);
+					store.commit('setWatchGame', false);
+				}
 			} catch (error) {
 				console.log("the error is:" + error);
 			}
@@ -149,6 +154,9 @@ export default defineComponent ({
 			})
 
 			gameSocket.value!.on('foundMatch', (res: string) =>{
+				if (waitForChatOpponent.value === true) {
+					waitForChatOpponent.value = false;
+				}
 				matchId.value = res;
 				console.log("found match:" + JSON.stringify(res));
 				if (!res)
@@ -305,12 +313,7 @@ export default defineComponent ({
 		}
 
 		onBeforeRouteLeave(() => {
-			// const answer = window.confirm("Are you sure you want to leave the game?")
-			// if (answer){
-				gameSocket.value.disconnect()
-			// 	return true
-			// }
-			// return false
+			gameSocket.value.disconnect()
 		})
 
 		function resizeCanvas(){
@@ -413,7 +416,8 @@ export default defineComponent ({
 		matchesList,
 		FollowGame,
 		goToFollowGame,
-		match404}
+		match404,
+		waitForChatOpponent}
 	},
 })
 </script>
