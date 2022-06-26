@@ -109,7 +109,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const matchId = uuid();
         const newMatch = this.gamesService.setMatch(matchId, queue.splice(0, 2), features.splice(0, 2));
         matchs.set(matchId, newMatch);
-        console.log('here');
         this.gamesService.sendToPlayers(newMatch,'foundMatch', newMatch.matchId);
         this.gamesService.waitForPlayers(this.server, newMatch, matchs);
       }
@@ -255,11 +254,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('getMatchByUser')
   async handleGetMatchByUser(client: Socket, data: { playerName: string }) {
     try {
-      console.log('INSIDE GET MATCH BY USER');
       if (!client.data.user) {
         return client.disconnect();
       }
-      console.log('data: ' + data.playerName);
       if (
         this.gamesService.isWaiting(client, queue) === true ||
         this.gamesService.isPlaying(client, matchs) === true

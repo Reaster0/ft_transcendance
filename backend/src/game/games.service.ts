@@ -297,12 +297,10 @@ export class GamesService {
   }
 
   findMatchIdByPlayer(client: Socket, matchs: Map<string, Match>, toFind: string) {
-    console.log('toFind ', toFind);
     for (const match of matchs.values()) {
       if (match.state === State.ONGOING || match.state === State.SCORE) {
         if (match.players[0].user.nickname === toFind
           || match.players[1].user.nickname === toFind) {
-          console.log('here');
           return match.matchId;
         }
       }
