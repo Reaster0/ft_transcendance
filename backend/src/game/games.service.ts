@@ -195,6 +195,7 @@ export class GamesService {
         that.checkPlayersPresents(server, match);
         if (match.state === State.FINISHED) {
           clearInterval(intervalId);
+          that.listGamesToAll(watchers, matchs);    
           that.finishGame(server, match, matchs);
         } else if (match.state === State.SCORE) {
           count++;
