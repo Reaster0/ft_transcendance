@@ -534,6 +534,7 @@ export default defineComponent({
         }
         usersList.value = params;
         if (!update.value.connected || currentChannel.value.type === ChannelType.PM) {
+          console.log('EMIT CHANNELS');
           connection.value!.emit('emitMyChannels');
         }
       })
@@ -548,6 +549,7 @@ export default defineComponent({
               channel.name = getUserName(usersId[i]);
               channel.avatar = getUserAvatar(usersId[i]);
               game.value.ingame = getUserStatus(usersId[i]) === Status.PLAYING ? true : false;
+              console.log('In game:' + game.value.ingame);
           }
           if (currentChannel.value.id === channel.id) {
             reDisplayChannel(channel);
@@ -627,6 +629,7 @@ export default defineComponent({
           currentChannel.value.id = params.id;
           alert('You just been added to a new private discussion.');
         }
+        displayMemberChannel();
       })
 
       connection.value!.on('alreadyInPm', function(params: { name: string }){
@@ -971,18 +974,24 @@ export default defineComponent({
 
     function waitingGame() {
       game.value.request = true;
+      game.value.togame = false;
+      console.log('Wainting game');
       if (game.value.socket === null) {
         game.value.socket = io('http://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
-        game.value!.socket.emit('fromChat');
+        game.value!.socket.on('connectedToGame', function() {
+          game.value!.socket.emit('fromChat');
+        })
       }
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
       let count = 0;
+      console.log('here');
       const intervalId = setInterval(() => {
         if (game.value.togame === true) {
+          game.value.togame = false;
           clearInterval(intervalId);
           goToGame();
         } else if (game.value.absent === true || count === 100) {
@@ -1029,35 +1038,43 @@ export default defineComponent({
     }
 
     function goToGame() {
-        router.push('/game');
+      game.value.socket = null;
+      router.push('/game');
     }
 
     /* Watch game system */
 
     function watchUserGame() {
+      console.log('watch user game');
       if (game.value.socket === null) {
         game.value.socket = io('http://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
-        game.value!.socket.emit('fromChat');
       }
       game.value.socket.on('notAvailable', function(params: { player: string }) {
         alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
         game.value.socket.disconnect();
+        game.value.socket = null;
         game.value.socket.removeAllListeners('notAvailable');
         game.value.socket.removeAllListeners('matchId');
+        game.value.socket.removeAllListeners('connectedToGame');
       });
       game.value.socket.on('matchId', function(params: { matchId: string }) {
+        console.log('received matchId');
         game.value.socket.removeAllListeners('notAvailable');
         game.value.socket.removeAllListeners('matchId');
+        game.value.socket.removeAllListeners('connectedToGame');
         store.commit('setGameSocket', game.value.socket);
         store.commit('setWatchGame', true);
         forceLeave = true;
+        game.value.socket = null;
         router.push('/game?watch=true&matchid=' + params.matchId);
       })
-      game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
+      game.value.socket.on('connectedToGame', function() {
+        game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
+      })
     }
 
     /* Utilities function */
@@ -1126,7 +1143,7 @@ export default defineComponent({
     }
 
     function goToUserPage() {
-        router.push("/user/" + currentChannel.value.name);
+      router.push("/user/" + currentChannel.value.name);
     }
 
 		return { update, messageText, userChannels, displayMemberChannel,

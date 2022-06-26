@@ -14,8 +14,10 @@ function leaveChat(forceLeave: boolean, socket: any, to: any, next: any, store: 
 	}
 	if (answer === true || forceLeave === true) {
 		console.log('disconnection from chat');
-		if (forceLeave === false) {
+		try {
 			socket.disconnect();
+		} catch {
+			console.log('socket was already down');
 		}
 		store.commit('setChatSocket' , null);
 		store.commit('setUserToManage' , null);

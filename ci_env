@@ -14,7 +14,7 @@ JWT_SECRET='onsenfou'
 JWT_EXPIRATION_TIME=36000000000000
 
 #FrondENd
-FRONTEND='http://localhost:8080/login'
+FRONTEND='http://localhost:8080/'
 
 # Variables for secret encryption
 ENCRYPTION_KEY='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' # Must be 32 char (256 bit)

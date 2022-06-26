@@ -135,10 +135,13 @@ export default defineComponent ({
 						} else {
 							setTimeout(() => {
 								if (waitForChatOpponent.value === true) {
+									waitForChatOpponent.value = false;
+									searchingGame.value = false;
 									alert('Your opponent never joined game.');
-									router.push('/');
+									gameSocket.value.disconnect(); // Necessary to delete socket from 'fromChat' array inside back
+									router.push('/'); // Because we disconnected
 								}
-							}, 30 * 1000);
+							}, 10 * 1000);
 						}
 					}
 					store.commit('setGameSocket', null);

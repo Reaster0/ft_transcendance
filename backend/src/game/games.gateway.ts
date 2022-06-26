@@ -56,6 +56,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('User leaving: ' + client.data.user.username);
         if (fromChat.indexOf(client.id) === -1) {
           await this.usersService.changeStatus(client.data.user, Status.OFFLINE, null);
+        } else {
+          const index = fromChat.indexOf(client.id);
+          fromChat.splice(index, 1);
         }
         if (this.gamesService.isWaiting(client, queue) === true) {
           const index = queue.indexOf(client);
@@ -181,6 +184,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('acceptGame')
   handleAcceptGame(client: Socket, matchId: string) {
     try {
+      const index = fromChat.indexOf(client.id);
+      if (index != -1) {
+        fromChat.splice(index, 1);
+      }
       const match = matchs.get(matchId);
       if (!client.data.user) {
         return client.disconnect();
@@ -248,6 +255,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('getMatchByUser')
   async handleGetMatchByUser(client: Socket, data: { playerName: string }) {
     try {
+      console.log('INSIDE GET MATCH BY USER');
       if (!client.data.user) {
         return client.disconnect();
       }
