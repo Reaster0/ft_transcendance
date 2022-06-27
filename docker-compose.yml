@@ -8,25 +8,27 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    #volumes:
-    #  - /data/postgres:/data/postgres
-    
-  # front:
-  #   build:
-  #     context: ./frontend
-  #   image: frontend
-  #   container_name: front
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
+    volumes:
+     - ./data/postgres:/data/postgres
 
-  # back:
-  #   build: ./backend
-  #   container_name: back
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - db
-  #   env_file:
-  #     - .env
+  front:
+    build:
+      context: ./frontend
+      args:
+        - VUE_APP_BACKEND=${VUE_APP_BACKEND}
+    image: frontend
+    container_name: front
+    restart: always
+    ports:
+      - "8080:8080"
+
+  back:
+    build: ./backend
+    container_name: back
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
