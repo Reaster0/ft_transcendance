@@ -42,7 +42,6 @@
         "@nestjs/websockets": "^8.4.5",
         "@types/cookie": "^0.5.1",
         "@types/passport-jwt": "^3.0.6",
-        "@types/socket.io": "^3.0.2",
         "bcrypt": "^5.0.1",
         "bcryptjs": "^2.4.3",
         "blob": "^0.1.0",
