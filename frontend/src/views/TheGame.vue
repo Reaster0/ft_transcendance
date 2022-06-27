@@ -119,7 +119,7 @@ export default defineComponent ({
 			try {
 				gameSocket.value = store.getters.getGameSocket;
 				if (gameSocket.value === null) {
-					gameSocket.value = io('http://:3000/game',{
+					gameSocket.value = io('ws://:3000/game',{
 						transportOptions: {
 						polling: { extraHeaders: { auth: document.cookie }},
 						withCredentials: true

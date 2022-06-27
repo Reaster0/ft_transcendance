@@ -119,7 +119,7 @@ export default defineComponent ({
           router.push('/thechat');
           return ;
         } else if (!chatSocket) {
-          const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+          const connection = io('ws//:3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },

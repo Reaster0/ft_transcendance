@@ -502,7 +502,7 @@ export default defineComponent({
 			try {
         connection.value = store.getters.getChatSocket;
         if (connection.value === null) {
-          connection.value = io(window.location.protocol + '//:3000/chat',
+          connection.value = io('ws//:3000/chat',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
@@ -965,7 +965,7 @@ export default defineComponent({
       game.value.request = true;
       game.value.togame = false;
       if (game.value.socket === null) {
-        game.value.socket = io('http://:3000/game',
+        game.value.socket = io('ws//:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
@@ -1013,7 +1013,7 @@ export default defineComponent({
       }
       showGameModal.value = false;
       if (game.value.socket === null) {
-        game.value.socket = io('http://:3000/game',
+        game.value.socket = io('ws//:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
@@ -1034,7 +1034,7 @@ export default defineComponent({
 
     function watchUserGame() {
       if (game.value.socket === null) {
-        game.value.socket = io('http://:3000/game',
+        game.value.socket = io('ws//:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
