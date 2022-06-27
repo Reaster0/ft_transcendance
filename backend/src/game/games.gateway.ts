@@ -140,7 +140,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const allSockets = await this.server.fetchSockets();
       let opponent = null;
       for (let socket of allSockets) {
-        if (socket.data.id === data.opponentSocketId) {
+        if (socket.id === data.opponentSocketId) {
           opponent = socket;
         }
       }

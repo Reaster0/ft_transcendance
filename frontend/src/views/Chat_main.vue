@@ -746,9 +746,9 @@ export default defineComponent({
           return ;
         }
         forceLeave = true;
-        game.value.togame = true;
         store.commit('setGameSocket', game.value.socket);
         store.commit('setOpponentSocketId', params.socketId);
+        game.value.togame = true;
       })
 
 		})
