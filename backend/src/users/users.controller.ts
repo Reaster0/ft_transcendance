@@ -97,7 +97,11 @@ export class UsersController {
   @Get('isMyFriend/:id')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   isMyfriend(@Req() req: RequestUser, @Param('id', ParseIntPipe) id: number): boolean {
-    return this.usersService.isMyFriend(req.user, id);
+    try {
+      return this.usersService.isMyFriend(req.user, id);
+    } catch (e) {
+      throw e;
+    }
   }
 
 
