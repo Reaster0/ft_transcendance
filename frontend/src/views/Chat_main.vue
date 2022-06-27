@@ -525,7 +525,7 @@ export default defineComponent({
         router.push('/');
       })
 
-      connection.value!.on('secondConnection, function() {
+      connection.value!.on('secondConnection', function() {
         alert('Are you already connected to chat somewhere else ? Some things may not work as intended.');
       })
 
@@ -779,6 +779,7 @@ export default defineComponent({
       connection.value!.removeAllListeners('gameInvitation');
       connection.value!.removeAllListeners('endGameInvit');
       connection.value!.removeAllListeners('gameAccepted');
+      connection.value!.removeAllListeners('secondConnection');
     })
 
     /* Functions for channel display and management */

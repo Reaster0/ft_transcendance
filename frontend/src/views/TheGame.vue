@@ -94,7 +94,7 @@ export default defineComponent ({
 		const searchingGame = ref<boolean>(false);
 		const fatalError = ref<boolean>(false);
 		const gameData = ref<any>({
-			pos: "" as string, //can be "left" or "right" OR the name of the left player if watching 
+			pos: "" as string, //can be "left" or "right" OR the name of the left player if watching
 			opponent: "" as string,
 			ball: {x: 0 as number, y: 0 as number, radius: 10 as number},
 			paddle:{ width: 5 as number, height: 15 as number},
@@ -116,7 +116,7 @@ export default defineComponent ({
 		let waitForChatOpponent = ref<boolean>(false);
 
 		onMounted(async() =>{
-			try {		
+			try {
 				gameSocket.value = store.getters.getGameSocket;
 				if (gameSocket.value === null) {
 					gameSocket.value = io('http://:3000/game',{
@@ -151,6 +151,10 @@ export default defineComponent ({
 			} catch (error) {
 				console.log("the error is:" + error);
 			}
+
+			gameSocket.value!.on('secondConnection', function() {
+				alert('Are you already connected to chat somewhere else ? Some things may not work as intended.');
+			})
 
 			gameSocket.value!.on('joined', (text: string) => {
 				console.log("joined" + text);
@@ -259,7 +263,7 @@ export default defineComponent ({
 				console.log("event close: " + event)
 				fatalError.value = true
 			}
-			
+
 			gameSocket.value!.on('disconnect', () => {
 				alert('Something went wrong. You\'ll be disconnected from game.');
 				router.push('/');
@@ -483,7 +487,7 @@ h1 {
 	color: #04BBEC;
 }
 
-.big_button {  
+.big_button {
   margin: 180px auto 0 auto;
 }
 
