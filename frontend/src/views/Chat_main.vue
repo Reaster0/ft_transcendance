@@ -30,7 +30,7 @@
               <v-divider class="mx-4" vertical></v-divider>
               <v-icon color="rgb(0,0,255)"> mdi-plus </v-icon>
             </v-btn>
-          
+
           </v-col>
 
           <!-- LIST OF CHANNELS JOINED -->
@@ -131,7 +131,7 @@
                   </v-badge>
                 </v-btn>
                 <v-card class="mt-2 ml-2" max-width="450px" v-if="msg.userId
-                  != currentUser.id">   
+                  != currentUser.id">
                   <v-list-item class="other-message-container">
                     <v-list-item-header>
                       <v-list-item-subtitle>
@@ -153,7 +153,7 @@
             <div v-if="currentChannel.messages.length === 0">
               <p class="textfullcenter font-weight-light" data-text="Start conversation">
                 Start conversation
-              </p>  
+              </p>
             </div>
 
             <!-- SEND MESSAGE -->
@@ -177,7 +177,7 @@
             <p class="textfullcenter font-weight-light" data-text="Blocked user">
               You blocked this user
             </p>
-          </v-app>  
+          </v-app>
 
           <v-app v-else-if="currentChannel.id != ''">
             <p class="textfullcenter font-weight-light" data-text="Loading messages">
@@ -190,7 +190,7 @@
 
         <!-- INFOS ON CURRENT/SEARCHED CHAT -->
         <v-col cols="auto" sm="3" class="border">
-          
+
           <!-- CHANNEL DESCRIPTION -->
           <v-card height="100%" class="text-center offsetphoto" shaped
             v-if="currentChannel.id != ''">
@@ -217,7 +217,7 @@
             <v-card-subtitle class="layout justify-center">
               {{ currentChannel.description }}
             </v-card-subtitle>
-            
+
             <!-- CASE CHANNEL -->
             <div id="channel" class="pt-6"
               v-if="currentChannel.type != ChannelType.PM">
@@ -265,7 +265,7 @@
                     </v-tab>
                   </v-tabs>
                   <!-- DISPLAY MEMBERS -->
-                  <v-card flat class="overflow-y-auto">       
+                  <v-card flat class="overflow-y-auto">
                     <div v-if="channelManager.displayIndex === 0">
                       <v-list>
                         <template v-for="(item, index) in
@@ -274,7 +274,7 @@
                             :inset="item.inset"></v-divider>
                           <v-list-item v-else :key="item.title">
                             <!-- MANAGE USER BUTTON IF ADMIN -->
-                            <div v-if="(currentChannel.role === Roles.ADMIN 
+                            <div v-if="(currentChannel.role === Roles.ADMIN
                               || currentChannel.role === Roles.OWNER)
                               && item.id != currentUser.id
                               && item.role != Roles.OWNER">
@@ -316,7 +316,7 @@
                           </v-divider>
                           <v-list-item v-else :key="item.title">
                             <!-- MANAGE USER BUTTON IF ADMIN -->
-                            <div v-if="(currentChannel.role === Roles.ADMIN 
+                            <div v-if="(currentChannel.role === Roles.ADMIN
                               || currentChannel.role === Roles.OWNER)
                               && item.id != currentUser.id
                               && item.role != Roles.OWNER">
@@ -414,7 +414,7 @@
                 </v-toolbar>
               </v-app>
             </div>
-          </v-card>  
+          </v-card>
           <game-modal :showGameModal="showGameModal"
             :toggleGameModal="toggleGameModal"
             :inviter="getUserName(game.inviter)"
@@ -467,10 +467,10 @@ export default defineComponent({
     let update = ref({ connected: false as boolean, users: false as boolean,
       messages: false as boolean });
     let currentChannel = ref({ name: '' as string, id: '' as string,
-      type: ChannelType.PUBLIC as ChannelType, 
+      type: ChannelType.PUBLIC as ChannelType,
       messages: [] as Message[], users: [] as UserChannel[],
       role: Roles.NONMEMBER as Roles, avatar: null as null | string,
-      notif: false as boolean, description: '' as string, 
+      notif: false as boolean, description: '' as string,
       blocked: false as boolean });
     let channelManager = ref({title: ['all members', 'admins'] as string[],
       members: [] as any[], admins: [] as any[],
@@ -481,7 +481,7 @@ export default defineComponent({
     let showPasswordModal = ref<boolean>(false);
     let showGameModal = ref<boolean>(false);
     let game = ref({ request: false as boolean, response: true as boolean,
-      inviter: null as any, socket: null as any, absent: false as boolean, 
+      inviter: null as any, socket: null as any, absent: false as boolean,
       togame: false as boolean, ingame: false as boolean });
     let chanJoinSelected = {name: 'enter channer'} as Channel;
     let confirm =  0 as number;
@@ -525,11 +525,15 @@ export default defineComponent({
         router.push('/');
       })
 
+      connection.value!.on('secondConnection, function() {
+        alert('Are you already connected to chat somewhere else ? Some things may not work as intended.');
+      })
+
       /* Function to receive users and channels data */
 
       connection.value!.on('usersList', async function(params: any) {
         for (let user of params) {
-          user.avatar = await getAvatarID(user.id) as any; 
+          user.avatar = await getAvatarID(user.id) as any;
         }
         usersList.value = params;
         if (!update.value.connected || currentChannel.value.type === ChannelType.PM) {
@@ -600,7 +604,7 @@ export default defineComponent({
         joinableChannels.value = [];
         for (let user of params) {
           let avatar = await getUserAvatar(user.id);
-          joinableChannels.value.push({ id: user.id, name: user.nickname, 
+          joinableChannels.value.push({ id: user.id, name: user.nickname,
             type: ChannelType.PM, avatar: avatar });
         }
       })
@@ -672,7 +676,7 @@ export default defineComponent({
       connection.value!.on('newlyAdmin', function(params: { channelId: string }){
         if (params.channelId === currentChannel.value.id) {
           alert('You are now an admin of ' + currentChannel.value.name + '.');
-        }        
+        }
       })
 
       /* Modification of channels */
@@ -689,7 +693,7 @@ export default defineComponent({
         connection.value!.emit('emitMyChannels');
       })
 
-      connection.value!.on('channelDestruction', function (params: {id: string }){          
+      connection.value!.on('channelDestruction', function (params: {id: string }){
         connection.value!.emit('emitMyChannels');
         if (currentChannel.value.id != params.id) {
           return ;
@@ -1054,7 +1058,7 @@ export default defineComponent({
         router.push('/game?watch=true&matchid=' + params.matchId);
       })
       game.value.socket.on('connectedToGame', function() {
-        game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });      
+        game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });
       })
     }
 
@@ -1091,7 +1095,7 @@ export default defineComponent({
     function toggleGameModal() {
       showGameModal.value = false;
     }
-    
+
    function dropdownShouldOpen(VueSelect:any) {
       return VueSelect.search.length !== 0 && VueSelect.open
     }
@@ -1193,7 +1197,7 @@ export default defineComponent({
   top: 50%;
   left: 50%;
   margin-right: -50%;
-  transform: translate(-50%, -50%);  
+  transform: translate(-50%, -50%);
   font-size: 1.2em;
 }
 
