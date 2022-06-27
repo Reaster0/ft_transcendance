@@ -22,6 +22,7 @@
     "search-dropdown-vue": "^1.0.2",
     "socket.io": "^4.5.1",
     "socket.io-client": "^4.5.1",
+    "uuid": "^7.0.3",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.15",
@@ -30,7 +31,8 @@
     "vue3-keypress": "^4.0.1",
     "vuetify": "^3.0.0-beta.0",
     "vuex": "^4.0.2",
-    "webfontloader": "^1.0.0"
+    "webfontloader": "^1.0.0",
+    "webpack-plugin-vuetify": "^2.0.0-alpha.11"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
