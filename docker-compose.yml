@@ -11,6 +11,15 @@ services:
     volumes:
      - ./data/postgres:/data/postgres
 
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
+
   front:
     build:
       context: ./frontend
@@ -26,6 +35,8 @@ services:
     build: ./backend
     container_name: back
     restart: always
+    volumes:
+      - ./frontend:/frontend
     ports:
       - "3000:3000"
     depends_on:
