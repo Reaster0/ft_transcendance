@@ -502,7 +502,7 @@ export default defineComponent({
 			try {
         connection.value = store.getters.getChatSocket;
         if (connection.value === null) {
-          connection.value = io('ws//:3000/chat',
+          connection.value = io('ws://:3000/chat',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
@@ -790,6 +790,8 @@ export default defineComponent({
         alert('Wait for end of game request before changing channel');
         return ;
       }
+      game.value.response = true;
+      game.value.absent = false;
       currentChannel.value.name = channel.name;
       currentChannel.value.id = channel.id;
       currentChannel.value.avatar = channel.avatar;
@@ -965,15 +967,19 @@ export default defineComponent({
       game.value.request = true;
       game.value.togame = false;
       if (game.value.socket === null) {
-        game.value.socket = io('ws//:3000/game',
+        game.value.socket = io('ws://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
         game.value!.socket.on('connectedToGame', function() {
           game.value!.socket.emit('fromChat');
+          sendGameInvit();
         })
       }
+    }
+
+    function sendGameInvit() {
       game.value!.socket.removeAllListeners('connectedToGame');
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
       let count = 0;
@@ -991,7 +997,6 @@ export default defineComponent({
         }
         count++;
       }, 100);
-
     }
 
     function noResponse() {
@@ -1013,16 +1018,19 @@ export default defineComponent({
       }
       showGameModal.value = false;
       if (game.value.socket === null) {
-        game.value.socket = io('ws//:3000/game',
+        game.value.socket = io('ws://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
       }
-      connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
-      store.commit('setGameSocket', game.value.socket);
-      forceLeave = true;
-      router.push('/game');
+      game.value.socket.on('connectedToGame', function() {
+        connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
+        store.commit('setGameSocket', game.value.socket);
+        game.value.socket.removeAllListeners('connectedToGame');
+        forceLeave = true;
+        router.push('/game');
+      });
     }
 
     function goToGame() {
@@ -1034,7 +1042,7 @@ export default defineComponent({
 
     function watchUserGame() {
       if (game.value.socket === null) {
-        game.value.socket = io('ws//:3000/game',
+        game.value.socket = io('ws://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true

@@ -71,7 +71,7 @@
 
 <script lang="ts">
 import { useRoute } from "vue-router"
-import { onMounted } from "@vue/runtime-core";
+import { onMounted, onUnmounted } from "@vue/runtime-core";
 import { defineComponent, ref, watch } from "vue";
 import { io } from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
@@ -292,6 +292,10 @@ export default defineComponent ({
 
 			if (route.query.watch)
 				setTimeout(function () {WatchGame()}, 600)
+		})
+
+		onUnmounted(async() => {
+			gameSocket.value.disconnect();
 		})
 
 		watch(gameStarted, (gameChange) =>{
