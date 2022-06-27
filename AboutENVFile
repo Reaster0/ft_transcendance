@@ -4,7 +4,7 @@ DATABASE_USER: Name of DB user
 DATABASE_PASSWORD: A password for DB user
 DATABASE_NAME: Name of your DB
 DATABASE_PORT: DB port (5432 for example)
-DATABASE_HOST: Your DB host (localhost by default)
+DATABASE_HOST: Your DB host (localhost by default, docker service database name with docker)
 
 
 # For 42 passport and authentification system :
