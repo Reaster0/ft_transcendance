@@ -76,18 +76,16 @@ export class UsersService {
 
   async updateUser(user: User, updateUser: UpdateUserDto): Promise<User> {
     const { nickname } = updateUser;
-    /* frontEND
-    if (nickname.length > 15)
+    if (nickname.length > 15) {
       throw new BadRequestException('Nickname is too long');
+    }
     if (nickname.match(/^[0-9a-z]+$/)) {
-      console.log('not alphanumeric');
       throw new BadRequestException('Nickname is not alphanumeric');
     }
-    */
     let find = await this.userRepository.findOne({ nickname: nickname });
-    if (find && find != user) 
+    if (find && find != user)  {
       throw new BadRequestException('Nickname already taken');
-
+    }
     user.nickname = nickname;
     return this.userRepository.save(user);
   }
