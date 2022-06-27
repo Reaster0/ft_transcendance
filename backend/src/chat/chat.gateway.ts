@@ -84,31 +84,35 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('joinChannel')
   async handleJoinChannel(client: Socket, channel: ChannelI) {
-    const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
-    if (!channelFound) {
-      return ;
-    }
-    if (channelFound.password) {
-      if (!channel.password) {
-        client.emit('wrongPassword');
-        return ;
-      } else if (await bcrypt.compare(channel.password, channelFound.password) === false) {
-        client.emit('wrongPassword');
+    try {
+      const channelFound = await this.chanServices.findChannelWithUsers(channel.id);
+      if (!channelFound) {
         return ;
       }
-    }
-    const index = channelFound.banned.indexOf(client.data.user.id);
-    if (index !== -1) {
-      client.emit('youAreBanned');
-      return ;
-    }
-    await this.chanServices.pushUserToChan(channelFound, client.data.user);
-    this.logger.log(`${client.data.user.username} joined ${channelFound.name}`);
-    client.emit('joinAccepted', { id: channelFound.id, isPm: false });
-    this.handleEmitMyChannels(client);
-    const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelFound.id);
-    for (const user of connectedUsers) {
-      this.server.to(user.chatSocket).emit('userChannelModif', { id: channelFound.id });
+      if (channelFound.password) {
+        if (!channel.password) {
+          client.emit('wrongPassword');
+          return ;
+        } else if (await bcrypt.compare(channel.password, channelFound.password) === false) {
+          client.emit('wrongPassword');
+          return ;
+        }
+      }
+      const index = channelFound.banned.indexOf(client.data.user.id);
+      if (index !== -1) {
+        client.emit('youAreBanned');
+        return ;
+      }
+      await this.chanServices.pushUserToChan(channelFound, client.data.user);
+      this.logger.log(`${client.data.user.username} joined ${channelFound.name}`);
+      client.emit('joinAccepted', { id: channelFound.id, isPm: false });
+      this.handleEmitMyChannels(client);
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelFound.id);
+      for (const user of connectedUsers) {
+        this.server.to(user.chatSocket).emit('userChannelModif', { id: channelFound.id });
+      }
+    } catch (e) {
+      this.logger.log(e);
     }
   }
 
@@ -163,7 +167,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         client.emit('alreadyInPm', { name: user2.nickname });
       }
     } catch (e) {
-      client.disconnect();
       this.logger.log(e);
     }
   }
@@ -292,78 +295,102 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /****** Emit alone functions ******/
 
   async emitChannelModif(channelId: string) {
-    const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
-    for (const user of connectedUsers) {
-      console.log(user.chatSocket);
-      this.server.to(user.chatSocket).emit('userChannelModif', { id: channelId });
+    try {
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(channelId);
+      for (const user of connectedUsers) {
+        console.log(user.chatSocket);
+        this.server.to(user.chatSocket).emit('userChannelModif', { id: channelId });
+      }
+    } catch (e) {
+      this.logger.log(e);
     }
   }
 
   async sendUsersList() {
-    const users = await this.userServices.getUsers();
-    this.server.emit('usersList', users);
+    try {
+      const users = await this.userServices.getUsers();
+      this.server.emit('usersList', users);
+    } catch (e) {
+      this.logger.log(e);
+    }
   }
 
   @SubscribeMessage('getUsersList')
   async sendUsersListToOne(client: Socket) {
-    const users = await this.userServices.getUsers();
-    client.emit('usersList', users);
+    try  {
+      const users = await this.userServices.getUsers();
+      client.emit('usersList', users);
+    } catch (e) {
+      this.logger.log(e);
+    }
   }
 
   /******* Emit service ********/
 
   @SubscribeMessage('emitMyChannels')
   async handleEmitMyChannels(client: Socket) {
-    this.logger.log('Get channels joined by user');
-    const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(client.data.user.id);
-    for (let channel of channels) {
-      channel.blocked = false;
-      if (channel.type === ChannelType.PM) {
-        let user: User = client.data.user;
-        let usersId = channel.name.split('/').map(Number);
-        let targetId = usersId[0];
-        if (usersId[0] === user.id) {
-          targetId = usersId[1];
-        }
-        let index = user.blockedIds.indexOf(targetId);
-        if (index !== -1) {
-          channel.blocked = true;
+    try {
+      this.logger.log('Get channels joined by user');
+      const channels: FrontChannelI[] = await this.chanServices.getChannelsFromUser(client.data.user.id);
+      for (let channel of channels) {
+        channel.blocked = false;
+        if (channel.type === ChannelType.PM) {
+          let user: User = client.data.user;
+          let usersId = channel.name.split('/').map(Number);
+          let targetId = usersId[0];
+          if (usersId[0] === user.id) {
+            targetId = usersId[1];
+          }
+          let index = user.blockedIds.indexOf(targetId);
+          if (index !== -1) {
+            channel.blocked = true;
+          }
         }
       }
+      client.emit('channelList', channels);
+    } catch (e) {
+      this.logger.log(e);
     }
-    client.emit('channelList', channels);
   }
 
   @SubscribeMessage('getChannelUsers')
   async handleGetChannelUsers(client: Socket, params: any): Promise<any> {
-    this.logger.log('Get channel users');
-    const channelUsers: RolesI[] = await this.chanServices.getChannelUsers(params.id);
-    let isMember = false;
-    let res = [] as any[];
+    try {
+      this.logger.log('Get channel users');
+      const channelUsers: RolesI[] = await this.chanServices.getChannelUsers(params.id);
+      let isMember = false;
+      let res = [] as any[];
 
-    for (let user of channelUsers) {
-      if (user.userId === client.data.user.id) {
-        isMember = true;
+      for (let user of channelUsers) {
+        if (user.userId === client.data.user.id) {
+          isMember = true;
+        }
+        res.push({ 'id': user.userId, 'role': user.role }) //better changeThis
       }
-      res.push({ 'id': user.userId, 'role': user.role }) //better changeThis
+      if (isMember === false) {
+        this.logger.log('Access Refused');
+        client.emit('AccessRefused');
+        return;
+      }
+      client.emit('channelUsers', { id: params.id, users: res });
+    } catch (e) {
+      this.logger.log(e);
     }
-    if (isMember === false) {
-      this.logger.log('Access Refused');
-      client.emit('AccessRefused');
-      return;
-    }
-    client.emit('channelUsers', { id: params.id, users: res });
   }
 
   @SubscribeMessage('getChannelMessages')
   async handleGetChannelMessages(client: Socket, params: any) {
-    const user = await this.userServices.findUserById(client.data.user.id);
-    this.logger.log('Get channel messages');
-    if (!await this.chanServices.userIsInChannel(user, params.id)) {
-      return;
+    try {
+      const user = await this.userServices.findUserById(client.data.user.id);
+      this.logger.log('Get channel messages');
+      if (!await this.chanServices.userIsInChannel(user, params.id)) {
+        return;
+      }
+      const messages = await this.messageServices.findMessagesForChannel(params.id, user);
+      client.emit('channelMessages', { id: params.id, messages: messages });
+    } catch (e) {
+      this.logger.log(e);
     }
-    const messages = await this.messageServices.findMessagesForChannel(params.id, user);
-    client.emit('channelMessages', { id: params.id, messages: messages });
   }
 
   @SubscribeMessage('getJoinableChannels')

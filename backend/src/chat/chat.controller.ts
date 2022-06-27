@@ -24,16 +24,20 @@ export class ChatController {
 
   @Get('genJoinUrl')
   async makeUrl(@Query('chanId') channelId: string): Promise<string> {
-    const params = {
-        chanId: channelId,
-    };
-    let date = new Date();
-    const res: string = this.urlGeneratorService.signControllerUrl({ controller: ChatController,
-        controllerMethod: ChatController.prototype.joinChannel,
-        params: params,
-        expirationDate: new Date(date.getTime() + 10 * 60000),
-      });
-      return (res);
+    try {
+      const params = {
+          chanId: channelId,
+      };
+      let date = new Date();
+      const res: string = this.urlGeneratorService.signControllerUrl({ controller: ChatController,
+          controllerMethod: ChatController.prototype.joinChannel,
+          params: params,
+          expirationDate: new Date(date.getTime() + 10 * 60000),
+        });
+        return (res);
+      } catch (e) {
+        console.log(e);
+      }
   }
 
   @Get('joinChannel/:chanId')
@@ -63,11 +67,19 @@ export class ChatController {
 
   @Get('joinableChannel/:id')
   async joinableChannel(@Param('id') id: number): Promise<FrontChannelI[]> {
-    return await this.chanServices.filterJoinableChannel(id);
+    try {
+      return await this.chanServices.filterJoinableChannel(id);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   @Get('findUser/:name')
   async findUser(@Param('name') name: string): Promise<User[]> {
-    return await this.userService.filterUserByName(name);
+    try {
+      return await this.userService.filterUserByName(name);
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
