@@ -37,7 +37,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     try {
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
-      if (user.status === Status.ONLINE) {
+      if (user.status !== Status.OFFLINE) {
         client.emit('secondConnection');
       }
       await this.userServices.changeStatus(client.data.user, Status.ONLINE, client.id);

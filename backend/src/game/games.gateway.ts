@@ -42,7 +42,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return client.disconnect();
       }
       client.data.user = user;
-      if (user.status === Status.PLAYING) {
+      if (user.status !== Status.OFFLINE) {
         client.emit('secondConnection');
       }
       this.logger.log('User connected: ' + user.nickname);

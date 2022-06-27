@@ -220,13 +220,13 @@ export class ChanServices {
     return (res);
   }
 
-  async retrieveOtherSocket(toPassId: number, channelId: string) {
+  async retrieveOtherSocket(toIgnoreId: number, channelId: string) {
     const member: ChannelI = await this.chanRepository.findOne({
       where: {id: channelId},
       relations: ['users'],
     });
     for (const user of member.users) {
-      if (user.id != toPassId) {
+      if (user.id != toIgnoreId) {
         return user.chatSocket;
       }
     }

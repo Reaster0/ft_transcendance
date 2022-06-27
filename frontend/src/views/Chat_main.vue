@@ -526,7 +526,7 @@ export default defineComponent({
       })
 
       connection.value!.on('secondConnection', function() {
-        alert('Are you already connected to chat somewhere else ? Some things may not work as intended.');
+        alert('Are you already connected somewhere else ? Some things may not work as intended.');
       })
 
       /* Function to receive users and channels data */
