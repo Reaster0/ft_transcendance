@@ -23,26 +23,29 @@ export class ChanServices {
   ) {}
 
   async createChannel(channel: ChannelI, creator: User): Promise<{channel: string, error: string}> {
-    let { name, type, password } = channel;
-    if (!name) return {channel:null, error: 'Channel name must not be empty'};
+    try {
+      let { name, type, password } = channel;
+      if (!name) return {channel:null, error: 'Channel name must not be empty'};
 
-		if (/^([a-zA-Z0-9-]+)$/.test(name) === false)
-			return {channel:null, error: 'Channel name must be alphabetical'};
+      if (/^([a-zA-Z0-9-]+)$/.test(name) === false)
+        return {channel:null, error: 'Channel name must be alphabetical'};
 
-    const sameName = await this.chanRepository.findOne({ name: name });
-		if (sameName) return {channel:null, error: 'This channel name is already taked'};
+      const sameName = await this.chanRepository.findOne({ name: name });
+      if (sameName) return {channel:null, error: 'This channel name is already taked'};
 
-    channel.users = [creator];
-    channel.banned = [];
-		if (type === ChannelType.PROTECTED || password) {
-			const salt = await bcrypt.genSalt();
-			channel.password = await bcrypt.hash(password, salt);
-		}
-		const newChannel = await this.chanRepository.save(channel);
-    const user: RolesI = {userId: creator.id, role: ERoles.OWNER, muteDate: null, channel: newChannel}
-    this.roleRepository.save(user);
-
-    return {channel: newChannel.name, error: ''};
+      channel.users = [creator];
+      channel.banned = [];
+      if (type === ChannelType.PROTECTED || password) {
+        const salt = await bcrypt.genSalt();
+        channel.password = await bcrypt.hash(password, salt);
+      }
+      const newChannel = await this.chanRepository.save(channel);
+      const user: RolesI = {userId: creator.id, role: ERoles.OWNER, muteDate: null, channel: newChannel}
+      this.roleRepository.save(user);
+      return {channel: newChannel.name, error: ''};
+    } catch (e) {
+      return {channel: null, error: '' + e};
+    }
 	}
 
   async privateConversation(user1: User, user2: User) {
@@ -86,7 +89,7 @@ export class ChanServices {
   async saveNewDate(channel: Channel, date: Date) {
     channel.date = date;
     try {
-    this.chanRepository.save(channel);
+      this.chanRepository.save(channel);
     } catch(e) {
         throw new InternalServerErrorException('failed to save channel');
     }
