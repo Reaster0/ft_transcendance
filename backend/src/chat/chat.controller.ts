@@ -40,36 +40,25 @@ export class ChatController {
   @UseGuards(AuthGuard('jwt'), AuthUser)
   @UseGuards(SignedUrlGuard)
   @Redirect('http://localhost:8080/thechat')
-  async joinChannel(@Param('chanId') id: string, @Req() req: RequestUser) {  
-    const channel = await this.chanServices.findChannelWithUsers(id);
-    if (!channel) {
-      return ;
+  async joinChannel(@Param('chanId') id: string, @Req() req: RequestUser) {
+    try {
+      const channel = await this.chanServices.findChannelWithUsers(id);
+      if (!channel) {
+        return ;
+      }
+      const user = req.user;
+      const already = await this.chanServices.getUserOnChannel(channel, user.id)
+      if (already) {
+        return ;
+      }
+      const result = await this.chanServices.pushUserToChan(channel, user);
+      if (!result) {
+        return ;
+      }
+      this.chatGateway.emitChannelModif(channel.id);
+    } catch (e) {
+      console.log(e);
     }
-    const user = req.user;
-    const already = await this.chanServices.getUserOnChannel(channel, user.id)
-    if (already) {
-      return ;
-    }
-    const result = await this.chanServices.pushUserToChan(channel, user);
-    if (!result) {
-      return ;
-    }
-    this.chatGateway.emitChannelModif(channel.id);
-  }
-
-  @Get('/channeltest')
-  async createChannelTest() {
-    const creator = await this.userService.findUserById('2');
-    const chan: ChannelI = {
-        name: "channeltest3",
-        password: '',
-        type: ChannelType.PUBLIC
-    };
-    return await this.chanServices.createChannel(chan, creator);
-  }
-
-  @Get('/msgtest')
-  async createMsgTest() {
   }
 
   @Get('joinableChannel/:id')

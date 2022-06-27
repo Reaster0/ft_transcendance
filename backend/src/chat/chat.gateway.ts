@@ -63,19 +63,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   /*********** Channel management ************ */
   @SubscribeMessage('createChannel')
   async handleCreateChannel(client: Socket, channel: ChannelI): Promise<boolean> {
-    if (!client.data.user) {
-      client.disconnect();
-      return false;
+    try {
+      if (!client.data.user) {
+        client.disconnect();
+        return false;
+      }
+      const createChannel: {channel: string, error: string} = await this.chanServices.createChannel(channel, client.data.user);
+      if (!createChannel.channel) {
+        this.logger.log(`ERROR: ${createChannel.error}`);
+        client.emit('errorChannelCreation', `${createChannel.error}` );
+        return false;
+      }
+      this.logger.log(`new Channel: ${createChannel.channel} created`);
+      client.emit('channelCreated', `${createChannel.channel}`);
+      return true;
+    } catch (e) {
+      this.logger.log(e);
     }
-    const createChannel: {channel: string, error: string} = await this.chanServices.createChannel(channel, client.data.user);
-    if (!createChannel.channel) {
-      this.logger.log(`ERROR: ${createChannel.error}`);
-      client.emit('errorChannelCreation', `${createChannel.error}` );
-      return false;
-    }
-    this.logger.log(`new Channel: ${createChannel.channel} created`);
-    client.emit('channelCreated', `${createChannel.channel}`);
-    return true;
   }
 
   @SubscribeMessage('joinChannel')
@@ -134,11 +138,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('editChannel')
   async handleEditChannel(client: Socket, input:
     { channelId: string, type: ChannelType, password: string, avatar: null | Buffer }): Promise<void> {
-    const { channelId, type, password, avatar} = input;
-    const channelFound = await this.chanServices.findChannelWithUsers(channelId);
-    const ret: Boolean = await this.chanServices.updateChannel(channelFound, {type, password, avatar});
-    if (ret === true) {
-      this.server.emit('channelEdited', { id: channelId })
+    try {
+      const { channelId, type, password, avatar} = input;
+      const channelFound = await this.chanServices.findChannelWithUsers(channelId);
+      const ret: Boolean = await this.chanServices.updateChannel(channelFound, {type, password, avatar});
+      if (ret === true) {
+        this.server.emit('channelEdited', { id: channelId })
+      }
+    } catch (e) {
+      this.logger.log(e);
     }
   }
 
@@ -164,36 +172,40 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('message')
   async handleMessage(client: Socket, params: { channelId: string, content: string}) {
-    this.logger.log('sending message');
-    let channel = await this.chanServices.getChannelFromId(params.channelId);
-    const user: RolesI = await this.chanServices.getUserOnChannel(channel, client.data.user.id);
-    if (!user) {
-      return;
-    }
-    let date = new Date;
-    if (user.muteDate >= date) {
-      client.emit('youAreMuted', { channelId: channel.id,
-        limitdate: user.muteDate.toUTCString() });
-      return;
-    }
-    await this.chanServices.saveNewDate(channel, date);
-    const message: MessageI = await this.messageServices.create({ channel, date, content: params.content, user: client.data.user });
-    const originalMessage = message.content;
-    const sender = message.user;
-    const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
-    for (const user of connectedUsers) {
-      const blockedUser: number = user.blockedIds.find(element => element === sender.id)
-      if (blockedUser) {
-        if (channel.type === ChannelType.PM) {
-          continue ;
+    try {
+      this.logger.log('sending message');
+      let channel = await this.chanServices.getChannelFromId(params.channelId);
+      const user: RolesI = await this.chanServices.getUserOnChannel(channel, client.data.user.id);
+      if (!user) {
+        return;
+      }
+      let date = new Date;
+      if (user.muteDate >= date) {
+        client.emit('youAreMuted', { channelId: channel.id,
+          limitdate: user.muteDate.toUTCString() });
+        return;
+      }
+      await this.chanServices.saveNewDate(channel, date);
+      const message: MessageI = await this.messageServices.create({ channel, date, content: params.content, user: client.data.user });
+      const originalMessage = message.content;
+      const sender = message.user;
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
+      for (const user of connectedUsers) {
+        const blockedUser: number = user.blockedIds.find(element => element === sender.id)
+        if (blockedUser) {
+          if (channel.type === ChannelType.PM) {
+            continue ;
+          }
+          message.content = "... 🛑 ...";
         }
-        message.content = "... 🛑 ...";
+        else {
+          message.content = originalMessage;
+        }
+        const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
+        this.server.to(user.chatSocket).emit('newMessage', { id: params.channelId, message: frontMessage });
       }
-      else {
-        message.content = originalMessage;
-      }
-      const frontMessage = { content: message.content, date: message.date.toUTCString(), userId: message.user.id };
-      this.server.to(user.chatSocket).emit('newMessage', { id: params.channelId, message: frontMessage });
+    } catch (e) {
+      this.logger.log(e);
     }
   }
 

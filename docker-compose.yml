@@ -8,25 +8,38 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    #volumes:
-    #  - /data/postgres:/data/postgres
-    
-  # front:
-  #   build:
-  #     context: ./frontend
-  #   image: frontend
-  #   container_name: front
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
+    volumes:
+      - /data/postgres:/data/postgres
+    #networks:
+    #  - db_network
 
-  # back:
-  #   build: ./backend
-  #   container_name: back
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - db
-  #   env_file:
-  #     - .env
+  front:
+    build:
+      context: ./frontend
+    image: frontend
+    container_name: front
+    restart: always
+    #depends_on:
+    #  - back
+    ports:
+      - "8080:8080"
+    #networks:
+    #  - app_network 
+
+  back:
+    build: ./backend
+    container_name: back
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+#    networks:
+#      - app_network
+#      - db_network
+
+#networks:
+#  app_network:
+#  db_network:
