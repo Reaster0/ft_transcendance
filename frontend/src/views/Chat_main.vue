@@ -685,7 +685,7 @@ export default defineComponent({
         if (currentChannel.value.id != params.id) {
           return ;
         }
-        connection.value.emit('getChannelUsers', { id: currentChannel.value.id });
+        connection.value!.emit('getChannelUsers', { id: currentChannel.value.id });
       })
 
       connection.value!.on('channelEdited', function (params: {id: string }){
