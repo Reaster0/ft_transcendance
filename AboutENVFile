@@ -24,8 +24,7 @@ ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
 
 # For avatar :
 
-DEFAULT_AVATAR: Avatar set by default, please be careful to add a supplementary
-'../' before your path as it ll be called from inside backend folder.
+DEFAULT_AVATAR: Avatar set by default, with docker, this variable will be called from backend folder.
 
 # For the Frontend :
 
