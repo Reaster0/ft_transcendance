@@ -14,7 +14,7 @@
               </div>
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+            <v-btn :style="{color: ' #ffffff'}" to="/thechat">
               Return to chat
             </v-btn>
           </v-toolbar>
