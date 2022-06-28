@@ -989,7 +989,7 @@ export default defineComponent({
     function sendGameInvit() {
       try {
         game.value.socket.removeAllListeners('connectedToGame');
-      ] catch (e) {
+      } catch (e) {
         console.log(e);
       }
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
@@ -1072,8 +1072,8 @@ export default defineComponent({
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
-
-      ` game.value.socket.on('notAvailable', function(params: { player: string }) {
+          
+        game.value.socket.on('notAvailable', function(params: { player: string }) {
           alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
           game.value.socket.removeAllListeners('notAvailable');
           game.value.socket.removeAllListeners('matchId');
