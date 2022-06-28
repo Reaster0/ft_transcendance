@@ -227,11 +227,9 @@ export class ChanServices {
     });
     for (const user of member.users) {
       if (user.id != toIgnoreId) {
-        console.log('Other socket:' + user.chatSocket);
         return user.chatSocket;
       }
     }
-    console.log('OtherSocket = NULL');
     return (null);
   }
 

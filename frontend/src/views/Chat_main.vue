@@ -966,16 +966,20 @@ export default defineComponent({
     function waitingGame() {
       game.value.request = true;
       game.value.togame = false;
-      if (game.value.socket === null) {
-        game.value.socket = io('ws://:3000/game',
-          { transportOptions: {
-              polling: { extraHeaders: { auth: document.cookie }},
-              withCredentials: true
-          }});
-        game.value!.socket.on('connectedToGame', function() {
-          game.value!.socket.emit('fromChat');
-          sendGameInvit();
-        })
+      game.value.absent = false;
+      game.value.response = true;
+      if (game.value.socket != null) {
+        game.value.socket.disconnect();
+      }
+      game.value.socket = io('ws://:3000/game',
+        { transportOptions: {
+            polling: { extraHeaders: { auth: document.cookie }},
+            withCredentials: true
+        }});
+        
+      game.value!.socket.on('connectedToGame', function() {
+        game.value!.socket.emit('fromChat');
+        sendGameInvit();
       }
     }
 

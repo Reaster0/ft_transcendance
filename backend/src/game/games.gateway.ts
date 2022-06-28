@@ -183,6 +183,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  @SubscribeMessage('checkIfInGame')
+  handleCheckIfInGame(client: Socket) {
+    for (const currMatch of matchs.values()) {
+      if (currMatch.state != State.FINISHED) {
+        const matchPlayers = currMatch.players;
+        for (const currPlayer of matchPlayers) {
+          if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
+            client.emit('foundMatch', currMatch.matchId);
+            return;
+          }
+        }
+      }
+    }
+    client.emit('opponentNotHere');
+  }
+
   @SubscribeMessage('acceptGame')
   handleAcceptGame(client: Socket, matchId: string) {
     try {

@@ -137,9 +137,7 @@ export default defineComponent ({
 								if (waitForChatOpponent.value === true) {
 									waitForChatOpponent.value = false;
 									searchingGame.value = false;
-									alert('Your opponent never joined game.');
-									gameSocket.value.disconnect(); // Necessary to delete socket from 'fromChat' array inside back
-									router.push('/'); // Because we disconnected
+									gameSocket.value!.emit('checkIfGame');
 								}
 							}, 10 * 1000);
 						}
@@ -168,6 +166,12 @@ export default defineComponent ({
 				console.log("found match:" + JSON.stringify(res));
 				if (!res)
 					gameStarted.value = false;
+			})
+
+			gameSocket.value!.on('opponentNotHere', () => {
+				alert('Your opponent never joined game.');
+				gameSocket.value.disconnect();
+				router.push('/');
 			})
 
 			gameSocket.value!.on('beReady', (params: { pos: string, opponent: string }) => {
