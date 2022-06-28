@@ -372,7 +372,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       }
       if (isMember === false) {
         this.logger.log('Access Refused');
-        client.emit('AccessRefused');
         return;
       }
       client.emit('channelUsers', { id: params.id, users: res });
