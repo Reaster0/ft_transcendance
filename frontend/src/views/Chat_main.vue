@@ -797,7 +797,7 @@ export default defineComponent({
       currentChannel.value.avatar = channel.avatar;
       currentChannel.value.notif = false;
       currentChannel.value.type = channel.type;
-      currentChannel.value.blocked = channel.blocked;
+      currentChannel.value.blocked = (channel.blocked === true ? true : false);
       const channelTypes = ['Public Channel', 'Private Channel', 'Protected Channel', 'Private Conversation'];
       currentChannel.value.description = channelTypes[channel.type];
       currentChannel.value.messages = [];

@@ -436,6 +436,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         client.emit('userAbsent');
         return;
       }
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
+      for (const user of connectedUsers) {
+        const blockedUser: number = user.blockedIds.find(element => element === client.data.user.id)
+        if (blockedUser) {
+          return ;
+        }
+      }
       this.server.to(socket).emit('gameInvitation', { id: client.data.user.id });
     } catch (e) {
       this.logger.log(e);
@@ -448,6 +455,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
       if (socket === null) {
         return;
+      }
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
+      for (const user of connectedUsers) {
+        const blockedUser: number = user.blockedIds.find(element => element === client.data.user.id)
+        if (blockedUser) {
+          return ;
+        }
       }
       this.server.to(socket).emit('endGameInvit', { id: client.data.user.id });
     } catch (e) {
