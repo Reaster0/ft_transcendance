@@ -1074,9 +1074,6 @@ export default defineComponent({
           
         game.value.socket.on('notAvailable', function(params: { player: string }) {
           alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
-          game.value.socket.removeAllListeners('notAvailable');
-          game.value.socket.removeAllListeners('matchId');
-          game.value.socket.removeAllListeners('connectedToGame');
           game.value.socket.disconnect();
           game.value.socket = null;
         });
