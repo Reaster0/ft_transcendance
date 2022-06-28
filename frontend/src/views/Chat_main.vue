@@ -968,23 +968,30 @@ export default defineComponent({
       game.value.togame = false;
       game.value.absent = false;
       game.value.response = true;
-      if (game.value.socket != null) {
-        game.value.socket.disconnect();
+      try {
+        if (game.value.socket != null) {
+          game.value.socket.disconnect();
+        }
+        game.value.socket = io('ws://:3000/game',
+          { transportOptions: {
+              polling: { extraHeaders: { auth: document.cookie }},
+              withCredentials: true
+          }});
+        game.value!.socket.on('connectedToGame', function() {
+          game.value!.socket.emit('fromChat');
+          sendGameInvit();
+        })
+      } catch (e) {
+        console.log(e);
       }
-      game.value.socket = io('ws://:3000/game',
-        { transportOptions: {
-            polling: { extraHeaders: { auth: document.cookie }},
-            withCredentials: true
-        }});
-
-      game.value!.socket.on('connectedToGame', function() {
-        game.value!.socket.emit('fromChat');
-        sendGameInvit();
-      })
     }
 
     function sendGameInvit() {
-      game.value!.socket.removeAllListeners('connectedToGame');
+      try {
+        game.value.socket.removeAllListeners('connectedToGame');
+      ] catch (e) {
+        console.log(e);
+      }
       connection.value!.emit('sendGameInvit', { channelId: currentChannel.value.id });
       let count = 0;
       const intervalId = setInterval(() => {
@@ -1005,7 +1012,11 @@ export default defineComponent({
 
     function noResponse() {
       connection.value!.emit('endGameInvit', { channelId: currentChannel.value.id });
-      game.value.socket.disconnect();
+      try {
+        game.value.socket.disconnect();
+      } catch (e) {
+        console.log(e);
+      }
       game.value.request = false;
       game.value.socket = null;
       if (game.value.absent === true || game.value.response === false) {
@@ -1021,20 +1032,26 @@ export default defineComponent({
         return ;
       }
       showGameModal.value = false;
-      if (game.value.socket === null) {
+      try {
+        if (game.value.socket != null) {
+          game.value.socket.disconnect();
+        }
         game.value.socket = io('ws://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
+
+        game.value.socket.on('connectedToGame', function() {
+          connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
+          store.commit('setGameSocket', game.value.socket);
+          game.value.socket.removeAllListeners('connectedToGame');
+          forceLeave = true;
+          router.push('/game');
+        });
+      } catch (e) {
+        console.log(e);
       }
-      game.value.socket.on('connectedToGame', function() {
-        connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
-        store.commit('setGameSocket', game.value.socket);
-        game.value.socket.removeAllListeners('connectedToGame');
-        forceLeave = true;
-        router.push('/game');
-      });
     }
 
     function goToGame() {
@@ -1045,34 +1062,44 @@ export default defineComponent({
     /* Watch game system */
 
     function watchUserGame() {
-      if (game.value.socket === null) {
+      try {
+        if (game.value.socket != null) {
+          game.value.socket.disconnect();
+        }
+
         game.value.socket = io('ws://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
               withCredentials: true
           }});
+
+      ` game.value.socket.on('notAvailable', function(params: { player: string }) {
+          alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
+          game.value.socket.removeAllListeners('notAvailable');
+          game.value.socket.removeAllListeners('matchId');
+          game.value.socket.removeAllListeners('connectedToGame');
+          game.value.socket.disconnect();
+          game.value.socket = null;
+        });
+
+        game.value.socket.on('matchId', function(params: { matchId: string }) {
+          game.value.socket.removeAllListeners('notAvailable');
+          game.value.socket.removeAllListeners('matchId');
+          game.value.socket.removeAllListeners('connectedToGame');
+          store.commit('setGameSocket', game.value.socket);
+          store.commit('setWatchGame', true);
+          forceLeave = true;
+          game.value.socket = null;
+          router.push('/game?watch=true&matchid=' + params.matchId);
+        });
+
+        game.value.socket.on('connectedToGame', function() {
+          game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });
+        });
+
+      } catch (e) {
+        console.log(e);
       }
-      game.value.socket.on('notAvailable', function(params: { player: string }) {
-        alert('Can\'t watch ' + params.player + ' play (either game started, finished or is only watching a game).');
-        game.value.socket.disconnect();
-        game.value.socket = null;
-        game.value.socket.removeAllListeners('notAvailable');
-        game.value.socket.removeAllListeners('matchId');
-        game.value.socket.removeAllListeners('connectedToGame');
-      });
-      game.value.socket.on('matchId', function(params: { matchId: string }) {
-        game.value.socket.removeAllListeners('notAvailable');
-        game.value.socket.removeAllListeners('matchId');
-        game.value.socket.removeAllListeners('connectedToGame');
-        store.commit('setGameSocket', game.value.socket);
-        store.commit('setWatchGame', true);
-        forceLeave = true;
-        game.value.socket = null;
-        router.push('/game?watch=true&matchid=' + params.matchId);
-      })
-      game.value.socket.on('connectedToGame', function() {
-        game.value.socket.emit('getMatchByUser', { playerName: currentChannel.value.name });
-      })
     }
 
     /* Utilities function */
