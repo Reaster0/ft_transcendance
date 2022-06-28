@@ -39,6 +39,7 @@ services:
       - ./frontend:/frontend
     ports:
       - "3000:3000"
+    platform: "linux/amd64"
     depends_on:
       - db
     env_file:
