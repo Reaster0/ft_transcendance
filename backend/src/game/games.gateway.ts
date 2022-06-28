@@ -13,11 +13,11 @@ import { Features } from './interfaces/match.interface';
 const queue: Array<Socket> = []; // Array of clients waiting for opponent
 const features: Array<Features> = []; // Array of features for ball size and speed
 const matchs: Map<string, Match> = new Map(); // Array of current match identified by uid
-const watchers: Array<Socket> = []; // Array of clients waiting to 
+const watchers: Array<Socket> = []; // Array of clients waiting to
 const fromChat: Array<string> = [];
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, credentials: true, namespace: '/game'})
-export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
+export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
     private readonly usersService: UsersService,
@@ -42,6 +42,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return client.disconnect();
       }
       client.data.user = user;
+      if (user.status !== Status.OFFLINE) {
+        client.emit('secondConnection');
+      }
       this.logger.log('User connected: ' + user.nickname);
       return client.emit('connectedToGame');
     } catch {
@@ -127,7 +130,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     } catch {
       return client.disconnect();
     }
-  }   
+  }
 
   @SubscribeMessage('invitToGame')
   async handleInvitToGame(client: Socket, data : { opponentSocketId: string, ballSize: string, ballSpeed: string }) {
@@ -137,7 +140,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const allSockets = await this.server.fetchSockets();
       let opponent = null;
       for (let socket of allSockets) {
-        if (socket.data.id === data.opponentSocketId) {
+        if (socket.id === data.opponentSocketId) {
           opponent = socket;
         }
       }
@@ -178,6 +181,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     } catch {
       client.disconnect();
     }
+  }
+
+  @SubscribeMessage('checkIfInGame')
+  handleCheckIfInGame(client: Socket) {
+    for (const currMatch of matchs.values()) {
+      if (currMatch.state != State.FINISHED) {
+        const matchPlayers = currMatch.players;
+        for (const currPlayer of matchPlayers) {
+          if (client === currPlayer.socket || client.data.user.id === currPlayer.user.id) {
+            client.emit('foundMatch', currMatch.matchId);
+            return;
+          }
+        }
+      }
+    }
+    client.emit('opponentNotHere');
   }
 
   @SubscribeMessage('acceptGame')
@@ -264,14 +283,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       const matchId = this.gamesService.findMatchIdByPlayer(client, matchs, data.playerName);
-      if (matchId === null) { 
+      if (matchId === null) {
         client.emit('notAvailable', { player: data.playerName });
         return ;
       }
       client.emit('matchId', { matchId: matchId });
     } catch {
       return client.disconnect();
-    }    
+    }
   }
 
   @SubscribeMessage('followGame')

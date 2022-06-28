@@ -37,6 +37,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     try {
       const user: User = await this.authServices.getUserBySocket(client);
       client.data.user = user;
+      if (user.status !== Status.OFFLINE) {
+        client.emit('secondConnection');
+      }
       await this.userServices.changeStatus(client.data.user, Status.ONLINE, client.id);
       this.logger.log(`Client connected: ${client.data.user.username}`);
     } catch {
@@ -275,7 +278,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const {channelId, userId} = data;
       if ((await this.chanServices.isAdmin(channelId, client.data.user.id)) === false) {
         return ;
-      } 
+      }
       const res = await this.chanServices.addAdmin(channelId, userId);
       if (!res) {
         return;
@@ -420,7 +423,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     } catch(e) {
       client.disconnect();
       this.logger.log(e);
-    } 
+    }
   }
 
   /*** Game invitation system ***/
@@ -429,28 +432,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async handleSendGameInvit(client: Socket, params: { channelId: string }) {
     try {
       const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
-      if (socket === null) { 
+      if (socket === null) {
         client.emit('userAbsent');
         return;
+      }
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
+      for (const user of connectedUsers) {
+        const blockedUser: number = user.blockedIds.find(element => element === client.data.user.id)
+        if (blockedUser) {
+          return ;
+        }
       }
       this.server.to(socket).emit('gameInvitation', { id: client.data.user.id });
     } catch (e) {
       this.logger.log(e);
     }
-  } 
+  }
 
   @SubscribeMessage('endGameInvit')
   async handleEndGameInvit(client: Socket, params: { channelId: string }) {
     try {
       const socket = await this.chanServices.retrieveOtherSocket(client.data.user.id, params.channelId);
-      if (socket === null) { 
+      if (socket === null) {
         return;
+      }
+      const connectedUsers: User[] = await this.chanServices.getAllChanUser(params.channelId);
+      for (const user of connectedUsers) {
+        const blockedUser: number = user.blockedIds.find(element => element === client.data.user.id)
+        if (blockedUser) {
+          return ;
+        }
       }
       this.server.to(socket).emit('endGameInvit', { id: client.data.user.id });
     } catch (e) {
       this.logger.log(e);
     }
-  } 
+  }
 
   @SubscribeMessage('acceptGameInvit')
   async handleAcceptGameInvit(client: Socket, params: { inviter: number, socketId: any}) {

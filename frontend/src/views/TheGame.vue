@@ -71,7 +71,7 @@
 
 <script lang="ts">
 import { useRoute } from "vue-router"
-import { onMounted } from "@vue/runtime-core";
+import { onMounted, onUnmounted } from "@vue/runtime-core";
 import { defineComponent, ref, watch } from "vue";
 import { io } from 'socket.io-client';
 import { useKeypress } from "vue3-keypress";
@@ -94,7 +94,7 @@ export default defineComponent ({
 		const searchingGame = ref<boolean>(false);
 		const fatalError = ref<boolean>(false);
 		const gameData = ref<any>({
-			pos: "" as string, //can be "left" or "right" OR the name of the left player if watching 
+			pos: "" as string, //can be "left" or "right" OR the name of the left player if watching
 			opponent: "" as string,
 			ball: {x: 0 as number, y: 0 as number, radius: 10 as number},
 			paddle:{ width: 5 as number, height: 15 as number},
@@ -116,10 +116,10 @@ export default defineComponent ({
 		let waitForChatOpponent = ref<boolean>(false);
 
 		onMounted(async() =>{
-			try {		
+			try {
 				gameSocket.value = store.getters.getGameSocket;
 				if (gameSocket.value === null) {
-					gameSocket.value = io('http://:3000/game',{
+					gameSocket.value = io('ws://:3000/game',{
 						transportOptions: {
 						polling: { extraHeaders: { auth: document.cookie }},
 						withCredentials: true
@@ -137,11 +137,9 @@ export default defineComponent ({
 								if (waitForChatOpponent.value === true) {
 									waitForChatOpponent.value = false;
 									searchingGame.value = false;
-									alert('Your opponent never joined game.');
-									gameSocket.value.disconnect(); // Necessary to delete socket from 'fromChat' array inside back
-									router.push('/'); // Because we disconnected
+									gameSocket.value!.emit('checkIfInGame');
 								}
-							}, 10 * 1000);
+							}, 7 * 1000);
 						}
 					}
 					store.commit('setGameSocket', null);
@@ -151,6 +149,10 @@ export default defineComponent ({
 			} catch (error) {
 				console.log("the error is:" + error);
 			}
+
+			gameSocket.value!.on('secondConnection', function() {
+				alert('Are you already connected somewhere else ? Some things may not work as intended.');
+			})
 
 			gameSocket.value!.on('joined', (text: string) => {
 				console.log("joined" + text);
@@ -164,6 +166,12 @@ export default defineComponent ({
 				console.log("found match:" + JSON.stringify(res));
 				if (!res)
 					gameStarted.value = false;
+			})
+
+			gameSocket.value!.on('opponentNotHere', () => {
+				alert('Your opponent never joined game.');
+				gameSocket.value.disconnect();
+				router.push('/');
 			})
 
 			gameSocket.value!.on('beReady', (params: { pos: string, opponent: string }) => {
@@ -259,7 +267,7 @@ export default defineComponent ({
 				console.log("event close: " + event)
 				fatalError.value = true
 			}
-			
+
 			gameSocket.value!.on('disconnect', () => {
 				alert('Something went wrong. You\'ll be disconnected from game.');
 				router.push('/');
@@ -288,6 +296,10 @@ export default defineComponent ({
 
 			if (route.query.watch)
 				setTimeout(function () {WatchGame()}, 600)
+		})
+
+		onUnmounted(async() => {
+			gameSocket.value.disconnect();
 		})
 
 		watch(gameStarted, (gameChange) =>{
@@ -483,7 +495,7 @@ h1 {
 	color: #04BBEC;
 }
 
-.big_button {  
+.big_button {
   margin: 180px auto 0 auto;
 }
 

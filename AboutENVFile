@@ -19,18 +19,21 @@ JWT_EXPIRATION_TIME: Tokens expiration time in seconds
 # For 2FA secret encryption :
 
 ENCRYPTION_KEY: A sentence of size 32 char (256 bit) used for encryption
-ENCRYPTION_IV_LENGTH: Length for encryption intialization vector (16 by default) 
+ENCRYPTION_IV_LENGTH: Length for encryption intialization vector (16 by default)
 ENCRYPTION_ALGORITHM: Algortihm for encryption (aes-256-ctr for example)
- 
+
 # For avatar :
 
-DEFAULT_AVATAR: Avatar set by default, please be careful to add a supplementary
-'../' before your path as it'll be called from inside backend folder.
+DEFAULT_AVATAR: Avatar set by default, with docker, this variable will be called from backend folder.
 
 # For the Frontend :
 
 VUE_APP_BACKEND: 'http://IP:PORT' of backend
 FRONTEND: 'http://IP:PORT' of frontend
+
+# For Pgadmin service :
+PGADMIN_DEFAULT_EMAIL: a mail address
+PGADMIN_DEFAULT_PASSWORD: a password for pgadmin
 
 # Others :
 APPNAME: Choosen name for app

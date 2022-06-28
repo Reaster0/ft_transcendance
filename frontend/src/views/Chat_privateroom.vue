@@ -14,7 +14,7 @@
               </div>
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn :style="{color: ' #ffffff'}" to="/chatgroup">
+            <v-btn :style="{color: ' #ffffff'}" to="/thechat">
               Return to chat
             </v-btn>
           </v-toolbar>
@@ -85,7 +85,7 @@ export default defineComponent ({
     onMounted(() =>{
       try {
         if (!chatSocket) {
-          const connection = io(window.location.protocol + '//' + window.location.hostname + ':3000/chat',{
+          const connection = io('ws://:3000/chat',{
             transportOptions: {
               polling: { extraHeaders: { auth: document.cookie} },
             },
