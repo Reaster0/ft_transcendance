@@ -139,7 +139,7 @@ export default defineComponent ({
 									searchingGame.value = false;
 									gameSocket.value!.emit('checkIfInGame');
 								}
-							}, 10 * 1000);
+							}, 7 * 1000);
 						}
 					}
 					store.commit('setGameSocket', null);
