@@ -617,7 +617,7 @@ export default defineComponent({
 
       connection.value!.on('joinAccepted', function(params: { id: string, isPm: boolean }) {
         connection.value!.emit('emitMyChannels');
-        if (params.isPm === false && currentChannel.value.id != params.id) {
+        if ((params.isPm === false && currentChannel.value.id != params.id) || game.value.request === true) {
           return ;
         } else if (params.isPm === false) {
           alert('Welcome to ' + currentChannel.value.name + ' !');
