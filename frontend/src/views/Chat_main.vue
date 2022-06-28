@@ -1028,7 +1028,7 @@ export default defineComponent({
     }
 
     function responseGame(response: boolean) {
-      if (response === false) {
+      if (response === false || game.value.request === true) {
         return ;
       }
       showGameModal.value = false;
@@ -1066,7 +1066,6 @@ export default defineComponent({
         if (game.value.socket != null) {
           game.value.socket.disconnect();
         }
-
         game.value.socket = io('ws://:3000/game',
           { transportOptions: {
               polling: { extraHeaders: { auth: document.cookie }},
