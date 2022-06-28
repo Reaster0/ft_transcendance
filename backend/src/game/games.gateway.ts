@@ -185,6 +185,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage('checkIfInGame')
   handleCheckIfInGame(client: Socket) {
+    console.log('Check If in game');
     for (const currMatch of matchs.values()) {
       if (currMatch.state != State.FINISHED) {
         const matchPlayers = currMatch.players;

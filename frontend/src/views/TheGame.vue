@@ -137,7 +137,7 @@ export default defineComponent ({
 								if (waitForChatOpponent.value === true) {
 									waitForChatOpponent.value = false;
 									searchingGame.value = false;
-									gameSocket.value!.emit('checkIfGame');
+									gameSocket.value!.emit('checkIfInGame');
 								}
 							}, 10 * 1000);
 						}

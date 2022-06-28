@@ -976,11 +976,11 @@ export default defineComponent({
             polling: { extraHeaders: { auth: document.cookie }},
             withCredentials: true
         }});
-        
+
       game.value!.socket.on('connectedToGame', function() {
         game.value!.socket.emit('fromChat');
         sendGameInvit();
-      }
+      })
     }
 
     function sendGameInvit() {
