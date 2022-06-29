@@ -114,11 +114,12 @@ export class UsersController {
   /** End of swagger **/
   getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
-      if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
-        throw new BadRequestException('Not a valid nickname');
-        return ;
-      }
       this.logger.log("Post('partialInfo') route called for user " + nickname);
+      if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
+        this.logger.log('bad request');
+        throw new BadRequestException('Not a valid nickname');
+      }
+      this.logger.log('go to getPatialInfo');
       return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
       throw e;
