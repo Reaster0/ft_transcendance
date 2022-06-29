@@ -138,7 +138,7 @@ export default defineComponent ({
 		async function addMyFriend(myName: string, nickname: string | null) {
 			if (nickname == null
 			|| nickname === ""
-			|| myName === nickname !
+			|| await store.getters.whoAmI.nickname === nickname
 			) { return; }
 			await addFriend(nickname)
 			isFriend.value = true
