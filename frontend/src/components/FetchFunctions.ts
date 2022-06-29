@@ -69,7 +69,7 @@ export async function updateUser(nick: string, oldnick: string | null) {
 		|| nick === oldnick
 		|| nick.length < 4
 		|| nick.length > 15
-		|| !nick.match(/^[a-z0-9]+$/i) == null) {
+		|| !nick.match(/^[a-z0-9A-Z]+$/i) == null) {
 		return false;
 	}
 	console.log('new nickname pass the tests');

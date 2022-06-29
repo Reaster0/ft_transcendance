@@ -79,7 +79,7 @@ export class UsersService {
     if (nickname.length > 15) {
       throw new BadRequestException('Nickname is too long');
     }
-    if (!nickname.match(/^[0-9a-z]+$/)) {
+    if (!nickname.match(/^[0-9a-zA-Z]+$/)) {
       throw new BadRequestException('Nickname is not alphanumeric');
     }
     let find = await this.userRepository.findOne({ nickname: nickname });

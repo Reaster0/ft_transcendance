@@ -1,7 +1,7 @@
 import { UsersService } from './services/users.service';
 import { Body, Controller, Param, Post, Get, ClassSerializerInterceptor, UseInterceptors,
   UseGuards, Req, Query, Patch, Res, UploadedFile, Delete, ParseIntPipe, HttpException,
-  HttpStatus, Logger, StreamableFile } from '@nestjs/common';
+  HttpStatus, Logger, StreamableFile, BadRequestException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, FriendDto } from './user.dto';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags, ApiNotFoundResponse,
   ApiOkResponse, ApiOperation, ApiForbiddenResponse } from '@nestjs/swagger';
@@ -113,11 +113,11 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
-    if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
-      console.log('test - not alphanum');
-      return ;
-    }
     try {
+      if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
+        throw new BadRequestException('Not a valid nickname');
+        return ;
+      }
       this.logger.log("Post('partialInfo') route called for user " + nickname);
       return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
@@ -286,13 +286,13 @@ export class UsersController {
   @ApiBadRequestResponse({ description: 'User\'s already a friend.' })
   /** End of swagger **/
   async addFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
-    const { nickname } = friendDto;
-    if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
-      console.log('test - not alphanum');
-      return ;
-    }
     try {
       this.logger.log("Patch('addFriend')route called by " + req.user.username);
+      const { nickname } = friendDto;
+      if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
+        throw new BadRequestException('Not a valid nickname');
+        return ;
+      }
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.addFriend(req.user, friend.id);
       return await this.usersService.listFriends(req.user);
