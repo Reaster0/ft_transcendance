@@ -114,7 +114,7 @@ export class UsersController {
   /** End of swagger **/
   getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
-      if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
+      if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
         console.log('test - not alphanum');
         return ;
       }
@@ -289,7 +289,7 @@ export class UsersController {
     try {
       this.logger.log("Patch('addFriend')route called by " + req.user.username);
       const { nickname } = friendDto;
-      if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
+      if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
         throw new BadRequestException('Not a valid nickname');
         return ;
       }
