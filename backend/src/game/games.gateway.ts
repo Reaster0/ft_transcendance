@@ -209,7 +209,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const match = matchs.get(matchId);
       if (!client.data.user) {
         return client.disconnect();
-      } else if (typeof(match) === undefined) {
+      } else if (match === undefined) {
         client.emit('requestError');
         return;
       }
@@ -240,7 +240,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return client.disconnect();
       }
       const match = matchs.get(data.matchId);
-      if (typeof(match) === undefined) {
+      if (match === undefined) {
         client.emit('requestError');
         return;
       }
@@ -308,7 +308,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
       const match = matchs.get(matchId);
-      if (typeof(match) === undefined || (match.state != State.ONGOING && match.state != State.SCORE)) {
+      if (match === undefined || (match.state != State.ONGOING && match.state != State.SCORE)) {
         return;
       }
       this.gamesService.startWatchGame(client, match);

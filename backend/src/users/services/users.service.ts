@@ -79,7 +79,7 @@ export class UsersService {
     if (nickname.length > 15) {
       throw new BadRequestException('Nickname is too long');
     }
-    if (nickname.match(/^[0-9a-z]+$/)) {
+    if (!nickname.match(/^[0-9a-z]+$/)) {
       throw new BadRequestException('Nickname is not alphanumeric');
     }
     let find = await this.userRepository.findOne({ nickname: nickname });
@@ -310,8 +310,8 @@ export class UsersService {
   isMyFriend(user: User, friendId: number): boolean {
 
     const friend = user.friends.find(element => element === friendId);
-
-    return (typeof(friend) !== undefined);
+    const value = (friend === undefined) ? false : true;
+    return value;
   }
 
   async getUserChannels(userId: number): Promise<Channel[]> {
