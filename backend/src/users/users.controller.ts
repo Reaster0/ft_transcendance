@@ -115,7 +115,7 @@ export class UsersController {
   getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
     try {
       if (!nickname.match(/^[0-9a-zA-Z]+$/)) { //sanitize
-        console.log('test - not alphanum');
+        throw new BadRequestException('Not a valid nickname');
         return ;
       }
       this.logger.log("Post('partialInfo') route called for user " + nickname);
