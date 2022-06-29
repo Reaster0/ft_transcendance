@@ -43,7 +43,7 @@ export class ChatController {
   @Get('joinChannel/:chanId')
   @UseGuards(AuthGuard('jwt'), AuthUser)
   @UseGuards(SignedUrlGuard)
-  @Redirect('http://localhost:8080/thechat')
+  @Redirect(process.env.FRONTEND + '/thechat')
   async joinChannel(@Param('chanId') id: string, @Req() req: RequestUser) {
     try {
       const channel = await this.chanServices.findChannelWithUsers(id);
