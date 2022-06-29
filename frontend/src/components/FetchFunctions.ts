@@ -139,6 +139,8 @@ export async function removeFriend(nickName: string) {
 }
 
 export async function getUserInfos(nickName: string) {
+	if (!nickName.match(/^[0-9a-zA-Z]+$/))
+		return { statusCode: 404 }
 	return await fetch(process.env.VUE_APP_BACKEND + "/users/partialInfo?" + new URLSearchParams({nickname: nickName})
 	, {method: 'POST', credentials: "include"})
 	.then(res => res.json())

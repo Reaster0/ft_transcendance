@@ -362,7 +362,7 @@
                     Start conversation
                   </v-btn>
                 </div>
-                <div v-if="!currentChannel.blocked">
+                <div v-if="currentChannel.role !== Roles.NONMEMBER && !currentChannel.blocked">
                   <v-btn @click="blockUserControl(true)" elevation="2"
                     class="my-2" width="80%" color="warning">
                     Block this user
@@ -371,7 +371,7 @@
                     Go to user page
                   </v-btn>
                 </div>
-                <div v-else>
+                <div v-else-if="currentChannel.role !== Roles.NONMEMBER">
                   <v-btn @click="blockUserControl(false)" elevation="2"
                     class="my-1" width="80%" color="success">
                     Unblock this user
@@ -720,6 +720,7 @@ export default defineComponent({
       /* Game invitation system */
 
       connection.value!.on('gameInvitation', function(params: { id: number }) {
+        console.log('received game invitation');
         if (showGameModal.value === false && game.value.request === false) {
           game.value.inviter = params.id;
           showGameModal.value = true;
@@ -742,6 +743,7 @@ export default defineComponent({
       })
 
       connection.value!.on('gameAccepted', function(params: { inviter: number, socketId: any }) {
+        console.log('gameAccepted');
         if (params.inviter != currentUser.id) {
           return ;
         }
@@ -749,6 +751,11 @@ export default defineComponent({
         store.commit('setGameSocket', game.value.socket);
         store.commit('setOpponentSocketId', params.socketId);
         game.value.togame = true;
+      })
+
+      connection.value!.on('goToGame', function() {
+        forceLeave = true;
+        router.push('/game');
       })
 
 		})
@@ -778,8 +785,9 @@ export default defineComponent({
       connection.value!.removeAllListeners('userAbsent');
       connection.value!.removeAllListeners('gameInvitation');
       connection.value!.removeAllListeners('endGameInvit');
-      connection.value!.removeAllListeners('gameAccepted');
       connection.value!.removeAllListeners('secondConnection');
+      connection.value!.removeAllListeners('goToGame');
+      connection.value!.removeAllListeners('gameAccepted');
     })
 
     /* Functions for channel display and management */
@@ -996,11 +1004,13 @@ export default defineComponent({
       let count = 0;
       const intervalId = setInterval(() => {
         if (game.value.togame === true) {
+          console.log('Got positive response');
           game.value.togame = false;
           clearInterval(intervalId);
           goToGame();
-        } else if (game.value.absent === true || count === 100) {
-          if (count === 100) {
+        } else if (game.value.absent === true || count === (30 * 100)) {
+          console.log('Got no response or absent');
+          if (count === (30 * 100)) {
             game.value.response = false;
           }
           clearInterval(intervalId);
@@ -1023,11 +1033,12 @@ export default defineComponent({
         setTimeout(() => {
           game.value.response = true;
           game.value.absent = false;
-        }, 10000);
+        }, 10 * 1000);
       }
     }
 
     function responseGame(response: boolean) {
+      console.log('receive invitation to game')
       if (response === false || game.value.request === true) {
         return ;
       }
@@ -1043,11 +1054,10 @@ export default defineComponent({
           }});
 
         game.value.socket.on('connectedToGame', function() {
+          console.log('connected to game websocket');
           connection.value!.emit('acceptGameInvit', { inviter: game.value.inviter, socketId: game.value.socket.id });
           store.commit('setGameSocket', game.value.socket);
           game.value.socket.removeAllListeners('connectedToGame');
-          forceLeave = true;
-          router.push('/game');
         });
       } catch (e) {
         console.log(e);
@@ -1055,6 +1065,7 @@ export default defineComponent({
     }
 
     function goToGame() {
+      console.log('GO to game');
       game.value.socket = null;
       router.push('/game');
     }

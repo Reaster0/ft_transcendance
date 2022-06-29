@@ -471,11 +471,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage('acceptGameInvit')
   async handleAcceptGameInvit(client: Socket, params: { inviter: number, socketId: any}) {
     try {
+      this.logger.log('Inside acceptGameInvit');
       const user = await this.userServices.findUserById('' + params.inviter);
       if (!user || user.chatSocket === null) {
+        this.logger.log('Problem with user inside acceptgameinvit')
         return ;
       }
       this.server.to(user.chatSocket).emit('gameAccepted', { inviter: params.inviter, socketId: params.socketId });
+      client.emit('goToGame');
     } catch (e) {
       this.logger.log(e);
     }
