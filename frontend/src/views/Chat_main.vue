@@ -1149,7 +1149,7 @@ export default defineComponent({
 
     async function genJoinUrl(channelId: string) {
       const res = await genJoinLink(channelId);
-      alert('invitation link: ' + res);
+      alert('invitation link: \n' + res);
     }
 
     /* Sub routes functions */
