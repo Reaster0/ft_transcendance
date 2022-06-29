@@ -20,9 +20,8 @@ export class Channel {
   @CreateDateColumn()
   date: Date;
 
-  // todo change this to number if front is ok
   @Column({ type: 'int', default: ChannelType.PUBLIC})
-  @ApiProperty({ enum: ChannelType, type: String, description: 'channel type, either public/private/protected/pm.' })
+  @ApiProperty({ enum: ChannelType, description: 'channel type, either public/private/protected/pm.' })
   type: ChannelType;
 
   @ApiProperty({ type: String, description: 'encrypted password' })

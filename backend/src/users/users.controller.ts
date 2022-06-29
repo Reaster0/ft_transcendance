@@ -251,7 +251,6 @@ export class UsersController {
   updateUser(@Body() updateUser: UpdateUserDto, @Req() req: RequestUser, @Res({ passthrough: true }) res: Response) {
     try {
       this.logger.log("Post('settings') route called by user " + req.user.username + ' (username)');
-      console.log('----------');
       return this.usersService.updateUser(req.user, updateUser);
     } catch(e) {
       throw (e);

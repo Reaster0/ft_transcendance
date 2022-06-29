@@ -31,7 +31,7 @@ import router from "../router/index";
 export default defineComponent ({
 	setup(){
 
-		const imgQR = ref<null | any>(null); // TODO check type
+		const imgQR = ref<null | any>(null);
 		const TwoFACode = ref<null | string>(null);
 		const codeAccepted = ref<boolean>(false);
 

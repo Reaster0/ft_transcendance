@@ -105,8 +105,8 @@ export default defineComponent ({
 				user.value = await store.getters.whoAmI as any;
 				console.log(user.value)
 				nickname.value = user.value.nickname as string;
-				avatar.value = await getAvatarID(user.value.id) as any; //TODO check type
-				gameHistory.value = await getHistoryID(user.value.id) as any; // TODO check type
+				avatar.value = await getAvatarID(user.value.id) as any;
+				gameHistory.value = await getHistoryID(user.value.id) as any;
 			}
 		})
 
@@ -144,7 +144,6 @@ export default defineComponent ({
 			isFriend.value = true
 		}
 
-		//TODO check type of e
 		async function imgReceived(e : any) {
 			img_accepted.value = await uploadAvatar(e)
 			if (img_accepted.value && user && user.value && user.value.id)
