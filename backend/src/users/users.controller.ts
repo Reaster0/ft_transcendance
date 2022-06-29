@@ -113,11 +113,11 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Only logged users can access it.' })
   /** End of swagger **/
   getPartialUserInfo(@Query('nickname') nickname: string): Promise<Partial<User>> {
-    if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
-      console.log('test - not alphanum');
-      return ;
-    }
     try {
+      if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
+        console.log('test - not alphanum');
+        return ;
+      }
       this.logger.log("Post('partialInfo') route called for user " + nickname);
       return this.usersService.getPartialUserInfo(nickname);
     } catch (e) {
@@ -286,12 +286,12 @@ export class UsersController {
   @ApiBadRequestResponse({ description: 'User\'s already a friend.' })
   /** End of swagger **/
   async addFriend(@Body() friendDto: FriendDto, @Req() req: RequestUser) {
-    const { nickname } = friendDto;
-    if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
-      console.log('test - not alphanum');
-      return ;
-    }
     try {
+      const { nickname } = friendDto;
+      if (!nickname.match(/^[0-9a-z]+$/)) { //sanitize
+        console.log('test - not alphanum');
+        return ;
+      }
       this.logger.log("Patch('addFriend')route called by " + req.user.username);
       const friend = await this.usersService.findUserByNickname(nickname);
       await this.usersService.addFriend(req.user, friend.id);
